@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyFeedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="MyFeedback.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <!-- Isi sidebar -->
+              <div class="sidebar-header">
+               <img src="logo.png" alt="Logo"/>
+             </div>
+             <ul >
+                 <li><a href="#"><i class="fa fa-user" ></i> MyProgress</a></li>
+                <li><a href="#"><i class="fa fa-book" ></i> MyCourse</a></li>
+                <li><a href="#"><i class="fa fa-heart" ></i> MyWellness</a></li>
+                <li><a href="#"><i class="fa fa-chart-bar" ></i> MyFinance</a></li>
+             </ul>
+             <div class="sidebar-user">
+                 <img src="user.png" alt="User" />
+                <span>SuperAdmin <br>
+                superadmin@gmail.com</span>
+             </div>
+        </div>
+        <div class="main-content">
+            <div class="content-wrapper">
+                <button id="createFeedbackButton"> <i class="fa fa-plus"></i> Buat Feedback Baru</button>
+                <ul class="feedback-list">
+                    <li>
+                        <span>Judul Feedback 1</span>
+                        <span>2024-07-20</span>
+                        <span class="status"> <i class="fas fa-circle" style="color: orange"></i> Diproses</span>
+                        <button class="viewDetailButton" data-feedback-id="1">Lihat Detail</button>
+                    </li>
+                    <li>
+                        <span>Judul Feedback 2</span>
+                        <span>2024-07-18</span>
+                        <span class="status"> <i class="fas fa-check-circle" style="color: green"></i> Selesai</span>
+                        <button class="viewDetailButton" data-feedback-id="2">Lihat Detail</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="MyFeedback.js"></script>
+</body>
+</html>
