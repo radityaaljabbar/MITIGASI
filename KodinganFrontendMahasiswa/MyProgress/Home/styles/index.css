@@ -1,0 +1,535 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+   line-height: 1.4rem; 
+   font-size: 16px;
+}
+
+body{
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #FAF0E6;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+}
+
+#sidebar {
+    box-sizing: border-box;
+    height: 100vh;
+    width: 240px; /* Reduced from 280px */
+    padding: 5px 0.8em; /* Reduced padding */
+    background-color: #951A22;
+    border-right: #FAF0E6;
+    position: sticky;
+    top: 0;
+    align-items: start;
+    transition: 300ms ease-in-out;
+    overflow: hidden;
+    text-wrap: nowrap;
+    z-index: 100;
+}
+
+#sidebar.close{
+    padding: 5px;
+    width: 50px;
+}
+
+#sidebar ul{
+    list-style: none;
+}
+
+#sidebar > ul > li:first-child{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px; /* Reduced from 16px */
+}
+
+#sidebar > ul > li:first-child .logo {
+    font-weight: bold;
+    font-size: 1.1rem; /* Slightly smaller */
+}
+
+#sidebar ul li.active a {
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+#sidebar a, #sidebar .dropdown-btn, #sidebar .logo {
+    border-radius: 0.4rem; /* Reduced from .5rem */
+    padding: 0.7em; /* Reduced from .85em */
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.8em; /* Reduced from 1em */
+}
+
+.dropdown-btn{
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+#sidebar img, svg {
+    flex-shrink: 0;
+    fill: white;
+    width: 20px; /* Added size constraint */
+    height: 20px; /* Added size constraint */
+}
+
+#sidebar a span, #sidebar .dropdown-btn span {
+    flex-grow: 1;
+    font-size: 0.9rem; /* Slightly smaller text */
+}
+
+#sidebar a:hover, #sidebar .dropdown-btn:hover{
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+#sidebar .sub-menu{
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: 300ms ease-in-out;
+}
+
+#sidebar .sub-menu > div{
+    overflow: hidden;
+}
+
+#sidebar .sub-menu.show{
+   grid-template-rows: 1fr; 
+}
+
+.dropdown-btn svg, .dropdown-btn img {
+    transition: 200ms ease;
+}
+
+.rotate svg:last-child, .rotate img:last-child{
+    rotate: -180deg;
+}
+
+#toggle-btn img {
+    transition: transform 300ms ease;
+}
+
+#toggle-btn.rotate img{
+    transform: rotate(180deg);
+}
+
+#sidebar .sub-menu a{
+    padding-left: 1.6em; /* Reduced from 2em */
+}
+
+#toggle-btn{
+    margin-left: auto;
+    padding: 0.8em; /* Reduced from 1em */
+    border: none;
+    border-radius: 0.4em; /* Reduced from .5em */
+    background: none;
+    cursor: pointer;
+}
+
+#toggle-btn img, #toggle-btn svg{
+    transition: rotate 150ms ease;
+}
+
+#toggle-btn:hover {
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #222533;
+    padding: 0.5em; /* Reduced from 0.6em */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #FAF0E6;
+}
+
+.sidebar-footer .profile-picture{
+    width: 50px; /* Reduced from 50px */
+    height: 50px; /* Reduced from 50px */
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sidebar-footer .user-info{
+    flex-grow: 1;
+    margin-left: 0.8em; /* Reduced from 1em */
+}
+
+.sidebar-footer .username{
+    display: block;
+    font-weight: bold;
+    color: white;
+    font-size: 0.85em; /* Reduced from 0.9em */
+}
+
+.sidebar-footer .email {
+    display: block;
+    font-size: 0.65em; /* Reduced from 0.7em */
+    color: white;
+    word-break: break-all;
+}
+
+.sidebar-footer .settings-btn{
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-footer .settings-btn img {
+    width: 20px; /* Reduced from 25px */
+    height: 20px; /* Reduced from 25px */
+}
+
+#sidebar.close .sidebar-footer .user-info,
+#sidebar.close .sidebar-footer .settings-btn {
+    display: none;
+}
+
+#sidebar.close .sidebar-footer {
+    justify-content: center;
+    padding: 0.4em; /* Reduced from 0.5em */
+}
+
+#sidebar.close .sidebar-footer .profile-picture {
+    display: block;
+    margin: 0 auto;
+    width: 35px; /* Added smaller size for closed sidebar */
+    height: 35px;
+}
+
+main{
+    padding: min(25px, 6%); /* Reduced from 30px, 7% */
+    width: 100%;
+}
+
+main p{
+    color: #070707;
+    margin-top: 4px; /* Reduced from 5px */
+}
+
+.container, .container-titles, .container-Luargraphs, .container-LuarStatus{
+    margin-bottom: 1.2em; /* Reduced from 1.5em */
+    padding: min(0.8em, 12%); /* Reduced from 1em, 15% */
+}
+
+/* Heading sizes */
+h1 {
+    font-size: 1.5rem; /* Added smaller size */
+    margin-bottom: 0.5rem; /* Added margin */
+}
+
+h2 {
+    font-size: 1.3rem; /* Added smaller size */
+}
+
+h3 {
+    font-size: 1.1rem; /* Added smaller size */
+}
+
+/* IP Semester Mahasiswa */
+.dataIPSemester {
+    background-color: #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); /* Lighter shadow */
+    border-radius: 0.8em; /* Reduced from 1em */
+    padding: 0.8em; /* Reduced from 1em */
+    min-height: 120px; /* Reduced from 140px */
+    max-height: 250px; /* Reduced from 300px */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 1px; /* Reduced from 1.5px */
+    overflow-y: auto;
+}
+
+.dataIPSemester h2 {
+    margin-bottom: 0.4em; /* Reduced from 0.5em */
+    text-align: center;
+}
+
+.dataIPSemester span{
+    font-size: 0.9rem; /* Slightly smaller */
+}
+
+ul.listIPSemester {
+    padding: 0.8em; /* Reduced from 1em */
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8em; /* Reduced from 1em */
+    list-style: none;
+    overflow-y: auto;
+}
+
+ul.listIPSemester li{
+    margin: 0.2em 0.8em; /* Reduced from 0.25em 1em */
+    display: flex;
+    width: 160px; /* Reduced from 180px */
+    justify-content: space-between;
+}
+
+ul.listIPSemester li span:first-child {
+    flex: 2;
+}
+
+ul.listIPSemester li span:nth-child(2) {
+    flex: 0.2;
+    text-align: center;
+}
+
+ul.listIPSemester li span:last-child {
+    flex: 1;
+    text-align: right;
+}
+
+/* IPK, SKS, TAK Mahasiswa */
+.container-data {
+    margin-bottom: 30px; /* Reduced from 35px */
+    padding: min(0.8em, 12%); /* Reduced from 1em, 15% */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 0.8em; /* Reduced from 1em */
+}
+
+#dataMyProgress {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); /* Lighter shadow */
+    border-radius: 0.8em; /* Reduced from 1em */
+    padding: 0.8em; /* Reduced from 1em */
+    width: 13em; /* Reduced from 15em */
+    min-height: 90px; /* Reduced from 100px */
+    max-height: 90px; /* Reduced from 100px */
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+#dataMyProgress h3 {
+    text-align: center;
+    margin-bottom: 0.3em; /* Added small margin */
+}
+
+#dataMyProgress p{
+    font-size: 1.2rem; /* Reduced from 1.25rem */
+    font-weight: bold;
+}
+
+/* Report and Graphs */
+.container-reportgraphs {
+    border-radius: 0.8em; /* Reduced from 1em */
+    padding: 0.8em; /* Reduced from 1em */
+    min-height: 120px; /* Reduced from 140px */
+    max-height: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 1.2em; /* Reduced from 1.5em */
+}
+
+.chart-container{
+    background-color: #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); /* Lighter shadow */
+    padding: 0.8em; /* Reduced from 1em */
+    border-radius: 0.8em; /* Reduced from 1em */
+    width: 100%;
+    max-width: 600px; /* Reduced from 650px */
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 320px; /* Reduced from 350px */
+}
+
+/* Status Container */
+.status-container {
+    background-color: #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); /* Lighter shadow */
+    padding: 0.8em; /* Reduced from 1em */
+    border-radius: 0.8em; /* Reduced from 1em */
+    text-align: center;
+    font-size: medium; /* Reduced from large */
+}
+
+.status {
+    color: green;
+    font-weight: bold;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1200px) {
+    .container-data {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    #dataMyProgress {
+        width: calc(33% - 0.8em); /* Reduced from 1em */
+        min-width: 160px; /* Reduced from 180px */
+    }
+    
+    .chart-container {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 992px) {
+    .container-reportgraphs {
+        flex-direction: column;
+    }
+    
+    .chart-container {
+        margin-bottom: 0.8em; /* Reduced from 1em */
+        max-width: 100%;
+    }
+    
+    ul.listIPSemester {
+        max-height: 180px; /* Reduced from 200px */
+    }
+}
+
+@media (max-width: 768px) {
+    #dataMyProgress {
+        width: calc(50% - 0.8em); /* Reduced from 1em */
+    }
+    
+    .container-data {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    #dataMyProgress {
+        width: 100%;
+    }
+    
+    main {
+        padding: 0.8em; /* Reduced from 1em */
+    }
+    
+    .container, .container-titles, .container-Luargraphs, .container-LuarStatus {
+        padding: 0.4em; /* Reduced from 0.5em */
+    }
+    
+    ul.listIPSemester li {
+        width: 100%;
+    }
+}
+
+@media (max-width: 800px){
+    body {
+        grid-template-columns: 1fr;
+    }
+    
+    main {
+        padding: 0.8em 0.8em 60px 0.8em; /* Reduced from 1em 1em 70px 1em */
+    }
+    
+    .container {
+        border: none;
+        padding: 0;
+    }
+    
+    #sidebar{
+        height: 55px; /* Reduced from 60px */
+        width: 100%;
+        border-right: none;
+        border-top: 1px solid #FAF0E6;
+        padding: 0;
+        position: fixed;
+        top: unset;
+        bottom: 0;
+        z-index: 1000;
+    }
+    
+    #sidebar > ul {
+        padding: 0;
+        display: grid;
+        grid-auto-columns: 1fr;
+        grid-auto-flow: column;
+        align-items: center;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    
+    #sidebar > ul::-webkit-scrollbar {
+        display: none;
+    }
+    
+    #sidebar ul li {
+        height: 100%;
+    }
+    
+    #sidebar ul a, #sidebar ul .dropdown-btn{
+        width: 100%;
+        height: 55px; /* Reduced from 60px */
+        padding: 0;
+        border-radius: 0;
+        justify-content: center;
+    }
+    
+    #sidebar ul li span, #sidebar ul li:first-child, .dropdown-btn svg:last-child, .dropdown-btn img:last-child{
+        display: none;
+    }
+    
+    #sidebar ul li .sub-menu.show{
+        position: fixed;
+        bottom: 55px; /* Reduced from 60px */
+        left: 0;
+        box-sizing: border-box;
+        height: 55px; /* Reduced from 60px */
+        width: 100%;
+        background-color: #222533;
+        border-top: 1px solid #FAF0E6;
+        display: flex;
+        justify-content: center;
+    }
+    
+    #sidebar ul li .sub-menu.show > div {
+        overflow-x: auto;
+        display: flex;
+    }
+    
+    #sidebar ul li .sub-menu.show li {
+        display: inline-flex;
+    }
+    
+    #sidebar ul li .sub-menu.show a {
+        box-sizing: border-box;
+        padding: 0.8em; /* Reduced from 1em */
+        width: auto;
+        justify-content: center;
+    }
+    
+    .sidebar-footer {
+        display: none;
+    }
+}

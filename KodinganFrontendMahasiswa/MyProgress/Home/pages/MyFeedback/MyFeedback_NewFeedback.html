@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Feedback Baru</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="../../styles/MyFeedback/MyFeedback_NewFeedback.css">
+</head>
+<body>
+
+    <nav id="sidebar">
+        <ul>
+            <li>
+                <span class="logo">Progressi</span>
+                <button id="toggle-btn">
+                    <img src="../../assets/imgs/sidebar-icons/SidebarClosed.png" alt="SidebarOpenedIcon">
+                </button>
+            </li>
+
+            <li>
+                <a href="../index.html">
+                    <img src="../../assets/imgs/sidebar-icons/MyProgress.png" alt="MyProgressIcon">
+                    <span>MyProgress</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="../MyCourse/MyCourse.html">
+                    <img src="../../assets/imgs/sidebar-icons/MyCourse.png" alt="MyCourseIcon">
+                    <span>MyCourse</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="../MyWellness/MyWellness_BelumTes.html">
+                    <img src="../../assets/imgs/sidebar-icons/MyWellness.png" alt="MyWellnessIcon">
+                    <span>MyWellness</span>
+                </a>
+            </li>
+        
+            <li>
+                <a href="../MyFinance/MyFinance_Main.html">
+                    <img src="../../assets/imgs/sidebar-icons/MyFinance.png" alt="MyFinanceIcon">
+                    <span>MyFinance</span>
+                </a>
+            </li>
+
+            <li class="active">
+                <a href="./MyFeedback_List.html">
+                    <img src="../../assets/imgs/sidebar-icons/MyFeedback.png" alt="MyFeedbackIcon">
+                    <span>MyFeedback</span>
+                </a>   
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <img src="../../assets/imgs/sidebar-icons/MockupUserPic.png" alt="UserProfilePicture" class="profile-picture">
+            <div class="user-info">
+                <span class="username">SuperAdmin</span>
+                <span class="email">superadmin@gmail.com</span>
+            </div>
+            <a href="#" class="settings-btn">
+                <img src="../../assets/imgs/sidebar-icons/SettingsIcon.png" alt="SettingsIcons">
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="formcontainer">
+            <form class="feedback-form">
+                <label for="feedback-title">Judul (Opsional)</label>
+                <input type="text" id="feedback-title" placeholder="Judul Feedback">
+                
+                <label for="feedback-content">Feedback Anda</label>
+                <textarea id="feedback-content" placeholder="Tulis feedback Anda di sini"></textarea>
+                
+                <div class="file-upload-container">
+                    <label for="file-upload">Lampiran (Opsional)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="file-upload" class="file-input">
+                        <div class="file-upload-box">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span id="file-name">Tidak ada file yang dipilih</span>
+                            <button type="button" class="browse-btn">Pilih File</button>
+                        </div>
+                        <div class="file-preview" id="file-preview"></div>
+                    </div>
+                    <p class="file-info">Format yang didukung: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)</p>
+                </div>
+                
+                <div class="button-container">
+                    <button class="kirimButton" id="actionButtons"> 
+                        <span> <i class="fas fa-paper-plane"></i> Kirim Feedback </span>
+                    </button>
+                    <button class="cancelButton" id="actionButtons"> 
+                        <span> <i class="fas fa-times"></i> Batal </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script src="../../scripts/MyFeedback/MyFeedback_NewFeedback.js"></script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+   line-height: 1.4rem; 
+   font-size: 16px;
+}
+
+body{
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #FAF0E6;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+}
+
+#sidebar {
+    box-sizing: border-box;
+    height: 100vh;
+    width: 240px; /* Reduced from 280px */
+    padding: 5px 0.8em; /* Reduced padding */
+    background-color: #951A22;
+    border-right: #FAF0E6;
+    position: sticky;
+    top: 0;
+    align-items: start;
+    transition: 300ms ease-in-out;
+    overflow: hidden;
+    text-wrap: nowrap;
+    z-index: 100;
+}
+
+#sidebar.close{
+    padding: 5px;
+    width: 50px;
+}
+
+#sidebar ul{
+    list-style: none;
+}
+
+#sidebar > ul > li:first-child{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px; /* Reduced from 16px */
+}
+
+#sidebar > ul > li:first-child .logo {
+    font-weight: bold;
+    font-size: 1.1rem; /* Slightly smaller */
+}
+
+#sidebar ul li.active a {
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+#sidebar a, #sidebar .dropdown-btn, #sidebar .logo {
+    border-radius: 0.4rem; /* Reduced from .5rem */
+    padding: 0.7em; /* Reduced from .85em */
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.8em; /* Reduced from 1em */
+}
+
+.dropdown-btn{
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+#sidebar img, svg {
+    flex-shrink: 0;
+    fill: white;
+    width: 20px; /* Added size constraint */
+    height: 20px; /* Added size constraint */
+}
+
+#sidebar a span, #sidebar .dropdown-btn span {
+    flex-grow: 1;
+    font-size: 0.9rem; /* Slightly smaller text */
+}
+
+#sidebar a:hover, #sidebar .dropdown-btn:hover{
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+#sidebar .sub-menu{
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: 300ms ease-in-out;
+}
+
+#sidebar .sub-menu > div{
+    overflow: hidden;
+}
+
+#sidebar .sub-menu.show{
+   grid-template-rows: 1fr; 
+}
+
+.dropdown-btn svg, .dropdown-btn img {
+    transition: 200ms ease;
+}
+
+.rotate svg:last-child, .rotate img:last-child{
+    rotate: -180deg;
+}
+
+#toggle-btn img {
+    transition: transform 300ms ease;
+}
+
+#toggle-btn.rotate img{
+    transform: rotate(180deg);
+}
+
+#sidebar .sub-menu a{
+    padding-left: 1.6em; /* Reduced from 2em */
+}
+
+#toggle-btn{
+    margin-left: auto;
+    padding: 0.8em; /* Reduced from 1em */
+    border: none;
+    border-radius: 0.4em; /* Reduced from .5em */
+    background: none;
+    cursor: pointer;
+}
+
+#toggle-btn img, #toggle-btn svg{
+    transition: rotate 150ms ease;
+}
+
+#toggle-btn:hover {
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #222533;
+    padding: 0.5em; /* Reduced from 0.6em */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #FAF0E6;
+}
+
+.sidebar-footer .profile-picture{
+    width: 50px; /* Reduced from 50px */
+    height: 50px; /* Reduced from 50px */
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sidebar-footer .user-info{
+    flex-grow: 1;
+    margin-left: 0.8em; /* Reduced from 1em */
+}
+
+.sidebar-footer .username{
+    display: block;
+    font-weight: bold;
+    color: white;
+    font-size: 0.85em; /* Reduced from 0.9em */
+}
+
+.sidebar-footer .email {
+    display: block;
+    font-size: 0.65em; /* Reduced from 0.7em */
+    color: white;
+    word-break: break-all;
+}
+
+.sidebar-footer .settings-btn{
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-footer .settings-btn img {
+    width: 20px; /* Reduced from 25px */
+    height: 20px; /* Reduced from 25px */
+}
+
+#sidebar.close .sidebar-footer .user-info,
+#sidebar.close .sidebar-footer .settings-btn {
+    display: none;
+}
+
+#sidebar.close .sidebar-footer {
+    justify-content: center;
+    padding: 0.4em; /* Reduced from 0.5em */
+}
+
+#sidebar.close .sidebar-footer .profile-picture {
+    display: block;
+    margin: 0 auto;
+    width: 35px; /* Added smaller size for closed sidebar */
+    height: 35px;
+}
+
+/* Main Content Styling */
+main {
+    font-family: 'Poppins', sans-serif;
+    background-color: #FAF0E6;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.content-container {
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.content-container h1 {
+    color: #951A22;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    text-align: left;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.75rem;
+}
+
+#belum-mengisi {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    text-align: center;
+}
+
+#belum-mengisi h2 {
+    color: #333;
+    font-size: 1.5rem;
+}
+
+#belum-mengisi .intro-text {
+    max-width: 600px;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* -------- Button Styling */
+.buttonContainer {
+    display: flex;
+    gap: .5em;
+}
+
+#belum-mengisi button {
+    width: auto;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background-color: #951A22;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#belum-mengisi button:hover {
+    background-color: #7a1118;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#belum-mengisi button span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .content-container {
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
+    
+    .content-container {
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .content-container h1 {
+        font-size: 1.6rem;
+    }
+    
+    #belum-mengisi h2 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-container {
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+    }
+    
+    .content-container h1 {
+        font-size: 1.4rem;
+    }
+    
+    #belum-mengisi {
+        padding: 0.5rem;
+    }
+    
+    #belum-mengisi h2 {
+        font-size: 1.2rem;
+    }
+    
+    #belum-mengisi button {
+        width: 180px;
+    }
+}
+
+/* Adjust for sidebar-closed view */
+body.sidebar-closed main {
+    margin-left: 50px;
+}

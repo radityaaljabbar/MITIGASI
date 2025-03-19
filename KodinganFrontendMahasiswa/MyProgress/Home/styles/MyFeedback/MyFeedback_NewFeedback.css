@@ -1,0 +1,502 @@
+/* Reset CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+   line-height: 1.4rem; 
+   font-size: 16px;
+}
+
+body{
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #FAF0E6;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+}
+
+#sidebar {
+    box-sizing: border-box;
+    height: 100vh;
+    width: 240px; /* Reduced from 280px */
+    padding: 5px 0.8em; /* Reduced padding */
+    background-color: #951A22;
+    border-right: #FAF0E6;
+    position: sticky;
+    top: 0;
+    align-items: start;
+    transition: 300ms ease-in-out;
+    overflow: hidden;
+    text-wrap: nowrap;
+    z-index: 100;
+}
+
+#sidebar.close{
+    padding: 5px;
+    width: 50px;
+}
+
+#sidebar ul{
+    list-style: none;
+}
+
+#sidebar > ul > li:first-child{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px; /* Reduced from 16px */
+}
+
+#sidebar > ul > li:first-child .logo {
+    font-weight: bold;
+    font-size: 1.1rem; /* Slightly smaller */
+}
+
+#sidebar ul li.active a {
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+#sidebar a, #sidebar .dropdown-btn, #sidebar .logo {
+    border-radius: 0.4rem; /* Reduced from .5rem */
+    padding: 0.7em; /* Reduced from .85em */
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.8em; /* Reduced from 1em */
+}
+
+.dropdown-btn{
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+#sidebar img, svg {
+    flex-shrink: 0;
+    fill: white;
+    width: 20px; /* Added size constraint */
+    height: 20px; /* Added size constraint */
+}
+
+#sidebar a span, #sidebar .dropdown-btn span {
+    flex-grow: 1;
+    font-size: 0.9rem; /* Slightly smaller text */
+}
+
+#sidebar a:hover, #sidebar .dropdown-btn:hover{
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+#sidebar .sub-menu{
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: 300ms ease-in-out;
+}
+
+#sidebar .sub-menu > div{
+    overflow: hidden;
+}
+
+#sidebar .sub-menu.show{
+   grid-template-rows: 1fr; 
+}
+
+.dropdown-btn svg, .dropdown-btn img {
+    transition: 200ms ease;
+}
+
+.rotate svg:last-child, .rotate img:last-child{
+    rotate: -180deg;
+}
+
+#toggle-btn img {
+    transition: transform 300ms ease;
+}
+
+#toggle-btn.rotate img{
+    transform: rotate(180deg);
+}
+
+#sidebar .sub-menu a{
+    padding-left: 1.6em; /* Reduced from 2em */
+}
+
+#toggle-btn{
+    margin-left: auto;
+    padding: 0.8em; /* Reduced from 1em */
+    border: none;
+    border-radius: 0.4em; /* Reduced from .5em */
+    background: none;
+    cursor: pointer;
+}
+
+#toggle-btn img, #toggle-btn svg{
+    transition: rotate 150ms ease;
+}
+
+#toggle-btn:hover {
+    background-color: rgba(217, 217, 217, 0.2);
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #222533;
+    padding: 0.5em; /* Reduced from 0.6em */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #FAF0E6;
+}
+
+.sidebar-footer .profile-picture{
+    width: 50px; /* Reduced from 50px */
+    height: 50px; /* Reduced from 50px */
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sidebar-footer .user-info{
+    flex-grow: 1;
+    margin-left: 0.8em; /* Reduced from 1em */
+}
+
+.sidebar-footer .username{
+    display: block;
+    font-weight: bold;
+    color: white;
+    font-size: 0.85em; /* Reduced from 0.9em */
+}
+
+.sidebar-footer .email {
+    display: block;
+    font-size: 0.65em; /* Reduced from 0.7em */
+    color: white;
+    word-break: break-all;
+}
+
+.sidebar-footer .settings-btn{
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-footer .settings-btn img {
+    width: 20px; /* Reduced from 25px */
+    height: 20px; /* Reduced from 25px */
+}
+
+#sidebar.close .sidebar-footer .user-info,
+#sidebar.close .sidebar-footer .settings-btn {
+    display: none;
+}
+
+#sidebar.close .sidebar-footer {
+    justify-content: center;
+    padding: 0.4em; /* Reduced from 0.5em */
+}
+
+#sidebar.close .sidebar-footer .profile-picture {
+    display: block;
+    margin: 0 auto;
+    width: 35px; /* Added smaller size for closed sidebar */
+    height: 35px;
+}
+
+/* Main Content Styling */
+/* Reset CSS remains the same */
+
+
+/* Improved Main Content Styling */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.formcontainer {
+    background-color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 1rem auto;
+    transition: all 0.3s ease;
+}
+
+form.feedback-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.feedback-form label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.feedback-form input,
+.feedback-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+
+    font-family: 'Poppins', sans-serif;
+    transition: border 0.3s ease;
+}
+
+.feedback-form input:focus,
+.feedback-form textarea:focus {
+    outline: none;
+    border-color: #951A22;
+    box-shadow: 0 0 0 2px rgba(149, 26, 34, 0.1);
+}
+
+.feedback-form textarea {
+    min-height: 12rem;
+    max-height: 30rem;
+    resize: vertical;
+}
+
+.feedback-form input::placeholder,
+.feedback-form textarea::placeholder {
+    color: #bbb;
+}
+
+/* File Upload Styling */
+.file-upload-container {
+    margin-bottom: 1.5rem;
+}
+
+.file-input-wrapper {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.file-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.file-upload-box {
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.file-upload-box:hover {
+    border-color: #188EDC;
+    background-color: #f0f7fc;
+}
+
+.file-upload-box i {
+    font-size: 2rem;
+    color: #188EDC;
+    margin-bottom: 0.5rem;
+}
+
+.file-upload-box span {
+    display: block;
+    color: #777;
+    margin-bottom: 0.75rem;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.browse-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.browse-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.file-info {
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: 0.5rem;
+}
+
+/* File Preview */
+.file-preview {
+    margin-top: 1rem;
+    display: none;
+}
+
+.file-preview.active {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: #f0f7fc;
+    border-radius: 6px;
+    border: 1px solid #d1e6f9;
+}
+
+.file-preview .file-icon {
+    font-size: 1.25rem;
+    color: #188EDC;
+}
+
+.file-preview .file-details {
+    flex: 1;
+}
+
+.file-preview .file-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 0.2rem;
+    word-break: break-all;
+}
+
+.file-preview .file-size {
+    font-size: 0.75rem;
+    color: #777;
+}
+
+.file-preview .remove-file {
+    color: #e74c3c;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.25rem;
+    transition: color 0.2s ease;
+}
+
+.file-preview .remove-file:hover {
+    color: #c0392b;
+}
+
+/* Button Styling */
+.button-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+button.cancelButton,
+button.kirimButton {
+    width: auto;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background-color: #951A22;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+
+
+button.kirimButton:hover,
+button.cancelButton:hover {
+    background-color: #7a1118;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* For the original button effect */
+button#actionButtons span {
+    position: relative;
+    z-index: 1;
+
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .formcontainer {
+        width: 90%;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
+    
+    .formcontainer {
+        width: 95%;
+        padding: 1.25rem;
+    }
+    
+    .button-container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    button.cancelButton,
+    button.kirimButton {
+        width: 100%;
+        padding: 8px 12px;
+    }
+    
+    .button-container {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+    }
+    .file-upload-box {
+        padding: 1rem;
+    }
+}
+
+/* Fix for the original button effect issue */
+button#actionButtons {
+    position: relative;
+    overflow: hidden;
+}
+
+button#actionButtons span {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
