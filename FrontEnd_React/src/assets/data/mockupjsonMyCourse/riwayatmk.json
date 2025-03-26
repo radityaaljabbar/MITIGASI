@@ -1,0 +1,17 @@
+[
+    {
+        "kodeMataKuliah": "TK-002",
+        "semester": 1,
+        "nilai": "A"
+    },
+    {
+        "kodeMataKuliah": "TK-005",
+        "semester": 1,
+        "nilai": "B+"
+    },
+    {
+        "kodeMataKuliah": "TK-006",
+        "semester": 2,
+        "nilai": "A-"
+    }
+]

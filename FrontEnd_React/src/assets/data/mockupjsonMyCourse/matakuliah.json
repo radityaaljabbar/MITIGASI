@@ -1,0 +1,38 @@
+[
+    {
+        "kodeMataKuliah": "TK-001",
+        "namaMataKuliah": "Pemrograman Dasar",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-002",
+        "namaMataKuliah": "Kalkulus",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-003",
+        "namaMataKuliah": "Struktur Data",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-004",
+        "namaMataKuliah": "Basis Data",
+        "sks": 3,
+        "jenis": "Wajib Prodi"
+    },
+    {
+        "kodeMataKuliah": "TK-005",
+        "namaMataKuliah": "Jaringan Komputer",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-006",
+        "namaMataKuliah": "Jaringan Komputer 2",
+        "sks": 3,
+        "jenis": "Wajib"
+    }
+]
