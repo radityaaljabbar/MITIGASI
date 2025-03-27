@@ -23,7 +23,7 @@ const fetchHistoryData = () => {
                     pdfLink: '#'
                 },
             ]);
-        }, 1000);
+        }, 500);
     });
 };
 

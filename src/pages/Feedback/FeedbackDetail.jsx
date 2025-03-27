@@ -17,7 +17,7 @@ const MyFeedbackDetails = () => {
     setTimeout(() => {
       setFeedbackData(foundFeedback);
       setIsLoading(false);
-    }, 1000);
+    }, 500);
   }, []);
 
 
