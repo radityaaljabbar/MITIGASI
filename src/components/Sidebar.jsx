@@ -17,11 +17,11 @@ const Sidebar = () => {
 
     //Bikin array object sidebar agar mempersingkat kode:
     const sidebarItems = [
-        { path: '/', name: 'MyProgress', icon: myProgressIcon },
-        { path: '/my-course', name: 'MyCourse', icon: myCourseIcon },
-        { path: '/my-wellness', name: 'MyWellness', icon: myWellnessIcon },
-        { path: '/my-finance', name: 'MyFinance', icon: myFinanceIcon },
-        { path: '/my-feedback', name: 'MyFeedback', icon: myFeedbackIcon },
+        { path: 'my-progress', name: 'MyProgress', icon: myProgressIcon },
+        { path: 'my-course', name: 'MyCourse', icon: myCourseIcon },
+        { path: 'my-wellness', name: 'MyWellness', icon: myWellnessIcon },
+        { path: 'my-finance', name: 'MyFinance', icon: myFinanceIcon },
+        { path: 'my-feedback', name: 'MyFeedback', icon: myFeedbackIcon },
     ];
 
     // Untuk menandakan menu mana yang sedang di buka (dikasih background)

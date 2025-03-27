@@ -21,7 +21,7 @@ const MyFinanceMain = () => {
           
           <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
             <Link 
-                to = '/my-finance/application'
+                to = 'application'
                 className="w-full sm:w-auto px-6 py-3 bg-[#951A22] text-white rounded-lg 
                          hover:bg-[#7a1118] transition-all duration-300 
                          transform hover:-translate-y-1 hover:shadow-lg
@@ -31,7 +31,7 @@ const MyFinanceMain = () => {
             </Link>
             
             <Link 
-                to = '/my-finance/application-history'
+                to = 'application-history'
                 className="w-full sm:w-auto px-6 py-3 border-2 border-[#951A22] text-[#951A22] 
                          rounded-lg hover:bg-[#951A22] hover:text-white 
                          transition-all duration-300 

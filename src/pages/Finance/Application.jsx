@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import handleBack from '../../components/handleBack';
+handleBack
 
 const FinanceEvaluationForm = () => {
   const [formData, setFormData] = useState({
@@ -177,7 +179,7 @@ const FinanceEvaluationForm = () => {
             </button>
             
             <button
-              type="button"
+              onClick={handleBack}
               className="w-full sm:w-auto px-6 py-3 border-2 border-[#951A22] 
                          text-[#951A22] rounded-lg 
                          hover:bg-[#951A22] hover:text-white 

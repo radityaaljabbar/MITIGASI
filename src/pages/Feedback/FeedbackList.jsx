@@ -14,7 +14,7 @@ const MyFeedback = () => {
     setTimeout(() => {
       setFeedbackList(feedbackDatas);
       setIsLoading(false);
-    }, 500);
+    }, 1000);
   }, []);
 
   const getStatusColor = (status) => {
@@ -46,7 +46,7 @@ const MyFeedback = () => {
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Daftar Feedback</h1>
         
         <Link 
-          to="/my-feedback/new-feedback" // ini nanti diganti yang isinya "$nim_mahasiswa"
+          to="new-feedback" // ini nanti diganti yang isinya "$nim_mahasiswa"
           className="flex items-center gap-2 bg-[#951A22] hover:bg-[#7A1118] text-white font-medium py-2 px-4 rounded transition-all duration-200 mb-6 shadow-sm hover:shadow"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -77,7 +77,7 @@ const MyFeedback = () => {
                     </div>
                   </div>
                   <Link
-                  to={`/my-feedback/${feedback.feedbackId}`}
+                  to={`${feedback.feedbackId}`}
                     // onClick={() => handleViewDetail(feedback.feedbackId)}
                     className="bg-[#951A22] hover:bg-[#7A1118] text-white text-sm py-2 px-4 rounded transition-colors duration-200 mt-2 sm:mt-0 w-full sm:w-auto"
                   >
