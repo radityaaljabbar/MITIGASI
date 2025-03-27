@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://kit.fontawesome.com/64d58efce2.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="style.css" />
+    <title>Academic Portal</title>
+  </head>
+  <body>
+    <div class="landing-container">
+      <!-- Navbar -->
+      <nav class="navbar">
+        <div class="logo">
+          <h2>Academic Portal</h2>
+        </div>
+        <div class="nav-links">
+          <a href="#" class="active">Home</a>
+          <a href="#">About</a>
+          <a href="#">Services</a>
+          <a href="#">Contact</a>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <div class="landing-content">
+        <!-- Left side: Text content -->
+        <div class="text-content">
+          <h1>University Academic <span>Information System</span></h1>
+          <p>
+            Manage your academic journey with ease. Access course materials,
+            view grades, communicate with advisors, and stay updated with
+            university announcements all in one place.
+          </p>
+          <button id="get-started" class="btn-get-started">Get Started</button>
+        </div>
+
+        <!-- Right side: Logo/Image -->
+        <div class="image-content">
+          <div class="image-container">
+            <!-- Replace with your actual logo or keep as placeholder -->
+            <div class="placeholder-logo">
+              <i class="fas fa-university"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Page Container (Initially Hidden) -->
+    <div class="login-container hidden">
+      <div class="forms-container">
+        <div class="signin-signup">
+          <!-- Mahasiswa Login Form -->
+          <form action="#" class="sign-in-form">
+            <h2 class="title">Mahasiswa Login</h2>
+            <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="text" placeholder="NIM" />
+            </div>
+            <div class="input-field">
+              <i class="fas fa-lock"></i>
+              <input type="password" placeholder="Password" />
+            </div>
+            <input type="submit" value="Login" class="btn solid" />
+          </form>
+          
+          <!-- Dosen Wali Login Form -->
+          <form action="#" class="sign-up-form">
+            <h2 class="title">Dosen Wali Login</h2>
+            <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="text" placeholder="NIP" />
+            </div>
+            <div class="input-field">
+              <i class="fas fa-lock"></i>
+              <input type="password" placeholder="Password" />
+            </div>
+            <input type="submit" class="btn" value="Login" />
+          </form>
+        </div>
+      </div>
+
+      <div class="panels-container">
+        <div class="panel left-panel">
+          <div class="content">
+            <h3>Dosen Wali?</h3>
+            <p>
+              Silakan login sebagai Dosen Wali untuk mengakses portal akademik dan informasi mahasiswa perwalian Anda.
+            </p>
+            <button class="btn transparent" id="sign-up-btn">
+              Dosen Wali
+            </button>
+          </div>
+          <img src="img/log.svg" class="image" alt="" />
+        </div>
+        <div class="panel right-panel">
+          <div class="content">
+            <h3>Mahasiswa?</h3>
+            <p>
+              Silakan login sebagai Mahasiswa untuk mengakses portal akademik dan jadwal perkuliahan Anda.
+            </p>
+            <button class="btn transparent" id="sign-in-btn">
+              Mahasiswa
+            </button>
+          </div>
+          <img src="img/register.svg" class="image" alt="" />
+        </div>
+      </div>
+
+      <!-- Back to landing page button -->
+      <button id="back-to-landing" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
