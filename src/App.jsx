@@ -11,7 +11,7 @@ import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import FeedbackList  from './pages/Feedback/FeedbackList.jsx';
 import FeedbackDetail from './pages/Feedback/FeedbackDetail.jsx'
-import NewFeedback from './pages/Feedback/NewFeedback.jsx'
+import NewFeedback from './pages/Feedback/NewFeedback2.jsx'
 import FinanceMain from "./pages/Finance/Main";
 import FinanceApp from "./pages/Finance/Application";
 import FinanceHistory from "./pages/Finance/AppilicationHistory.jsx"
