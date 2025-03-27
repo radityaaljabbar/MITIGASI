@@ -1,0 +1,1 @@
+ini folder untuk nampung codingan frontend. Di pull / clone trus di commit jgn main dlu di branching aja 
