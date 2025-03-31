@@ -34,5 +34,41 @@
         "namaMataKuliah": "Jaringan Komputer 2",
         "sks": 3,
         "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-007",
+        "namaMataKuliah": "Fisika",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-008",
+        "namaMataKuliah": "Fisika 2",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-009",
+        "namaMataKuliah": "Elektronika Dasar",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-010",
+        "namaMataKuliah": "Elektronika Dasar",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-011",
+        "namaMataKuliah": "Matriks dan Vektor",
+        "sks": 3,
+        "jenis": "Wajib"
+    },
+    {
+        "kodeMataKuliah": "TK-012",
+        "namaMataKuliah": "Bahasa Inggris",
+        "sks": 3,
+        "jenis": "Wajib"
     }
 ]

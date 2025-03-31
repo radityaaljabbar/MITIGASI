@@ -4,7 +4,7 @@ import RiwayatMataKuliah from '../components/myCourseComponents/RiwayatMataKulia
 
 const MyCoursePage = () => {
     return (
-        <div className="flex flex-col items-center justify-center p-5 gap-7 w-full">
+        <div className="flex flex-col items-center justify-center h-screen p-5 gap-7 w-full">
             <RekomendasiMataKuliah />
             <RiwayatMataKuliah />
         </div>
