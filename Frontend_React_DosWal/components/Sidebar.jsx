@@ -1,27 +1,23 @@
 import React from 'react';
-import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 //Import icon-icon yang diperlukan
 import toggleSidebarIcon from '../assets/images/toggleSidebar.png';
+import myProgressIcon from '../assets/images/MyProgress.png';
+import myCourseIcon from '../assets/images/MyCourse.png';
+import myWellnessIcon from '../assets/images/MyWellness.png';
+import myFinanceIcon from '../assets/images/MyFinance.png';
+import myFeedbackIcon from '../assets/images/MyFeedback.png';
 import settingsIcon from '../assets/images/SettingsIcon.png';
-import myStudentsIcon from '../assets/images/MyStudentsIcon.png';
-import myCourseAdvisorIcon from '../assets/images/MyCourseAdvisorIcon.png';
-import myReportIcon from '../assets/images/MyReportIcon.png';
 
-const Sidebar = () => {
-    //Deklarasi useState dan useLocation:
-    const [expanded, setExpanded] = useState(true);
-
+const Sidebar = ({ expanded, setExpanded }) => {
     //Bikin array object sidebar agar mempersingkat kode:
     const sidebarItems = [
-        { path: '/', name: 'MyStudents', icon: myStudentsIcon },
-        {
-            path: '/my-course-advisor',
-            name: 'MyCourseAdvisor',
-            icon: myCourseAdvisorIcon,
-        },
-        { path: '/my-report', name: 'MyReport', icon: myReportIcon },
+        { path: '/', name: 'MyProgress', icon: myProgressIcon },
+        { path: '/my-course', name: 'MyCourse', icon: myCourseIcon },
+        { path: '/my-wellness', name: 'MyWellness', icon: myWellnessIcon },
+        { path: '/my-finance', name: 'MyFinance', icon: myFinanceIcon },
+        { path: '/my-feedback', name: 'MyFeedback', icon: myFeedbackIcon },
     ];
 
     // Untuk menandakan menu mana yang sedang di buka (dikasih background)
@@ -31,8 +27,8 @@ const Sidebar = () => {
             : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group hover:bg-white/20`;
     //
     return (
-        <aside className="h-screen">
-            <nav className="h-full flex flex-col bg-[#951A22] border-r border-[#FAF0E6] shadow-sm sticky top-0 z-50">
+        <aside className="h-screen sticky top-0 flex-shrink-0">
+            <nav className="h-full flex flex-col bg-[#951A22] border-r border-[#FAF0E6] shadow-sm">
                 {/* Header dari sidebar (Logo dan Tombol Toggle Sidebar) */}
                 <div className="p-4 pb-2 flex justify-between items-center">
                     <span
@@ -75,7 +71,7 @@ const Sidebar = () => {
                                 {/* Nampilin nama menu ketika sidebar tertutup dan mouse di hover */}
                                 {!expanded && (
                                     <div
-                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bgwhite text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0`}>
+                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bgwhite text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
                                         {item.name}
                                     </div>
                                 )}
