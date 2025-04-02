@@ -15,7 +15,7 @@ import NewFeedback from './pages/Feedback/NewFeedback.jsx'
 import FinanceMain from "./pages/Finance/Main";
 import FinanceApp from "./pages/Finance/Application";
 import FinanceHistory from "./pages/Finance/ApplicationHistory.jsx"
-import Login from './pages/LoginPage.jsx'
+import Login from './pages/Login/LoginPage'
 
 
 const App = () => {
