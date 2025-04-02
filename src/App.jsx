@@ -1,33 +1,53 @@
 import React from 'react';
-import {
-    Route,
-    createBrowserRouter,
-    createRoutesFromElements,
-    RouterProvider,
+import { 
+    Route, 
+    createBrowserRouter, 
+    createRoutesFromElements, 
+    RouterProvider, 
+    Navigate 
 } from 'react-router-dom';
+import { BrowserRouter as Router, Routes } from 'react-router-dom';
 
+
+import ProtectedRoute from './components/ProtectedRoute';
+//  Student Pages
 import MainLayout from './layout/MainLayout';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
-import FeedbackList  from './pages/Feedback/FeedbackList.jsx';
-import FeedbackDetail from './pages/Feedback/FeedbackDetail.jsx'
-import NewFeedback from './pages/Feedback/NewFeedback.jsx'
+import FeedbackList from './pages/Feedback/FeedbackList.jsx';
+import FeedbackDetail from './pages/Feedback/FeedbackDetail.jsx';
+import NewFeedback from './pages/Feedback/NewFeedback.jsx';
 import FinanceMain from "./pages/Finance/Main";
 import FinanceApp from "./pages/Finance/Application";
-import FinanceHistory from "./pages/Finance/ApplicationHistory.jsx"
-import Login from './pages/Login/LoginPage'
+import FinanceHistory from "./pages/Finance/ApplicationHistory.jsx";
+import Login from './pages/Login/LoginPage';
+
+//  Lecturer Pages
+import LecturerDashboard from './pages/lecturer/LecturerDashboard';
+
+// Placeholder components from add.jsx
+const StudentCourses = () => <div>Student Courses Page</div>;
+const StudentGrades = () => <div>Student Grades Page</div>;
+const LecturerAdvisees = () => <div>Lecturer Advisees Page</div>;
+const LecturerSchedule = () => <div>Lecturer Schedule Page</div>;
 
 
 const App = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route>
-                {/* <Route path="/" element={<MainLayout />} /> */}
-                <Route path="/"  element={<Login />}></Route>
-                <Route path='/student' element={<MainLayout />}>
-                    {/* <Route index element={<HomePage />} /> */}
-                    {/* <Route  path="my-feedback" element={<HomePage />} /> */}
-                    <Route path="dashboard" element={<MainLayout />} />
+                <Route path="/" element={<Login />} />
+                
+                {/* Protected Student Routes */}
+                <Route 
+                    path="/student" 
+                    element={
+                        <ProtectedRoute requiredType="students">
+                            <MainLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route index element={<HomePage />} />
                     <Route path="my-feedback" element={<FeedbackList />} />
                     <Route path="my-feedback/:feedbackId" element={<FeedbackDetail />} />
                     <Route path="my-feedback/new-feedback" element={<NewFeedback />} />
@@ -36,6 +56,24 @@ const App = () => {
                     <Route path="my-finance/application-history" element={<FinanceHistory />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
+                
+                {/* Protected Lecturer Routes */}
+                <Route 
+                    path="/lecturer/*" 
+                    element={
+                        <ProtectedRoute requiredType="lecturers">
+                            <MainLayout />
+                        </ProtectedRoute>
+                    } 
+                >
+                    <Route path="dashboard" element={<LecturerDashboard />} />
+                    <Route path="advisees" element={<LecturerAdvisees />} />
+                    <Route path="schedule" element={<LecturerSchedule />} />
+                    <Route path="*" element={<Navigate to="/lecturer/dashboard" />} />
+                </Route>
+                
+                {/* Redirect any other route to login */}
+                <Route path="*" element={<Navigate to="/" />} />
             </Route>
         )
     );

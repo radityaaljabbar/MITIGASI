@@ -11,11 +11,11 @@ const Login = () => {
   // Simulated user data (in a real app, this would come from a backend)
   const users = {
     students: {
-      '2023001': { password: 'mahasiswa123', name: 'John Doe' },
+      '1': { password: '2', name: 'John Doe' },
       '2023002': { password: 'mahasiswa456', name: 'Jane Smith' }
     },
     lecturers: {
-      '198501012020': { password: 'dosen123', name: 'Dr. Ahmad' },
+      '2': { password: '3', name: 'Dr. Ahmad' },
       '198602022021': { password: 'dosen456', name: 'Dr. Siti' }
     }
   };
@@ -36,10 +36,12 @@ const Login = () => {
         type: userType
       }));
       
-      // Navigate to dashboard
-      console.log(loginId)
-      navigate('/student');
-
+      // Navigate to appropriate dashboard
+      if (isStudentLogin) {
+        navigate('/student/my-feedback');
+      } else {
+        navigate('/lecturer');
+      }
     } else {
       alert('Invalid credentials');
     }
