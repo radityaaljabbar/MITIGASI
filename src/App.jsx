@@ -25,11 +25,6 @@ import Login from './pages/Login/LoginPage';
 //  Lecturer Pages
 import LecturerDashboard from './pages/lecturer/LecturerDashboard';
 
-// Placeholder components from add.jsx
-const StudentCourses = () => <div>Student Courses Page</div>;
-const StudentGrades = () => <div>Student Grades Page</div>;
-const LecturerAdvisees = () => <div>Lecturer Advisees Page</div>;
-const LecturerSchedule = () => <div>Lecturer Schedule Page</div>;
 
 
 const App = () => {
@@ -67,8 +62,6 @@ const App = () => {
                     } 
                 >
                     <Route path="dashboard" element={<LecturerDashboard />} />
-                    <Route path="advisees" element={<LecturerAdvisees />} />
-                    <Route path="schedule" element={<LecturerSchedule />} />
                     <Route path="*" element={<Navigate to="/lecturer/dashboard" />} />
                 </Route>
                 
