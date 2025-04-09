@@ -1,13 +1,12 @@
 import React from 'react';
 //? Import Component
-import ChartContainer from '../components/myProgressComponents/ChartContainer';
-import IPSemesterCard from '../components/myProgressComponents/IPSemesterCard';
-import IpkSksTakCard from '../components/myProgressComponents/IpkSksTakCard';
-import KlasifikasiAkademikCard from '../components/myProgressComponents/KlasifikasiAkademikCard';
+import ChartContainer from '../../components/compMahasiswa/myProgressComponents/ChartContainer';
+import IPSemesterCard from '../../components/compMahasiswa/myProgressComponents/IPSemesterCard';
+import IpkSksTakCard from '../../components/compMahasiswa/myProgressComponents/IpkSksTakCard';
+import KlasifikasiAkademikCard from '../../components/compMahasiswa/myProgressComponents/KlasifikasiAkademikCard';
 //? Import mockup json:
-import mockupDataSemester from '../assets/data/mockupjsonMyProgress/mockupDataSemester.json';
-import mockupDataKehadiran from '../assets/data/mockupjsonMyProgress/mockupDataKehadiran.json';
-import { Chart } from 'chart.js';
+import mockupDataSemester from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyProgress/mockupDataSemester.json';
+import mockupDataKehadiran from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyProgress/mockupDataKehadiran.json';
 
 const MyProgress = () => {
     console.log(mockupDataKehadiran);
@@ -55,7 +54,7 @@ const MyProgress = () => {
                     <ChartContainer
                         id="attendanceChart"
                         data={mockupDataKehadiran}
-                        type="semester"
+                        type="attendance"
                     />
                 </div>
             </div>

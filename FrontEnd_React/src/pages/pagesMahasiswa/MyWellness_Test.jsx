@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import pertanyaanPsikologi from '../assets/data/mockupjsonMyWellness/pertanyaanPsikologi.json';
-import scoreCategories from '../assets/data/mockupjsonMyWellness/scoreCategories.json';
+import pertanyaanPsikologi from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyWellness/pertanyaanPsikologi.json';
+import scoreCategories from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyWellness/scoreCategories.json';
 
 const MyWellness_Test = ({ submitTestPsikologi }) => {
     // Hardcode NIM dan Nama nanti diambil dri backend pas session mereka login
@@ -159,7 +159,7 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
         toast.success('Tes Psikologi Berhasil Dikirim!');
 
         // Navigate to results page
-        return navigate('/my-wellness');
+        return navigate('/stu/my-wellness');
     };
 
     return (

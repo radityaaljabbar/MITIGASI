@@ -1,7 +1,7 @@
 import React from 'react';
 //Importing the data from a mockup json:
-import matakuliah from '../../assets/data/mockupjsonMyCourse/matakuliah.json';
-import riwayatMK from '../../assets/data/mockupjsonMyCourse/riwayatmk.json';
+import matakuliah from '../../../assets/data/mockupjsonMahasiswa/mockupjsonMyCourse/matakuliah.json';
+import riwayatMK from '../../../assets/data/mockupjsonMahasiswa/mockupjsonMyCourse/riwayatmk.json';
 
 const RiwayatMataKuliah = () => {
     //Ngoprek json mk sama rekomendasi:

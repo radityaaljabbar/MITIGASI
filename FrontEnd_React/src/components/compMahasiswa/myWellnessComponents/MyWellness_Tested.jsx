@@ -43,13 +43,14 @@ const MyWellness_Tested = ({ dataPsikologi }) => {
                     <b>Tanggal Tes: {dataPsikologi.testDate}</b>
                 </p>
                 <div className="flex flex-wrap gap-[0.8rem] mt-[0.8rem]">
-                    <button className="bg-[#951A22] text-white py-3 px-6 rounded-lg cursor-pointer font-medium relative overflow-hidden transition-all duration-300 ease-in-out hover:bg-[#7a1118] hover:translate-y-[-2px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)]">
-                        <span className="relative z-[1]">
-                            <Link to="/my-wellness/psi-test">
+                    <Link to="/stu/my-wellness/psi-test">
+                        <button className="bg-[#951A22] text-white py-3 px-6 rounded-lg cursor-pointer font-medium relative overflow-hidden transition-all duration-300 ease-in-out hover:bg-[#7a1118] hover:translate-y-[-2px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)]">
+                            <span className="relative z-[1]">
                                 Mulai Evaluasi Baru
-                            </Link>
-                        </span>
-                    </button>
+                            </span>
+                        </button>
+                    </Link>
+
                     <button
                         onClick={handlePrint}
                         className="bg-[#951A22] text-white py-3 px-6 rounded-lg cursor-pointer font-medium relative overflow-hidden transition-all duration-300 ease-in-out hover:bg-[#7a1118] hover:translate-y-[-2px] hover:shadow-[0_4px_8px_rgba(0,0,0,0.15)]">

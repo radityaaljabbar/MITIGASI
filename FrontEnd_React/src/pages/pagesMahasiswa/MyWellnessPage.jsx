@@ -1,13 +1,13 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 //Import Data json:
-import psikologiMahasiswa from '../assets/data/mockupjsonMyWellness/psikologiMahasiswa.json';
+import psikologiMahasiswa from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyWellness/psikologiMahasiswa.json';
 //Importing komponen2 MyWellness
-import MyWellness_Tested from '../components/myWellnessComponents/MyWellness_Tested';
-import MyWellness_NotTested from '../components/myWellnessComponents/MyWellness_NotTested';
+import MyWellness_Tested from '../../components/compMahasiswa/myWellnessComponents/MyWellness_Tested';
+import MyWellness_NotTested from '../../components/compMahasiswa/myWellnessComponents/MyWellness_NotTested';
 
 const MyWellnessPage = () => {
-    const NIMTest = 1103210088;
+    const NIMTest = 1103210099;
     const [dataPsikologi, setDataPsikologi] = useState(null);
 
     // Fungsi untuk ngasih data tergantung NIM avail atau tidak:

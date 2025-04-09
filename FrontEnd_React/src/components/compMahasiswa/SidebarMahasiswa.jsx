@@ -2,30 +2,24 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 //Import icon-icon yang diperlukan
-import toggleSidebarIcon from '../assets/images/toggleSidebar.png';
-import myProgressIcon from '../assets/images/MyProgress.png';
-import myCourseIcon from '../assets/images/MyCourse.png';
-import myWellnessIcon from '../assets/images/MyWellness.png';
-import myFinanceIcon from '../assets/images/MyFinance.png';
-import myFeedbackIcon from '../assets/images/MyFeedback.png';
-import settingsIcon from '../assets/images/SettingsIcon.png';
+import toggleSidebarIcon from '../../assets/images/imageMahasiswa/sidebarImage/toggleSidebar.png';
+import myProgressIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyProgress.png';
+import myCourseIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyCourse.png';
+import myWellnessIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyWellness.png';
+import myFinanceIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyFinance.png';
+import myFeedbackIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyFeedback.png';
+import settingsIcon from '../../assets/images/imageMahasiswa/sidebarImage/SettingsIcon.png';
 
 const Sidebar = ({ expanded, setExpanded }) => {
     //Bikin array object sidebar agar mempersingkat kode:
     const sidebarItems = [
-        { path: '/', name: 'MyProgress', icon: myProgressIcon },
-        { path: '/my-course', name: 'MyCourse', icon: myCourseIcon },
-        { path: '/my-wellness', name: 'MyWellness', icon: myWellnessIcon },
-        { path: '/my-finance', name: 'MyFinance', icon: myFinanceIcon },
-        { path: '/my-feedback', name: 'MyFeedback', icon: myFeedbackIcon },
+        { path: '/stu', name: 'MyProgress', icon: myProgressIcon, end: true },
+        { path: '/stu/my-course', name: 'MyCourse', icon: myCourseIcon },
+        { path: '/stu/my-wellness', name: 'MyWellness', icon: myWellnessIcon },
+        { path: '/stu/my-finance', name: 'MyFinance', icon: myFinanceIcon },
+        { path: '/stu/my-feedback', name: 'MyFeedback', icon: myFeedbackIcon },
     ];
 
-    // Untuk menandakan menu mana yang sedang di buka (dikasih background)
-    const activeMenuLink = ({ isActive }) =>
-        isActive
-            ? `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group bg-white/20 shadow-md`
-            : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group hover:bg-white/20`;
-    //
     return (
         <aside className="h-screen sticky top-0 flex-shrink-0">
             <nav className="h-full flex flex-col bg-[#951A22] border-r border-[#FAF0E6] shadow-sm">
@@ -54,7 +48,14 @@ const Sidebar = ({ expanded, setExpanded }) => {
                 <ul className="flex-1 px-3 space-y-4 mt-4">
                     {sidebarItems.map((item) => (
                         <li key={item.path} className="relative">
-                            <NavLink to={item.path} className={activeMenuLink}>
+                            <NavLink
+                                to={item.path}
+                                end={item.end}
+                                className={({ isActive }) =>
+                                    isActive
+                                        ? `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group bg-white/20 shadow-md`
+                                        : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group hover:bg-white/20`
+                                }>
                                 <img
                                     src={item.icon}
                                     alt={item.name}

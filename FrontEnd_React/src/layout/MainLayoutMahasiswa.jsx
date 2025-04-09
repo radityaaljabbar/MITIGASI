@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../components/compMahasiswa/SidebarMahasiswa';
 
 const MainLayout = () => {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);

@@ -1,6 +1,6 @@
 import React from 'react';
-import RekomendasiMataKuliah from '../components/myCourseComponents/RekomendasiMataKuliah';
-import RiwayatMataKuliah from '../components/myCourseComponents/RiwayatMataKuliah';
+import RekomendasiMataKuliah from '../../components/compMahasiswa/myCourseComponents/RekomendasiMataKuliah';
+import RiwayatMataKuliah from '../../components/compMahasiswa/myCourseComponents/RiwayatMataKuliah';
 
 const MyCoursePage = () => {
     return (

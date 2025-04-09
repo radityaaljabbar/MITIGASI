@@ -6,13 +6,13 @@ import {
     RouterProvider,
 } from 'react-router-dom';
 
-import MainLayout from './layout/MainLayout';
-import NotFoundPage from './pages/NotFoundPage';
+import MainLayoutMahasiswa from './layout/MainLayoutMahasiswa';
+import NotFoundPage from './pages/pagesMahasiswa/NotFoundPage';
 //Importing the feature pages:
-import MyProgress from './pages/MyProgress';
-import MyCoursePage from './pages/MyCoursePage';
-import MyWellnessPage from './pages/MyWellnessPage';
-import MyWellness_Test from './pages/MyWellness_Test';
+import MyProgress from './pages/pagesMahasiswa/MyProgress';
+import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage';
+import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage';
+import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test';
 
 const App = () => {
     const kirimTestPsikologi = (jawabanTestPsikologi) => {
@@ -21,12 +21,12 @@ const App = () => {
 
     const router = createBrowserRouter(
         createRoutesFromElements(
-            <Route path="/" element={<MainLayout />}>
+            <Route path="/stu" element={<MainLayoutMahasiswa />}>
                 <Route index element={<MyProgress />} />
-                <Route path="/my-course" element={<MyCoursePage />} />
-                <Route path="/my-wellness" element={<MyWellnessPage />} />
+                <Route path="/stu/my-course" element={<MyCoursePage />} />
+                <Route path="/stu/my-wellness" element={<MyWellnessPage />} />
                 <Route
-                    path="/my-wellness/psi-test"
+                    path="/stu/my-wellness/psi-test"
                     element={
                         <MyWellness_Test
                             submitTestPsikologi={kirimTestPsikologi}
