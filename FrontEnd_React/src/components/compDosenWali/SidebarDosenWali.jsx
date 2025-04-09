@@ -1,36 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-//Import icon-icon yang diperlukan
-import toggleSidebarIcon from '../../assets/images/imageMahasiswa/sidebarImage/toggleSidebar.png';
-import myProgressIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyProgress.png';
-import myCourseIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyCourse.png';
-import myWellnessIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyWellness.png';
-import myFinanceIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyFinance.png';
-import myFeedbackIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyFeedback.png';
-import settingsIcon from '../../assets/images/imageMahasiswa/sidebarImage/SettingsIcon.png';
+// Import icon-icon yang diperlukan
+import toggleSidebarIcon from '../../assets/images/imageDosenWali/sidebarImages/toggleSidebar.png';
+import settingsIcon from '../../assets/images/imageDosenWali/sidebarImages/SettingsIcon.png';
+import myStudentsIcon from '../../assets/images/imageDosenWali/sidebarImages/MyStudentsIcon.png';
+import myCourseAdvisorIcon from '../../assets/images/imageDosenWali/sidebarImages/MyCourseAdvisorIcon.png';
+import myReportIcon from '../../assets/images/imageDosenWali/sidebarImages/MyReportIcon.png';
 
-const Sidebar = ({ expanded, setExpanded }) => {
-    //Bikin array object sidebar agar mempersingkat kode:
+const SidebarDosenWali = ({ expanded, setExpanded }) => {
+    // Bikin array object sidebar agar mempersingkat kode:
     const sidebarItems = [
         {
-            path: '/student',
-            name: 'MyProgress',
-            icon: myProgressIcon,
+            path: '/lecturer',
+            name: 'MyStudents',
+            icon: myStudentsIcon,
             end: true,
         },
-        { path: '/student/my-course', name: 'MyCourse', icon: myCourseIcon },
         {
-            path: '/student/my-wellness',
-            name: 'MyWellness',
-            icon: myWellnessIcon,
+            path: '/lecturer/course-advisor',
+            name: 'MyCourseAdvisor',
+            icon: myCourseAdvisorIcon,
         },
-        { path: '/student/my-finance', name: 'MyFinance', icon: myFinanceIcon },
-        {
-            path: '/student/my-feedback',
-            name: 'MyFeedback',
-            icon: myFeedbackIcon,
-        },
+        { path: '/lecturer/report', name: 'MyReport', icon: myReportIcon },
     ];
 
     return (
@@ -99,7 +91,7 @@ const Sidebar = ({ expanded, setExpanded }) => {
                     <img
                         src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
                         alt="User Profile Picture"
-                        className="w-10 h-10 rounded-sm" //Nambah expanded belum
+                        className="w-10 h-10 rounded-sm"
                     />
                     <div
                         className={`flex justify-between items-center overflow-hidden transition-all ${
@@ -107,10 +99,10 @@ const Sidebar = ({ expanded, setExpanded }) => {
                         }`}>
                         <div className="leading-4">
                             <span className="block font-bold text-white text-xs">
-                                John Doe
+                                Dr. Jane Smith
                             </span>
                             <span className="block text-[0.65em] text-white">
-                                johndoe@gmail.com
+                                janesmith@faculty.edu
                             </span>
                         </div>
                         <NavLink
@@ -129,4 +121,4 @@ const Sidebar = ({ expanded, setExpanded }) => {
     );
 };
 
-export default Sidebar;
+export default SidebarDosenWali;

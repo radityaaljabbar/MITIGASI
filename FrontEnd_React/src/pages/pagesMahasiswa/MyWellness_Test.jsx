@@ -159,7 +159,7 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
         toast.success('Tes Psikologi Berhasil Dikirim!');
 
         // Navigate to results page
-        return navigate('/stu/my-wellness');
+        return navigate('/student/my-wellness');
     };
 
     return (

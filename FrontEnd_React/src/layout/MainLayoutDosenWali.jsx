@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Sidebar from '../components/compMahasiswa/SidebarMahasiswa';
+import SidebarDosenWali from '../components/compDosenWali/SidebarDosenWali';
 
-const MainLayout = () => {
+const MainLayoutDosenWali = () => {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
     return (
         <div className="flex h-screen overflow-hidden">
-            <Sidebar
+            <SidebarDosenWali
                 expanded={sidebarExpanded}
                 setExpanded={setSidebarExpanded}
             />
@@ -21,4 +21,4 @@ const MainLayout = () => {
     );
 };
 
-export default MainLayout;
+export default MainLayoutDosenWali;

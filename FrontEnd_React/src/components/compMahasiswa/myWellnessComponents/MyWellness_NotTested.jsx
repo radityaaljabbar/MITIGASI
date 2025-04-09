@@ -14,7 +14,7 @@ const MyWellness_NotTested = () => {
             </p>
 
             <button className="px-4 py-2 bg-[#951a22] text-white font-medium rounded-lg hover:bg-[#7a1118] hover:shadow-md hover:translate-y-[-2px] transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#951a22]/50 text-sm">
-                <Link to="/my-wellness/psi-test">Mulai Evaluasi</Link>
+                <Link to="/student/my-wellness/psi-test">Mulai Evaluasi</Link>
             </button>
         </div>
     );

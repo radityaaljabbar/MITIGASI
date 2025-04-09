@@ -21,12 +21,15 @@ const App = () => {
 
     const router = createBrowserRouter(
         createRoutesFromElements(
-            <Route path="/stu" element={<MainLayoutMahasiswa />}>
+            <Route path="/student" element={<MainLayoutMahasiswa />}>
                 <Route index element={<MyProgress />} />
-                <Route path="/stu/my-course" element={<MyCoursePage />} />
-                <Route path="/stu/my-wellness" element={<MyWellnessPage />} />
+                <Route path="/student/my-course" element={<MyCoursePage />} />
                 <Route
-                    path="/stu/my-wellness/psi-test"
+                    path="/student/my-wellness"
+                    element={<MyWellnessPage />}
+                />
+                <Route
+                    path="/student/my-wellness/psi-test"
                     element={
                         <MyWellness_Test
                             submitTestPsikologi={kirimTestPsikologi}
