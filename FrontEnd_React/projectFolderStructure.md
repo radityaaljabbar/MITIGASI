@@ -1,21 +1,5 @@
 ```
 └── 📁FrontEnd_React
-    └── 📁assets
-        └── 📁images
-            └── DropdownArrow.png
-            └── MockupUserPic.png
-            └── MyCourse.png
-            └── MyFeedback.png
-            └── MyFinance.png
-            └── MyProgress.png
-            └── MyWellness.png
-            └── SettingsIcon.png
-            └── toggleSidebar.png
-    └── 📁layout
-        └── MainLayout.jsx
-    └── 📁pages
-        └── HomePage.jsx
-        └── NotFoundPage.jsx
     └── 📁public
         └── vite.svg
     └── 📁src
