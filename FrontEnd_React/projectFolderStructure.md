@@ -11,8 +11,6 @@
             └── MyWellness.png
             └── SettingsIcon.png
             └── toggleSidebar.png
-    └── 📁components
-        └── Sidebar.jsx
     └── 📁layout
         └── MainLayout.jsx
     └── 📁pages
