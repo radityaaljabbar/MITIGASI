@@ -1,0 +1,47 @@
+[
+    {
+        "idHasilPsikologi": 1,
+        "NIM": 1103210066,
+        "name": "John Doe",
+        "summary": "Mahasiswa memiliki tingkat stres yang rendah dan mampu mengelola waktu dengan baik.",
+        "suggestions": "Pertahankan pola manajemen waktu dan strategi pengelolaan stres yang sudah baik.",
+        "klasifikasiPsikologi": "Sehat",
+        "testDate": "2024-03-27"
+    },
+    {
+        "idHasilPsikologi": 2,
+        "NIM": 1103210077,
+        "name": "Jane Smith",
+        "summary": "Mahasiswa cenderung mengalami kecemasan saat menghadapi ujian dan membutuhkan strategi manajemen stres.",
+        "suggestions": "Disarankan untuk mengikuti konseling dan belajar teknik relaksasi.",
+        "klasifikasiPsikologi": "Cemas Ringan",
+        "testDate": "2024-03-28"
+    },
+    {
+        "idHasilPsikologi": 3,
+        "NIM": 1103210088,
+        "name": "Michael Johnson",
+        "summary": "Mahasiswa mengalami tekanan akademik tinggi dan menunjukkan tanda-tanda burnout ringan.",
+        "suggestions": "Perlu melakukan manajemen beban akademik dan memperhatikan kesehatan mental.",
+        "klasifikasiPsikologi": "Burnout Ringan",
+        "testDate": "2024-03-29"
+    },
+    {
+        "idHasilPsikologi": 4,
+        "NIM": 1103210099,
+        "name": "Emily Brown",
+        "summary": "Mahasiswa memiliki tingkat motivasi belajar yang tinggi dan menunjukkan ketahanan psikologis yang baik.",
+        "suggestions": "Lanjutkan pola belajar positif dan jaga keseimbangan antara akademik dan kesehatan mental.",
+        "klasifikasiPsikologi": "Sehat",
+        "testDate": "2024-03-30"
+    },
+    {
+        "idHasilPsikologi": 5,
+        "NIM": 1103210100,
+        "name": "David Wilson",
+        "summary": "Mahasiswa mengalami kesulitan beradaptasi dengan lingkungan akademik baru dan membutuhkan bimbingan tambahan.",
+        "suggestions": "Rekomendasikan program mentoring dan dukungan akademik tambahan.",
+        "klasifikasiPsikologi": "Adaptasi Rendah",
+        "testDate": "2024-03-31"
+    }
+]

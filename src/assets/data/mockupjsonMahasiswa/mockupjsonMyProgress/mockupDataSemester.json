@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "semester": "1st",
+        "gpa": 3.75
+    },
+    {
+        "id": 2,
+        "semester": "2nd",
+        "gpa": 3.82
+    },
+    {
+        "id": 3,
+        "semester": "3rd",
+        "gpa": 3.9
+    },
+    {
+        "id": 4,
+        "semester": "4th",
+        "gpa": 3.68
+    },
+    {
+        "id": 5,
+        "semester": "5th",
+        "gpa": 3.78
+    },
+    {
+        "id": 6,
+        "semester": "6th",
+        "gpa": 3.89
+    },
+    {
+        "id": 7,
+        "semester": "7th",
+        "gpa": 3.92
+    },
+    {
+        "id": 8,
+        "semester": "8th",
+        "gpa": 3.95
+    }
+]

@@ -1,0 +1,14 @@
+[
+    { "id": 1, "month": "Jan", "attendance": 95 },
+    { "id": 2, "month": "Feb", "attendance": 98 },
+    { "id": 3, "month": "Mar", "attendance": 92 },
+    { "id": 4, "month": "Apr", "attendance": 100 },
+    { "id": 5, "month": "May", "attendance": 96 },
+    { "id": 6, "month": "Jun", "attendance": 94 },
+    { "id": 7, "month": "Jul", "attendance": 99 },
+    { "id": 8, "month": "Aug", "attendance": 97 },
+    { "id": 9, "month": "Sep", "attendance": 93 },
+    { "id": 10, "month": "Oct", "attendance": 95 },
+    { "id": 11, "month": "Nov", "attendance": 90 },
+    { "id": 12, "month": "Dec", "attendance": 98 }
+]
