@@ -12,14 +12,17 @@ import { BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 //  Student Pages
 import MainLayout from './layout/MainLayout';
-import HomePage from './pages/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
-import FeedbackList from './pages/Feedback/FeedbackList.jsx';
-import FeedbackDetail from './pages/Feedback/FeedbackDetail.jsx';
-import NewFeedback from './pages/Feedback/NewFeedback.jsx';
-import FinanceMain from "./pages/Finance/Main";
-import FinanceApp from "./pages/Finance/Application";
-import FinanceHistory from "./pages/Finance/ApplicationHistory.jsx";
+// import NotFoundPage from './pages/NotFoundPage';
+import FeedbackList from './pages/pagesMahasiswa/Feedback/FeedbackList.jsx';
+import FeedbackDetail from './pages/pagesMahasiswa/Feedback/FeedbackDetail.jsx';
+import NewFeedback from './pages/pagesMahasiswa/Feedback/NewFeedback.jsx';
+import FinanceMain from "./pages/pagesMahasiswa/Finance/Main";
+import FinanceApp from "./pages/pagesMahasiswa/Finance/Application";
+import FinanceHistory from "./pages/pagesMahasiswa/Finance/ApplicationHistory.jsx";
+import MyProgress from './pages/pagesMahasiswa/MyProgress';
+import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage';
+import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage';
+import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test';
 import Login from './pages/Login/LoginPage';
 
 //  Lecturer Pages
@@ -28,6 +31,9 @@ import LecturerDashboard from './pages/lecturer/LecturerDashboard';
 
 
 const App = () => {
+    const kirimTestPsikologi = (jawabanTestPsikologi) => {
+        console.log(jawabanTestPsikologi);
+    };
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route>
@@ -38,19 +44,35 @@ const App = () => {
                     path="/student" 
                     element={
                         <ProtectedRoute requiredType="students">
-                            <MainLayout />
+                            <MainLayout/>
                         </ProtectedRoute>
                     }
                 >
-                    <Route index element={<HomePage />} />
+                    <Route index element={<MyProgress />} />
                     <Route path="my-feedback" element={<FeedbackList />} />
                     <Route path="my-feedback/:feedbackId" element={<FeedbackDetail />} />
                     <Route path="my-feedback/new-feedback" element={<NewFeedback />} />
                     <Route path="my-finance" element={<FinanceMain />} />
                     <Route path="my-finance/application" element={<FinanceApp />} />
                     <Route path="my-finance/application-history" element={<FinanceHistory />} />
-                    <Route path="*" element={<NotFoundPage />} />
-                </Route>
+                    <Route path="my-finance/application-history" element={<FinanceHistory />} />
+                    
+                    <Route path="my-course" element={<MyCoursePage />} />
+                    <Route
+                        path="my-wellness"
+                        element={<MyWellnessPage />}
+                    />
+                    <Route
+                        path="my-wellness/psi-test"
+                        element={
+                            <MyWellness_Test
+                                submitTestPsikologi={kirimTestPsikologi}
+                            />
+                        }
+                    />
+
+                        
+                    </Route>
                 
                 {/* Protected Lecturer Routes */}
                 <Route 

@@ -1,0 +1,52 @@
+[
+    {
+        "feedbackId": 1,
+        "nim": "1301190001",
+        "title": "Kesulitan dalam Mata Kuliah Algoritma",
+        "feedbackDate": "2025-03-10T14:30:00",
+        "details": "Saya mengalami kesulitan dalam memahami materi terkait algoritma sorting pada mata kuliah Algoritma dan Pemrograman. Apakah ada rekomendasi sumber belajar tambahan?",
+        "responseDate": "20 Maret 2025",
+        "response": "Terima kasih atas feedback-nya. Saya merekomendasikan untuk mengunjungi lab praktikum di lantai 3 gedung utara, mereka memiliki sesi tutorial setiap Rabu. Selain itu, ada beberapa video pembelajaran di LMS yang bisa Anda tonton ulang.",
+        "status": "In Progress"
+    },
+    {
+        "feedbackId": 2,
+        "nim": "1301190001",
+        "title": "Konsultasi Pemilihan Mata Kuliah Pilihan",
+        "feedbackDate": "2025-03-12T10:15:00",
+        "details": "Saya ingin berkonsultasi mengenai mata kuliah pilihan yang sebaiknya saya ambil di semester depan jika saya tertarik pada bidang Data Science.",
+        "responseDate": "20 Maret 2025",
+        "response": "Berdasarkan minat Anda di bidang Data Science, saya sarankan untuk mengambil mata kuliah Pengantar Pemrosesan Data, Statistika Komputasi, dan Machine Learning dasar. Mari kita diskusikan lebih lanjut di jadwal bimbingan akademik minggu depan.",
+        "status": "Resolved"
+    },
+    {
+        "feedbackId": 3,
+        "nim": "1301190001",
+        "title": "Izin Tidak Mengikuti UTS",
+        "feedbackDate": "2025-03-15T09:00:00",
+        "details": "Saya ingin meminta izin untuk tidak mengikuti UTS mata kuliah Basis Data karena harus menjalani operasi usus buntu. Saya telah melampirkan surat keterangan dokter di email terpisah.",
+        "responseDate": "20 Maret 2025",
+        "response": "Izin Anda sudah saya terima. Mohon segera setelah pulih untuk mengurus prosedur UTS susulan di bagian akademik. Semoga operasinya lancar dan cepat sembuh.",
+        "status": "In Progress"
+    },
+    {
+        "feedbackId": 4,
+        "nim": "1301190001",
+        "title": "Kendala Teknis saat Kuliah Daring",
+        "feedbackDate": "2025-03-18T13:45:00",
+        "details": "Saya mengalami masalah koneksi internet yang tidak stabil saat mengikuti kuliah daring, sehingga sering tertinggal materi penting. Apakah ada solusi atau kebijakan khusus untuk kondisi ini?",
+        "responseDate": "20 Maret 2025",
+        "response": "Untuk mengatasi kendala tersebut, semua perkuliahan daring direkam dan dapat diakses di repositori kuliah selama 2 minggu. Selain itu, Anda bisa menggunakan fasilitas internet kampus di perpustakaan jika memungkinkan.",
+        "status": "In Progress"
+    },
+    {
+        "feedbackId": 5,
+        "nim": "1301190001",
+        "title": "Bimbingan Skripsi",
+        "feedbackDate": "2025-03-20T15:30:00",
+        "details": "Saya ingin meminta jadwal bimbingan skripsi untuk minggu ini. Ada beberapa poin yang perlu saya konsultasikan terkait metodologi penelitian yang saya gunakan.",
+        "responseDate": "20 Maret 2025",
+        "response": "Saya bisa melakukan bimbingan pada hari Jumat, 24 Maret pukul 13.00-15.00 di ruang dosen lantai 4. Mohon siapkan dokumen penelitian Anda dan pertanyaan spesifik yang ingin dibahas.",
+        "status": "Pending"
+    }
+]
