@@ -6,28 +6,25 @@ import {
     RouterProvider, 
     Navigate 
 } from 'react-router-dom';
-import { BrowserRouter as Router, Routes } from 'react-router-dom';
 
 
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 //  Student Pages
-import MainLayout from './layout/MainLayout';
-// import NotFoundPage from './pages/NotFoundPage';
+import MainLayout from './layout/MainLayout.jsx';
 import FeedbackList from './pages/pagesMahasiswa/Feedback/FeedbackList.jsx';
 import FeedbackDetail from './pages/pagesMahasiswa/Feedback/FeedbackDetail.jsx';
 import NewFeedback from './pages/pagesMahasiswa/Feedback/NewFeedback.jsx';
-import FinanceMain from "./pages/pagesMahasiswa/Finance/Main";
-import FinanceApp from "./pages/pagesMahasiswa/Finance/Application";
+import FinanceMain from "./pages/pagesMahasiswa/Finance/Main.jsx";
+import FinanceApp from "./pages/pagesMahasiswa/Finance/Application.jsx";
 import FinanceHistory from "./pages/pagesMahasiswa/Finance/ApplicationHistory.jsx";
-import MyProgress from './pages/pagesMahasiswa/MyProgress';
-import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage';
-import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage';
-import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test';
-import Login from './pages/Login/LoginPage';
+import MyProgress from './pages/pagesMahasiswa/MyProgress.jsx';
+import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage.jsx';
+import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage.jsx';
+import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test.jsx';
+import Login from './pages/Login/LoginPage.jsx';
 
 //  Lecturer Pages
-import LecturerDashboard from './pages/lecturer/LecturerDashboard';
-
+import LecturerDashboard from './pages/lecturer/LecturerDashboard.jsx';
 
 
 const App = () => {
