@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import handleBack from '../../../components/handleBack';
 
 const FeedbackForm = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8 bg-[#FAF0E6] h-screen overflow-auto">
@@ -28,20 +27,20 @@ const FeedbackForm = () => {
           />
           
           <div className="flex flex-wrap gap-4 mt-2 justify-start sm:flex-row flex-col">
-            <button
-              type="button"
-              className="bg-red-800 text-white font-medium px-6 py-3 rounded-lg cursor-pointer transition-all duration-300 hover:bg-red-900 hover:translate-y-0 hover:shadow-md flex items-center justify-center gap-2 order-1 sm:order-2"
-            >
-              <i className="fas fa-paper-plane mr-2"></i>
-              <span>Kirim Feedback</span>
-            </button>
-            <button
+            <button 
               onClick={handleBack}
-              type="button"
-              className="bg-red-800 text-white font-medium px-6 py-3 rounded-lg cursor-pointer transition-all duration-300 hover:bg-red-900 hover:translate-y-0 hover:shadow-md flex items-center justify-center gap-2 order-2 sm:order-1"
+              className="flex items-center bg-[#951A22] hover:bg-[#7A1118] text-white px-5 py-2.5 rounded-lg transform transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <i className="fas fa-times mr-2"></i>
-              <span>Batal</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Kembali</span>
+            </button>
+
+            <button 
+              className="flex items-center bg-[#951A22] hover:bg-[#7A1118] text-white px-5 py-2.5 rounded-lg transform transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <span>Kirim Feedback</span>
             </button>
           </div>
         </form>
