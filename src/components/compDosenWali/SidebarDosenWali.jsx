@@ -9,10 +9,10 @@ import myCourseAdvisorIcon from '../../assets/images/imageDosenWali/sidebarImage
 import myReportIcon from '../../assets/images/imageDosenWali/sidebarImages/MyReportIcon.png';
 
 const SidebarDosenWali = ({ expanded, setExpanded }) => {
-    // Bikin array object sidebar agar mempersingkat kode:
+    // Updated array object sidebar to match your actual routes:
     const sidebarItems = [
         {
-            path: '/lecturer',
+            path: '/lecturer/dashboard',
             name: 'MyStudents',
             icon: myStudentsIcon,
             end: true,
@@ -22,7 +22,11 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
             name: 'MyCourseAdvisor',
             icon: myCourseAdvisorIcon,
         },
-        { path: '/lecturer/report', name: 'MyReport', icon: myReportIcon },
+        {
+            path: '/lecturer/report',
+            name: 'MyReport',
+            icon: myReportIcon,
+        },
     ];
 
     return (
@@ -56,11 +60,15 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                             <NavLink
                                 to={item.path}
                                 end={item.end}
-                                className={({ isActive }) =>
-                                    isActive
+                                className={({ isActive }) => {
+                                    console.log(
+                                        `${item.name} isActive:`,
+                                        isActive
+                                    );
+                                    return isActive
                                         ? `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group bg-white/20 shadow-md`
-                                        : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group hover:bg-white/20`
-                                }>
+                                        : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group hover:bg-white/20`;
+                                }}>
                                 <img
                                     src={item.icon}
                                     alt={item.name}
@@ -74,10 +82,10 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                                     {item.name}
                                 </span>
 
-                                {/* Nampilin nama menu ketika sidebar tertutup dan mouse di hover */}
+                                {/* Fixed typo: bgwhite → bg-white */}
                                 {!expanded && (
                                     <div
-                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bgwhite text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
+                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-white text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
                                         {item.name}
                                     </div>
                                 )}
