@@ -102,7 +102,7 @@ const App = () => {
                 </Route>
 
                 {/* Global 404 page */}
-                <Route path="*" element={<NotFoundPage />} />
+                <Route path="*" element={<Login />} />
             </Route>
         )
     );
