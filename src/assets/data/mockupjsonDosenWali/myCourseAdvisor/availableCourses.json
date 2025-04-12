@@ -1,0 +1,90 @@
+[
+    {
+        "id": 1,
+        "kodeMataKuliah": "TK-001",
+        "namaMataKuliah": "Pemrograman Dasar",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "1"
+    },
+    {
+        "id": 2,
+        "kodeMataKuliah": "TK-002",
+        "namaMataKuliah": "Kalkulus",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "1"
+    },
+    {
+        "id": 3,
+        "kodeMataKuliah": "TK-003",
+        "namaMataKuliah": "Struktur Data",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "2"
+    },
+    {
+        "id": 4,
+        "kodeMataKuliah": "TK-004",
+        "namaMataKuliah": "Basis Data",
+        "sks": 3,
+        "jenis": "Wajib Prodi",
+        "semester": "2"
+    },
+    {
+        "id": 5,
+        "kodeMataKuliah": "TK-005",
+        "namaMataKuliah": "Jaringan Komputer",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "3"
+    },
+    {
+        "id": 6,
+        "kodeMataKuliah": "TK-006",
+        "namaMataKuliah": "Jaringan Komputer 2",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "4"
+    },
+    {
+        "id": 7,
+        "kodeMataKuliah": "TK-007",
+        "namaMataKuliah": "Fisika",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "1"
+    },
+    {
+        "id": 8,
+        "kodeMataKuliah": "TK-008",
+        "namaMataKuliah": "Fisika 2",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "2"
+    },
+    {
+        "id": 9,
+        "kodeMataKuliah": "TK-009",
+        "namaMataKuliah": "Elektronika Dasar",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "3"
+    },
+    {
+        "id": 10,
+        "kodeMataKuliah": "TK-011",
+        "namaMataKuliah": "Matriks dan Vektor",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "1"
+    },
+    {
+        "id": 11,
+        "kodeMataKuliah": "TK-012",
+        "namaMataKuliah": "Bahasa Inggris",
+        "sks": 3,
+        "jenis": "Wajib",
+        "semester": "2"
+    }
+]
