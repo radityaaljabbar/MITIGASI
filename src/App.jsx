@@ -25,6 +25,7 @@ import Login from './pages/Login/LoginPage.jsx';
 //  Lecturer Pages
 import LecturerDashboard from './pages/lecturer/LecturerDashboard.jsx';
 import MyCourseAdvisorPage from './pages/lecturer/MyCourseAdvisorPage.jsx';
+import MyReportPage from './pages/lecturer/MyReport/MyReportPage.jsx';
 // Import your not found page
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
 
@@ -95,6 +96,7 @@ const App = () => {
                         path="course-advisor" // Fixed the typo: removed extra 'r'
                         element={<MyCourseAdvisorPage />}
                     />
+                    <Route path="my-report" element={<MyReportPage />} />
                     {/* The report route will be added later by your teammate */}
 
                     {/* Use your NotFoundPage for 404 routes within lecturer section */}

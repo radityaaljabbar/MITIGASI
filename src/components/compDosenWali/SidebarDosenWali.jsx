@@ -23,7 +23,7 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
             icon: myCourseAdvisorIcon,
         },
         {
-            path: '/lecturer/report',
+            path: '/lecturer/my-report',
             name: 'MyReport',
             icon: myReportIcon,
         },
