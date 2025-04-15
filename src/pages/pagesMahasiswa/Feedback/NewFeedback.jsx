@@ -31,8 +31,27 @@ const FeedbackForm = () => {
                     <textarea
                         id="feedback-content"
                         placeholder="Tulis feedback Anda di sini"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-h-40"
+                        className="w-full px-3 mb-6 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-h-40"
                     />
+
+                    {/* Document Upload */}
+                    <label 
+                        htmlFor="supportDocument" 
+                        className="font-semibold mb-2 text-gray-800"
+                    >
+                        Unggah Dokumen Pendukung
+                    </label>
+                    <input
+                        type="file"
+                        id="supportDocument"
+                        name="supportDocument"
+                        className="w-full px-3 py-2 mb-6 border-2 border-dashed border-gray-300 
+                                    rounded-md file:mr-4 file:rounded-md file:border-0
+                                    file:bg-[#951A22] file:text-white file:px-4 file:py-2
+                                    hover:file:bg-[#7a1118] transition duration-300"
+                    />
+
+                    
 
                     <div className="flex flex-wrap gap-4 mt-2 justify-start sm:flex-row flex-col">
                         <button
