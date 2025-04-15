@@ -73,7 +73,7 @@
     },
     {
         "id": 10,
-        "kodeMataKuliah": "TK-011",
+        "kodeMataKuliah": "TK-010",
         "namaMataKuliah": "Matriks dan Vektor",
         "sks": 3,
         "jenis": "Wajib",
@@ -81,9 +81,25 @@
     },
     {
         "id": 11,
-        "kodeMataKuliah": "TK-012",
+        "kodeMataKuliah": "TK-011",
         "namaMataKuliah": "Bahasa Inggris",
         "sks": 3,
+        "jenis": "Wajib",
+        "semester": "2"
+    },
+    {
+        "id": 12,
+        "kodeMataKuliah": "TK-012",
+        "namaMataKuliah": "Studium Generale",
+        "sks": 1,
+        "jenis": "Wajib",
+        "semester": "2"
+    },
+    {
+        "id": 13,
+        "kodeMataKuliah": "TK-013",
+        "namaMataKuliah": "Pancasila",
+        "sks": 2,
         "jenis": "Wajib",
         "semester": "2"
     }
