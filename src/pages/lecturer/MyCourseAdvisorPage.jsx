@@ -1,44 +1,56 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useMemo,
+    useCallback,
+} from 'react';
 
 // Mock data for available courses based on your provided schema
 import availableCoursesData from '../../assets/data/mockupjsonDosenWali/myCourseAdvisor/availableCourses.json';
 
 // Mock data for classes
 const classesList = [
-    { id: 1, name: 'Teknik Informatika A' },
-    { id: 2, name: 'Teknik Informatika B' },
-    { id: 3, name: 'Sistem Informasi A' },
+    { id: 4506, name: 'TK-45-06' },
+    { id: 4604, name: 'TK-46-04' },
+    { id: 4705, name: 'TK-47-05' },
 ];
 
 // Mock data for students (will be filtered by class)
 const studentsList = [
-    { id: 1, name: 'Andi Pratama', classId: 1 },
-    { id: 2, name: 'Budi Santoso', classId: 1 },
-    { id: 3, name: 'Citra Dewi', classId: 2 },
-    { id: 4, name: 'Dina Fitriani', classId: 2 },
-    { id: 5, name: 'Eko Prasetyo', classId: 3 },
+    { id: 1103210708, name: 'Andi Pratama', classId: 4506 },
+    { id: 1103210056, name: 'Budi Santoso', classId: 4506 },
+    { id: 1103220070, name: 'Citra Dewi', classId: 4604 },
+    { id: 1103220788, name: 'Dina Fitriani', classId: 4604 },
+    { id: 1103230099, name: 'Eko Prasetyo', classId: 4705 },
 ];
 
 // Simplified mock data for student course histories (only contains kodeMK, nilaiMK, indeksMK)
 const studentCourseHistoryData = [
-    { id: 1, kodeMataKuliah: 'TK-001', indeks: 'A', studentId: 1 },
-    { id: 2, kodeMataKuliah: 'TK-002', indeks: 'B', studentId: 1 },
-    { id: 3, kodeMataKuliah: 'TK-007', indeks: 'C', studentId: 1 },
-    { id: 4, kodeMataKuliah: 'TK-001', indeks: 'B', studentId: 2 },
-    { id: 5, kodeMataKuliah: 'TK-002', indeks: 'D', studentId: 2 },
-    { id: 6, kodeMataKuliah: 'TK-001', indeks: 'A', studentId: 3 },
-    { id: 7, kodeMataKuliah: 'TK-003', indeks: 'E', studentId: 3 },
+    { id: 1, kodeMataKuliah: 'TK-001', indeks: 'A', studentId: 1103210708 },
+    { id: 2, kodeMataKuliah: 'TK-002', indeks: 'B', studentId: 1103210708 },
+    { id: 3, kodeMataKuliah: 'TK-007', indeks: 'C', studentId: 1103210708 },
+    { id: 4, kodeMataKuliah: 'TK-001', indeks: 'B', studentId: 1103210056 },
+    { id: 5, kodeMataKuliah: 'TK-002', indeks: 'E', studentId: 1103210056 },
+    { id: 6, kodeMataKuliah: 'TK-001', indeks: 'A', studentId: 1103220070 },
+    { id: 7, kodeMataKuliah: 'TK-003', indeks: 'E', studentId: 1103220070 },
 ];
 
 const MyCourseAdvisor = () => {
     // Maximum SKS allowed
     const MAX_SKS = 24;
 
+    // Use static reference for constant data
+    const staticAvailableCoursesData = useMemo(
+        () => [...availableCoursesData],
+        []
+    );
+
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState('');
     const [selectedSemester, setSelectedSemester] = useState('');
     const [availableCourses, setAvailableCourses] = useState([
-        ...availableCoursesData,
+        ...staticAvailableCoursesData,
     ]);
     const [recommendedCourses, setRecommendedCourses] = useState([]);
     const [mergedCourseHistory, setMergedCourseHistory] = useState([]);
@@ -51,69 +63,107 @@ const MyCourseAdvisor = () => {
         0
     );
 
-    // Filter students based on selected class
-    const filteredStudents = selectedClass
-        ? studentsList.filter(
-              (student) => student.classId === parseInt(selectedClass)
-          )
-        : [];
+    // Filter students based on selected class - memozied to avoid recalculation
+    const filteredStudents = useMemo(() => {
+        return selectedClass
+            ? studentsList.filter(
+                  (student) => student.classId === parseInt(selectedClass)
+              )
+            : [];
+    }, [selectedClass]);
 
-    // Get raw course history data for selected student
-    const studentCourseHistory = selectedStudent
-        ? studentCourseHistoryData.filter(
-              (course) => course.studentId === parseInt(selectedStudent)
-          )
-        : [];
+    // Get raw course history data for selected student - memozied to avoid recalculation
+    const studentCourseHistory = useMemo(() => {
+        return selectedStudent
+            ? studentCourseHistoryData.filter(
+                  (course) => course.studentId === parseInt(selectedStudent)
+              )
+            : [];
+    }, [selectedStudent]);
 
     // Merge course history with available courses data to get complete information
     useEffect(() => {
-        if (studentCourseHistory.length > 0) {
-            const merged = studentCourseHistory.map((historyItem) => {
-                // Find the course details from availableCoursesData
-                const courseDetails = availableCoursesData.find(
-                    (course) =>
-                        course.kodeMataKuliah === historyItem.kodeMataKuliah
-                );
-
-                // Merge the history item with course details
-                return courseDetails
-                    ? {
-                          ...historyItem,
-                          namaMataKuliah: courseDetails.namaMataKuliah,
-                          sks: courseDetails.sks,
-                          jenis: courseDetails.jenis,
-                          tingkat: courseDetails.semester, // Using semester as tingkat
-                      }
-                    : historyItem;
-            });
-
-            setMergedCourseHistory(merged);
-        } else {
+        // Don't run this effect if there's no student selected or no course history
+        if (!selectedStudent || studentCourseHistory.length === 0) {
             setMergedCourseHistory([]);
+            return;
         }
-    }, [studentCourseHistory]);
 
-    // Filter available courses based on selected semester
-    const filteredAvailableCourses = selectedSemester
-        ? availableCourses.filter(
-              (course) => course.semester === selectedSemester
-          )
-        : availableCourses;
+        const merged = studentCourseHistory.map((historyItem) => {
+            // Find the course details from staticAvailableCoursesData
+            const courseDetails = staticAvailableCoursesData.find(
+                (course) => course.kodeMataKuliah === historyItem.kodeMataKuliah
+            );
 
-    // Helper function to check if a course has been taken by the student
-    const hasCourseTaken = (kodeMataKuliah) => {
-        return studentCourseHistory.some(
-            (course) =>
-                course.kodeMataKuliah === kodeMataKuliah &&
-                course.indeks !== 'E' &&
-                course.indeks !== 'D'
-        );
-    };
+            // Merge the history item with course details
+            return courseDetails
+                ? {
+                      ...historyItem,
+                      namaMataKuliah: courseDetails.namaMataKuliah,
+                      sks: courseDetails.sks,
+                      jenis: courseDetails.jenis,
+                      tingkat: courseDetails.semester, // Using semester as tingkat
+                  }
+                : historyItem;
+        });
+
+        setMergedCourseHistory(merged);
+    }, [selectedStudent, studentCourseHistory, staticAvailableCoursesData]);
+
+    // Filter available courses based on selected semester - memozied to avoid recalculation
+    const filteredAvailableCourses = useMemo(() => {
+        return selectedSemester
+            ? availableCourses.filter(
+                  (course) => course.semester === selectedSemester
+              )
+            : availableCourses;
+    }, [selectedSemester, availableCourses]);
+
+    // Modified: Helper function to check if a course has been taken and passed
+    // For Wajib: pass if grade is not 'E'
+    // For Peminatan: pass if grade is not 'D' or 'E'
+    const hasCourseTaken = useCallback(
+        (kodeMataKuliah) => {
+            // Find the course in available courses to determine its type
+            const courseDetails = staticAvailableCoursesData.find(
+                (course) => course.kodeMataKuliah === kodeMataKuliah
+            );
+
+            // Find student's history for this course
+            const courseHistory = studentCourseHistory.find(
+                (course) => course.kodeMataKuliah === kodeMataKuliah
+            );
+
+            // If no history found, the course hasn't been taken
+            if (!courseHistory) return false;
+
+            // Get course type (Wajib or Peminatan)
+            const courseType = courseDetails?.jenis;
+
+            // Apply different rules based on course type
+            if (courseType === 'Wajib') {
+                // For Wajib courses, only E grades need retaking
+                return courseHistory.indeks !== 'E';
+            } else if (courseType === 'Peminatan') {
+                // For Peminatan courses, both D and E grades need retaking
+                return (
+                    courseHistory.indeks !== 'E' && courseHistory.indeks !== 'D'
+                );
+            }
+
+            // Default fallback - consider course as taken if it exists in history
+            // with any grade other than E (most conservative approach)
+            return courseHistory.indeks !== 'E';
+        },
+        [studentCourseHistory, staticAvailableCoursesData]
+    );
 
     // Filter available courses to exclude courses already taken with passing grades
-    const eligibleAvailableCourses = filteredAvailableCourses.filter(
-        (course) => !hasCourseTaken(course.kodeMataKuliah)
-    );
+    const eligibleAvailableCourses = useMemo(() => {
+        return filteredAvailableCourses.filter(
+            (course) => !hasCourseTaken(course.kodeMataKuliah)
+        );
+    }, [filteredAvailableCourses, hasCourseTaken]);
 
     // Handle class selection
     const handleClassChange = (e) => {
@@ -145,23 +195,25 @@ const MyCourseAdvisor = () => {
             return; // Don't add the course if it exceeds the limit
         }
 
-        setAvailableCourses(availableCourses.filter((c) => c.id !== course.id));
-        setRecommendedCourses([...recommendedCourses, course]);
+        setAvailableCourses((prevCourses) =>
+            prevCourses.filter((c) => c.id !== course.id)
+        );
+        setRecommendedCourses((prevCourses) => [...prevCourses, course]);
         setSksLimitExceeded(false); // Reset warning if successful
     };
 
     // Remove course from recommended list
     const removeCourse = (course) => {
-        setRecommendedCourses(
-            recommendedCourses.filter((c) => c.id !== course.id)
+        setRecommendedCourses((prevCourses) =>
+            prevCourses.filter((c) => c.id !== course.id)
         );
-        setAvailableCourses([...availableCourses, course]);
+        setAvailableCourses((prevCourses) => [...prevCourses, course]);
         setSksLimitExceeded(false); // Reset warning as we've removed a course
     };
 
     // Reset all available courses
     const resetAvailableCourses = () => {
-        setAvailableCourses([...availableCoursesData]);
+        setAvailableCourses([...staticAvailableCoursesData]);
         setRecommendedCourses([]);
         setSksLimitExceeded(false); // Reset warning
     };
@@ -184,9 +236,12 @@ const MyCourseAdvisor = () => {
     };
 
     // Check if adding a course would exceed the SKS limit
-    const wouldExceedSKSLimit = (courseSKS) => {
-        return totalRecommendedSKS + courseSKS > MAX_SKS;
-    };
+    const wouldExceedSKSLimit = useCallback(
+        (courseSKS) => {
+            return totalRecommendedSKS + courseSKS > MAX_SKS;
+        },
+        [totalRecommendedSKS, MAX_SKS]
+    );
 
     return (
         <div className="p-6 min-h-screen">
@@ -266,15 +321,21 @@ const MyCourseAdvisor = () => {
                                     </thead>
                                     <tbody>
                                         {mergedCourseHistory.map((course) => {
-                                            // Determine row color based on grade
-                                            const gradeColor =
-                                                course.indeks === 'E'
-                                                    ? 'bg-red-100'
-                                                    : course.indeks === 'D'
-                                                    ? 'bg-orange-100'
-                                                    : course.indeks === 'A'
-                                                    ? 'bg-green-100'
-                                                    : '';
+                                            // Determine row color based on grade and course type
+                                            let gradeColor = '';
+
+                                            if (course.indeks === 'A') {
+                                                gradeColor = 'bg-green-100';
+                                            } else if (course.indeks === 'E') {
+                                                // E is always a failing grade
+                                                gradeColor = 'bg-red-100';
+                                            } else if (
+                                                course.indeks === 'D' &&
+                                                course.jenis === 'Peminatan'
+                                            ) {
+                                                // D is a failing grade only for Peminatan courses
+                                                gradeColor = 'bg-orange-100';
+                                            }
 
                                             return (
                                                 <tr
@@ -407,17 +468,37 @@ const MyCourseAdvisor = () => {
                                                         )
                                                     )
                                                     .map((course) => {
-                                                        // Check if course has a failing grade (D or E)
-                                                        const failedCourse =
+                                                        // Check if course has a failing grade based on course type
+                                                        const courseHistory =
                                                             studentCourseHistory.find(
                                                                 (history) =>
                                                                     history.kodeMataKuliah ===
-                                                                        course.kodeMataKuliah &&
-                                                                    (history.indeks ===
-                                                                        'D' ||
-                                                                        history.indeks ===
-                                                                            'E')
+                                                                    course.kodeMataKuliah
                                                             );
+
+                                                        // Set different highlighting based on course type and grade
+                                                        let failedCourseHighlight =
+                                                            '';
+
+                                                        if (courseHistory) {
+                                                            if (
+                                                                courseHistory.indeks ===
+                                                                'E'
+                                                            ) {
+                                                                // E is always a failed course
+                                                                failedCourseHighlight =
+                                                                    'bg-red-50';
+                                                            } else if (
+                                                                courseHistory.indeks ===
+                                                                    'D' &&
+                                                                course.jenis ===
+                                                                    'Peminatan'
+                                                            ) {
+                                                                // D is a failed course only for Peminatan
+                                                                failedCourseHighlight =
+                                                                    'bg-yellow-50';
+                                                            }
+                                                        }
 
                                                         // Check if adding this course would exceed the SKS limit
                                                         const exceedsSKSLimit =
@@ -428,11 +509,7 @@ const MyCourseAdvisor = () => {
                                                         return (
                                                             <tr
                                                                 key={course.id}
-                                                                className={`border-b hover:bg-gray-50 ${
-                                                                    failedCourse
-                                                                        ? 'bg-yellow-50'
-                                                                        : ''
-                                                                } ${
+                                                                className={`border-b hover:bg-gray-50 ${failedCourseHighlight} ${
                                                                     exceedsSKSLimit
                                                                         ? 'bg-red-50'
                                                                         : ''

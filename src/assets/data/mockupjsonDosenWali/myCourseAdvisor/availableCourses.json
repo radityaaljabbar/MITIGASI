@@ -102,5 +102,13 @@
         "sks": 2,
         "jenis": "Wajib",
         "semester": "2"
+    },
+    {
+        "id": 14,
+        "kodeMataKuliah": "CL-001",
+        "namaMataKuliah": "Internet of Things",
+        "sks": 3,
+        "jenis": "Peminatan",
+        "semester": "7"
     }
 ]
