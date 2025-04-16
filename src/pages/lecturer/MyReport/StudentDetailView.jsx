@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ArrowLeft, Paperclip, Send, Printer, ChevronRight, FileText } from "lucide-react";
+import getStatusColor from '../../../components/statusColor'
 
 const StudentDetailView = ({ student, onBack }) => {
   const [komentar, setKomentar] = useState("");
@@ -80,21 +81,12 @@ const StudentDetailView = ({ student, onBack }) => {
             <h3 className="font-bold text-base mb-1">
               {student.title}
             </h3>
-            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium inline-flex items-center ${getStatusColor(student.status)}`}>
               {student.status}
             </span>
           </div>
           
           <div className="text-sm text-gray-700 leading-relaxed space-y-4">
-            {/* <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce venenatis, nisi eu auctor luctus, ante mi aliquam mauris, eget vestibulum orci dui sed mauris. Fusce dignissim turpis nibh, id mollis nisi lobortis id. Nam ut lectus ipsum.
-            </p>
-            <p>
-              Curabitur condimentum enim eget commodo dictum. Mauris quam justo, feugiat at maximus pretium, tempus at enim. Quisque in ultricies nibh. Praesent dictum lectus vel auctor varius.
-            </p>
-            <p>
-              Donec tempus magna non tellus mollis feugiat in id justo. Ut nec accumsan urna. Curabitur ac iaculis lacus. Fusce id feugiat neque, at condimentum urna. Nam et hendrerit libero, vestibulum imperdiet dolor.
-            </p> */}
             {student.details}
           </div>
         </div>
