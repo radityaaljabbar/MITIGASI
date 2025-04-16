@@ -1,28 +1,29 @@
 import React, { useState } from "react";
 import { Search, Filter, Download } from "lucide-react";
+import feedbackDatas from '../../../assets/data/feedback.json'
 
 const StudentListView = ({ onViewDetail }) => {
-  const students = [
-    { id: 1, name: "MIFTAH FARID MAULANA", nim: "1103210066", kelas: "TK-45-06", deskripsi: "TERKAIT PENGAJUAN RESET KRS SIRAMA", tanggal: "RABU, 25 DESEMBER 2024 11:47 WIB" },
-    { id: 2, name: "RADITYA GHIFARI AL JABBAR", nim: "1103213092", kelas: "TK-45-06", deskripsi: "TERKAIT PENGAJUAN RESET KRS SIRAMA", tanggal: "RABU, 25 DESEMBER 2024 12:00 WIB" },
-    { id: 3, name: "ANDREAS WAHYU PRAYOGO", nim: "1103213114", kelas: "TK-45-06", deskripsi: "TERKAIT PENGAJUAN RESET KRS SIRAMA", tanggal: "RABU, 25 DESEMBER 2024 12:00 WIB" },
-    { id: 4, name: "HENDRI MAULANA AZHAR", nim: "1103211809", kelas: "TK-45-04", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN SURAT", tanggal: "SELASA, 03 DESEMBER 2024 10:00 WIB" },
-    { id: 5, name: "MUHAMMAD MASYAKUL HARISNA", nim: "1103212011", kelas: "TK-45-04", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN SURAT", tanggal: "SELASA, 03 DESEMBER 2024 12:00 WIB" },
-    { id: 6, name: "HOMANINDRA PRATAMA", nim: "1103210067", kelas: "TK-45-02", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN", tanggal: "KAMIS, 19 DESEMBER 2024 08:00 WIB" },
-    { id: 7, name: "MUHAMMAD TULUS RUSYDI", nim: "1103210792", kelas: "TK-45-01", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN", tanggal: "KAMIS, 19 DESEMBER 2024 08:00 WIB" },
-    { id: 8, name: "CHRISTOPHER EDWIN BREAUX", nim: "1103211071", kelas: "TK-46-01", deskripsi: "TERKAIT PENGAJUAN CUTI PERKULIAHAAN", tanggal: "KAMIS, 19 DESEMBER 2024 12:00 WIB" },
-  ];
+  // const students = [
+  //   { id: 1, name: "MIFTAH FARID MAULANA", nim: "1103210066", kelas: "TK-45-06", deskripsi: "TERKAIT PENGAJUAN RESET KRS SIRAMA", tanggal: "RABU, 25 DESEMBER 2024 11:47 WIB" },
+  //   { id: 2, name: "RADITYA GHIFARI AL JABBAR", nim: "1103213092", kelas: "TK-45-06", deskripsi: "TERKAIT PENGAJUAN RESET KRS SIRAMA", tanggal: "RABU, 25 DESEMBER 2024 12:00 WIB" },
+  //   { id: 3, name: "ANDREAS WAHYU PRAYOGO", nim: "1103213114", kelas: "TK-45-06", deskripsi: "TERKAIT PENGAJUAN RESET KRS SIRAMA", tanggal: "RABU, 25 DESEMBER 2024 12:00 WIB" },
+  //   { id: 4, name: "HENDRI MAULANA AZHAR", nim: "1103211809", kelas: "TK-45-04", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN SURAT", tanggal: "SELASA, 03 DESEMBER 2024 10:00 WIB" },
+  //   { id: 5, name: "MUHAMMAD MASYAKUL HARISNA", nim: "1103212011", kelas: "TK-45-04", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN SURAT", tanggal: "SELASA, 03 DESEMBER 2024 12:00 WIB" },
+  //   { id: 6, name: "HOMANINDRA PRATAMA", nim: "1103210067", kelas: "TK-45-02", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN", tanggal: "KAMIS, 19 DESEMBER 2024 08:00 WIB" },
+  //   { id: 7, name: "MUHAMMAD TULUS RUSYDI", nim: "1103210792", kelas: "TK-45-01", deskripsi: "TERKAIT PERMOHONAN TANDA TANGAN", tanggal: "KAMIS, 19 DESEMBER 2024 08:00 WIB" },
+  //   { id: 8, name: "CHRISTOPHER EDWIN BREAUX", nim: "1103211071", kelas: "TK-46-01", deskripsi: "TERKAIT PENGAJUAN CUTI PERKULIAHAAN", tanggal: "KAMIS, 19 DESEMBER 2024 12:00 WIB" },
+  // ];
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterKelas, setFilterKelas] = useState("");
 
-  const filteredStudents = students.filter(
+  const filteredStudents = feedbackDatas.filter(
     (student) => {
       const matchesSearch = 
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.nim.includes(searchTerm) ||
         student.kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.deskripsi.toLowerCase().includes(searchTerm.toLowerCase());
+        student.title.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesFilter = !filterKelas || student.kelas === filterKelas;
       
@@ -31,7 +32,7 @@ const StudentListView = ({ onViewDetail }) => {
   );
 
   // Extract unique class values for filter dropdown
-  const uniqueClasses = [...new Set(students.map(student => student.kelas))];
+  const uniqueClasses = [...new Set(feedbackDatas.map(student => student.kelas))];
 
   return (
     <div className="bg-white rounded-xl shadow p-4 md:p-6 transition-all duration-300 hover:shadow-lg">
@@ -81,7 +82,7 @@ const StudentListView = ({ onViewDetail }) => {
             {filteredStudents.length > 0 ? (
               filteredStudents.map((student, idx) => (
                 <tr
-                  key={student.id}
+                  key={student.feedbackId}
                   className="hover:bg-blue-50 cursor-pointer border-t transition-colors"
                   onClick={() => onViewDetail(student)}
                 >
@@ -94,9 +95,9 @@ const StudentListView = ({ onViewDetail }) => {
                     </span>
                   </td>
                   <td className="px-4 py-3 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
-                    {student.deskripsi}
+                    {student.title}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{student.tanggal}</td>
+                  <td className="px-4 py-3 text-gray-600">{student.feedbackDate}</td>
                 </tr>
               ))
             ) : (

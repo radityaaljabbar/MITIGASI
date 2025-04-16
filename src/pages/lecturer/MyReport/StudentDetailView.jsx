@@ -69,7 +69,7 @@ const StudentDetailView = ({ student, onBack }) => {
               </div>
             </div>
             <div className="text-sm text-blue-700">
-              {student.tanggal}
+              {student.feedbackDate}
             </div>
           </div>
         </div>
@@ -78,15 +78,15 @@ const StudentDetailView = ({ student, onBack }) => {
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-bold text-base mb-1">
-              {student.deskripsi}
+              {student.title}
             </h3>
             <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-              Dalam Proses
+              {student.status}
             </span>
           </div>
           
           <div className="text-sm text-gray-700 leading-relaxed space-y-4">
-            <p>
+            {/* <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce venenatis, nisi eu auctor luctus, ante mi aliquam mauris, eget vestibulum orci dui sed mauris. Fusce dignissim turpis nibh, id mollis nisi lobortis id. Nam ut lectus ipsum.
             </p>
             <p>
@@ -94,7 +94,8 @@ const StudentDetailView = ({ student, onBack }) => {
             </p>
             <p>
               Donec tempus magna non tellus mollis feugiat in id justo. Ut nec accumsan urna. Curabitur ac iaculis lacus. Fusce id feugiat neque, at condimentum urna. Nam et hendrerit libero, vestibulum imperdiet dolor.
-            </p>
+            </p> */}
+            {student.details}
           </div>
         </div>
         
