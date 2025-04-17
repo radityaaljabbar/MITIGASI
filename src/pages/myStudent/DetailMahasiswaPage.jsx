@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 
 const DetailMahasiswaPage = () => {
     const { nim } = useParams();
-    return <div>{nim}</div>;
+    return <div>Hello World... {nim}</div>;
 };
 
 export default DetailMahasiswaPage;

@@ -94,7 +94,10 @@ const App = () => {
                         element={<Navigate to="/lecturer/dashboard" />}
                     />
                     <Route path="dashboard" element={<MyStudentList />} />
-
+                    <Route
+                        path="detailMahasiswa/:nim"
+                        element={<MyStudentDetail />}
+                    />
                     <Route
                         path="course-advisor" // Fixed the typo: removed extra 'r'
                         element={<MyCourseAdvisorPage />}
