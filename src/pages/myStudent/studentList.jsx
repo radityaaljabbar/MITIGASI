@@ -210,10 +210,6 @@ export default function DaftarMahasiswaWali() {
                             </select>
                             <Filter className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
                         </div>
-
-                        <button className="bg-blue-600 text-white p-2 rounded-md flex items-center justify-center">
-                            <Download className="h-5 w-5" />
-                        </button>
                     </div>
                 </div>
 
