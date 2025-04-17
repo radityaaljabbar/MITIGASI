@@ -12,8 +12,9 @@ const Login = () => {
 
     // Simulated user data (in a real app, this would come from a backend)
     const users = {
-        students,
-        lecturers
+        students: students[0],
+        lecturers: lecturers[0]
+        
         // students: {
         //     1: { password: '2', name: 'John Doe' },
         //     2023002: { password: 'mahasiswa456', name: 'Jane Smith' },
