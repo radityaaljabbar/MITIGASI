@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import students from '../../assets/data/mockupjsonMahasiswa/dataStudent.json'
+import lecturers from '../../assets/data/mockupjsonDosenWali/dataLecturer.json'
 
 const Login = () => {
     const [isStudentLogin, setIsStudentLogin] = useState(true);
@@ -10,14 +12,16 @@ const Login = () => {
 
     // Simulated user data (in a real app, this would come from a backend)
     const users = {
-        students: {
-            1: { password: '2', name: 'John Doe' },
-            2023002: { password: 'mahasiswa456', name: 'Jane Smith' },
-        },
-        lecturers: {
-            2: { password: '3', name: 'Dr. Ahmad' },
-            198602022021: { password: 'dosen456', name: 'Dr. Siti' },
-        },
+        students,
+        lecturers
+        // students: {
+        //     1: { password: '2', name: 'John Doe' },
+        //     2023002: { password: 'mahasiswa456', name: 'Jane Smith' },
+        // },
+        // lecturers: {
+        //     2: { password: '3', name: 'Dr. Ahmad' },
+        //     198602022021: { password: 'dosen456', name: 'Dr. Siti' },
+        // },
     };
 
     const handleLogin = (e) => {
