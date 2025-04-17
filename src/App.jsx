@@ -26,6 +26,7 @@ import Login from './pages/Login/LoginPage.jsx';
 import LecturerDashboard from './pages/lecturer/LecturerDashboard.jsx';
 import MyCourseAdvisorPage from './pages/lecturer/MyCourseAdvisorPage.jsx';
 import MyReportPage from './pages/lecturer/MyReport/MyReportPage.jsx';
+import MyStudentList from './pages/myStudent/studentList.jsx'
 // Import your not found page
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
 
@@ -91,7 +92,7 @@ const App = () => {
                         index
                         element={<Navigate to="/lecturer/dashboard" />}
                     />
-                    <Route path="dashboard" element={<LecturerDashboard />} />
+                    <Route path="dashboard" element={<MyStudentList />} />
                     <Route
                         path="course-advisor" // Fixed the typo: removed extra 'r'
                         element={<MyCourseAdvisorPage />}
