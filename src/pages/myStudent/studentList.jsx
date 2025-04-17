@@ -411,7 +411,7 @@ export default function DaftarMahasiswaWali() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     navigate(
-                                                        `/mahasiswa/${student.nim}`
+                                                        `/lecturer/detailMahasiswa/${student.nim}`
                                                     );
                                                 }}>
                                                 Lihat Detail Lengkap
