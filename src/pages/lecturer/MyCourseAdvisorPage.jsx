@@ -5,6 +5,7 @@ import React, {
     useMemo,
     useCallback,
 } from 'react';
+import { toast } from 'react-toastify';
 
 // Mock data for available courses based on your provided schema
 import availableCoursesData from '../../assets/data/mockupjsonDosenWali/myCourseAdvisor/availableCourses.json';
@@ -221,16 +222,16 @@ const MyCourseAdvisor = () => {
     // Send recommendations to the selected student
     const sendRecommendations = () => {
         if (!selectedStudent) {
-            alert('Pilih mahasiswa terlebih dahulu');
+            toast.warn('Pilih mahasiswa terlebih dahulu!');
             return;
         }
 
         if (recommendedCourses.length === 0) {
-            alert('Tambahkan mata kuliah rekomendasi terlebih dahulu');
+            toast.warn('Tambahkan mata kuliah rekomendasi terlebih dahulu');
             return;
         }
 
-        alert(`Rekomendasi mata kuliah berhasil dikirim ke mahasiswa`);
+        toast.info(`Backend haven't been developed, Comming out soon.`);
         // Here you would normally send this data to your backend
         resetAvailableCourses();
     };
