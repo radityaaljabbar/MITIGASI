@@ -134,7 +134,7 @@ export default function DaftarMahasiswaWali() {
     };
 
     const handleRowClick = (nim) => {
-        navigate(`/mahasiswa/${nim}`);
+        navigate(`/lecturer/detailMahasiswa/${nim}`);
     };
 
     const filteredStudents = students
