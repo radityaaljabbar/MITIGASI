@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
+import AnalisisPsikologi from './AnalisisPsikologi/analisisPsikologi'
 
 const StudentDetail = () => {
     const { nim } = useParams();
@@ -18,26 +19,26 @@ const StudentDetail = () => {
             //? Ini nanti diganti ke komponen2 yang diperlukan:
             case 'akademik':
                 return (
-                    <div className="p-8 text-center text-2xl">
+                    <div className="p-3 text-center">
                         {nim} <br />
                         ANALISIS AKADEMIK
                     </div>
                 );
             case 'psikologi':
                 return (
-                    <div className="p-8 text-center text-2xl">
-                        ANALISIS PSIKOLOGI
+                    <div className="p-3 text-center">
+                        <AnalisisPsikologi/> 
                     </div>
                 );
             case 'finansial':
                 return (
-                    <div className="p-8 text-center text-2xl">
+                    <div className="p-3 text-center">
                         ANALISIS FINANSIAL
                     </div>
                 );
             default:
                 return (
-                    <div className="p-8 text-center text-2xl">
+                    <div className="p-3 text-center">
                         ANALISIS AKADEMIK
                     </div>
                 );
