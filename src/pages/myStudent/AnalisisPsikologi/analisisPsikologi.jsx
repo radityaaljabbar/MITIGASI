@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, Link, User } from 'lucide-react';
+import { Download, User } from 'lucide-react';
 import handleBack from '../../../components/handleBack';
 
 export default function AnalisaPsikologiDetailPage() {
@@ -65,22 +65,15 @@ export default function AnalisaPsikologiDetailPage() {
         </div>
         
         {student ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-rows-1 gap-8">
             {/* Informasi Mahasiswa */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex flex-col items-center mb-6">
-                <div className="bg-red-100 rounded-full p-6 mb-4">
-                  <User size={64} className="text-red-800" />
-                </div>
+            <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
+              <div className="flex flex-col items-center mb-2">
                 <h3 className="text-xl font-bold">{student.name}</h3>
                 <p className="text-gray-600">NIM: {student.nim}</p>
               </div>
               
               <div className="divide-y">
-                <div className="py-3">
-                  <p className="text-gray-500 text-sm">Jurusan</p>
-                  <p className="font-medium">{student.jurusan}</p>
-                </div>
                 <div className="py-3">
                   <p className="text-gray-500 text-sm">Semester</p>
                   <p className="font-medium">{student.semester}</p>
@@ -89,22 +82,8 @@ export default function AnalisaPsikologiDetailPage() {
                   <p className="text-gray-500 text-sm">Tahun Masuk</p>
                   <p className="font-medium">{student.tahunMasuk}</p>
                 </div>
-                <div className="py-3">
-                  <p className="text-gray-500 text-sm">Riwayat Konseling</p>
-                  {student.riwayatKonseling.map((item, index) => (
-                    <div key={index} className="mt-2 text-sm">
-                      <p className="font-medium">{item.topik}</p>
-                      <p className="text-gray-500">{item.tanggal}</p>
-                    </div>
-                  ))}
-                </div>
               </div>
               
-              <div className="mt-6">
-                <button className="w-full bg-red-800 text-white py-2 rounded">
-                  Jadwalkan Konseling
-                </button>
-              </div>
             </div>
             
             {/* Grafik & Analisis */}
