@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
 
 const StudentDetail = () => {
@@ -19,6 +19,7 @@ const StudentDetail = () => {
             case 'akademik':
                 return (
                     <div className="p-8 text-center text-2xl">
+                        {nim} <br />
                         ANALISIS AKADEMIK
                     </div>
                 );
