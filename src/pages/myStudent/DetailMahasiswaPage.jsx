@@ -4,7 +4,7 @@ import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/
 
 const StudentDetail = () => {
     const { nim } = useParams();
-    const navigate = useNavigate();
+
     const [activeTab, setActiveTab] = useState('akademik');
 
     // Handler untuk perubahan tab
@@ -15,6 +15,7 @@ const StudentDetail = () => {
     // Render konten berdasarkan tab aktif
     const renderTabContent = () => {
         switch (activeTab) {
+            //? Ini nanti diganti ke komponen2 yang diperlukan:
             case 'akademik':
                 return (
                     <div className="p-8 text-center text-2xl">
