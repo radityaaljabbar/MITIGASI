@@ -1,0 +1,50 @@
+{
+    "studentData": {
+        "name": "Ahmad Farhan",
+        "nim": "2210511001",
+        "semester": 5,
+        "financialStatus": "Berisiko",
+        "lastUpdated": "12 April 2025",
+        "pendingRequests": [
+            {
+                "id": 1,
+                "type": "Keringanan UKT",
+                "requestDate": "5 April 2025",
+                "status": "Menunggu Review",
+                "reason": "Kesulitan finansial karena orang tua di-PHK",
+                "attachments": ["surat_phk.pdf", "slip_gaji.pdf"],
+                "monthlyIncome": 3500000,
+                "monthlyExpenses": 3000000,
+                "requestAmount": 4000000
+            }
+        ],
+        "previousRequests": [
+            {
+                "id": 2,
+                "type": "Cicilan UKT",
+                "requestDate": "10 Januari 2025",
+                "status": "Disetujui",
+                "approvalDate": "15 Januari 2025",
+                "reason": "Keterlambatan gaji orang tua",
+                "attachments": ["pernyataan_keterlambatan.pdf"],
+                "monthlyIncome": 4500000,
+                "monthlyExpenses": 3200000,
+                "requestAmount": 9500000,
+                "installmentPlan": "3 kali angsuran"
+            },
+            {
+                "id": 3,
+                "type": "Keringanan UKT",
+                "requestDate": "2 Agustus 2024",
+                "status": "Ditolak",
+                "rejectionDate": "10 Agustus 2024",
+                "reason": "Biaya kuliah terlalu tinggi",
+                "attachments": ["surat_permohonan.pdf"],
+                "monthlyIncome": 5000000,
+                "monthlyExpenses": 2800000,
+                "requestAmount": 3000000,
+                "rejectionReason": "Tidak memenuhi kriteria bantuan"
+            }
+        ]
+    }
+}

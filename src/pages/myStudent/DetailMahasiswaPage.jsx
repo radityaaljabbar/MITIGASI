@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
-import AnalisisPsikologi from './AnalisisPsikologi/analisisPsikologi'
+import AnalisisPsikologi from './AnalisisPsikologi/analisisPsikologi';
+import AnalisisFinansialPage from './AnalisisFinansial/AnalisisFinansialPage';
 
 const StudentDetail = () => {
     const { nim } = useParams();
@@ -27,21 +28,17 @@ const StudentDetail = () => {
             case 'psikologi':
                 return (
                     <div className="p-3 text-center">
-                        <AnalisisPsikologi/> 
+                        <AnalisisPsikologi />
                     </div>
                 );
             case 'finansial':
                 return (
                     <div className="p-3 text-center">
-                        ANALISIS FINANSIAL
+                        <AnalisisFinansialPage />
                     </div>
                 );
             default:
-                return (
-                    <div className="p-3 text-center">
-                        ANALISIS AKADEMIK
-                    </div>
-                );
+                return <div className="p-3 text-center">ANALISIS AKADEMIK</div>;
         }
     };
 
