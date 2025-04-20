@@ -49,7 +49,7 @@ export default function AnalisaPsikologiDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-amber-50">
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 flex-grow">
+      <div className="bg-white container mx-auto max-w-6xl px-4 py-8 flex-grow shadow-md rounded-xl">
         {/* Header & Export Button */}
         <div className="mb-6 flex justify-between items-center">
           <div>
@@ -67,7 +67,7 @@ export default function AnalisaPsikologiDetailPage() {
         {student ? (
           <div className="grid grid-rows-1 gap-8">
             {/* Informasi Mahasiswa */}
-            <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
+            <div className="bg-[#FAF0E6] p-6 rounded-lg lg:col-span-2 border">
               <div className="flex flex-col items-center mb-2">
                 <h3 className="text-xl font-bold">{student.name}</h3>
                 <p className="text-gray-600">NIM: {student.nim}</p>
@@ -83,12 +83,11 @@ export default function AnalisaPsikologiDetailPage() {
                   <p className="font-medium">{student.tahunMasuk}</p>
                 </div>
               </div>
-              
             </div>
             
             {/* Grafik & Analisis */}
-            <div className="lg:col-span-2">
-              <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            <div className="lg:col-span-2 ">
+              <div className="p-6 rounded-lg mb-6 border-2 shadow-md">
                 <h3 className="text-xl font-semibold mb-4">Profil Psikologi</h3>
                 
                 <div className="h-64 mb-4">
@@ -113,8 +112,8 @@ export default function AnalisaPsikologiDetailPage() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 rounded-md">
+                <div className="bg-white p-6 rounded-lg shadow-md border">
                   <h4 className="font-semibold mb-4">Aspek Positif</h4>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>Kepribadian yang kuat (85%)</li>
@@ -124,7 +123,7 @@ export default function AnalisaPsikologiDetailPage() {
                   </ul>
                 </div>
                 
-                <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="bg-white p-6 rounded-lg shadow-md border">
                   <h4 className="font-semibold mb-4">Area Pengembangan</h4>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>Peningkatan motivasi belajar</li>
@@ -134,7 +133,7 @@ export default function AnalisaPsikologiDetailPage() {
                 </div>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white p-6 rounded-lg">
                 <h3 className="text-xl font-semibold mb-4">Detail Aspek Psikologi</h3>
                 
                 <div className="space-y-4">
