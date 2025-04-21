@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFileDownload } from 'react-icons/Fa';
+import { FaFileDownload } from 'react-icons/fa';
 import StatusAksiDosen from './StatusAksiDosen';
 
 const DetailPengajuanFinansial = ({
@@ -93,7 +93,7 @@ const DetailPengajuanFinansial = ({
                             <p className="font-medium">
                                 Rp{' '}
                                 {selectedRequest.monthlyExpenses.toLocaleString(
-                                    'id=ID'
+                                    'id-ID'
                                 )}
                             </p>
                         </div>
