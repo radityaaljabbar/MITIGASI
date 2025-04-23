@@ -47,13 +47,6 @@ const StudentDetailView = ({ student, onBack }) => {
             <span>Kembali ke Daftar</span>
           </button>
           
-          <div className="flex items-center text-sm text-gray-500">
-            <span>Dashboard</span>
-            <ChevronRight size={14} />
-            <span>My Report</span>
-            <ChevronRight size={14} />
-            <span className="font-medium text-gray-700">{student.name}</span>
-          </div>
         </div>
       </div>
       
