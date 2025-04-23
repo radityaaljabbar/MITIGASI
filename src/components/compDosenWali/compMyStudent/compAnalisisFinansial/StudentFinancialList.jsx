@@ -35,7 +35,7 @@ const StudentFinancialList = ({
                                             ` • Ditolak pada ${request.rejectionDate}`}
                                     </p>
                                     <p className="text-sm mt-1 line-clamp-2">
-                                        request.reason
+                                        {request.reason}
                                     </p>
                                 </div>
                                 <button

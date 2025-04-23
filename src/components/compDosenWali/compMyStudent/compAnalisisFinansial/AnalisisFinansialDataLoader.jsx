@@ -2,17 +2,62 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import studentFinancialData from '../../../../assets/data/mockupjsonDosenWali/MyStudent/AnalisisFinansial/mockupFinansialMahasiswa.json';
 
-// Nanti disesuaikan dengan API dari backend.
+// Updated function with better error handling
 export const fetchStudentFinancialData = async (nim) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         setTimeout(() => {
-            //NIM nanti diambil dari session login user, udah gitu bisa difilter buat ambil data sesuai nimnya:
-            //Krna API belum ada skrg make mockup datanya aja dlu
-            const data = { ...studentFinancialData.studentData };
-            if (nim) {
-                data.nim = nim;
+            try {
+                // Make sure the data structure exists
+                if (
+                    !studentFinancialData ||
+                    !studentFinancialData.studentsData ||
+                    !Array.isArray(studentFinancialData.studentsData)
+                ) {
+                    console.error(
+                        'Invalid data structure:',
+                        studentFinancialData
+                    );
+                    reject(new Error('Invalid data structure in mockup data'));
+                    return;
+                }
+
+                if (!nim) {
+                    // If no NIM is provided, return the first student as default (optional)
+                    toast.warning('No NIM provided, showing default student');
+                    resolve(studentFinancialData.studentsData[0]);
+                    return;
+                }
+
+                // Find the student with the matching NIM
+                const student = studentFinancialData.studentsData.find(
+                    (student) => student && student.nim === nim
+                );
+
+                if (!student) {
+                    console.error(`Student with NIM ${nim} not found`);
+                    toast.error(
+                        `Data mahasiswa dengan NIM ${nim} tidak ditemukan`
+                    );
+                    // Return a safe default object to prevent null reference errors
+                    resolve({
+                        name: 'Data Tidak Ditemukan',
+                        nim: nim,
+                        semester: '-',
+                        financialStatus: '-',
+                        lastUpdated: '-',
+                        pendingRequests: [],
+                        previousRequests: [],
+                    });
+                    return;
+                }
+
+                // Return the found student data
+                resolve(student);
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+                toast.error('Gagal memuat data mahasiswa');
+                reject(error);
             }
-            resolve(data);
         }, 1000);
     });
 };
