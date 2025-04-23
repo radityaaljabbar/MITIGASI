@@ -17,9 +17,8 @@ export default function AnalisaPsikologiDetailPage() {
       id: 1,
       name: "Budi Santoso",
       nim: "18021001",
-      jurusan: "Psikologi",
       semester: 5,
-      tahunMasuk: "2021",
+      statusPsikologi: "Aman",
       aspekPsikologi: {
         kepribadian: 85,
         motivasi: 70,

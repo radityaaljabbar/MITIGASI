@@ -29,7 +29,7 @@ const StudentDetail = () => {
             case 'psikologi':
                 return (
                     <div className="p-3 text-center">
-                        <BelumMengisi />
+                        <AnalisisPsikologi />
                     </div>
                 );
             case 'finansial':
