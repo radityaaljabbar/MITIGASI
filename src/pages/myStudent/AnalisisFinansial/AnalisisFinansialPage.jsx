@@ -6,6 +6,7 @@ import LoadingAnalisisFinansial from '../../../components/compDosenWali/compMySt
 import StudentInfoFinansialPage from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentInfoFinansialPage';
 import StudentFinancialList from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentFinancialList';
 import DetailPengajuanFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/DetailPengajuanFinansial';
+import BelumMengisiFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/BelumMengisiFinansial';
 
 //? Service / Data Handler / laader:
 import {
@@ -14,6 +15,11 @@ import {
     rejectRequest,
     downloadAttachment,
 } from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/AnalisisFinansialDataLoader';
+
+// New component for displaying "no data" state
+const NoFinancialDataNotice = ({ studentName }) => (
+    <BelumMengisiFinansial studentName={studentName} />
+);
 
 const AnalisisFinansial = () => {
     const { nim } = useParams();
@@ -29,6 +35,16 @@ const AnalisisFinansial = () => {
                 setStudentData(data);
             } catch (error) {
                 console.error('Error fetching student data:', error);
+                // Set empty default data structure to prevent errors
+                setStudentData({
+                    name: 'Data Tidak Ditemukan',
+                    nim: nim || '-',
+                    semester: '-',
+                    financialStatus: '-',
+                    lastUpdated: '-',
+                    pendingRequests: [],
+                    previousRequests: [],
+                });
             } finally {
                 setLoading(false);
             }
@@ -62,6 +78,14 @@ const AnalisisFinansial = () => {
         return <LoadingAnalisisFinansial />;
     }
 
+    // Check if the student has any financial requests (pending or previous)
+    const hasFinancialData =
+        studentData &&
+        ((studentData.pendingRequests &&
+            studentData.pendingRequests.length > 0) ||
+            (studentData.previousRequests &&
+                studentData.previousRequests.length > 0));
+
     return (
         <div className="p-4 max-w-6xl mx-auto">
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
@@ -70,28 +94,37 @@ const AnalisisFinansial = () => {
                         Analisis Finansial Mahasiswa
                     </h2>
                     <p className="text-sm opacity-90">
-                        Data terakhir diperbarui: {studentData.lastUpdated}
+                        {hasFinancialData
+                            ? `Data terakhir diperbarui: ${studentData.lastUpdated}`
+                            : 'Belum ada data pengajuan'}
                     </p>
                 </div>
 
                 <div className="p-5">
+                    {/* Student info is always shown */}
                     <StudentInfoFinansialPage studentData={studentData} />
 
-                    <StudentFinancialList
-                        requests={studentData.pendingRequests}
-                        title="Pengajuan Menunggu Review"
-                        emptyMessage="Tidak ada pengajuan yang menunggu review"
-                        onViewDetail={handleViewDetail}
-                        isPending={true}
-                    />
+                    {hasFinancialData ? (
+                        <>
+                            <StudentFinancialList
+                                requests={studentData.pendingRequests}
+                                title="Pengajuan Menunggu Review"
+                                emptyMessage="Tidak ada pengajuan yang menunggu review"
+                                onViewDetail={handleViewDetail}
+                                isPending={true}
+                            />
 
-                    <StudentFinancialList
-                        requests={studentData.previousRequests}
-                        title="Riwayat Pengajuan"
-                        emptyMessage="Tidak ada riwayat pengajuan"
-                        onViewDetail={handleViewDetail}
-                        isPending={false}
-                    />
+                            <StudentFinancialList
+                                requests={studentData.previousRequests}
+                                title="Riwayat Pengajuan"
+                                emptyMessage="Tidak ada riwayat pengajuan"
+                                onViewDetail={handleViewDetail}
+                                isPending={false}
+                            />
+                        </>
+                    ) : (
+                        <NoFinancialDataNotice studentName={studentData.name} />
+                    )}
                 </div>
             </div>
 

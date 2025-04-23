@@ -36,7 +36,10 @@ export const fetchStudentFinancialData = async (nim) => {
                 if (!student) {
                     console.error(`Student with NIM ${nim} not found`);
                     toast.error(
-                        `Data mahasiswa dengan NIM ${nim} tidak ditemukan`
+                        `Data mahasiswa dengan NIM ${nim} tidak ditemukan`,
+                        {
+                            toastId: `student-not-found-${nim}`, // This ensures only one toast with this ID appears
+                        }
                     );
                     // Return a safe default object to prevent null reference errors
                     resolve({
