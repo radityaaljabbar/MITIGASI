@@ -101,11 +101,13 @@ const AnalisisFinansial = () => {
                 </div>
 
                 <div className="p-5">
-                    {/* Student info is always shown */}
-                    <StudentInfoFinansialPage studentData={studentData} />
-
                     {hasFinancialData ? (
                         <>
+                            {/* Student info is always shown */}
+                            <StudentInfoFinansialPage
+                                studentData={studentData}
+                            />
+
                             <StudentFinancialList
                                 requests={studentData.pendingRequests}
                                 title="Pengajuan Menunggu Review"
