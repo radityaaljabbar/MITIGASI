@@ -1,4 +1,3 @@
-// File: src/pages/AnalisisPsikologi/DetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 import handleBack from '../../../components/handleBack';

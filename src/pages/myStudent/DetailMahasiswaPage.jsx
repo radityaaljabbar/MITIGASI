@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
-import AnalisisPsikologi from './AnalisisPsikologi/AnalisisPsikologicopy';
+import AnalisisPsikologi from './AnalisisPsikologi/AnalisisPsikologi';
 import BelumMengisi from './AnalisisPsikologi/belumMengisi'
 import AnalisisFinansialPage from './AnalisisFinansial/AnalisisFinansialPage';
 

@@ -1,4 +1,3 @@
-// File: src/components/AnalisisPsikologi/PsychologyDetails.jsx
 import React from 'react';
 
 export default function PsychologyDetails({ aspectData, rekomendasi }) {

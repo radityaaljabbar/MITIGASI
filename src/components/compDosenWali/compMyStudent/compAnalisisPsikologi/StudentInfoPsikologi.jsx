@@ -1,4 +1,3 @@
-// File: src/components/AnalisisPsikologi/StudentInfo.jsx
 import React from 'react';
 
 export default function StudentInfo({ student }) {

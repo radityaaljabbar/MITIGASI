@@ -1,4 +1,3 @@
-// File: src/components/AnalisisPsikologi/StrengthsAreas.jsx
 import React from 'react';
 
 export default function StrengthsAreas() {
