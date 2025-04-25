@@ -7,7 +7,7 @@ import StudentInfoFinansialPage from '../../../components/compDosenWali/compMySt
 import StudentFinancialList from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentFinancialList';
 import DetailPengajuanFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/DetailPengajuanFinansial';
 import BelumMengisiFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/BelumMengisiFinansial';
-
+import handleBack from '../../../components/handleBack';
 //? Service / Data Handler / laader:
 import {
     fetchStudentFinancialData,
@@ -90,9 +90,11 @@ const AnalisisFinansial = () => {
         <div className="p-4 max-w-6xl mx-auto">
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
                 <div className="bg-red-800 p-4 text-white">
-                    <h2 className="text-xl font-bold">
-                        Analisis Finansial Mahasiswa
-                    </h2>
+                    <button
+                        onClick={handleBack}
+                        className="text-white hover:underline flex items-center">
+                        &lt; Kembali ke Daftar Mahasiswa
+                    </button>
                     <p className="text-sm opacity-90">
                         {hasFinancialData
                             ? `Data terakhir diperbarui: ${studentData.lastUpdated}`

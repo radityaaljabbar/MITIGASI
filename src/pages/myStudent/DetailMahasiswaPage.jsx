@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
 import AnalisisPsikologi from './AnalisisPsikologi/AnalisisPsikologi';
-import BelumMengisi from './AnalisisPsikologi/belumMengisi'
+import BelumMengisi from './AnalisisPsikologi/belumMengisi';
 import AnalisisFinansialPage from './AnalisisFinansial/AnalisisFinansialPage';
+import AnalisisAkademikPage from './AnalisisAkademik/AnalisisAkademikPage';
 
 const StudentDetail = () => {
-    const { nim } = useParams();
-
     const [activeTab, setActiveTab] = useState('akademik');
 
     // Handler untuk perubahan tab
@@ -22,8 +20,7 @@ const StudentDetail = () => {
             case 'akademik':
                 return (
                     <div className="p-3 text-center">
-                        {nim} <br />
-                        ANALISIS AKADEMIK
+                        <AnalisisAkademikPage />
                     </div>
                 );
             case 'psikologi':
