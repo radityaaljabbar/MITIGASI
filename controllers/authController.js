@@ -1,20 +1,22 @@
+// Authentication Controller for Plain Text Passwords
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const { pool } = require('../config/database');
 
 // Generate JWT Token
 const generateToken = (id, role) => {
-    return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    return jwt.sign({ id, role }, process.env.JWT_SECRET || 'your_jwt_secret', {
+        expiresIn: '30d',
+    });
 };
 
-// @desc    Login user (mahasiswa or dosen wali)
+// @desc    Login user (mahasiswa or dosen_wali)
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = async (req, res) => {
     try {
         const { id, password, role } = req.body;
 
-        // Validasi Request
+        // Validate request
         if (!id || !password || !role) {
             return res.status(400).json({
                 success: false,
@@ -22,20 +24,20 @@ exports.login = async (req, res) => {
             });
         }
 
-        //Validate Role
+        // Validate role
         if (role !== 'mahasiswa' && role !== 'dosen_wali' && role !== 'admin') {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid Role',
+                message: 'Invalid role',
             });
         }
 
         let user = null;
         let passwordMatch = false;
 
-        // Check tabel mana yg hrs di query sesuai dengan role yg di kirim di req.body
+        // Check which table to query based on role
         if (role === 'mahasiswa') {
-            // Query tabel mahasiswa
+            // Query mahasiswa table
             const [rows] = await pool.execute(
                 'SELECT nim, nama, kelas, password FROM mahasiswa WHERE nim = ?',
                 [id]
@@ -43,11 +45,11 @@ exports.login = async (req, res) => {
 
             if (rows.length > 0) {
                 user = rows[0];
-                // Compare passwords
-                passwordMatch = await bcrypt.compare(password, user.password);
+                // For plain text passwords, simply compare the strings
+                passwordMatch = password === user.password;
             }
         } else if (role === 'dosen_wali') {
-            // Query tabel dosen_wali
+            // Query dosen_wali table
             const [rows] = await pool.execute(
                 'SELECT nip, nama, kode, password FROM dosen_wali WHERE nip = ?',
                 [id]
@@ -55,32 +57,32 @@ exports.login = async (req, res) => {
 
             if (rows.length > 0) {
                 user = rows[0];
-                // Compare passwords
-                passwordMatch = await bcrypt.compare(password, user.password);
+                // For plain text passwords, simply compare the strings
+                passwordMatch = password === user.password;
             }
         } else {
-            // Admin logic
-            // Di hardcore dlu buat si admin
-            if (id === 'admin' && password === 'admin12345') {
+            // Admin logic - adjust according to your needs
+            // For simplicity, using a hardcoded admin account for testing
+            if (id === 'admin' && password === 'admin123') {
                 user = { id: 'admin', nama: 'Administrator' };
                 passwordMatch = true;
             }
         }
 
-        // Cek keberadaan user dan password bener atau tidak
+        // Check if user exists and password is correct
         if (!user || !passwordMatch) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid Credentials',
+                message: 'Invalid credentials',
             });
         }
 
         // Generate token
         const idField =
             role === 'mahasiswa' ? 'nim' : role === 'dosen_wali' ? 'nip' : 'id';
-        const token = generateToekn(user[idField] || id, role);
+        const token = generateToken(user[idField] || id, role);
 
-        // Send Response
+        // Send response
         res.status(200).json({
             success: true,
             token,
@@ -99,9 +101,9 @@ exports.login = async (req, res) => {
     }
 };
 
-// @desc Get data user yang lagi login
-// @route GET /api/auth/me
-// @access Private
+// @desc    Get current logged in user
+// @route   GET /api/auth/me
+// @access  Private
 exports.getMe = async (req, res) => {
     res.status(200).json({
         success: true,

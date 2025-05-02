@@ -34,12 +34,12 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.use('/api/', authRoutes);
-app.use('/api/student', studentRoutes);
-app.use('/api/faculty', facultyRoutes);
-app.use('/api/admin', adminRoutes);
+// app.use('/api/student', studentRoutes);
+// app.use('/api/faculty', facultyRoutes);
+// app.use('/api/admin', adminRoutes);
 
 // Error handling middleware (hrs diletakan di trakhiran disini)
-app.use(errorHandler);
+// app.use(errorHandler);
 
 // Mulai server
 const PORT = process.env.PORT || 5000;
