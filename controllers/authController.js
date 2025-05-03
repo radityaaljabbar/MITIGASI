@@ -115,8 +115,29 @@ exports.getMe = async (req, res) => {
 // @route   GET /api/auth/logout
 // @access  Private
 exports.logout = async (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: 'Logged out successfully',
-    });
+    try {
+        // Get token from request (set by middleware)
+        const token = req.token;
+
+        // Decode token to get expiration
+        const decoded = jwt.decode(token);
+        const expiresAt = new Date(decoded.exp * 1000);
+
+        // Add token to blacklist
+        await pool.execute(
+            'INSERT INTO token_blacklist (token, expires_at) VALUES (?, ?)',
+            [token, expiresAt]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully',
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error logging out',
+        });
+    }
 };

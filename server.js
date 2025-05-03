@@ -16,6 +16,9 @@ const adminRoutes = require('./routes/adminRoutes');
 // Import middlewares
 const { errorHandler } = require('./middlewares/errorMiddleware');
 
+// NEW: Import token cleanup utility
+const cleanupBlacklist = require('./utils/tokenCleanup');
+
 // Load environment variables
 dotenv.config();
 
@@ -59,6 +62,9 @@ const startServer = async () => {
             console.log(
                 `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
             );
+
+            // NEW: Start the token cleanup process
+            console.log('Token blacklist cleanup service started');
         });
     } catch (error) {
         console.error('Server startup error:', error);

@@ -24,6 +24,19 @@ exports.protect = async (req, res, next) => {
     }
 
     try {
+        // NEW: Check if token is blacklisted
+        const [blacklisted] = await pool.execute(
+            'SELECT * FROM token_blacklist WHERE token = ?',
+            [token]
+        );
+
+        if (blacklisted.length > 0) {
+            return res.status(401).json({
+                success: false,
+                message: 'Token has been invalidated',
+            });
+        }
+
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -70,18 +83,21 @@ exports.protect = async (req, res, next) => {
                 role: 'dosen_wali',
             };
         } else if (role === 'admin') {
-            // For admin, disesuaiin aja ntaran gampang
             req.user = {
                 id,
                 role: 'admin',
             };
         }
+
+        // NEW: Store the token in request for use in logout
+        req.token = token;
+
         next();
     } catch (error) {
         console.error('Auth middleware error: ', error);
         return res.status(401).json({
             success: false,
-            message: 'NOt authorized to acces this route',
+            message: 'Not authorized to access this route',
         });
     }
 };
