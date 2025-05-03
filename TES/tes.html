@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Status Mahasiswa</title>
+</head>
+<body>
+    <h1>Prediksi Status Mahasiswa</h1>
+
+    <label for="ipk">IPK:</label>
+    <input type="number" id="ipk" name="ipk" step="0.1" min="0" max="4" required><br><br>
+
+    <label for="skor_psikologi">Skor Psikologi:</label>
+    <input type="number" id="skor_psikologi" name="skor_psikologi" required><br><br>
+
+    <label for="finansial">Finansial (0 = Tidak Membutuhkan, 1 = Membutuhkan):</label>
+    <input type="number" id="finansial" name="finansial" step="1" min="0" max="1" required><br><br>
+
+    <button onclick="predictStatus()">Prediksi Status</button>
+
+    <h2>Status Mahasiswa: <span id="prediksi"></span></h2>
+
+    <script>
+        async function predictStatus() {
+            const ipk = parseFloat(document.getElementById('ipk').value);
+            const skorPsikologi = parseFloat(document.getElementById('skor_psikologi').value);
+            const finansial = parseInt(document.getElementById('finansial').value);
+
+            // Mengirimkan data ke API Flask
+            const response = await fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',  // Pastikan ini adalah POST
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ipk: ipk,
+                    skor_psikologi: skorPsikologi,
+                    finansial: finansial
+                })
+            });
+
+            const data = await response.json();
+
+            // Menampilkan hasil prediksi pada halaman
+            document.getElementById('prediksi').textContent = data.status;
+        }
+    </script>
+</body>
+</html>
