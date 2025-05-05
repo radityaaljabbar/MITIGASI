@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
-import handleBack from '../../../components/handleBack';
+import handleBack from '../../../../components/handleBack';
 
 export default function AnalisaPsikologiDetailPage() {
   const [student, setStudent] = useState(null);

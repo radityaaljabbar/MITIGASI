@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import NavbarMyStudentDetail from '../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
+import NavbarMyStudentDetail from '../../../components/compDosenWali/compMyStudent/NavbarMyStudentDetail';
 import AnalisisPsikologi from './AnalisisPsikologi/AnalisisPsikologi';
 import BelumMengisi from './AnalisisPsikologi/belumMengisi';
 import AnalisisFinansialPage from './AnalisisFinansial/AnalisisFinansialPage';

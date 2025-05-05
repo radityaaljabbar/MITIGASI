@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
-import handleBack from '../../../components/handleBack';
-import StudentInfo from '../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/StudentInfoPsikologi';
-import PsychologyChart from '../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/ChartPsikologi';
-import StrengthsAreas from '../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/StrengthArea';
-import PsychologyDetails from '../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/DetailPsikologi';
+import handleBack from '../../../../components/handleBack';
+import StudentInfo from '../../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/StudentInfoPsikologi';
+import PsychologyChart from '../../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/ChartPsikologi';
+import StrengthsAreas from '../../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/StrengthArea';
+import PsychologyDetails from '../../../../components/compDosenWali/compMyStudent/compAnalisisPsikologi/DetailPsikologi';
 
 export default function AnalisaPsikologiDetailPage() {
   const [student, setStudent] = useState(null);

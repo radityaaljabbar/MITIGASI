@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 //? Import komponen-komponen yang dibutuhkan:
-import LoadingAnalisisFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/LoadingAnalisisFinansial';
-import StudentInfoFinansialPage from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentInfoFinansialPage';
-import StudentFinancialList from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentFinancialList';
-import DetailPengajuanFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/DetailPengajuanFinansial';
-import BelumMengisiFinansial from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/BelumMengisiFinansial';
-import handleBack from '../../../components/handleBack';
+import LoadingAnalisisFinansial from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/LoadingAnalisisFinansial';
+import StudentInfoFinansialPage from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentInfoFinansialPage';
+import StudentFinancialList from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentFinancialList';
+import DetailPengajuanFinansial from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/DetailPengajuanFinansial';
+import BelumMengisiFinansial from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/BelumMengisiFinansial';
+import handleBack from '../../../../components/handleBack';
 //? Service / Data Handler / laader:
 import {
     fetchStudentFinancialData,
     approveRequest,
     rejectRequest,
     downloadAttachment,
-} from '../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/AnalisisFinansialDataLoader';
+} from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/AnalisisFinansialDataLoader';
 
 // New component for displaying "no data" state
 const NoFinancialDataNotice = ({ studentName }) => (

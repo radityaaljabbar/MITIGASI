@@ -26,8 +26,8 @@ import Login from './pages/Login/LoginPage.jsx';
 import LecturerDashboard from './pages/lecturer/LecturerDashboard.jsx';
 import MyCourseAdvisorPage from './pages/lecturer/MyCourseAdvisorPage.jsx';
 import MyReportPage from './pages/lecturer/MyReport/MyReportPage.jsx';
-import MyStudentDetail from './pages/myStudent/DetailMahasiswaPage.jsx';
-import MyStudentList from './pages/myStudent/studentList.jsx';
+import MyStudentDetail from './pages/lecturer/myStudent/DetailMahasiswaPage.jsx';
+import MyStudentList from './pages/lecturer/myStudent/studentList.jsx';
 // Import your not found page
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
 
