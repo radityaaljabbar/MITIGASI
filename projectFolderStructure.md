@@ -1,13 +1,84 @@
 ```
-└── 📁FrontEnd_React
+└── 📁frontendCode
+        └── 📁branches
+        └── config
+        └── description
+        └── FETCH_HEAD
+        └── HEAD
+        └── 📁hooks
+            └── applypatch-msg.sample
+            └── commit-msg.sample
+            └── fsmonitor-watchman.sample
+            └── post-update.sample
+            └── pre-applypatch.sample
+            └── pre-commit.sample
+            └── pre-merge-commit.sample
+            └── pre-push.sample
+            └── pre-rebase.sample
+            └── pre-receive.sample
+            └── prepare-commit-msg.sample
+            └── push-to-checkout.sample
+            └── sendemail-validate.sample
+            └── update.sample
+        └── index
+        └── 📁info
+            └── exclude
+        └── 📁logs
+            └── HEAD
+            └── 📁refs
+                └── 📁heads
+                    └── main-project-branch
+                └── 📁remotes
+                    └── 📁origin
+                        └── andre
+                        └── farid-branch
+                        └── kode_backend_branch
+                        └── main
+                        └── main-project-branch
+                        └── ML
+                        └── radit-branch
+        └── 📁objects
+            └── 📁info
+            └── 📁pack
+                └── pack-2200ba1ef78d5967ba530f0bbd716f38ddfa6674.idx
+                └── pack-2200ba1ef78d5967ba530f0bbd716f38ddfa6674.pack
+                └── pack-2200ba1ef78d5967ba530f0bbd716f38ddfa6674.rev
+        └── 📁refs
+            └── 📁heads
+                └── main-project-branch
+            └── 📁remotes
+                └── 📁origin
+                    └── andre
+                    └── farid-branch
+                    └── kode_backend_branch
+                    └── main
+                    └── main-project-branch
+                    └── ML
+                    └── radit-branch
+            └── 📁tags
+    └── 📁.vite
+        └── 📁deps
+            └── _metadata.json
+            └── package.json
     └── 📁public
         └── vite.svg
     └── 📁src
         └── App.jsx
         └── 📁assets
             └── 📁data
+                └── 📁database
+                    └── mitigasi.sql
+                └── feedback.json
                 └── 📁mockupjsonDosenWali
+                    └── dataDosen.json
+                    └── dataLecturer.json
+                    └── 📁myCourseAdvisor
+                        └── availableCourses.json
+                    └── 📁MyStudent
+                        └── 📁AnalisisFinansial
+                            └── mockupFinansialMahasiswa.json
                 └── 📁mockupjsonMahasiswa
+                    └── dataStudent.json
                     └── 📁mockupjsonMyCourse
                         └── matakuliah.json
                         └── rekomendasimk.json
@@ -21,6 +92,13 @@
                         └── scoreCategories.json
             └── 📁images
                 └── 📁imageDosenWali
+                    └── 📁sidebarImages
+                        └── MyCourseAdvisorIcon.png
+                        └── MyReportIcon.png
+                        └── MyStudentsIcon.png
+                        └── SettingsIcon.png
+                        └── toggleSidebar (1).png
+                        └── toggleSidebar.png
                 └── 📁imageMahasiswa
                     └── 📁sidebarImage
                         └── DropdownArrow.png
@@ -34,6 +112,23 @@
                         └── toggleSidebar.png
         └── 📁components
             └── 📁compDosenWali
+                └── 📁compMyStudent
+                    └── 📁compAnalisisFinansial
+                        └── AnalisisFinansialDataLoader.jsx
+                        └── BelumMengisiFinansial.jsx
+                        └── DetailPengajuanFinansial.jsx
+                        └── LoadingAnalisisFinansial.jsx
+                        └── StatusAksiDosen.jsx
+                        └── StudentFinancialList.jsx
+                        └── StudentInfoFinansialPage.jsx
+                    └── 📁compAnalisisPsikologi
+                        └── ChartPsikologi.jsx
+                        └── DetailPsikologi.jsx
+                        └── PengolahanData.js
+                        └── StrengthArea.jsx
+                        └── StudentInfoPsikologi.jsx
+                    └── NavbarMyStudentDetail.jsx
+                └── SidebarDosenWali.jsx
             └── 📁compMahasiswa
                 └── 📁myCourseComponents
                     └── RekomendasiMataKuliah.jsx
@@ -47,27 +142,56 @@
                     └── MyWellness_NotTested.jsx
                     └── MyWellness_Tested.jsx
                 └── SidebarMahasiswa.jsx
+            └── handleBack.jsx
+            └── ProtectedRoute.jsx
+            └── statusColor.jsx
         └── index.css
         └── 📁layout
+            └── MainLayout.jsx
             └── MainLayoutMahasiswa.jsx
         └── main.jsx
         └── 📁pages
-            └── 📁pagesDosenWali
+            └── 📁lecturer
+                └── LecturerDashboard.jsx
+                └── MyCourseAdvisorPage.jsx
+                └── 📁MyReport
+                    └── MyReportPage.jsx
+                    └── StudentDetailView.jsx
+                    └── StudentListView.jsx
+                └── NotFoundPage.jsx
+            └── 📁Login
+                └── LoginPage.jsx
+            └── 📁myStudent
+                └── 📁AnalisisAkademik
+                    └── AnalisisAkademikPage.jsx
+                └── 📁AnalisisFinansial
+                    └── AnalisisFinansialPage.jsx
+                └── 📁AnalisisPsikologi
+                    └── AnalisisPsikologi.jsx
+                    └── belumMengisi.jsx
+                └── DetailMahasiswaPage.jsx
+                └── studentList.jsx
             └── 📁pagesMahasiswa
+                └── 📁Feedback
+                    └── FeedbackDetail.jsx
+                    └── FeedbackList.jsx
+                    └── NewFeedback.jsx
+                └── 📁Finance
+                    └── Application.jsx
+                    └── ApplicationHistory.jsx
+                    └── Main.jsx
                 └── MyCoursePage.jsx
                 └── MyProgress.jsx
                 └── MyWellness_Test.jsx
                 └── MyWellnessPage.jsx
                 └── NotFoundPage.jsx
     └── .gitignore
-    └── App.jsx
     └── eslint.config.js
-    └── index.css
     └── index.html
-    └── main.jsx
     └── package-lock.json
     └── package.json
     └── postcss.config.js
+    └── projectFolderStructure.md
     └── README.md
     └── tailwind.config.js
     └── test.txt
