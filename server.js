@@ -12,7 +12,7 @@ const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const responseDosenWali = require('./routes/responseDosenWaliRoutes')
+const responseDosenWali = require('./routes/responseDosenWaliRoutes');
 
 // Import middlewares
 const { errorHandler } = require('./middlewares/errorMiddleware');
@@ -25,6 +25,14 @@ dotenv.config();
 
 // Initialize express app
 const app = express();
+
+// Enable CORS for frontend requests
+app.use(
+    cors({
+        origin: 'http://localhost:3000', // Your frontend Vite dev server address
+        credentials: true,
+    })
+);
 
 // Middlewares
 app.use(cors());
