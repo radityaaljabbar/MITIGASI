@@ -1,57 +1,51 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import students from '../../assets/data/mockupjsonMahasiswa/dataStudent.json'
-import lecturers from '../../assets/data/mockupjsonDosenWali/dataLecturer.json'
+import { loginUser } from '../../services/authService';
 
 const Login = () => {
     const [isStudentLogin, setIsStudentLogin] = useState(true);
-    const [nim, setNim] = useState('');
-    const [nip, setNip] = useState('');
+    const [id, setId] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
     const navigate = useNavigate();
 
-    // Simulated user data (in a real app, this would come from a backend)
-    const users = {
-        students: students[0],
-        lecturers: lecturers[0]
-        
-        // students: {
-        //     1: { password: '2', name: 'John Doe' },
-        //     2023002: { password: 'mahasiswa456', name: 'Jane Smith' },
-        // },
-        // lecturers: {
-        //     2: { password: '3', name: 'Dr. Ahmad' },
-        //     198602022021: { password: 'dosen456', name: 'Dr. Siti' },
-        // },
-    };
-
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
 
-        const userType = isStudentLogin ? 'students' : 'lecturers';
-        const loginId = isStudentLogin ? nim : nip;
+        // Determine the role based on login type
+        const role = isStudentLogin ? 'mahasiswa' : 'dosen_wali';
 
-        const user = users[userType][loginId];
+        try {
+            // Call the API login endpoint
+            const response = await loginUser(id, password, role);
 
-        if (user && user.password === password) {
-            // Store user session
-            localStorage.setItem(
-                'user',
-                JSON.stringify({
-                    id: loginId,
-                    name: user.name,
-                    type: userType,
-                })
-            );
+            if (response.success) {
+                // Store user info and token in localStorage
+                localStorage.setItem(
+                    'user',
+                    JSON.stringify({
+                        id: response.user.id,
+                        name: response.user.name,
+                        type: isStudentLogin ? 'students' : 'lecturers',
+                        token: response.token,
+                        role: response.user.role,
+                    })
+                );
 
-            // Navigate to appropriate dashboard
-            if (isStudentLogin) {
-                navigate('/student');
+                // Navigate to appropriate dashboard
+                navigate(isStudentLogin ? '/student' : '/lecturer');
             } else {
-                navigate('/lecturer');
+                setError(response.message || 'Login failed');
             }
-        } else {
-            alert('Invalid credentials');
+        } catch (error) {
+            setError('An error occurred. Please try again.');
+            console.error('Login error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -88,13 +82,19 @@ const Login = () => {
                             </h3>
                         </div>
 
+                        {error && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                {error}
+                            </div>
+                        )}
+
                         <div className="space-y-4">
                             {isStudentLogin ? (
                                 <input
                                     type="text"
                                     placeholder="NIM"
-                                    value={nim}
-                                    onChange={(e) => setNim(e.target.value)}
+                                    value={id}
+                                    onChange={(e) => setId(e.target.value)}
                                     className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                     required
                                 />
@@ -102,8 +102,8 @@ const Login = () => {
                                 <input
                                     type="text"
                                     placeholder="NIP"
-                                    value={nip}
-                                    onChange={(e) => setNip(e.target.value)}
+                                    value={id}
+                                    onChange={(e) => setId(e.target.value)}
                                     className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                     required
                                 />
@@ -121,8 +121,9 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-red-700 text-white py-3 rounded-full hover:bg-red-800 transition">
-                            Login
+                            disabled={loading}
+                            className="w-full bg-red-700 text-white py-3 rounded-full hover:bg-red-800 transition disabled:bg-red-300">
+                            {loading ? 'Loading...' : 'Login'}
                         </button>
                     </form>
                 </div>

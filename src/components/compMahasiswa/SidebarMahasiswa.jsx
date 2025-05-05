@@ -1,5 +1,6 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { logoutUser } from '../../services/authService';
 
 //Import icon-icon yang diperlukan
 import toggleSidebarIcon from '../../assets/images/imageMahasiswa/sidebarImage/toggleSidebar.png';
@@ -8,9 +9,38 @@ import myCourseIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyCour
 import myWellnessIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyWellness.png';
 import myFinanceIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyFinance.png';
 import myFeedbackIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyFeedback.png';
-import settingsIcon from '../../assets/images/imageMahasiswa/sidebarImage/SettingsIcon.png';
+import logoutIcon from '../../assets/images/imageMahasiswa/sidebarImage/LogoutIcon.png';
 
 const Sidebar = ({ expanded, setExpanded }) => {
+    const navigate = useNavigate();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    // Handle logout function
+    const handleLogout = async (e) => {
+        e.preventDefault();
+
+        try {
+            setIsLoggingOut(true);
+            const result = await logoutUser();
+
+            if (result.success) {
+                // Redirect to login page on successful logout
+                navigate('/');
+            } else {
+                console.error('Logout failed:', result.message);
+                // Still redirect to login page even if server-side logout fails
+                // Since we've already cleared localStorage
+                navigate('/');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+            // Redirect to login regardless of error
+            navigate('/');
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
+
     //Bikin array object sidebar agar mempersingkat kode:
     const sidebarItems = [
         {
@@ -44,7 +74,6 @@ const Sidebar = ({ expanded, setExpanded }) => {
                         }`}>
                         MITIGASI
                     </span>
-
                     <button
                         onClick={() => setExpanded((curr) => !curr)}
                         aria-label="Toggle Sidebar"
@@ -74,18 +103,16 @@ const Sidebar = ({ expanded, setExpanded }) => {
                                     alt={item.name}
                                     className="w-5 h-5 fill-white"
                                 />
-
                                 <span
                                     className={`overflow-hidden transition-all text-sm ${
                                         expanded ? 'w-40 ml-3' : 'w-0'
                                     }`}>
                                     {item.name}
                                 </span>
-
                                 {/* Nampilin nama menu ketika sidebar tertutup dan mouse di hover */}
                                 {!expanded && (
                                     <div
-                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bgwhite text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
+                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-white text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
                                         {item.name}
                                     </div>
                                 )}
@@ -99,7 +126,7 @@ const Sidebar = ({ expanded, setExpanded }) => {
                     <img
                         src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
                         alt="User Profile Picture"
-                        className="w-10 h-10 rounded-sm" //Nambah expanded belum
+                        className="w-10 h-10 rounded-sm"
                     />
                     <div
                         className={`flex justify-between items-center overflow-hidden transition-all ${
@@ -113,15 +140,17 @@ const Sidebar = ({ expanded, setExpanded }) => {
                                 johndoe@gmail.com
                             </span>
                         </div>
-                        <NavLink
-                            to="/system-settings"
+                        {/* Updated logout button with onClick handler */}
+                        <button
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
                             className="text-white no-underline flex items-center hover:opacity-80">
                             <img
-                                src={settingsIcon}
-                                alt="Settings Icon"
+                                src={logoutIcon}
+                                alt="Logout"
                                 className="w-5 h-5"
                             />
-                        </NavLink>
+                        </button>
                     </div>
                 </div>
             </nav>
