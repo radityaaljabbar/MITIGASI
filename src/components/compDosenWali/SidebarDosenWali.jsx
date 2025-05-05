@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { logoutUser } from '../../services/authService';
+import { logoutUser, fetchCurrentUser } from '../../services/authService';
 
 // Import icon-icon yang diperlukan
 import toggleSidebarIcon from '../../assets/images/imageDosenWali/sidebarImages/toggleSidebar.png';
@@ -12,15 +12,48 @@ import myReportIcon from '../../assets/images/imageDosenWali/sidebarImages/MyRep
 const SidebarDosenWali = ({ expanded, setExpanded }) => {
     const navigate = useNavigate();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [userData, setUserData] = useState({
+        name: '',
+        nip: '',
+        code: '',
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch user data on component mount
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetchCurrentUser();
+
+                if (response.success) {
+                    setUserData({
+                        name: response.data.name || '',
+                        nip: response.data.id || '',
+                        code: response.data.code || '',
+                    });
+                } else {
+                    console.error(
+                        'Failed to fetch lecturer data:',
+                        response.message
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching lecturer data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        getUserData();
+    }, []);
 
     // Handle logout function
     const handleLogout = async (e) => {
         e.preventDefault();
-
         try {
             setIsLoggingOut(true);
             const result = await logoutUser();
-
             if (result.success) {
                 // Redirect to login page on successful logout
                 navigate('/');
@@ -117,29 +150,41 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                 </ul>
 
                 {/* Footer Profil User */}
-                <div className="border-t border-black/20 bg-black/20 flex p-3">
-                    <img
-                        src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
-                        alt="User Profile Picture"
-                        className="w-10 h-10 rounded-sm"
-                    />
+                <div className="border-t border-black/20 bg-black/20 p-3">
                     <div
-                        className={`flex justify-between items-center overflow-hidden transition-all ${
-                            expanded ? 'w-40 ml-3' : 'w-0'
+                        className={`flex justify-between items-center w-full ${
+                            !expanded && 'justify-center'
                         }`}>
-                        <div className="leading-4">
-                            <span className="block font-bold text-white text-xs">
-                                Dr. Jane Smith
-                            </span>
-                            <span className="block text-[0.65em] text-white">
-                                janesmith@faculty.edu
-                            </span>
-                        </div>
+                        {expanded && (
+                            <div className="flex-grow overflow-hidden mr-2">
+                                {isLoading ? (
+                                    <div className="leading-4">
+                                        <span className="block font-bold text-white text-xs">
+                                            Loading...
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="leading-4">
+                                        <span className="block font-bold text-white text-xs truncate">
+                                            {userData.name}
+                                        </span>
+                                        <span className="block text-[0.65em] text-white truncate">
+                                            NIP: {userData.nip}
+                                        </span>
+                                        <span className="block text-[0.65em] text-white truncate">
+                                            Kode: {userData.code}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Updated logout button with onClick handler */}
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="text-white no-underline flex items-center hover:opacity-80">
+                            className="text-white no-underline flex items-center hover:opacity-80"
+                            title="Logout">
                             <img
                                 src={logoutIcon}
                                 alt="Logout"

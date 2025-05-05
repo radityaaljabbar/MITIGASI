@@ -89,3 +89,29 @@ export const logoutUser = async () => {
         };
     }
 };
+
+// Function to fetch current user data from the backend
+export const fetchCurrentUser = async () => {
+    try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            return { success: false, message: 'No token found' };
+        }
+
+        const response = await fetch(`${API_URL}/me`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        return {
+            success: false,
+            message: 'Network error. Could not fetch user data.',
+        };
+    }
+};

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { logoutUser } from '../../services/authService';
+import { logoutUser, fetchCurrentUser } from '../../services/authService';
 
-//Import icon-icon yang diperlukan
+// Import icon-icon yang diperlukan
 import toggleSidebarIcon from '../../assets/images/imageMahasiswa/sidebarImage/toggleSidebar.png';
 import myProgressIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyProgress.png';
 import myCourseIcon from '../../assets/images/imageMahasiswa/sidebarImage/MyCourse.png';
@@ -14,15 +14,48 @@ import logoutIcon from '../../assets/images/imageMahasiswa/sidebarImage/LogoutIc
 const Sidebar = ({ expanded, setExpanded }) => {
     const navigate = useNavigate();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [userData, setUserData] = useState({
+        name: '',
+        nim: '',
+        class: '',
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch user data on component mount
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetchCurrentUser();
+
+                if (response.success) {
+                    setUserData({
+                        name: response.data.name || '',
+                        nim: response.data.id || '',
+                        class: response.data.class || '',
+                    });
+                } else {
+                    console.error(
+                        'Failed to fetch user data:',
+                        response.message
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        getUserData();
+    }, []);
 
     // Handle logout function
     const handleLogout = async (e) => {
         e.preventDefault();
-
         try {
             setIsLoggingOut(true);
             const result = await logoutUser();
-
             if (result.success) {
                 // Redirect to login page on successful logout
                 navigate('/');
@@ -41,7 +74,7 @@ const Sidebar = ({ expanded, setExpanded }) => {
         }
     };
 
-    //Bikin array object sidebar agar mempersingkat kode:
+    // Bikin array object sidebar agar mempersingkat kode:
     const sidebarItems = [
         {
             path: '/student',
@@ -109,6 +142,7 @@ const Sidebar = ({ expanded, setExpanded }) => {
                                     }`}>
                                     {item.name}
                                 </span>
+
                                 {/* Nampilin nama menu ketika sidebar tertutup dan mouse di hover */}
                                 {!expanded && (
                                     <div
@@ -122,29 +156,41 @@ const Sidebar = ({ expanded, setExpanded }) => {
                 </ul>
 
                 {/* Footer Profil User */}
-                <div className="border-t border-black/20 bg-black/20 flex p-3">
-                    <img
-                        src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
-                        alt="User Profile Picture"
-                        className="w-10 h-10 rounded-sm"
-                    />
+                <div className="border-t border-black/20 bg-black/20 p-3">
                     <div
-                        className={`flex justify-between items-center overflow-hidden transition-all ${
-                            expanded ? 'w-40 ml-3' : 'w-0'
+                        className={`flex justify-between items-center w-full ${
+                            !expanded && 'justify-center'
                         }`}>
-                        <div className="leading-4">
-                            <span className="block font-bold text-white text-xs">
-                                John Doe
-                            </span>
-                            <span className="block text-[0.65em] text-white">
-                                johndoe@gmail.com
-                            </span>
-                        </div>
+                        {expanded && (
+                            <div className="flex-grow overflow-hidden mr-2">
+                                {isLoading ? (
+                                    <div className="leading-4">
+                                        <span className="block font-bold text-white text-xs">
+                                            Loading...
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="leading-4">
+                                        <span className="block font-bold text-white text-xs truncate">
+                                            {userData.name}
+                                        </span>
+                                        <span className="block text-[0.65em] text-white truncate">
+                                            {userData.nim}
+                                        </span>
+                                        <span className="block text-[0.65em] text-white truncate">
+                                            {userData.class}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Updated logout button with onClick handler */}
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="text-white no-underline flex items-center hover:opacity-80">
+                            className="text-white no-underline flex items-center hover:opacity-80"
+                            title="Logout">
                             <img
                                 src={logoutIcon}
                                 alt="Logout"
