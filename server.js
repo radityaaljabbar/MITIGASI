@@ -12,6 +12,7 @@ const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const responseDosenWali = require('./routes/responseDosenWaliRoutes')
 
 // Import middlewares
 const { errorHandler } = require('./middlewares/errorMiddleware');
@@ -40,6 +41,7 @@ app.use('/api/', authRoutes);
 // app.use('/api/student', studentRoutes);
 // app.use('/api/faculty', facultyRoutes);
 // app.use('/api/admin', adminRoutes);
+app.use('/api/', responseDosenWali);
 
 // Error handling middleware (hrs diletakan di trakhiran disini)
 // app.use(errorHandler);
