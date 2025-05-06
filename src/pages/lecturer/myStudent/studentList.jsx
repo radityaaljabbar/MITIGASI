@@ -1,111 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-    Info,
-    ChevronDown,
-    Search,
-    Download,
-    Filter,
-    Bell,
-    Menu,
-    User,
-} from 'lucide-react';
+import { Info, ChevronDown, Search, Filter, User } from 'lucide-react';
+import { getListMahasiswa } from '../../../services/dosenWali/myStudent/listMahasiswaService';
 
 export default function DaftarMahasiswaWali() {
-    const [selectedClass, setSelectedClass] = useState('TK-48-01');
+    const [selectedClass, setSelectedClass] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [showDetail, setShowDetail] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all');
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [classOptions, setClassOptions] = useState([]);
     const navigate = useNavigate();
 
-    const students = [
-        {
-            id: 1,
-            name: 'John Doe',
-            nim: '1234567890',
-            kelas: 'TK-48-01',
-            ipk: 3.8,
-            tak: 20,
-            status: 'Aman',
-            details: {
-                akademik: 'Aman',
-                psikologis: 'Aman',
-                finansial: 'Aman',
-            },
-        },
-        {
-            id: 2,
-            name: 'Jane Smith',
-            nim: '0987654321',
-            kelas: 'TK-48-01',
-            ipk: 3.2,
-            tak: 15,
-            status: 'Siaga',
-            details: {
-                akademik: 'Siaga',
-                psikologis: 'Aman',
-                finansial: 'Siaga',
-            },
-        },
-        {
-            id: 3,
-            name: 'Peter Jones',
-            nim: '1122334455',
-            kelas: 'TK-48-02',
-            ipk: 2.5,
-            tak: 10,
-            status: 'Bermasalah',
-            details: {
-                akademik: 'Bermasalah',
-                psikologis: 'Siaga',
-                finansial: 'Bermasalah',
-            },
-        },
-        {
-            id: 4,
-            name: 'Anna Karenina',
-            nim: '1103290987',
-            kelas: 'TK-48-02',
-            ipk: 3.73,
-            tak: 22,
-            status: 'Aman',
-            details: {
-                akademik: 'Aman',
-                psikologis: 'Aman',
-                finansial: 'Aman',
-            },
-        },
-        {
-            id: 5,
-            name: 'David Wilson',
-            nim: '2203456123',
-            kelas: 'TK-48-03',
-            ipk: 2.9,
-            tak: 12,
-            status: 'Siaga',
-            details: {
-                akademik: 'Siaga',
-                psikologis: 'Aman',
-                finansial: 'Siaga',
-            },
-        },
-        {
-            id: 6,
-            name: 'Maria Rodriguez',
-            nim: '3304567234',
-            kelas: 'TK-48-03',
-            ipk: 3.5,
-            tak: 18,
-            status: 'Aman',
-            details: {
-                akademik: 'Aman',
-                psikologis: 'Aman',
-                finansial: 'Aman',
-            },
-        },
-    ];
+    // Fetch data from backend when component mounts
+    useEffect(() => {
+        const fetchStudents = async () => {
+            setLoading(true);
+            try {
+                const response = await getListMahasiswa();
+                if (response.success) {
+                    setStudents(response.data);
 
-    const classOptions = ['TK-48-01', 'TK-48-02', 'TK-48-03', 'TK-48-04'];
+                    // Extract unique class options from the data
+                    const uniqueClasses = [
+                        ...new Set(
+                            response.data.map((student) => student.kelas)
+                        ),
+                    ];
+                    setClassOptions(uniqueClasses);
+                } else {
+                    setError(response.message || 'Failed to fetch data');
+                }
+            } catch (error) {
+                setError('Error connecting to the server');
+                console.error('Error fetching student data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, []);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -213,88 +150,118 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 </div>
 
+                {/* Loading State */}
+                {loading && (
+                    <div className="bg-white p-8 rounded-lg shadow text-center">
+                        <p className="text-lg">Loading student data...</p>
+                    </div>
+                )}
+
+                {/* Error State */}
+                {error && (
+                    <div className="bg-white p-8 rounded-lg shadow text-center">
+                        <p className="text-lg text-red-600">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 bg-red-800 text-white px-4 py-2 rounded">
+                            Reload Page
+                        </button>
+                    </div>
+                )}
+
                 {/* Table */}
-                <div className="overflow-x-auto bg-white rounded-lg shadow">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-red-800 text-white">
-                                <th className="py-3 px-4 text-left">NAMA</th>
-                                <th className="py-3 px-4 text-left">NIM</th>
-                                <th className="py-3 px-4 text-left">KELAS</th>
-                                <th className="py-3 px-4 text-center">IPK</th>
-                                <th className="py-3 px-4 text-center">TAK</th>
-                                <th className="py-3 px-4 text-center">
-                                    STATUS
-                                </th>
-                                <th className="py-3 px-4 text-center">
-                                    DETAIL
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredStudents.length > 0 ? (
-                                filteredStudents.map((student) => (
-                                    <tr
-                                        key={student.id}
-                                        className={`${getStatusColor(
-                                            student.status
-                                        )} border-b hover:bg-gray-50 cursor-pointer`}
-                                        onClick={() =>
-                                            handleRowClick(student.nim)
-                                        }>
-                                        <td className="py-3 px-4">
-                                            {student.name}
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            {student.nim}
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            {student.kelas}
-                                        </td>
-                                        <td className="py-3 px-4 text-center">
-                                            {student.ipk}
-                                        </td>
-                                        <td className="py-3 px-4 text-center">
-                                            {student.tak}
-                                        </td>
-                                        <td className="py-3 px-4 text-center">
-                                            <span className="inline-flex items-center">
-                                                <span
-                                                    className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
-                                                        student.status
-                                                    )}`}></span>
-                                                {student.status}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4 text-center">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setShowDetail(
-                                                        showDetail ===
-                                                            student.id
-                                                            ? null
-                                                            : student.id
-                                                    );
-                                                }}
-                                                className="text-blue-600 hover:text-blue-800">
-                                                <Info className="h-5 w-5 mx-auto" />
-                                            </button>
+                {!loading && !error && (
+                    <div className="overflow-x-auto bg-white rounded-lg shadow">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-red-800 text-white">
+                                    <th className="py-3 px-4 text-left">
+                                        NAMA
+                                    </th>
+                                    <th className="py-3 px-4 text-left">NIM</th>
+                                    <th className="py-3 px-4 text-left">
+                                        KELAS
+                                    </th>
+                                    <th className="py-3 px-4 text-center">
+                                        IPK
+                                    </th>
+                                    <th className="py-3 px-4 text-center">
+                                        TAK
+                                    </th>
+                                    <th className="py-3 px-4 text-center">
+                                        STATUS
+                                    </th>
+                                    <th className="py-3 px-4 text-center">
+                                        DETAIL
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredStudents.length > 0 ? (
+                                    filteredStudents.map((student, index) => (
+                                        <tr
+                                            key={student.nim || index}
+                                            className={`${getStatusColor(
+                                                student.status
+                                            )} border-b hover:bg-gray-50 cursor-pointer`}
+                                            onClick={() =>
+                                                handleRowClick(student.nim)
+                                            }>
+                                            <td className="py-3 px-4">
+                                                {student.name}
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                {student.nim}
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                {student.kelas}
+                                            </td>
+                                            <td className="py-3 px-4 text-center">
+                                                {student.ipk}
+                                            </td>
+                                            <td className="py-3 px-4 text-center">
+                                                {student.tak}
+                                            </td>
+                                            <td className="py-3 px-4 text-center">
+                                                <span className="inline-flex items-center">
+                                                    <span
+                                                        className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
+                                                            student.status
+                                                        )}`}></span>
+                                                    {student.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4 text-center">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowDetail(
+                                                            showDetail ===
+                                                                student.nim
+                                                                ? null
+                                                                : student.nim
+                                                        );
+                                                    }}
+                                                    className="text-blue-600 hover:text-blue-800">
+                                                    <Info className="h-5 w-5 mx-auto" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="7"
+                                            className="py-4 text-center text-gray-500">
+                                            Tidak ada data mahasiswa yang
+                                            ditemukan
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan="7"
-                                        className="py-4 text-center text-gray-500">
-                                        Tidak ada data mahasiswa yang ditemukan
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {/* Student Detail Popup */}
                 {showDetail && (
@@ -313,7 +280,7 @@ export default function DaftarMahasiswaWali() {
 
                             {(() => {
                                 const student = students.find(
-                                    (s) => s.id === showDetail
+                                    (s) => s.nim === showDetail
                                 );
                                 if (!student) return null;
 
@@ -357,7 +324,9 @@ export default function DaftarMahasiswaWali() {
                                                     TAK
                                                 </p>
                                                 <p className="text-lg font-bold">
-                                                    {student.tak} poin
+                                                    {student.tak}{' '}
+                                                    {typeof student.tak !==
+                                                        'string' && 'poin'}
                                                 </p>
                                             </div>
                                         </div>
@@ -372,9 +341,11 @@ export default function DaftarMahasiswaWali() {
                                                     <span
                                                         className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
                                                             student.details
-                                                                .akademik
+                                                                ?.akademik ||
+                                                                'Aman'
                                                         )}`}></span>
-                                                    {student.details.akademik}
+                                                    {student.details
+                                                        ?.akademik || 'Aman'}
                                                 </div>
                                             </div>
                                             <div className="flex justify-between p-2 bg-gray-50 rounded">
@@ -383,9 +354,11 @@ export default function DaftarMahasiswaWali() {
                                                     <span
                                                         className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
                                                             student.details
-                                                                .psikologis
+                                                                ?.psikologis ||
+                                                                'Aman'
                                                         )}`}></span>
-                                                    {student.details.psikologis}
+                                                    {student.details
+                                                        ?.psikologis || 'Aman'}
                                                 </div>
                                             </div>
                                             <div className="flex justify-between p-2 bg-gray-50 rounded">
@@ -394,9 +367,11 @@ export default function DaftarMahasiswaWali() {
                                                     <span
                                                         className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
                                                             student.details
-                                                                .finansial
+                                                                ?.finansial ||
+                                                                'Aman'
                                                         )}`}></span>
-                                                    {student.details.finansial}
+                                                    {student.details
+                                                        ?.finansial || 'Aman'}
                                                 </div>
                                             </div>
                                         </div>
@@ -427,24 +402,30 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 )}
 
-                {/* Pagination */}
-                <div className="mt-4 flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                        Menampilkan {filteredStudents.length} dari{' '}
-                        {students.length} mahasiswa
-                    </p>
-                    <div className="flex gap-1">
-                        <button className="px-3 py-1 border border-gray-300 rounded bg-white">
-                            1
-                        </button>
-                        <button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-400">
-                            2
-                        </button>
-                        <button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-400">
-                            3
-                        </button>
+                {/* Pagination - Only show if we have data */}
+                {!loading && !error && filteredStudents.length > 0 && (
+                    <div className="mt-4 flex justify-between items-center">
+                        <p className="text-sm text-gray-600">
+                            Menampilkan {filteredStudents.length} dari{' '}
+                            {students.length} mahasiswa
+                        </p>
+                        <div className="flex gap-1">
+                            <button className="px-3 py-1 border border-gray-300 rounded bg-white">
+                                1
+                            </button>
+                            {students.length > 10 && (
+                                <>
+                                    <button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-400">
+                                        2
+                                    </button>
+                                    <button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-400">
+                                        3
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </main>
         </div>
     );
