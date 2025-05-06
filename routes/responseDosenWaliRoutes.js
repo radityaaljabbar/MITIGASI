@@ -5,7 +5,9 @@ const response = require('../utils/response')
 const { protect, authorize } = require('../middlewares/authMiddleware');
 const getDoswal = require('../controllers/responseDosenWaliController')
 
-router.get('/responseDosenWali', protect, authorize('dosen_wali'), getDoswal.getDoswal)
+router.get('/keluhanMahasiswa', protect, authorize('dosen_wali'), getDoswal.getKeluhanMahasiswa)
+
+router.get('/responseDosenWali',protect, authorize('dosen_wali'), getDoswal.getResponDosWal)
 
 module.exports = router;
 
