@@ -10,7 +10,7 @@ const generateToken = (id, role) => {
 };
 
 // @desc    Login user (mahasiswa or dosen_wali)
-// @route   POST /api/auth/login
+// @route   POST /api/login
 // @access  Public
 exports.login = async (req, res) => {
     try {
@@ -102,7 +102,7 @@ exports.login = async (req, res) => {
 };
 
 // @desc    Get current logged in user
-// @route   GET /api/auth/me
+// @route   GET /api/me
 // @access  Private
 exports.getMe = async (req, res) => {
     res.status(200).json({
@@ -112,7 +112,7 @@ exports.getMe = async (req, res) => {
 };
 
 // @desc    Logout user
-// @route   GET /api/auth/logout
+// @route   GET /api/logout
 // @access  Private
 exports.logout = async (req, res) => {
     try {
