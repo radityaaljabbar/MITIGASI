@@ -83,15 +83,28 @@ exports.login = async (req, res) => {
         const token = generateToken(user[idField] || id, role);
 
         // Send response
-        res.status(200).json({
-            success: true,
-            token,
-            user: {
-                id: user[idField] || id,
-                name: user.nama,
-                role,
-            },
-        });
+        if (role === 'dosen_wali') {
+            res.status(200).json({
+                success: true,
+                token,
+                user: {
+                    id: user[idField],
+                    name: user.nama,
+                    kodedosen: user.kode,
+                    role,
+                },
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                token,
+                user: {
+                    id: user[idField] || id,
+                    name: user.nama,
+                    role,
+                },
+            });
+        }
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({

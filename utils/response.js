@@ -3,13 +3,14 @@ const response = (statusCode, data, message, res) => {
         {
             payload: data,
             message,
+            success,
             metadata: {
-                prev: "",
-                next: "",
-                current: ""
-            }
-        }
-    ])
-}
+                prev: '',
+                next: '',
+                current: '',
+            },
+        },
+    ]);
+};
 
-module.exports = response
+module.exports = response;

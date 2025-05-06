@@ -47,7 +47,7 @@ if (process.env.NODE_ENV === 'development') {
 // Routes
 app.use('/api/', authRoutes);
 // app.use('/api/student', studentRoutes);
-// app.use('/api/faculty', facultyRoutes);
+app.use('/api/faculty', facultyRoutes);
 // app.use('/api/admin', adminRoutes);
 app.use('/api/', responseDosenWali);
 
