@@ -7,6 +7,8 @@ const facultyController = require('../controllers/facultyController');
 // Import middleware authentikasi
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
+// @desc Endpoint backend untuk fitur MyStudent List Mahasiswa
+// @FR-01.1 - MyStudents-Overview
 // studentList.jsx route
 router.get(
     '/listMahasiswa',
