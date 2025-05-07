@@ -3,7 +3,6 @@ const response = (statusCode, data, message, res) => {
         {
             payload: data,
             message,
-            success,
             metadata: {
                 prev: '',
                 next: '',
