@@ -1,10 +1,8 @@
-const {pool} = require('../config/database')
 const response = require('../utils/response')
 const responseDosWalModel = require('../models/responseDosenWali')
 
 exports.getKeluhanMahasiswa = async (req, res, next) => {
     const dosenNIP = req.user.id
-    
 
     try {
         const [data] = await (responseDosWalModel.getKeluhan(dosenNIP))
