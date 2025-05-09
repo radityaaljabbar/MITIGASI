@@ -49,7 +49,7 @@ app.use('/api/', authRoutes);
 // app.use('/api/student', studentRoutes);
 app.use('/api/faculty', facultyRoutes);
 // app.use('/api/admin', adminRoutes);
-app.use('/api/', responseDosenWali);
+app.use('/api/faculty', responseDosenWali);
 
 // Error handling middleware (hrs diletakan di trakhiran disini)
 // app.use(errorHandler);
