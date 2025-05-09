@@ -3,7 +3,6 @@ const router = express.Router();
 
 // Import controller
 const facultyController = require('../controllers/facultyController');
-
 // Import middleware authentikasi
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
@@ -17,4 +16,21 @@ router.get(
     facultyController.getStudentList
 );
 
+// @desc Endpoint backend untuk fitur MyReport
+// FR-03.1 - MyReport - Overview
+// /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx
+
+router.get(
+    '/keluhanMahasiswa',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getKeluhanMahasiswa
+);
+
+router.get(
+    '/responseDosenWali',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getResponDosWal
+);
 module.exports = router;

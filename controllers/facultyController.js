@@ -1,7 +1,9 @@
 const { pool } = require('../config/database');
+const response = require('../utils/response');
+const responseDosWalModel = require('../models/responseDosenWali');
 
 // @desc    Get list of students for dosen wali
-// @route   GET /api/listMahasiswa
+// @route   GET /api/faculty/listMahasiswa
 // @access  Private (dosen_wali only)
 exports.getStudentList = async (req, res) => {
     try {
@@ -71,5 +73,47 @@ exports.getStudentList = async (req, res) => {
             success: false,
             message: 'Server error',
         });
+    }
+};
+
+// @desc    Get list and data of students report to lecturer
+// @route   GET /api/faculty/keluhanMahasiswa
+// @access  Private (dosen_wali only)
+exports.getKeluhanMahasiswa = async (req, res, next) => {
+    const dosenNIP = req.user.id;
+
+    try {
+        const [data] = await responseDosWalModel.getKeluhan(dosenNIP);
+        console.log(dosenNIP);
+        response(200, data, 'dapat semua keluhan', res);
+    } catch (err) {
+        if (err) throw err;
+        response(
+            500,
+            null,
+            'tidak dapat mengambil data keluhan mahasiswa wali',
+            res
+        );
+    }
+};
+
+// @desc    Get list and data of dosenwali response to students report to lecturer
+// @route   GET /api/faculty/responseDosenWali
+// @access  Private (dosen_wali only)
+exports.getResponDosWal = async (req, res, next) => {
+    const dosenNIP = req.user.id;
+
+    try {
+        const [data] = await responseDosWalModel.getResponse(dosenNIP);
+        console.log(dosenNIP);
+        response(200, data, 'dapat semua response', res);
+    } catch (err) {
+        if (err) throw err;
+        response(
+            500,
+            null,
+            'tidak dapat mengambil data response dosen wali',
+            res
+        );
     }
 };
