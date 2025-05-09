@@ -110,13 +110,84 @@ export const getFeedbackDetail = async (id) => {
     }
 };
 
-// Format tanggal yang diambil dari backend ke format indo
+// Get response dari dosen wali terkait feedback mahasiswa sesuai id params
 /**
- * @param {Date}
- * @returns {string}
+ * @param {string|number}
+ * @returns {Promise<Object>}
  */
 
-function formatDate(date) {
+/**
+ * Get response dari dosen wali terkait feedback mahasiswa sesuai id params
+ * @param {string|number} id
+ * @returns {Promise<Object>}
+ */
+export const getFeedbackResponse = async (id) => {
+    try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            return {
+                success: false,
+                message: 'No token found',
+            };
+        }
+
+        console.log(`Fetching response for feedback ID: ${id}`);
+
+        // Use the correct endpoint with query parameter
+        const response = await fetch(
+            `${API_URL}/responseDosenWali?feedbackId=${id}`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        // Check if we received valid data from the endpoint
+        if (data && data[0]?.payload && data[0].payload.length > 0) {
+            const item = data[0].payload[0]; // Get the first item in the payload array
+            return {
+                success: true,
+                data: {
+                    responseId: item.id_response,
+                    feedbackId: item.id_keluhan,
+                    dosenNip: item.nip_dosen_wali,
+                    responseText: item.response_keluhan,
+                    responseDate: formatDate(new Date(item.tanggal_response)),
+                    status:
+                        item.status_keluhan === 1
+                            ? 'Sudah Direspon'
+                            : 'Menunggu Respon',
+                },
+            };
+        }
+
+        return {
+            success: false,
+            message: 'No response found for this feedback',
+        };
+    } catch (error) {
+        console.error('Error fetching feedback response:', error);
+        return {
+            success: false,
+            message: 'Network error could not fetch feedback response',
+        };
+    }
+};
+
+// Make sure this function is properly exported
+/**
+ * Format date to Indonesian format
+ * @param {Date} date
+ * @returns {string}
+ */
+export function formatDate(date) {
     if (!date || isNaN(date.getTime())) {
         return 'Invalid Date';
     }

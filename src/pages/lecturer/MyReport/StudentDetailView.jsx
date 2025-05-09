@@ -1,58 +1,100 @@
 import React, { useEffect, useState } from 'react';
-import {
-    ArrowLeft,
-    Paperclip,
-    Send,
-    Printer,
-    ChevronRight,
-    FileText,
-} from 'lucide-react';
+import { ArrowLeft, Paperclip, Send, Printer, FileText } from 'lucide-react';
 import getStatusColor from '../../../components/statusColor';
-import { getFeedbackDetail } from '../../../services/dosenWali/myReport/listFeedbackMahasiswaService';
+import { getFeedbackResponse } from '../../../services/dosenWali/myReport/listFeedbackMahasiswaService';
 
 const StudentDetailView = ({ student, onBack }) => {
     const [komentar, setKomentar] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [studentDetail, setStudentDetail] = useState(student);
-    const [komentarList, setKomentarList] = useState([
-        {
-            id: 1,
-            name: 'Admin',
-            text: 'Mohon untuk melengkapi dokumen yang dibutuhkan',
-            timestamp: '10:30 WIB, 25 Des 2024',
-        },
-    ]);
+    const [responseData, setResponseData] = useState(null);
+    const [komentarList, setKomentarList] = useState([]);
+    const [debugInfo, setDebugInfo] = useState('');
 
     // Fetch detail feedback mahasiswa
+    // Inside the useEffect for fetching dosen response
     useEffect(() => {
-        const fetchDetailFeedback = async () => {
-            //
-            if (!student.details) {
-                setLoading(true);
+        const fetchDosenResponse = async () => {
+            if (student.feedbackId) {
+                setDebugInfo(
+                    `Starting to fetch response for ID: ${student.feedbackId}`
+                );
                 try {
-                    const response = await getFeedbackDetail(
+                    const response = await getFeedbackResponse(
                         student.feedbackId
                     );
 
-                    if (response.success) {
-                        setStudentDetail(response.data);
+                    console.log('Dosen response data:', response);
+                    setDebugInfo(
+                        (prev) =>
+                            `${prev}\nAPI response: ${JSON.stringify(
+                                response,
+                                null,
+                                2
+                            )}`
+                    );
+
+                    if (response.success && response.data) {
+                        setResponseData(response.data);
+
+                        // Update student status based on response status
+                        setStudentDetail((prev) => ({
+                            ...prev,
+                            status: response.data.status,
+                        }));
+
+                        // Create a new comment from the response
+                        const newComment = {
+                            id: response.data.responseId,
+                            name: 'Dosen Wali',
+                            text: response.data.responseText,
+                            timestamp: response.data.responseDate,
+                            isDosenResponse: true,
+                        };
+
+                        // Replace the entire comment list
+                        setKomentarList([newComment]);
+                        setDebugInfo(
+                            (prev) =>
+                                `${prev}\nResponse data found and added to comments.`
+                        );
                     } else {
-                        setError(
-                            response.message ||
-                                'Failed to fetch detailed information'
+                        // If no response found, show waiting message
+                        setKomentarList([
+                            {
+                                id: 1,
+                                name: 'System',
+                                text: 'Keluhan anda belum di respon, mohon menunggu',
+                                timestamp: new Date().toLocaleString('id-ID'),
+                                isSystemMessage: true,
+                            },
+                        ]);
+                        setDebugInfo(
+                            (prev) =>
+                                `${prev}\nNo response data found, showing waiting message.`
                         );
                     }
                 } catch (error) {
-                    setError('An error occured while fetching detaild data');
-                    console.error(error);
-                } finally {
-                    setLoading(false);
+                    console.error('Error fetching dosen response:', error);
+                    setDebugInfo((prev) => `${prev}\nError: ${error.message}`);
+
+                    // Set waiting message if there's an error
+                    setKomentarList([
+                        {
+                            id: 1,
+                            name: 'System',
+                            text: 'Keluhan anda belum di respon, mohon menunggu',
+                            timestamp: new Date().toLocaleString('id-ID'),
+                            isSystemMessage: true,
+                        },
+                    ]);
                 }
             }
         };
-        fetchDetailFeedback();
-    }, [student]);
+
+        fetchDosenResponse();
+    }, [student.feedbackId]);
 
     const handleKirimKomentar = () => {
         if (komentar.trim()) {
@@ -184,25 +226,35 @@ const StudentDetailView = ({ student, onBack }) => {
 
                     {/* Comment list */}
                     <div className="space-y-3 mb-4">
-                        {komentarList.map((comment) => (
-                            <div
-                                key={comment.id}
-                                className={`p-3 rounded-lg text-sm ${
-                                    comment.name === 'You'
-                                        ? 'bg-blue-50 border-blue-100 ml-4'
-                                        : 'bg-gray-50 border-gray-100 mr-4'
-                                } border`}>
-                                <div className="flex justify-between mb-1">
-                                    <span className="font-medium">
-                                        {comment.name}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                        {comment.timestamp}
-                                    </span>
+                        {komentarList.length > 0 ? (
+                            komentarList.map((comment) => (
+                                <div
+                                    key={comment.id}
+                                    className={`p-3 rounded-lg text-sm ${
+                                        comment.name === 'You'
+                                            ? 'bg-blue-50 border-blue-100 ml-4'
+                                            : comment.isDosenResponse
+                                            ? 'bg-green-50 border-green-100'
+                                            : comment.isSystemMessage
+                                            ? 'bg-yellow-50 border-yellow-100 text-center font-medium'
+                                            : 'bg-gray-50 border-gray-100 mr-4'
+                                    } border`}>
+                                    <div className="flex justify-between mb-1">
+                                        <span className="font-medium">
+                                            {comment.name}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                            {comment.timestamp}
+                                        </span>
+                                    </div>
+                                    <p>{comment.text}</p>
                                 </div>
-                                <p>{comment.text}</p>
+                            ))
+                        ) : (
+                            <div className="text-sm text-gray-500 italic">
+                                Belum ada komentar
                             </div>
-                        ))}
+                        )}
                     </div>
 
                     {/* Comment input */}
@@ -241,9 +293,16 @@ const StudentDetailView = ({ student, onBack }) => {
                         <Printer size={16} />
                         <span>Cetak Laporan</span>
                     </button>
-                    <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 transition-colors">
+                    <button
+                        className={`flex items-center justify-center gap-2 px-4 py-2 ${
+                            responseData ? 'bg-green-600' : 'bg-blue-600'
+                        } text-white rounded-xl text-sm hover:${
+                            responseData ? 'bg-green-700' : 'bg-blue-700'
+                        } transition-colors`}>
                         <Send size={16} />
-                        <span>Kirim Respon</span>
+                        <span>
+                            {responseData ? 'Edit Respon' : 'Kirim Respon'}
+                        </span>
                     </button>
                 </div>
             </div>
