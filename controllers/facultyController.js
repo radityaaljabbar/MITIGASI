@@ -102,13 +102,16 @@ exports.getKeluhanMahasiswa = async (req, res, next) => {
 // @access  Private (dosen_wali only)
 exports.getResponDosWal = async (req, res, next) => {
     const dosenNIP = req.user.id;
+    const feedbackId = req.query.feedbackId; // Add this to get the specific feedback ID
 
     try {
-        const [data] = await responseDosWalModel.getResponse(dosenNIP);
-        console.log(dosenNIP);
+        const [data] = await responseDosWalModel.getResponse(
+            dosenNIP,
+            feedbackId
+        );
         response(200, data, 'dapat semua response', res);
     } catch (err) {
-        if (err) throw err;
+        console.error('Error fetching response:', err);
         response(
             500,
             null,
