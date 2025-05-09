@@ -16,5 +16,11 @@ export const getListMahasiswa = async () => {
         });
 
         return await response.json();
-    } catch (error) {}
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        return {
+            success: false,
+            message: 'Network error. Could not fetch user data.',
+        };
+    }
 };

@@ -1,7 +1,5 @@
 ```
 └── 📁frontendCode
-        └── 📁branches
-        └── COMMIT_EDITMSG
         └── config
         └── description
         └── FETCH_HEAD
@@ -33,62 +31,18 @@
                     └── 📁origin
                         └── andre
                         └── farid-branch
+                        └── HEAD
                         └── kode_backend_branch
                         └── main
                         └── main-project-branch
                         └── ML
                         └── radit-branch
         └── 📁objects
-            └── 📁28
-                └── e33fc8c5388ff3460da192e25aa7f42ab0ff60
-            └── 📁2a
-                └── f3987aa077ee85b06f8d8c1fa3425936bca28c
-            └── 📁2f
-                └── dcbda6869f0333c8f76b8748a50cc3f3238c5b
-            └── 📁30
-                └── 14fb30ea698a53359b59a42f19b5be8467f8ea
-            └── 📁31
-                └── 4bb105ad488ef1771cdff372d30c3cec2816ca
-            └── 📁39
-                └── 4458ef6b1ddfa2446b94357205510c969f9aa5
-            └── 📁45
-                └── 509621b2e003e5defbc1e69059ab7f91ba1048
-            └── 📁69
-                └── a627adb20c2b6f925c4c4ca98b4df90877bd5e
-            └── 📁6d
-                └── 8b8dba0cb5f68c87d0e8f6cb2e48b704c00517
-            └── 📁78
-                └── 4c2cedaff5067de5d7b0acbbf54ac576ca2196
-            └── 📁86
-                └── 6878c711c06eca01b0a8e7789d51f62bfcb828
-            └── 📁89
-                └── a0f43e9990dc9656d5f2991380e6f66db36e89
-            └── 📁a9
-                └── b73fca18e7015f29e07b1cf09bbfe8a43cdebb
-            └── 📁ab
-                └── f1ca3d9f9d0218f65a74e39f358166a863a8de
-            └── 📁b9
-                └── 4259c3bd1fa555c291ed13d639e37f9dbc77b8
-            └── 📁bd
-                └── ac0ac6b173d8f85c0a3b17479e573f6216dfcd
-            └── 📁c7
-                └── fb52d22712f35e4d37359888756180feea5cf4
-            └── 📁cf
-                └── be3a590f0bdc459eb50d38d86247a459834c31
-            └── 📁d3
-                └── c9d1baf8c4fd5670fb541c99bd477ab4a7e535
-            └── 📁d6
-                └── 3597b68b287310a305660e415dffba00a64296
-            └── 📁e2
-                └── a450fc94e08270afffa14e3666d065fe3c3387
-            └── 📁ee
-                └── ca8ecdfca43fd9611fe8c8028532d0a19b5281
             └── 📁info
             └── 📁pack
-                └── pack-2200ba1ef78d5967ba530f0bbd716f38ddfa6674.idx
-                └── pack-2200ba1ef78d5967ba530f0bbd716f38ddfa6674.pack
-                └── pack-2200ba1ef78d5967ba530f0bbd716f38ddfa6674.rev
-        └── ORIG_HEAD
+                └── pack-e1a66e5adb74f7180e5cc8e1b4cecb8f4447fec3.idx
+                └── pack-e1a66e5adb74f7180e5cc8e1b4cecb8f4447fec3.pack
+                └── pack-e1a66e5adb74f7180e5cc8e1b4cecb8f4447fec3.rev
         └── 📁refs
             └── 📁heads
                 └── main-project-branch
@@ -96,6 +50,7 @@
                 └── 📁origin
                     └── andre
                     └── farid-branch
+                    └── HEAD
                     └── kode_backend_branch
                     └── main
                     └── main-project-branch
@@ -139,6 +94,7 @@
             └── 📁images
                 └── 📁imageDosenWali
                     └── 📁sidebarImages
+                        └── LogoutIcon.png
                         └── MyCourseAdvisorIcon.png
                         └── MyReportIcon.png
                         └── MyStudentsIcon.png
@@ -148,6 +104,7 @@
                 └── 📁imageMahasiswa
                     └── 📁sidebarImage
                         └── DropdownArrow.png
+                        └── LogoutIcon.png
                         └── MockupUserPic.png
                         └── MyCourse.png
                         └── MyFeedback.png
@@ -233,6 +190,9 @@
                 └── NotFoundPage.jsx
         └── 📁services
             └── authService.js
+            └── 📁dosenWali
+                └── 📁myStudent
+                    └── listMahasiswaService.js
     └── .gitignore
     └── eslint.config.js
     └── index.html
