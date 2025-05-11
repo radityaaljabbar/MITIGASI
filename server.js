@@ -11,8 +11,7 @@ const { testConnection } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const responseDosenWali = require('./routes/responseDosenWaliRoutes');
+// const adminRoutes = require('./routes/adminRoutes');
 
 // Import middlewares
 const { errorHandler } = require('./middlewares/errorMiddleware');
@@ -46,7 +45,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.use('/api/', authRoutes);
-// app.use('/api/student', studentRoutes);
+app.use('/api/student', studentRoutes);
 app.use('/api/faculty', facultyRoutes);
 // app.use('/api/admin', adminRoutes);
 

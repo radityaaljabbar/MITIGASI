@@ -1,0 +1,37 @@
+```
+└── 📁backendCode
+    └── 📁config
+        └── config.js
+        └── database.js
+    └── 📁controllers
+        └── adminController.js
+        └── authController.js
+        └── facultyController.js
+        └── studentController.js
+    └── 📁middlewares
+        └── authMiddleware.js
+        └── errorMiddleware.js
+        └── validationMiddleware.js
+    └── 📁models
+        └── dosenWaliTable.js
+        └── mahasiswaTable.js
+        └── responseDosenWali.js
+    └── 📁routes
+        └── adminRoutes.js
+        └── authRoutes.js
+        └── facultyRoutes.js
+        └── studentRoutes.js
+    └── 📁utils
+        └── helpers.js
+        └── logger.js
+        └── response.js
+        └── tokenCleanup.js
+        └── validator.js
+    └── .env
+    └── .gitignore
+    └── package-lock.json
+    └── package.json
+    └── README.md
+    └── server.js
+    └── structure.md
+```
