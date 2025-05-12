@@ -2,7 +2,7 @@ const { pool } = require('../../config/database');
 
 /**
  * Ambil data nilai mahasiswa berdasarkan ID
- * @param {string} studentId - ID mahasiswa
+ * @param {string} nim - ID mahasiswa
  * @returns {Promise<Array>} - Array data nilai
  */
 const getStudentGrades = async (studentId) => {

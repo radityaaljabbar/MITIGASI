@@ -1,3 +1,4 @@
+// Import queries2 dari folder models
 const {
     getStudentGrades,
     getNewCourses,
@@ -5,6 +6,47 @@ const {
     getOldCourses,
     processCourseHistory,
 } = require('../models/mahasiswaQueries/myCourseQueries');
+
+const {
+    fetchStudentTAK,
+} = require('../models/mahasiswaQueries/MyProgress_TAKQueries');
+
+// @desc Ambil tak dari mahasisw yang login
+// @route GET /api/student/takMahasiswa
+// @access Private (khusus mahasiswa)
+exports.getStudentsTAK = async (req, res) => {
+    try {
+        // Ambil nim mahasiswa dari localStorage:
+        const nim = req.user.id;
+
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'NIM not found, make sure you have logged in correctly',
+            });
+        }
+
+        // Ambil data tak dari query:
+        const rows = await fetchStudentTAK(nim);
+
+        // Ekstrak TAK saja
+        const takValue = rows.length > 0 ? rows[0].tak : 0;
+
+        // console.log('TAK Value:', takValue);
+
+        return res.status(200).json({
+            success: true,
+            data: takValue,
+        });
+    } catch (error) {
+        console.error('Error fetching students TAK:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+        });
+    }
+};
 
 // @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
 // @route GET /api/student/riwayatMataKuliah
@@ -19,7 +61,7 @@ exports.getCourseHistory = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message:
-                    'NIM tidak ditemukan, pastikan kamu sudah login dengan benar',
+                    'NIM not found, make sure you have logged in correctly',
             });
         }
 
