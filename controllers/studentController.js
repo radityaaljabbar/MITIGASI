@@ -113,8 +113,6 @@ exports.getCourseHistory = async (req, res) => {
             newCoursesMap[course.kode_mk] = course;
         });
 
-        console.log(newCoursesMap);
-
         // 5. Cari kode matkul yang nggak ketemu di tabel matkul baru
         const notFoundKodeMk = arrayKodeMk.filter(
             (kode) => !newCoursesMap[kode]
