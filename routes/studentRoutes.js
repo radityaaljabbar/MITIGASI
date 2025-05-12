@@ -15,7 +15,7 @@ router.get(
     '/takMahasiswa',
     protect,
     authorize('mahasiswa'),
-    studentController.getStudentsTAK
+    studentController.getStudentsTAKSKSIPK
 );
 
 /**

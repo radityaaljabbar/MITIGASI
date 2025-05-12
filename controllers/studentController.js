@@ -9,12 +9,14 @@ const {
 
 const {
     fetchStudentTAK,
-} = require('../models/mahasiswaQueries/MyProgress_TAKQueries');
+    fetchStudentSKSTotal,
+    fetchStudentIPK,
+} = require('../models/mahasiswaQueries/MyProgress_takSksIpkQueries');
 
 // @desc Ambil tak dari mahasisw yang login
 // @route GET /api/student/takMahasiswa
 // @access Private (khusus mahasiswa)
-exports.getStudentsTAK = async (req, res) => {
+exports.getStudentsTAKSKSIPK = async (req, res) => {
     try {
         // Ambil nim mahasiswa dari localStorage:
         const nim = req.user.id;
@@ -28,16 +30,25 @@ exports.getStudentsTAK = async (req, res) => {
         }
 
         // Ambil data tak dari query:
-        const rows = await fetchStudentTAK(nim);
+        const rowsTAK = await fetchStudentTAK(nim);
+        const rowsSKSTotal = await fetchStudentSKSTotal(nim);
+        const rowsIPK = await fetchStudentIPK(nim);
 
         // Ekstrak TAK saja
-        const takValue = rows.length > 0 ? rows[0].tak : 0;
+        const takValue = rowsTAK.length > 0 ? rowsTAK[0].tak : 0;
+        const sksTotalValue =
+            rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
+        const ipkValue = rowsIPK.length > 0 ? rowsIPK[0].ipk_lulus : 0;
 
-        // console.log('TAK Value:', takValue);
+        const ipkSksTak = {
+            ipk: ipkValue,
+            sksTotal: sksTotalValue,
+            tak: takValue,
+        };
 
         return res.status(200).json({
             success: true,
-            data: takValue,
+            data: ipkSksTak,
         });
     } catch (error) {
         console.error('Error fetching students TAK:', error);
