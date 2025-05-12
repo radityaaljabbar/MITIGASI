@@ -91,7 +91,7 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // 2. Bikin daftar unik kode_mk dari nilai mahasiswa
+        // 2. Bikin array kode_mk dari nilai mahasiswa
         const kodeMkSet = new Set(nilaiRows.map((row) => row.kode_mk));
         const arrayKodeMk = [...kodeMkSet];
 
