@@ -27,7 +27,7 @@ const RekomendasiMataKuliah = () => {
             </h2>
             <div className="w-full h-[calc(100%-70px)] overflow-y-auto overflow-x-auto rounded-lg">
                 <table className="w-full border-separate border-spacing-0 text-sm">
-                    <thead>
+                    <thead className="sticky top-0 z-10">
                         <tr className="bg-[#951a22] text-white">
                             {[
                                 'Nama Mata Kuliah',
@@ -37,7 +37,7 @@ const RekomendasiMataKuliah = () => {
                             ].map((header, index) => (
                                 <th
                                     key={index}
-                                    className="border border-gray-300 p-3 text-center font-bold sticky top-0 z-10 uppercase">
+                                    className="border border-gray-300 p-3 text-center font-bold uppercase bg-[#951a22]">
                                     {header}
                                 </th>
                             ))}
