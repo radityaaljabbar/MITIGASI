@@ -21,12 +21,11 @@ const getStudentGrades = async (studentId) => {
 const getNewCourses = async (courseCodeArray) => {
     // Bikin placeholders buat query IN clause
     const placeholders = Array(courseCodeArray.length).fill('?').join(',');
-
     const [newCoursesRows] = await pool.execute(
-        `SELECT kode_mk, nama_mk, sks_mk, jenis_mk FROM mata_kuliah_baru WHERE kode_mk IN (${placeholders})`,
+        // Tambahkan ekivalensi di sini untuk mengambil kode lama
+        `SELECT kode_mk, nama_mk, sks_mk, jenis_mk, ekivalensi FROM mata_kuliah_baru WHERE kode_mk IN (${placeholders})`,
         courseCodeArray
     );
-
     return newCoursesRows;
 };
 
@@ -37,13 +36,11 @@ const getNewCourses = async (courseCodeArray) => {
  */
 const getEquivalentCourses = async (oldCourseCodeArray) => {
     const placeholders = Array(oldCourseCodeArray.length).fill('?').join(',');
-
     const [equivalentRows] = await pool.execute(
         `SELECT kode_mk, nama_mk, sks_mk, jenis_mk, ekivalensi FROM mata_kuliah_baru 
         WHERE ekivalensi IN (${placeholders})`,
         oldCourseCodeArray
     );
-
     return equivalentRows;
 };
 
@@ -54,13 +51,11 @@ const getEquivalentCourses = async (oldCourseCodeArray) => {
  */
 const getOldCourses = async (oldCourseCodeArray) => {
     const placeholders = Array(oldCourseCodeArray.length).fill('?').join(',');
-
     const [oldCoursesRows] = await pool.execute(
-        `SELECT kode_mk_lama, nama_mk_lama, sks_mk_lama FROM mata_kuliah_lama 
+        `SELECT kode_mk_lama, nama_mk_lama, sks_mk_lama FROM mata_kuliah_lama
         WHERE kode_mk_lama IN (${placeholders})`,
         oldCourseCodeArray
     );
-
     return oldCoursesRows;
 };
 
@@ -80,10 +75,17 @@ const processCourseHistory = (grades, coursesMap) => {
         if (courseDetails) {
             // Cek apakah ini matkul ekivalensi
             const isEquivalent = courseDetails.is_equivalent === true;
-            // Kalau ekivalensi, tampilkan kode lama → kode baru
-            const kodeMataKuliah = isEquivalent
-                ? `${kode_mk} → ${courseDetails.kode_mk_baru}`
-                : kode_mk;
+
+            // Tentukan kode mana yang akan ditampilkan
+            let kodeMataKuliah = kode_mk;
+
+            if (isEquivalent) {
+                // Untuk matkul yang sudah dipetakan ekivalen, gunakan kode lama
+                kodeMataKuliah = kode_mk;
+            } else if (courseDetails.ekivalensi) {
+                // Untuk matkul baru yang punya nilai ekivalensi, gunakan nilai ekivalensi
+                kodeMataKuliah = courseDetails.ekivalensi;
+            }
 
             courseHistory.push({
                 nama_mata_kuliah:
