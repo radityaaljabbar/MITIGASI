@@ -4,6 +4,7 @@ const {
     getNewCourses,
     getEquivalentCourses,
     getOldCourses,
+    getOldCoursesNames,
     processCourseHistory,
 } = require('../models/mahasiswaQueries/myCourseQueries');
 
@@ -62,6 +63,9 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
 // @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
 // @route GET /api/student/riwayatMataKuliah
 // @access Private (khusus mahasiswa)
+// @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
+// @route GET /api/student/riwayatMataKuliah
+// @access Private (khusus mahasiswa)
 exports.getCourseHistory = async (req, res) => {
     try {
         // Ambil nim mahasiswa dari session
@@ -72,7 +76,7 @@ exports.getCourseHistory = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message:
-                    'NIM not found, make sure you have logged in correctly',
+                    'NIM tidak ditemukan, pastikan kamu sudah login dengan benar',
             });
         }
 
@@ -157,8 +161,44 @@ exports.getCourseHistory = async (req, res) => {
             }
         }
 
+        // Kumpulkan semua kode ekivalensi yang perlu dicari namanya
+        const ekivalensiCodes = [];
+
+        // Tambahkan dari matkul yang punya nilai ekivalensi
+        newCoursesRows.forEach((course) => {
+            if (course.ekivalensi) {
+                ekivalensiCodes.push(course.ekivalensi);
+            }
+        });
+
+        // Tambahkan dari matkul yang sudah ekivalen (kode lama dari nilai)
+        arrayKodeMk.forEach((kode) => {
+            if (newCoursesMap[kode] && newCoursesMap[kode].is_equivalent) {
+                ekivalensiCodes.push(kode);
+            }
+        });
+
+        // Map untuk menyimpan nama matkul lama berdasarkan kode
+        const oldCoursesNamesMap = {};
+
+        // Cari nama matkul lama jika ada kode ekivalensi
+        if (ekivalensiCodes.length > 0) {
+            const oldCoursesNamesRows = await getOldCoursesNames(
+                ekivalensiCodes
+            );
+
+            // Buat map untuk nama matkul lama
+            oldCoursesNamesRows.forEach((course) => {
+                oldCoursesNamesMap[course.kode_mk_lama] = course.nama_mk_lama;
+            });
+        }
+
         // 7. Proses dan gabungkan data untuk respons
-        const courseHistory = processCourseHistory(nilaiRows, newCoursesMap);
+        const courseHistory = processCourseHistory(
+            nilaiRows,
+            newCoursesMap,
+            oldCoursesNamesMap
+        );
 
         return res.status(200).json({
             success: true,

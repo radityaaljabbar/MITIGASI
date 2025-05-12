@@ -2,7 +2,7 @@ const { pool } = require('../../config/database');
 
 /**
  * Ambil data nilai mahasiswa berdasarkan ID
- * @param {string} nim - ID mahasiswa
+ * @param {string} studentId - ID mahasiswa
  * @returns {Promise<Array>} - Array data nilai
  */
 const getStudentGrades = async (studentId) => {
@@ -45,6 +45,21 @@ const getEquivalentCourses = async (oldCourseCodeArray) => {
 };
 
 /**
+ * Ambil data nama matkul lama berdasarkan kode ekivalensi
+ * @param {Array} ekivalensiArray - Array kode ekivalensi
+ * @returns {Promise<Array>} - Array data nama matkul lama
+ */
+const getOldCoursesNames = async (ekivalensiArray) => {
+    const placeholders = Array(ekivalensiArray.length).fill('?').join(',');
+    const [oldCoursesRows] = await pool.execute(
+        `SELECT kode_mk_lama, nama_mk_lama FROM mata_kuliah_lama
+        WHERE kode_mk_lama IN (${placeholders})`,
+        ekivalensiArray
+    );
+    return oldCoursesRows;
+};
+
+/**
  * Ambil data matkul lama dari database
  * @param {Array} oldCourseCodeArray - Array kode matkul lama
  * @returns {Promise<Array>} - Array data matkul lama
@@ -63,9 +78,10 @@ const getOldCourses = async (oldCourseCodeArray) => {
  * Mengolah data matkul dan nilai menjadi riwayat matkul lengkap
  * @param {Array} grades - Array data nilai
  * @param {Object} coursesMap - Map data matkul
+ * @param {Object} oldCoursesNamesMap - Map nama matkul lama
  * @returns {Array} - Array data riwayat matkul
  */
-const processCourseHistory = (grades, coursesMap) => {
+const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
     const courseHistory = [];
 
     grades.forEach((grade) => {
@@ -76,20 +92,30 @@ const processCourseHistory = (grades, coursesMap) => {
             // Cek apakah ini matkul ekivalensi
             const isEquivalent = courseDetails.is_equivalent === true;
 
-            // Tentukan kode mana yang akan ditampilkan
+            // Tentukan kode dan nama matkul yang akan ditampilkan
             let kodeMataKuliah = kode_mk;
+            let namaMataKuliah =
+                courseDetails.nama_mk || courseDetails.nama_mk_lama;
 
             if (isEquivalent) {
-                // Untuk matkul yang sudah dipetakan ekivalen, gunakan kode lama
+                // Untuk matkul yang sudah dipetakan ekivalen, gunakan kode lama dan nama lama
                 kodeMataKuliah = kode_mk;
+                // Cari nama matkul lama jika tersedia
+                if (oldCoursesNamesMap[kode_mk]) {
+                    namaMataKuliah = oldCoursesNamesMap[kode_mk];
+                }
             } else if (courseDetails.ekivalensi) {
-                // Untuk matkul baru yang punya nilai ekivalensi, gunakan nilai ekivalensi
+                // Untuk matkul baru yang punya nilai ekivalensi, gunakan nilai ekivalensi dan nama lamanya
                 kodeMataKuliah = courseDetails.ekivalensi;
+                // Cari nama matkul lama jika tersedia
+                if (oldCoursesNamesMap[courseDetails.ekivalensi]) {
+                    namaMataKuliah =
+                        oldCoursesNamesMap[courseDetails.ekivalensi];
+                }
             }
 
             courseHistory.push({
-                nama_mata_kuliah:
-                    courseDetails.nama_mk || courseDetails.nama_mk_lama,
+                nama_mata_kuliah: namaMataKuliah,
                 kode_mata_kuliah: kodeMataKuliah,
                 jenis: courseDetails.jenis_mk || '-',
                 sks: courseDetails.sks_mk || courseDetails.sks_mk_lama || 0,
@@ -119,5 +145,6 @@ module.exports = {
     getNewCourses,
     getEquivalentCourses,
     getOldCourses,
+    getOldCoursesNames,
     processCourseHistory,
 };
