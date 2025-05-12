@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+//Import berkas-berkas query:
+import { getStudentTAK } from '../../services/mahasiswaServices/myProgress_TAKService';
 //? Import Component
 import ChartContainer from '../../components/compMahasiswa/myProgressComponents/ChartContainer';
 import IPSemesterCard from '../../components/compMahasiswa/myProgressComponents/IPSemesterCard';
@@ -9,12 +12,27 @@ import mockupDataSemester from '../../assets/data/mockupjsonMahasiswa/mockupjson
 import mockupDataKehadiran from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyProgress/mockupDataKehadiran.json';
 
 const MyProgress = () => {
-    console.log(mockupDataKehadiran);
-    console.log(mockupDataSemester);
+    const [takValue, setTakValue] = useState(0);
+
+    // Fetch data from the query file using useEffect
+    useEffect(() => {
+        const fetchTAK = async () => {
+            try {
+                const response = await getStudentTAK();
+                if (response.success) {
+                    setTakValue(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching TAK:', error);
+            }
+        };
+
+        fetchTAK();
+    }, []);
+
     //mockup IPK, SKS, TAK:
     const muIPK = 3.92;
     const muSKS = 144;
-    const muTAK = 120;
     const muStatusAca = 'Excelent';
 
     return (
@@ -34,7 +52,7 @@ const MyProgress = () => {
                 {/* Manggil komponen kotak IPK, SKS, TAK */}
                 <IpkSksTakCard title="IPK" value={muIPK} />
                 <IpkSksTakCard title="SKS" value={muSKS} />
-                <IpkSksTakCard title="TAK" value={muTAK} />
+                <IpkSksTakCard title="TAK" value={takValue} />
             </div>
 
             {/* Bagian judul laporan dan grafik */}

@@ -1,10 +1,12 @@
 const API_URL = 'http://localhost:5000/api/student';
 
-// Get list riwayat MK mahasiswa dari backend:
 /**
- * @returns {Promise<Object>}
+ * Get TAK dari mahasiswa yang sedang login
+ * @param nim
+ * @return {Promise<Object>}
  */
-export const getCourseHistory = async () => {
+
+export const getStudentTAK = async () => {
     try {
         // Get token dari localStorage user
         const token = localStorage.getItem('token');
@@ -17,8 +19,8 @@ export const getCourseHistory = async () => {
             };
         }
 
-        // Fetch API:
-        const response = await fetch(`${API_URL}/riwayatMataKuliah`, {
+        // Fetch ke API:
+        const response = await fetch(`${API_URL}/takMahasiswa`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -31,14 +33,12 @@ export const getCourseHistory = async () => {
         }
 
         const data = await response.json();
-        // console.log('API Response:', data);
-
-        return data; // Return data dri API
+        return data;
     } catch (error) {
-        console.error('Error fetching course history data:', error);
+        console.error('Error fetching TAK data:', error);
         return {
             success: false,
-            message: 'Network error. Could not fetch course history data.',
+            message: 'Network error. Could not fetch TAK data.',
             data: [],
         };
     }
