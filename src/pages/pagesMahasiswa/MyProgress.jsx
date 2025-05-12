@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 //Import berkas-berkas query:
-import { getStudentTAK } from '../../services/mahasiswaServices/myProgress_TAKService';
+import { getStudentTAK } from '../../services/mahasiswaServices/myProgress_takSksIpkService';
 //? Import Component
 import ChartContainer from '../../components/compMahasiswa/myProgressComponents/ChartContainer';
 import IPSemesterCard from '../../components/compMahasiswa/myProgressComponents/IPSemesterCard';
@@ -13,6 +13,8 @@ import mockupDataKehadiran from '../../assets/data/mockupjsonMahasiswa/mockupjso
 
 const MyProgress = () => {
     const [takValue, setTakValue] = useState(0);
+    const [sksValue, setSksValue] = useState(0);
+    const [ipkValue, setIpkValue] = useState(0);
 
     // Fetch data from the query file using useEffect
     useEffect(() => {
@@ -20,7 +22,9 @@ const MyProgress = () => {
             try {
                 const response = await getStudentTAK();
                 if (response.success) {
-                    setTakValue(response.data);
+                    setTakValue(response.data.tak);
+                    setSksValue(response.data.sksTotal);
+                    setIpkValue(response.data.ipk);
                 }
             } catch (error) {
                 console.error('Error fetching TAK:', error);
@@ -31,8 +35,6 @@ const MyProgress = () => {
     }, []);
 
     //mockup IPK, SKS, TAK:
-    const muIPK = 3.92;
-    const muSKS = 144;
     const muStatusAca = 'Excelent';
 
     return (
@@ -50,8 +52,8 @@ const MyProgress = () => {
             {/* Cards untuk IPK, SKS, dan TAK */}
             <div className="flex flex-wrap justify-evenly gap-3 mb-8 p-[min(0.83m,12%)]">
                 {/* Manggil komponen kotak IPK, SKS, TAK */}
-                <IpkSksTakCard title="IPK" value={muIPK} />
-                <IpkSksTakCard title="SKS" value={muSKS} />
+                <IpkSksTakCard title="IPK" value={ipkValue.toFixed(2)} />
+                <IpkSksTakCard title="SKS" value={sksValue} />
                 <IpkSksTakCard title="TAK" value={takValue} />
             </div>
 
