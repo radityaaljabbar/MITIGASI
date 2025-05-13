@@ -186,7 +186,7 @@ const AnalisisAkademikPage = () => {
     const mockStudentData = {
         name: namaValue,
         nim: nim,
-        semester: Math.max(...semuaSemester),
+        semester: Math.max(...semuaSemester)+1,
         kelas: kelasValue,
         ipk: ipkValue,
         sksTotal: sksValue,
