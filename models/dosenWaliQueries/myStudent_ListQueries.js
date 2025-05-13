@@ -13,16 +13,24 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
     const studentList = [];
     for (const kelas of classCodesList) {
         const [students] = await pool.execute(
-            'SELECT nim, nama, kelas FROM mahasiswa WHERE kelas = ?',
-            [kelas]
+            `SELECT 
+                mhs.nim, 
+                mhs.nama, 
+                mhs.kelas,
+                ipkt.ipk_lulus,
+                takt.tak
+            FROM mahasiswa mhs 
+            JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
+            JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
+            WHERE kelas = "${kelas}"`
         );
 
         const formattedStudents = students.map((student) => ({
             name: student.nama,
             nim: student.nim,
             kelas: student.kelas,
-            ipk: '-', // Placeholder for now
-            tak: '-', // Placeholder for now
+            ipk: student.ipk_lulus, // Placeholder for now
+            tak: student.tak, // Placeholder for now
             status: 'Aman', // Default status
             details: {
                 akademik: 'Aman',
