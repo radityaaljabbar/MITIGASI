@@ -53,12 +53,6 @@ const AkademikDashboard = ({ studentData }) => {
                         <p className="text-sm text-gray-600">Kelas</p>
                         <p className="font-medium">{studentData.kelas}</p>
                     </div>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">Program Studi</p>
-                        <p className="font-medium">
-                            {studentData.programStudi}
-                        </p>
-                    </div>
                 </div>
                 <div>
                     <div className="mb-4">
@@ -185,13 +179,15 @@ const AnalisisAkademikPage = () => {
         fetchTAK();
     }, []);
 
+    // mengambil data semester sekarang
+    const semuaSemester = perSemesterValue.map(item => item.semester);
+
     //? Mock data untuk simulasi
     const mockStudentData = {
         name: namaValue,
-        nim: nim || '1234567890',
-        semester: 5,
+        nim: nim,
+        semester: Math.max(...semuaSemester),
         kelas: kelasValue,
-        programStudi: 'Teknik Komputer',
         ipk: ipkValue,
         sksTotal: sksValue,
         perSemester: perSemesterValue,
