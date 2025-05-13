@@ -140,7 +140,18 @@ exports.getStudentAcademicDetails = async (req, res) => {
         const ipk = studentData.ipk_lulus;      // Sesuaikan nama field jika berbeda di DB
         const sksTotal = studentData.sks_lulus; // Sesuaikan nama field jika berbeda di DB
         const tak = studentData.tak;            // Sesuaikan nama field jika berbeda di DB
+        const perSemester = []
         // NIM juga ada di studentData.nim, bisa digunakan untuk verifikasi jika perlu
+
+        academicDataArray.forEach(row => {
+            if (row.semester && row.sks_semester !== null) { // Pastikan ada data semester
+                perSemester.push({
+                    semester: row.semester,
+                    sksSemester: row.sks_semester,
+                    ipSemester: row.ip_semester
+                });
+            }
+        });
 
         console.log("Data Mahasiswa Ditemukan (dari getStudentAcademicData):");
         console.log("Nama:", namaMahasiswa);
@@ -149,6 +160,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
         console.log("IPK Lulus:", ipk);
         console.log("SKS Lulus:", sksTotal);
         console.log("TAK:", tak);
+        console.log("sks:", perSemester);
 
         const responseData = {
             nama: namaMahasiswa,
@@ -157,6 +169,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
             ipk: ipk,
             sksTotal: sksTotal,
             tak: tak,
+            perSemester: perSemester
         };
 
         return res.status(200).json({

@@ -9,10 +9,14 @@ exports.getStudentAcademicData = async (nimMhs) => {
             mhs.kelas,
             ipkt.ipk_lulus,
             ipkt.sks_lulus, 
-            takt.tak
+            takt.tak,
+            sem.semester,
+            sem.sks_semester,
+            sem.ip_semester
         FROM mahasiswa mhs 
         JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
         JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
+        JOIN persemester sem ON sem.nim_mahasiswa = mhs.nim
         WHERE mhs.nim = ?`; // Gunakan placeholder '?' untuk keamanan (mencegah SQL Injection)
                           // dan lebih baik spesifikasikan tabel mhs.nim jika nim ada di tabel lain juga
 
