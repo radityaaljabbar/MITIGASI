@@ -37,10 +37,6 @@ const StudentInfoAkademik = ({ studentData }) => {
 };
 
 const AkademikDashboard = ({ studentData }) => {
-    
-
-    
-
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -85,28 +81,28 @@ const AkademikDashboard = ({ studentData }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <h4 className="text-lg font-medium mb-3">
-                        SKS per Tingkat
+                        SKS Semester
                     </h4>
                     <div className="space-y-2">
-                        {studentData.sksTingkat.map((sks, index) => (
+                        {studentData.perSemester.map((sks, index) => (
                             <div
                                 key={index}
                                 className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                                <span>Tingkat {index + 1}</span>
-                                <span className="font-medium">{sks} SKS</span>
+                                <span>Semester {index+1}</span>
+                                <span className="font-medium">{sks.sksSemester} SKS</span>
                             </div>
                         ))}
                     </div>
                 </div>
                 <div>
-                    <h4 className="text-lg font-medium mb-3">IP per Tingkat</h4>
+                    <h4 className="text-lg font-medium mb-3">IP Semester</h4>
                     <div className="space-y-2">
-                        {studentData.ipTingkat.map((ip, index) => (
+                        {studentData.perSemester.map((ip, index) => (
                             <div
                                 key={index}
                                 className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                                <span>Tingkat {index + 1}</span>
-                                <span className="font-medium">{ip}</span>
+                                <span>Semester {index + 1}</span>
+                                <span className="font-medium">{ip.ipSemester.toFixed(2)}</span>
                             </div>
                         ))}
                     </div>
@@ -165,6 +161,7 @@ const AnalisisAkademikPage = () => {
     const [ipkValue, setIpkValue] = useState(0);
     const [namaValue, setnamaValue] = useState(0);
     const [kelasValue, setkelasValue] = useState(0);
+    const [perSemesterValue, setperSemesterValue] = useState([]);
 
     useEffect(() => {
         const fetchTAK = async () => {
@@ -177,6 +174,8 @@ const AnalisisAkademikPage = () => {
                     setIpkValue(response.data.ipk);
                     setnamaValue(response.data.nama);
                     setkelasValue(response.data.kelas);
+                    setperSemesterValue(response.data.perSemester);
+
                 }
             } catch (error) {
                 console.error('Error fetching TAK:', error);
@@ -195,8 +194,7 @@ const AnalisisAkademikPage = () => {
         programStudi: 'Teknik Komputer',
         ipk: ipkValue,
         sksTotal: sksValue,
-        sksTingkat: [36, 40, 32, 0],
-        ipTingkat: [3.7, 3.85, 3.92, 0],
+        perSemester: perSemesterValue,
         takTotal: takValue,
     };
 
