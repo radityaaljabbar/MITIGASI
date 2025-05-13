@@ -316,7 +316,7 @@ export default function DaftarMahasiswaWali() {
                                                     IPK
                                                 </p>
                                                 <p className="text-lg font-bold">
-                                                    {student.ipk}
+                                                    {student.ipk.toFixed(2)}
                                                 </p>
                                             </div>
                                             <div className="p-3 bg-gray-50 rounded">

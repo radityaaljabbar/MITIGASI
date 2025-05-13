@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import { getStudentTAKIPKSKS } from '../../../../services/dosenWali/myStudent/academicMahasiswaService';
+
 
 const StudentInfoAkademik = ({ studentData }) => {
+    const [student, setStudentValue] = useState(0);
+
+
     const mockStatusAkademik = 'Aman';
     //? Componen di page: Informasi Mahasiswa
     return (
@@ -32,6 +37,10 @@ const StudentInfoAkademik = ({ studentData }) => {
 };
 
 const AkademikDashboard = ({ studentData }) => {
+    
+
+    
+
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -59,7 +68,7 @@ const AkademikDashboard = ({ studentData }) => {
                     <div className="mb-4">
                         <p className="text-sm text-gray-600">IPK</p>
                         <h3 className="text-2xl font-bold text-red-800">
-                            {studentData.ipk}
+                            {studentData.ipk.toFixed(2)}
                         </h3>
                     </div>
                     <div className="mb-4">
@@ -151,19 +160,44 @@ const RiwayatMKContent = () => (
 const AnalisisAkademikPage = () => {
     const { nim } = useParams();
     const [activeSubTab, setActiveSubTab] = useState('analisisTrend');
+    const [takValue, setTakValue] = useState(0);
+    const [sksValue, setSksValue] = useState(0);
+    const [ipkValue, setIpkValue] = useState(0);
+    const [namaValue, setnamaValue] = useState(0);
+    const [kelasValue, setkelasValue] = useState(0);
+
+    useEffect(() => {
+        const fetchTAK = async () => {
+            try {
+                const response = await getStudentTAKIPKSKS(nim);
+                console.log(response)
+                if (response.success) {
+                    setTakValue(response.data.tak);
+                    setSksValue(response.data.sksTotal);
+                    setIpkValue(response.data.ipk);
+                    setnamaValue(response.data.nama);
+                    setkelasValue(response.data.kelas);
+                }
+            } catch (error) {
+                console.error('Error fetching TAK:', error);
+            }
+        };
+
+        fetchTAK();
+    }, []);
 
     //? Mock data untuk simulasi
     const mockStudentData = {
-        name: 'John Doe',
+        name: namaValue,
         nim: nim || '1234567890',
         semester: 5,
-        kelas: 'TK-48-01',
+        kelas: kelasValue,
         programStudi: 'Teknik Komputer',
-        ipk: 3.82,
-        sksTotal: 108,
+        ipk: ipkValue,
+        sksTotal: sksValue,
         sksTingkat: [36, 40, 32, 0],
         ipTingkat: [3.7, 3.85, 3.92, 0],
-        takTotal: 75,
+        takTotal: takValue,
     };
 
     // Function to render content based on active tab
