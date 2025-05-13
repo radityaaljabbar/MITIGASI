@@ -5,7 +5,7 @@ const responseDosWalModel = require('../models/responseDosenWali');
 const {
     getKelasWali,
     getStudentsByClassCodes,
-} = require('../models/dosenWaliQueries/studentsAndClassListQueries');
+} = require('../models/dosenWaliQueries/myStudent_ListQueries');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
