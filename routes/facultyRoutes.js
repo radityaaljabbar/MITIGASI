@@ -33,4 +33,17 @@ router.get(
     facultyController.getResponDosWal
 );
 
+router.get(
+    '/datamahasiswa',
+    protect,
+    authorize('dosen_wali')
+)
+
+router.get(
+    '/takipksksMahasiswa',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getStudentAcademicDetails
+);
+
 module.exports = router;
