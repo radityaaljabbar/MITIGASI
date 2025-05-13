@@ -19,7 +19,6 @@ router.get(
 // @desc Endpoint backend untuk fitur MyReport
 // FR-03.1 - MyReport - Overview
 // /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx
-
 router.get(
     '/keluhanMahasiswa',
     protect,
@@ -33,4 +32,5 @@ router.get(
     authorize('dosen_wali'),
     facultyController.getResponDosWal
 );
+
 module.exports = router;

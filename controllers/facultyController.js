@@ -1,6 +1,11 @@
 const { pool } = require('../config/database');
 const response = require('../utils/response');
+// Import queries
 const responseDosWalModel = require('../models/responseDosenWali');
+const {
+    getKelasWali,
+    getStudentsByClassCodes,
+} = require('../models/dosenWaliQueries/studentsAndClassListQueries');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
@@ -19,10 +24,7 @@ exports.getStudentList = async (req, res) => {
         }
 
         // Get classes associated with this dosen
-        const [classes] = await pool.execute(
-            'SELECT id_kelas, kode_kelas FROM kelas WHERE kode_dosen = ?',
-            [dosenCode]
-        );
+        const classes = await getKelasWali(dosenCode);
 
         if (classes.length === 0) {
             return res.status(200).json({
@@ -36,31 +38,7 @@ exports.getStudentList = async (req, res) => {
         const classCodesList = classes.map((cls) => cls.kode_kelas);
 
         // Get students from all classes
-        const studentList = [];
-
-        for (const kelas of classCodesList) {
-            const [students] = await pool.execute(
-                'SELECT nim, nama, kelas FROM mahasiswa WHERE kelas = ?',
-                [kelas]
-            );
-
-            // Add placeholder data for missing values (ipk, tak, status)
-            const formattedStudents = students.map((student) => ({
-                name: student.nama,
-                nim: student.nim,
-                kelas: student.kelas,
-                ipk: '-', // Placeholder for now
-                tak: '-', // Placeholder for now
-                status: 'Aman', // Default status
-                details: {
-                    akademik: 'Aman',
-                    psikologis: 'Aman',
-                    finansial: 'Aman',
-                },
-            }));
-
-            studentList.push(...formattedStudents);
-        }
+        const studentList = await getStudentsByClassCodes(classCodesList);
 
         return res.status(200).json({
             success: true,
@@ -76,6 +54,8 @@ exports.getStudentList = async (req, res) => {
     }
 };
 
+// @desc
+
 // @desc    Get list and data of students report to lecturer
 // @route   GET /api/faculty/keluhanMahasiswa
 // @access  Private (dosen_wali only)
@@ -84,7 +64,7 @@ exports.getKeluhanMahasiswa = async (req, res, next) => {
 
     try {
         const [data] = await responseDosWalModel.getKeluhan(dosenNIP);
-        console.log(dosenNIP);
+        // console.log(dosenNIP);
         response(200, data, 'dapat semua keluhan', res);
     } catch (err) {
         if (err) throw err;
