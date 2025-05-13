@@ -40,33 +40,17 @@ const AkademikDashboard = ({ studentData }) => {
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">NIM</p>
-                        <p className="font-medium">{studentData.nim}</p>
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">Nama</p>
-                        <p className="font-medium">{studentData.name}</p>
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">Kelas</p>
-                        <p className="font-medium">{studentData.kelas}</p>
-                    </div>
+                <div className="mb-4">
+                    <p className="text-sm text-gray-600">IPK</p>
+                    <h3 className="text-2xl font-bold text-red-800">
+                        {studentData.ipk.toFixed(2)}
+                    </h3>
                 </div>
-                <div>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">IPK</p>
-                        <h3 className="text-2xl font-bold text-red-800">
-                            {studentData.ipk.toFixed(2)}
-                        </h3>
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">SKS Total</p>
-                        <h3 className="text-2xl font-bold text-red-800">
-                            {studentData.sksTotal}
-                        </h3>
-                    </div>
+                <div className="mb-4">
+                    <p className="text-sm text-gray-600">SKS Total</p>
+                    <h3 className="text-2xl font-bold text-red-800">
+                        {studentData.sksTotal}
+                    </h3>
                 </div>
             </div>
 
