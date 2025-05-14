@@ -137,10 +137,10 @@ export const getAvailableCourse = async () => {
             const transformedCourses = data.data.map((course, index) => ({
                 // Assuming data.data is the array of courses
                 id: `avail_course_${course.kode_mata_kuliah || index}`, // Generate a unique id
-                kodeMataKuliah: course.kode_mata_kuliah,
-                namaMataKuliah: course.nama_mata_kuliah,
-                jenis: course.jenis,
-                sks: course.sks,
+                kodeMataKuliah: course.kode_mk,
+                namaMataKuliah: course.nama_mk,
+                jenis: course.jenis_mk,
+                sks: course.sks_mk,
                 semester: course.semester, // This is used for filtering
             }));
 
