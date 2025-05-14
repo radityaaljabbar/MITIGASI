@@ -134,19 +134,19 @@ export const getAvailableCourse = async () => {
             // Check the success flag from the parsed data
             // Transform the data to match the format expected by the component
             // Expected: id, kodeMataKuliah, namaMataKuliah, jenis, sks, semester
-            const transformedCourses = data.data.map((course, index) => ({
+            const listAvailCourses = data.data.map((course, index) => ({
                 // Assuming data.data is the array of courses
-                id: `avail_course_${course.kode_mata_kuliah || index}`, // Generate a unique id
+                id: `avail_course_${course.kode_mata_kuliah || index}`,
                 kodeMataKuliah: course.kode_mk,
                 namaMataKuliah: course.nama_mk,
                 jenis: course.jenis_mk,
                 sks: course.sks_mk,
-                semester: course.semester, // This is used for filtering
+                semester: course.semester,
             }));
 
             return {
                 success: true,
-                availableCourses: transformedCourses || [], // Return under 'availableCourses' key
+                availableCourses: listAvailCourses || [], // Return under 'availableCourses' key
             };
         } else {
             return {
