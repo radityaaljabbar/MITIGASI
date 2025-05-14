@@ -28,3 +28,12 @@ exports.getStudentInClass = async (listKodeKelas) => {
     }
     return listMahasiswa;
 };
+
+// Fetch all courses available:
+exports.getAvailCourses = async () => {
+    const [availableCourses] = await pool.execute(
+        'SELECT kode_mk, nama_mk, sks_mk, jenis_mk, tingkat, jenis_semester from mata_kuliah_baru'
+    );
+
+    return availableCourses;
+};

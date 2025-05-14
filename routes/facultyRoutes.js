@@ -33,7 +33,17 @@ router.get(
     '/courseAdvisor/courseHistory',
     protect,
     authorize('dosen_wali'),
-    () => {}
+    facultyController.getHistoryMKMyCourseAdvisor
+);
+
+// @desc    Endpoint backend untuk fitur MyCourseAdvisor
+// @fitur   FR-02 - MyCourseAdvisor-MKTersedia
+// MyCourseAdvisorPage.jsx
+router.get(
+    '/courseAdvisor/mataKuliahAvail',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getAvailableCourse
 );
 
 // @desc    Endpoint backend untuk fitur MyReport
