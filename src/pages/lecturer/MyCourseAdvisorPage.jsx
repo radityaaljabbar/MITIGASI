@@ -10,35 +10,28 @@ import { toast } from 'react-toastify';
 // Import the service functions
 import {
     getClassAndStudentList,
-    getStudentCourseHistory, // Your service function
+    getStudentCourseHistory,
+    getAvailableCourse,
 } from '../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService';
-
-// Import mock data for available courses since you still need them
-import availableCoursesData from '../../assets/data/mockupjsonDosenWali/myCourseAdvisor/availableCourses.json';
 
 const MyCourseAdvisor = () => {
     // Maximum SKS allowed
     const MAX_SKS = 24;
-
-    // Use static reference for constant data
-    const staticAvailableCoursesData = useMemo(
-        () => [...availableCoursesData],
-        []
-    );
 
     // State for API data
     const [classesList, setClassesList] = useState([]);
     const [studentsList, setStudentsList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); // General loading for initial data
     const [isLoadingHistory, setIsLoadingHistory] = useState(false); // Specific loading for course history
+    const [isLoadingCourses, setIsLoadingCourses] = useState(false); // Loading state for available courses
 
     // Existing state variables
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState(''); // This will be the 'nim' for the service
     const [selectedSemester, setSelectedSemester] = useState('');
-    const [availableCourses, setAvailableCourses] = useState([
-        ...staticAvailableCoursesData,
-    ]);
+    const [availableCourses, setAvailableCourses] = useState([]); // Initialize as empty array
+    const [staticAvailableCoursesData, setStaticAvailableCoursesData] =
+        useState([]); // To store initial fetch
     const [recommendedCourses, setRecommendedCourses] = useState([]);
     const [studentCourseHistory, setStudentCourseHistory] = useState([]); // This will store the result from your service
     const [mergedCourseHistory, setMergedCourseHistory] = useState([]); // This is displayed in the table
@@ -88,6 +81,30 @@ const MyCourseAdvisor = () => {
             }
         };
         fetchData();
+
+        // Fetch available courses
+        const fetchAvailableCourses = async () => {
+            setIsLoadingCourses(true);
+            try {
+                const result = await getAvailableCourse();
+                if (result.success) {
+                    setAvailableCourses(result.availableCourses);
+                    setStaticAvailableCoursesData(result.availableCourses);
+                } else {
+                    toast.error(
+                        result.message || 'Failed to fetch available courses'
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching available courses:', error);
+                toast.error(
+                    'An error occurred while fetching available courses'
+                );
+            } finally {
+                setIsLoadingCourses(false);
+            }
+        };
+        fetchAvailableCourses();
     }, []);
 
     // Fetch student course history when a student is selected
@@ -346,7 +363,7 @@ const MyCourseAdvisor = () => {
                                                 Indeks
                                             </th>
                                             <th className="py-3 px-4 text-center">
-                                                Semester
+                                                Tahun Ajaran
                                             </th>{' '}
                                             {/* This is course.tingkat */}
                                         </tr>
@@ -390,7 +407,8 @@ const MyCourseAdvisor = () => {
                                                         {course.indeks}
                                                     </td>
                                                     <td className="py-2 px-4 text-center">
-                                                        {course.tingkat || '-'}
+                                                        {course.tahun_ajaran ||
+                                                            '-'}
                                                     </td>{' '}
                                                     {/* `tingkat` from your service/merge */}
                                                 </tr>
@@ -495,17 +513,22 @@ const MyCourseAdvisor = () => {
                                             {filteredAvailableCourses.length >
                                             0 ? (
                                                 filteredAvailableCourses
-                                                    .sort((a, b) =>
-                                                        a.namaMataKuliah.localeCompare(
-                                                            b.namaMataKuliah
-                                                        )
-                                                    )
+                                                    .sort((a, b) => {
+                                                        // Safely access the properties with fallbacks
+                                                        const aName =
+                                                            a.nama_mk || '';
+                                                        const bName =
+                                                            b.nama_mk || '';
+                                                        return aName.localeCompare(
+                                                            bName
+                                                        );
+                                                    })
                                                     .map((course) => {
                                                         const courseHistory =
                                                             studentCourseHistory.find(
                                                                 (history) =>
                                                                     history.kodeMataKuliah ===
-                                                                    course.kodeMataKuliah
+                                                                    course.kode_mk
                                                             );
                                                         let failedCourseHighlight =
                                                             '';
@@ -519,7 +542,7 @@ const MyCourseAdvisor = () => {
                                                             } else if (
                                                                 courseHistory.indeks ===
                                                                     'D' &&
-                                                                course.jenis ===
+                                                                course.jenis_mk ===
                                                                     'Peminatan'
                                                             ) {
                                                                 failedCourseHighlight =
@@ -528,7 +551,7 @@ const MyCourseAdvisor = () => {
                                                         }
                                                         const exceedsSKSLimit =
                                                             wouldExceedSKSLimit(
-                                                                course.sks
+                                                                course.sks_mk
                                                             );
                                                         return (
                                                             <tr
@@ -540,27 +563,39 @@ const MyCourseAdvisor = () => {
                                                                 }`}>
                                                                 <td className="py-2 px-4 border-r">
                                                                     {
-                                                                        course.kodeMataKuliah
+                                                                        course.kode_mk
                                                                     }
                                                                 </td>
                                                                 <td className="py-2 px-4 border-r">
                                                                     {
-                                                                        course.namaMataKuliah
+                                                                        course.nama_mk
                                                                     }
                                                                 </td>
                                                                 <td className="py-2 px-4 text-center border-r">
-                                                                    {course.sks}
+                                                                    {
+                                                                        course.sks_mk
+                                                                    }
                                                                 </td>
                                                                 <td className="py-2 px-4 border-r">
                                                                     {
-                                                                        course.jenis
+                                                                        course.jenis_mk
                                                                     }
                                                                 </td>
                                                                 <td className="py-2 px-4 text-center">
                                                                     <button
                                                                         onClick={() =>
                                                                             addCourse(
-                                                                                course
+                                                                                {
+                                                                                    ...course,
+                                                                                    kodeMataKuliah:
+                                                                                        course.kode_mk,
+                                                                                    namaMataKuliah:
+                                                                                        course.nama_mk,
+                                                                                    sks: course.sks_mk,
+                                                                                    jenis: course.jenis_mk,
+                                                                                    semester:
+                                                                                        course.semester,
+                                                                                }
                                                                             )
                                                                         }
                                                                         disabled={

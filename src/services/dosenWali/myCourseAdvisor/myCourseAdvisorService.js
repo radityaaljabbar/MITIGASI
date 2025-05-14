@@ -73,20 +73,19 @@ export const getStudentCourseHistory = async (nim) => {
 
         if (data.success) {
             // Transform the data to match the format expected by the component
-            const listAvailCourses = data.data.map((course, index) => ({
+            const studentCourseHistory = data.data.map((course, index) => ({
                 id: `history_${index}`, // Generate an id for each course history item
-                kodeMataKuliah: course.kode_mk,
-                namaMataKuliah: course.nama_mk,
-                jenis: course.jenis_mk,
-                sks: course.sks_mk,
-                tingkat: course.tingkat, // Using semester as tingkat
-                jenis_semester: course.jenis_semester,
-                semester: course.semester,
+                kodeMataKuliah: course.kodeMataKuliah,
+                namaMataKuliah: course.namaMataKuliah,
+                jenis: course.jenis,
+                sks: course.sks,
+                indeks: course.nilai,
+                tahun_ajaran: course.tahun_ajaran,
             }));
 
             return {
                 success: true,
-                courseHistory: listAvailCourses || [],
+                courseHistory: studentCourseHistory || [],
             };
         } else {
             return {
