@@ -6,12 +6,16 @@ const {
     getKelasWali,
     getStudentsByClassCodes,
 } = require('../models/dosenWaliQueries/myStudent_ListQueries');
+const {
+    getKelasWaliDosen,
+    getStudentInClass,
+} = require('../models/dosenWaliQueries/myCourseAdvisor_Queries');
 
 const {
     fetchStudentTAK,
     fetchStudentSKSTotal,
     fetchStudentIPK,
-    getStudentAcademicData
+    getStudentAcademicData,
 } = require('../models/dosenWaliQueries/myStudentDetailAcademicQueries');
 
 // @desc    Get list of students for dosen wali
@@ -61,12 +65,10 @@ exports.getStudentList = async (req, res) => {
     }
 };
 
-// @desc
-
 // @desc    Get list and data of students report to lecturer
 // @route   GET /api/faculty/keluhanMahasiswa
 // @access  Private (dosen_wali only)
-exports.getKeluhanMahasiswa = async (req, res, next) => {
+exports.getKeluhanMahasiswa = async (req, res) => {
     const dosenNIP = req.user.id;
 
     try {
@@ -87,7 +89,7 @@ exports.getKeluhanMahasiswa = async (req, res, next) => {
 // @desc    Get list and data of dosenwali response to students report to lecturer
 // @route   GET /api/faculty/responseDosenWali
 // @access  Private (dosen_wali only)
-exports.getResponDosWal = async (req, res, next) => {
+exports.getResponDosWal = async (req, res) => {
     const dosenNIP = req.user.id;
     const feedbackId = req.query.feedbackId; // Add this to get the specific feedback ID
 
@@ -108,6 +110,60 @@ exports.getResponDosWal = async (req, res, next) => {
     }
 };
 
+/**
+ * @desc Get all classes assigned to the logged-in dosen wali
+ * @route GET /api/faculty/courseAdvisor/classes
+ * @access Private (dosen_wali only)
+ */
+exports.getClassesAndStudents = async (req, res) => {
+    try {
+        // Get dosen id (nip) dari middleware:
+        const kodeDosen = req.user.code;
+
+        // Klo kode dosen tidak ada error
+        if (!kodeDosen) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dosen code not found',
+            });
+        }
+
+        // Get list kelas wali dari fungsi query:
+        const classes = await getKelasWaliDosen(kodeDosen);
+
+        // Cek array classes ada atau tidak
+        if (classes.length === 0) {
+            return res.status(200).json({
+                success: true,
+                data: [],
+                message: 'No classes found for this dosen',
+            });
+        }
+
+        // Pisahin kode_kelas ke array baru
+        const listKodeKelas = classes.map((cls) => cls.kode_kelas);
+
+        // Fetch list mahasiswa berdasarkan kelas:
+        const listMahasiswa = await getStudentInClass(listKodeKelas);
+
+        return res.status(200).json({
+            success: true,
+            countKelas: listKodeKelas.length,
+            countMahasiswa: listMahasiswa.length,
+            data: {
+                classesList: listKodeKelas,
+                studentsList: listMahasiswa,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching classes and student list:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+        });
+    }
+};
+
 exports.getStudentAcademicDetails = async (req, res) => {
     try {
         const nim = req.query.nim;
@@ -124,7 +180,8 @@ exports.getStudentAcademicDetails = async (req, res) => {
 
         // Periksa apakah data mahasiswa ditemukan
         if (!academicDataArray || academicDataArray.length === 0) {
-            return res.status(404).json({ // 404 Not Found lebih tepat
+            return res.status(404).json({
+                // 404 Not Found lebih tepat
                 success: false,
                 message: `Student academic data not found for NIM: ${nim}`,
             });
@@ -137,30 +194,31 @@ exports.getStudentAcademicDetails = async (req, res) => {
         // Ini lebih aman dan langsung dari sumber data yang komprehensif
         const namaMahasiswa = studentData.nama;
         const kelasMahasiswa = studentData.kelas;
-        const ipk = studentData.ipk_lulus;      // Sesuaikan nama field jika berbeda di DB
+        const ipk = studentData.ipk_lulus; // Sesuaikan nama field jika berbeda di DB
         const sksTotal = studentData.sks_lulus; // Sesuaikan nama field jika berbeda di DB
-        const tak = studentData.tak;            // Sesuaikan nama field jika berbeda di DB
-        const perSemester = []
+        const tak = studentData.tak; // Sesuaikan nama field jika berbeda di DB
+        const perSemester = [];
         // NIM juga ada di studentData.nim, bisa digunakan untuk verifikasi jika perlu
 
-        academicDataArray.forEach(row => {
-            if (row.semester && row.sks_semester !== null) { // Pastikan ada data semester
+        academicDataArray.forEach((row) => {
+            if (row.semester && row.sks_semester !== null) {
+                // Pastikan ada data semester
                 perSemester.push({
                     semester: row.semester,
                     sksSemester: row.sks_semester,
-                    ipSemester: row.ip_semester
+                    ipSemester: row.ip_semester,
                 });
             }
         });
 
-        console.log("Data Mahasiswa Ditemukan (dari getStudentAcademicData):");
-        console.log("Nama:", namaMahasiswa);
-        console.log("NIM:", nim); // NIM dari input, bisa juga studentData.nim
-        console.log("Kelas:", kelasMahasiswa);
-        console.log("IPK Lulus:", ipk);
-        console.log("SKS Lulus:", sksTotal);
-        console.log("TAK:", tak);
-        console.log("sks:", perSemester);
+        console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
+        console.log('Nama:', namaMahasiswa);
+        console.log('NIM:', nim); // NIM dari input, bisa juga studentData.nim
+        console.log('Kelas:', kelasMahasiswa);
+        console.log('IPK Lulus:', ipk);
+        console.log('SKS Lulus:', sksTotal);
+        console.log('TAK:', tak);
+        console.log('sks:', perSemester);
 
         const responseData = {
             nama: namaMahasiswa,
@@ -169,14 +227,13 @@ exports.getStudentAcademicDetails = async (req, res) => {
             ipk: ipk,
             sksTotal: sksTotal,
             tak: tak,
-            perSemester: perSemester
+            perSemester: perSemester,
         };
 
         return res.status(200).json({
             success: true,
             data: responseData,
         });
-
     } catch (error) {
         console.error('Error in getStudentAcademicDetails:', error); // Lebih spesifik nama fungsinya
         // Periksa jenis error jika perlu untuk respons yang lebih detail
