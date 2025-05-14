@@ -12,7 +12,8 @@ const {
     fetchStudentTAK,
     fetchStudentSKSTotal,
     fetchStudentIPK,
-} = require('../models/mahasiswaQueries/MyProgress_takSksIpkQueries');
+    fetchStudentIPS,
+} = require('../models/mahasiswaQueries/MyProgress');
 
 // @desc Ambil tak dari mahasisw yang login
 // @route GET /api/student/takMahasiswa
@@ -34,22 +35,39 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
         const rowsTAK = await fetchStudentTAK(nim);
         const rowsSKSTotal = await fetchStudentSKSTotal(nim);
         const rowsIPK = await fetchStudentIPK(nim);
+        const rowsIPS = await fetchStudentIPS(nim);
 
         // Ekstrak TAK saja
         const takValue = rowsTAK.length > 0 ? rowsTAK[0].tak : 0;
-        const sksTotalValue =
-            rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
+        const sksTotalValue = rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
         const ipkValue = rowsIPK.length > 0 ? rowsIPK[0].ipk_lulus : 0;
+        
+        const ipsValue = [];
 
-        const ipkSksTak = {
+        rowsIPS.forEach(row => {
+            if (row.semester && row.ip_semester !== null) { // Pastikan ada data semester
+                ipsValue.push({
+                    semester: row.semester,
+                    ipSemester: row.ip_semester
+                });
+            }
+        });
+
+        console.log("Data Mahasiswa Ditemukan (dari getStudentAcademicData):");
+        console.log("tak: ", takValue);
+        console.log("sks total: ", sksTotalValue);
+        console.log("ips: ", ipsValue)
+
+        const ipkSksTakIps = {
             ipk: ipkValue,
             sksTotal: sksTotalValue,
             tak: takValue,
+            ips: ipsValue
         };
 
         return res.status(200).json({
             success: true,
-            data: ipkSksTak,
+            data: ipkSksTakIps,
         });
     } catch (error) {
         console.error('Error fetching students TAK:', error);
