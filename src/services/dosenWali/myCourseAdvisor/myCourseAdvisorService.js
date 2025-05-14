@@ -60,7 +60,7 @@ export const getStudentCourseHistory = async (nim) => {
             };
         }
 
-        const response = await fetch(`${API_URL}/courseHistory/${nim}`, {
+        const response = await fetch(`${API_URL}/courseHistory?nim=${nim}`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -72,9 +72,21 @@ export const getStudentCourseHistory = async (nim) => {
         console.log('Course History API Response:', data);
 
         if (data.success) {
+            // Transform the data to match the format expected by the component
+            const transformedCourseHistory = data.data.map((course, index) => ({
+                id: `history_${index}`, // Generate an id for each course history item
+                kodeMataKuliah: course.kode_mata_kuliah,
+                namaMataKuliah: course.nama_mata_kuliah,
+                jenis: course.jenis,
+                sks: course.sks,
+                indeks: course.nilai.trim(), // Trim whitespace from grade
+                tingkat: course.semester, // Using semester as tingkat
+                tahunAjaran: course.tahun_ajaran,
+            }));
+
             return {
                 success: true,
-                courseHistory: data.data || [],
+                courseHistory: transformedCourseHistory || [],
             };
         } else {
             return {
