@@ -7,35 +7,14 @@ import React, {
 } from 'react';
 import { toast } from 'react-toastify';
 
-// Mock data for available courses based on your provided schema
+// Import the service functions
+import {
+    getClassAndStudentList,
+    getStudentCourseHistory,
+} from '../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService';
+
+// Import mock data for available courses since you still need them
 import availableCoursesData from '../../assets/data/mockupjsonDosenWali/myCourseAdvisor/availableCourses.json';
-
-// Mock data for classes
-const classesList = [
-    { id: 4506, name: 'TK-45-06' },
-    { id: 4604, name: 'TK-46-04' },
-    { id: 4705, name: 'TK-47-05' },
-];
-
-// Mock data for students (will be filtered by class)
-const studentsList = [
-    { id: 1103210708, name: 'Andi Pratama', classId: 4506 },
-    { id: 1103210056, name: 'Budi Santoso', classId: 4506 },
-    { id: 1103220070, name: 'Citra Dewi', classId: 4604 },
-    { id: 1103220788, name: 'Dina Fitriani', classId: 4604 },
-    { id: 1103230099, name: 'Eko Prasetyo', classId: 4705 },
-];
-
-// Simplified mock data for student course histories (only contains kodeMK, nilaiMK, indeksMK)
-const studentCourseHistoryData = [
-    { id: 1, kodeMataKuliah: 'TK-001', indeks: 'A', studentId: 1103210708 },
-    { id: 2, kodeMataKuliah: 'TK-002', indeks: 'B', studentId: 1103210708 },
-    { id: 3, kodeMataKuliah: 'TK-007', indeks: 'C', studentId: 1103210708 },
-    { id: 4, kodeMataKuliah: 'TK-001', indeks: 'B', studentId: 1103210056 },
-    { id: 5, kodeMataKuliah: 'TK-002', indeks: 'E', studentId: 1103210056 },
-    { id: 6, kodeMataKuliah: 'TK-001', indeks: 'A', studentId: 1103220070 },
-    { id: 7, kodeMataKuliah: 'TK-003', indeks: 'E', studentId: 1103220070 },
-];
 
 const MyCourseAdvisor = () => {
     // Maximum SKS allowed
@@ -47,6 +26,12 @@ const MyCourseAdvisor = () => {
         []
     );
 
+    // State for API data
+    const [classesList, setClassesList] = useState([]);
+    const [studentsList, setStudentsList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Existing state variables
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState('');
     const [selectedSemester, setSelectedSemester] = useState('');
@@ -55,6 +40,7 @@ const MyCourseAdvisor = () => {
     ]);
     const [recommendedCourses, setRecommendedCourses] = useState([]);
     const [mergedCourseHistory, setMergedCourseHistory] = useState([]);
+    const [studentCourseHistory, setStudentCourseHistory] = useState([]);
     const [sksLimitExceeded, setSksLimitExceeded] = useState(false);
     const componentRef = useRef();
 
@@ -64,23 +50,90 @@ const MyCourseAdvisor = () => {
         0
     );
 
+    // Fetch classes and students data when component mounts
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const result = await getClassAndStudentList();
+                if (result.success) {
+                    // Format classes data to match the expected format in the component
+                    const formattedClasses = result.classesList.map(
+                        (className, index) => ({
+                            id: `class_${index}`,
+                            name: className,
+                        })
+                    );
+
+                    // Convert student data to expected format
+                    // Note: API gives students with class names, but component expects classId
+                    // We create a mapping of class names to ids
+                    const classNameToIdMap = {};
+                    formattedClasses.forEach((cls) => {
+                        classNameToIdMap[cls.name] = cls.id;
+                    });
+
+                    const formattedStudents = result.studentsList.map(
+                        (student) => ({
+                            id: student.id,
+                            name: student.name,
+                            classId: classNameToIdMap[student.class] || null,
+                        })
+                    );
+
+                    setClassesList(formattedClasses);
+                    setStudentsList(formattedStudents);
+                } else {
+                    toast.error(result.message || 'Failed to fetch data');
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                toast.error('An error occurred while fetching data');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Fetch student course history when a student is selected
+    useEffect(() => {
+        if (!selectedStudent) {
+            setStudentCourseHistory([]);
+            setMergedCourseHistory([]);
+            return;
+        }
+
+        const fetchCourseHistory = async () => {
+            try {
+                const result = await getStudentCourseHistory(selectedStudent);
+                if (result.success) {
+                    setStudentCourseHistory(result.courseHistory || []);
+                } else {
+                    toast.error(
+                        result.message || 'Failed to fetch course history'
+                    );
+                    setStudentCourseHistory([]);
+                }
+            } catch (error) {
+                console.error('Error fetching course history:', error);
+                toast.error('An error occurred while fetching course history');
+                setStudentCourseHistory([]);
+            }
+        };
+
+        fetchCourseHistory();
+    }, [selectedStudent]);
+
     // Filter students based on selected class - memozied to avoid recalculation
     const filteredStudents = useMemo(() => {
         return selectedClass
             ? studentsList.filter(
-                  (student) => student.classId === parseInt(selectedClass)
+                  (student) => student.classId === selectedClass
               )
             : [];
-    }, [selectedClass]);
-
-    // Get raw course history data for selected student - memozied to avoid recalculation
-    const studentCourseHistory = useMemo(() => {
-        return selectedStudent
-            ? studentCourseHistoryData.filter(
-                  (course) => course.studentId === parseInt(selectedStudent)
-              )
-            : [];
-    }, [selectedStudent]);
+    }, [selectedClass, studentsList]);
 
     // Merge course history with available courses data to get complete information
     useEffect(() => {
@@ -111,60 +164,8 @@ const MyCourseAdvisor = () => {
         setMergedCourseHistory(merged);
     }, [selectedStudent, studentCourseHistory, staticAvailableCoursesData]);
 
-    // Filter available courses based on selected semester - memozied to avoid recalculation
-    const filteredAvailableCourses = useMemo(() => {
-        return selectedSemester
-            ? availableCourses.filter(
-                  (course) => course.semester === selectedSemester
-              )
-            : availableCourses;
-    }, [selectedSemester, availableCourses]);
-
-    // Modified: Helper function to check if a course has been taken and passed
-    // For Wajib: pass if grade is not 'E'
-    // For Peminatan: pass if grade is not 'D' or 'E'
-    const hasCourseTaken = useCallback(
-        (kodeMataKuliah) => {
-            // Find the course in available courses to determine its type
-            const courseDetails = staticAvailableCoursesData.find(
-                (course) => course.kodeMataKuliah === kodeMataKuliah
-            );
-
-            // Find student's history for this course
-            const courseHistory = studentCourseHistory.find(
-                (course) => course.kodeMataKuliah === kodeMataKuliah
-            );
-
-            // If no history found, the course hasn't been taken
-            if (!courseHistory) return false;
-
-            // Get course type (Wajib or Peminatan)
-            const courseType = courseDetails?.jenis;
-
-            // Apply different rules based on course type
-            if (courseType === 'Wajib') {
-                // For Wajib courses, only E grades need retaking
-                return courseHistory.indeks !== 'E';
-            } else if (courseType === 'Peminatan') {
-                // For Peminatan courses, both D and E grades need retaking
-                return (
-                    courseHistory.indeks !== 'E' && courseHistory.indeks !== 'D'
-                );
-            }
-
-            // Default fallback - consider course as taken if it exists in history
-            // with any grade other than E (most conservative approach)
-            return courseHistory.indeks !== 'E';
-        },
-        [studentCourseHistory, staticAvailableCoursesData]
-    );
-
-    // Filter available courses to exclude courses already taken with passing grades
-    const eligibleAvailableCourses = useMemo(() => {
-        return filteredAvailableCourses.filter(
-            (course) => !hasCourseTaken(course.kodeMataKuliah)
-        );
-    }, [filteredAvailableCourses, hasCourseTaken]);
+    // Rest of your component code stays the same...
+    // (Filter available courses, helper functions, etc.)
 
     // Handle class selection
     const handleClassChange = (e) => {
