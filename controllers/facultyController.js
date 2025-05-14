@@ -345,7 +345,7 @@ exports.getAvailableCourse = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            count: 0,
+            count: mataKuliahTersedia.length,
             data: mataKuliahTersedia,
         });
     } catch (error) {

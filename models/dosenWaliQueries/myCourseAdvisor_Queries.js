@@ -32,7 +32,7 @@ exports.getStudentInClass = async (listKodeKelas) => {
 // Fetch all courses available:
 exports.getAvailCourses = async () => {
     const [availableCourses] = await pool.execute(
-        'SELECT kode_mk, nama_mk, sks_mk, jenis_mk, tingkat, jenis_semester from mata_kuliah_baru'
+        'SELECT kode_mk, nama_mk, sks_mk, jenis_mk, tingkat, jenis_semester, semester from mata_kuliah_baru'
     );
 
     return availableCourses;
