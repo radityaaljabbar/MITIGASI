@@ -112,7 +112,7 @@ exports.getResponDosWal = async (req, res) => {
 
 /**
  * @desc Get all classes assigned to the logged-in dosen wali
- * @route GET /api/faculty/courseAdvisor/classes
+ * @route GET /api/faculty/courseAdvisor/classesAndStudents
  * @access Private (dosen_wali only)
  */
 exports.getClassesAndStudents = async (req, res) => {

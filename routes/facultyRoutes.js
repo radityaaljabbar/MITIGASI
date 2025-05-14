@@ -3,7 +3,6 @@ const router = express.Router();
 
 // Import controller
 const facultyController = require('../controllers/facultyController');
-//? Controller riwayat mata kuliah:
 // Import middleware authentikasi
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
@@ -54,11 +53,7 @@ router.get(
     facultyController.getResponDosWal
 );
 
-router.get(
-    '/datamahasiswa',
-    protect,
-    authorize('dosen_wali')
-)
+router.get('/datamahasiswa', protect, authorize('dosen_wali'));
 
 router.get(
     '/takipksksMahasiswa',
