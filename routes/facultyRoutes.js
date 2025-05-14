@@ -3,11 +3,12 @@ const router = express.Router();
 
 // Import controller
 const facultyController = require('../controllers/facultyController');
+//? Controller riwayat mata kuliah:
 // Import middleware authentikasi
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
-// @desc Endpoint backend untuk fitur MyStudent List Mahasiswa
-// @FR-01.1 - MyStudents-Overview
+// @desc    Endpoint backend untuk fitur MyStudent List Mahasiswa
+// @Fitur   FR-01.1 - MyStudents-Overview
 // studentList.jsx route
 router.get(
     '/listMahasiswa',
@@ -16,8 +17,28 @@ router.get(
     facultyController.getStudentList
 );
 
-// @desc Endpoint backend untuk fitur MyReport
-// FR-03.1 - MyReport - Overview
+// @desc    Endpoint backend untuk fitur MyCourseAdvisor
+// @fitur   FR-02 - MyCourseAdvisor-ChooseClassandStudent
+// MyCourseAdvisorPage.jsx
+router.get(
+    '/courseAdvisor/classesAndStudents',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getClassesAndStudents
+);
+
+// @desc    Endpoint backend untuk fitur MyCourseAdvisor
+// @fitur   FR-02 - MyCourseAdvisor-riwayatMK
+// MyCourseAdvisorPage.jsx
+router.get(
+    '/courseAdvisor/courseHistory',
+    protect,
+    authorize('dosen_wali'),
+    () => {}
+);
+
+// @desc    Endpoint backend untuk fitur MyReport
+// @fitur   FR-03.1 - MyReport - Overview
 // /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx
 router.get(
     '/keluhanMahasiswa',
@@ -27,7 +48,7 @@ router.get(
 );
 
 router.get(
-    '/responseDosenWali',
+    '/responseDosenWali/',
     protect,
     authorize('dosen_wali'),
     facultyController.getResponDosWal

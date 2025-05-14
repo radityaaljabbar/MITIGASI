@@ -1,8 +1,8 @@
-const { pool } = require('../../config/config');
+const { pool } = require('../../config/database');
 
 // Fetch list kelas wali dosen wali (user)
-exports.getKelasWali = async (kodeDosen) => {
-    const [classes] = await pool.excecute(
+exports.getKelasWaliDosen = async (kodeDosen) => {
+    const [classes] = await pool.execute(
         'SELECT id_kelas, kode_kelas FROM kelas WHERE kode_dosen = ?',
         [kodeDosen]
     );
@@ -14,7 +14,7 @@ exports.getKelasWali = async (kodeDosen) => {
 exports.getStudentInClass = async (listKodeKelas) => {
     const listMahasiswa = [];
     for (const kelas of listKodeKelas) {
-        const [students] = await pool.excecute(
+        const [students] = await pool.execute(
             'SELECT nim, nama, kelas FROM mahasiswa WHERE kelas = ?',
             [kelas]
         );
