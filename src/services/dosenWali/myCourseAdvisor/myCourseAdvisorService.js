@@ -20,7 +20,7 @@ export const getClassAndStudentList = async () => {
         });
 
         const data = await response.json();
-        console.log('API Response:', data);
+        // console.log('API Response:', data);
 
         // Chek fetch api di data.successnya true atau false?
         if (data.success) {
@@ -69,11 +69,10 @@ export const getStudentCourseHistory = async (nim) => {
         });
 
         const data = await response.json();
-        console.log('Course History API Raw Response:', data);
+        // console.log('Course History API Raw Response:', data);
 
         if (data.success) {
-            // Enhanced debugging
-            console.log('First item from API:', data.data[0]);
+            // console.log('First item from API:', data.data[0]);
 
             // Transform the data to match the format expected by the component
             const studentCourseHistory = data.data.map((course, index) => {

@@ -398,10 +398,6 @@ const MyCourseAdvisor = () => {
                                                 gradeColor = 'bg-orange-100';
                                             }
 
-                                            console.log(
-                                                `Selected grade color for ${course.kodeMataKuliah}: ${gradeColor}`
-                                            );
-
                                             return (
                                                 <tr
                                                     key={
@@ -506,10 +502,10 @@ const MyCourseAdvisor = () => {
                                     </div>
                                 )}
                                 {/* Tabel mata kuliah tersedia */}
-                                <div className="overflow-x-auto border rounded-lg shadow-sm">
+                                <div className="overflow-x-auto border rounded-lg shadow-sm max-h-[600px] overflow-y-auto">
                                     <table className="w-full border-collapse bg-white">
-                                        <thead className="bg-[#951A22] text-white">
-                                            <tr>
+                                        <thead className="sticky top-0 z-10">
+                                            <tr className="bg-[#951A22] text-white">
                                                 <th className="py-3 px-4 text-left">
                                                     Kode
                                                 </th>
