@@ -137,11 +137,11 @@ export const getAvailableCourse = async () => {
             const listAvailCourses = data.data.map((course, index) => ({
                 // Assuming data.data is the array of courses
                 id: `avail_course_${course.kode_mata_kuliah || index}`,
-                kodeMataKuliah: course.kode_mk,
-                namaMataKuliah: course.nama_mk,
-                jenis: course.jenis_mk,
-                sks: course.sks_mk,
-                semester: course.semester,
+                kode_mk: course.kode_mk,
+                nama_mk: course.nama_mk,
+                jenis_mk: course.jenis_mk,
+                sks_mk: course.sks_mk,
+                semester_mk: course.semester,
             }));
 
             return {
