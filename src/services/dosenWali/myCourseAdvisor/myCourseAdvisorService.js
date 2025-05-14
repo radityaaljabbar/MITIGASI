@@ -69,19 +69,39 @@ export const getStudentCourseHistory = async (nim) => {
         });
 
         const data = await response.json();
-        console.log('Course History API Response:', data);
+        console.log('Course History API Raw Response:', data);
 
         if (data.success) {
+            // Enhanced debugging
+            console.log('First item from API:', data.data[0]);
+
             // Transform the data to match the format expected by the component
-            const studentCourseHistory = data.data.map((course, index) => ({
-                id: `history_${index}`, // Generate an id for each course history item
-                kodeMataKuliah: course.kodeMataKuliah,
-                namaMataKuliah: course.namaMataKuliah,
-                jenis: course.jenis,
-                sks: course.sks,
-                indeks: course.nilai,
-                tahun_ajaran: course.tahun_ajaran,
-            }));
+            const studentCourseHistory = data.data.map((course, index) => {
+                // Create an object with all expected properties with proper defaults
+                const transformedCourse = {
+                    id: `history_${index}`, // Generate an id for each course history item
+                    kodeMataKuliah: course.kode_mata_kuliah || '',
+                    namaMataKuliah:
+                        course.nama_mata_kuliah || 'Data tidak tersedia',
+                    jenis: course.jenis || 'Data tidak tersedia',
+                    sks: course.sks || 0,
+                    indeks: course.nilai || '-',
+                    semester: course.semester || '-',
+                };
+
+                // Debug the transformation
+                console.log('Transforming course:', {
+                    from: course,
+                    to: transformedCourse,
+                });
+
+                return transformedCourse;
+            });
+
+            console.log(
+                'Transformed student course history:',
+                studentCourseHistory
+            );
 
             return {
                 success: true,

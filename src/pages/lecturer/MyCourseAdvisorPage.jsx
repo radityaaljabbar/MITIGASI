@@ -344,7 +344,6 @@ const MyCourseAdvisor = () => {
                             // Tabel riwayat MK
                             <div className="overflow-x-auto border rounded-lg shadow-sm max-h-[400px] overflow-y-auto">
                                 <table className="w-full border-collapse bg-white">
-                                    {/* ... (thead remains the same) ... */}
                                     <thead className="sticky top-0 z-10 ">
                                         <tr className="bg-[#951A22] text-white">
                                             <th className="py-3 px-4 text-left">
@@ -363,31 +362,52 @@ const MyCourseAdvisor = () => {
                                                 Indeks
                                             </th>
                                             <th className="py-3 px-4 text-center">
-                                                Tahun Ajaran
+                                                Semester
                                             </th>{' '}
-                                            {/* This is course.tingkat */}
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {mergedCourseHistory.map((course) => {
-                                            // Determine row color based on grade and course type
+                                            // Normalize the grade value for robust comparison
+                                            const indeks = course.indeks
+                                                ? course.indeks
+                                                      .toString()
+                                                      .trim()
+                                                      .toUpperCase()
+                                                : '';
+                                            const jenis = course.jenis
+                                                ? course.jenis.toString().trim()
+                                                : '';
+
+                                            // Debugging
+                                            console.log(
+                                                `Course ${course.kodeMataKuliah}: normalized indeks="${indeks}", jenis="${jenis}"`
+                                            );
+
+                                            // Determine row color based on normalized values
                                             let gradeColor = '';
-                                            if (course.indeks === 'A')
+
+                                            if (indeks === 'A') {
                                                 gradeColor = 'bg-green-100';
-                                            else if (course.indeks === 'E')
+                                            } else if (indeks === 'E') {
                                                 gradeColor = 'bg-red-100';
-                                            else if (
-                                                course.indeks === 'D' &&
-                                                course.jenis === 'Peminatan'
-                                            )
+                                            } else if (
+                                                indeks === 'D' &&
+                                                jenis.includes('Peminatan')
+                                            ) {
                                                 gradeColor = 'bg-orange-100';
+                                            }
+
+                                            console.log(
+                                                `Selected grade color for ${course.kodeMataKuliah}: ${gradeColor}`
+                                            );
 
                                             return (
                                                 <tr
                                                     key={
                                                         course.id ||
                                                         course.kodeMataKuliah
-                                                    } // Ensure a unique key
+                                                    }
                                                     className={`border-b hover:bg-gray-50 ${gradeColor}`}>
                                                     <td className="py-2 px-4 border-r">
                                                         {course.kodeMataKuliah}
@@ -407,10 +427,8 @@ const MyCourseAdvisor = () => {
                                                         {course.indeks}
                                                     </td>
                                                     <td className="py-2 px-4 text-center">
-                                                        {course.tahun_ajaran ||
-                                                            '-'}
-                                                    </td>{' '}
-                                                    {/* `tingkat` from your service/merge */}
+                                                        {course.semester || '-'}
+                                                    </td>
                                                 </tr>
                                             );
                                         })}
