@@ -10,13 +10,11 @@ const IPSemesterCard = ({ dataSemester }) => {
             <ul className="p-3 m-0 w-full max-w-full flex flex-row flex-wrap justify-center gap-3 list-none overflow-y-auto">
                 {dataSemester.map((dataS) => (
                     <li
-                        key={dataS.id}
+                        key={dataS.semester}
                         className="m-[0.2em_0.8em] flex w-[160px] justify-between">
                         <span className="flex-2">
-                            {dataS.semester} Semester
+                            Semester {dataS.semester} : {dataS.ipSemester.toFixed(2)} 
                         </span>
-                        <span className="flex-[0.2] text-center">:</span>
-                        <span>{dataS.gpa.toFixed(2)}</span>
                     </li>
                 ))}
             </ul>
