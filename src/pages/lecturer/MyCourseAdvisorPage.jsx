@@ -264,9 +264,12 @@ const MyCourseAdvisor = () => {
         if (!selectedSemester) {
             return availableCourses;
         }
-        return availableCourses.filter(
-            (course) => course.semester === selectedSemester
-        );
+        return availableCourses.filter((course) => {
+            // Check both possible semester field names
+            const courseSemester = course.semester_mk ;
+            // Convert both to strings for consistent comparison
+            return String(courseSemester) === String(selectedSemester);
+        });
     }, [availableCourses, selectedSemester]);
 
     // ... (rest of your component's JSX)
@@ -487,6 +490,18 @@ const MyCourseAdvisor = () => {
                                             <option value="4">
                                                 Semester 4
                                             </option>
+                                            <option value="5">
+                                                Semester 5
+                                            </option>
+                                            <option value="6">
+                                                Semester 6
+                                            </option>
+                                            <option value="7">
+                                                Semester 7
+                                            </option>
+                                            <option value="8">
+                                                Semester 8
+                                            </option>
                                             {/* Add more semesters as needed */}
                                         </select>
                                     </div>
@@ -517,6 +532,9 @@ const MyCourseAdvisor = () => {
                                                 </th>
                                                 <th className="py-3 px-4 text-left">
                                                     Jenis
+                                                </th>
+                                                <th className="py-3 px-4 text-center">
+                                                    Semester
                                                 </th>
                                                 <th className="py-3 px-4 text-center">
                                                     Aksi
@@ -593,6 +611,11 @@ const MyCourseAdvisor = () => {
                                                                 <td className="py-2 px-4 border-r">
                                                                     {
                                                                         course.jenis_mk
+                                                                    }
+                                                                </td>
+                                                                <td className="py-2 px-4 text-center border-r">
+                                                                    {
+                                                                        course.semester_mk
                                                                     }
                                                                 </td>
                                                                 <td className="py-2 px-4 text-center">
@@ -695,7 +718,7 @@ const MyCourseAdvisor = () => {
                                                             </td>
                                                             <td className="py-2 px-4 text-center border-r">
                                                                 {
-                                                                    course.semester
+                                                                    course.semester_mk
                                                                 }
                                                             </td>
                                                             <td className="py-2 px-4 text-center">
