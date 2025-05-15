@@ -12,6 +12,7 @@ import {
     getClassAndStudentList,
     getStudentCourseHistory,
     getAvailableCourse,
+    sendRecommendedCourses,
 } from '../../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService';
 
 // Create context
@@ -237,8 +238,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         setSksLimitExceeded(false);
     };
 
-    // Kirim rekomendasi
-    const sendRecommendations = () => {
+    // Kirim rekomendasi mata kuliah
+    const sendRecommendations = async () => {
         if (!selectedStudent) {
             toast.warn('Pilih mahasiswa terlebih dahulu!');
             return;
@@ -247,8 +248,41 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             toast.warn('Tambahkan mata kuliah rekomendasi terlebih dahulu');
             return;
         }
-        toast.info(`Backend haven't been developed, Comming out soon.`);
-        resetAvailableCourses();
+
+        try {
+            // Show toast loading:
+            const toastId = toast.loading(
+                'Mengirim rekomendasi mata kuliah. . .'
+            );
+
+            // Panggil fungsi dari file service untuk nerusin data ke backend
+            const result = await sendRecommendedCourses(
+                selectedStudent,
+                recommendedCourses
+            );
+
+            // Update toast berdasarkan hasil
+            if (result.success) {
+                toast.update(toastId, {
+                    render: 'Rekomendasi mata kuliah berhasil dikirim!',
+                    type: 'success',
+                    isLoading: false,
+                    autoClose: 3000,
+                });
+                // Reset form setelah sukses submit
+                resetAvailableCourses();
+            } else {
+                toast.update(toastId, {
+                    render: result.message || 'Gagal mengirim rekomendasi',
+                    type: 'error',
+                    isLoading: false,
+                    autoClose: 5000,
+                });
+            }
+        } catch (error) {
+            console.error('Error in sendRecommendations:', error);
+            toast.error('Terjadi kesalahan saat mengirim rekomendasi');
+        }
     };
 
     const wouldExceedSKSLimit = (courseSKS) => {
@@ -311,7 +345,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 };
 
 // Custom hook to use the context
-export const useMyCourseAdvisor = () => {
+function useMyCourseAdvisorHook() {
     const context = useContext(MyCourseAdvisorContext);
     if (!context) {
         throw new Error(
@@ -319,4 +353,6 @@ export const useMyCourseAdvisor = () => {
         );
     }
     return context;
-};
+}
+
+export const useMyCourseAdvisor = useMyCourseAdvisorHook;

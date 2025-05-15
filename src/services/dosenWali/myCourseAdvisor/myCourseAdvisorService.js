@@ -89,18 +89,18 @@ export const getStudentCourseHistory = async (nim) => {
                 };
 
                 // Debug the transformation
-                console.log('Transforming course:', {
-                    from: course,
-                    to: transformedCourse,
-                });
+                // console.log('Transforming course:', {
+                //     from: course,
+                //     to: transformedCourse,
+                // });
 
                 return transformedCourse;
             });
 
-            console.log(
-                'Transformed student course history:',
-                studentCourseHistory
-            );
+            // console.log(
+            //     'Transformed student course history:',
+            //     studentCourseHistory
+            // );
 
             return {
                 success: true,
@@ -177,6 +177,59 @@ export const getAvailableCourse = async () => {
         return {
             success: false,
             message: 'An error occurred while fetching available courses data',
+            error: error.message,
+        };
+    }
+};
+
+export const sendRecommendedCourses = async (nim, recommendedCourses) => {
+    try {
+        // Get token dan validasi
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return {
+                success: false,
+                message: 'No token found',
+            };
+        }
+
+        const courseCodes = recommendedCourses.map((course) => course.kode_mk);
+
+        const requestData = {
+            nim: nim,
+            courseCodes: courseCodes,
+        };
+
+        const response = await fetch(`${API_URL}/sendRekomendasiMK`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            return {
+                success: true,
+                message: data.message || 'Recommendation Sent Successfully',
+                totalSKS: data.totalSKS,
+                count: data.count,
+            };
+        } else {
+            return {
+                success: false,
+                message:
+                    data.message || 'Failed to send course recommendations',
+            };
+        }
+    } catch (error) {
+        console.error('Error sending course recommendation', error);
+        return {
+            success: false,
+            message: 'An error occured while sending recommendations',
             error: error.message,
         };
     }
