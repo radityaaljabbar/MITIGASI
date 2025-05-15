@@ -24,7 +24,7 @@ import Login from './pages/Login/LoginPage.jsx';
 
 //  Lecturer Pages
 import LecturerDashboard from './pages/lecturer/LecturerDashboard.jsx';
-import MyCourseAdvisorPage from './pages/lecturer/MyCourseAdvisorPage.jsx';
+import MyCourseAdvisorPage from './pages/lecturer/myCourseAdvisor/MyCourseAdvisorPage.jsx';
 import MyReportPage from './pages/lecturer/MyReport/MyReportPage.jsx';
 import MyStudentDetail from './pages/lecturer/myStudent/DetailMahasiswaPage.jsx';
 import MyStudentList from './pages/lecturer/myStudent/studentList.jsx';
