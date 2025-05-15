@@ -66,7 +66,7 @@ const MyFeedback = () => {
               feedbackList.map((feedback) => (
                 <li 
                   key={feedback.feedbackId}
-                  className="border-l-4 border-[#951A22] bg-white p-4 rounded shadow-sm hover:translate-x-1 transition-transform duration-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+                  className="border-l-4 border-[#951A22] bg-white p-4 rounded shadow-sm hover:-translate-x-1.5 transition-transform duration-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
                 >
                   <div className="flex flex-col w-full sm:w-auto">
                     <span className="font-medium text-gray-800 mb-1 sm:mb-0">{feedback.title}</span>

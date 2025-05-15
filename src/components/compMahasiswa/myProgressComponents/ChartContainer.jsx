@@ -20,11 +20,11 @@ const ChartContainer = ({ id, data, type }) => {
                 chartInstance.current = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: data.map((item) => item.semester + 'Semester'),
+                        labels: data.map((item) => item.semester + ' Semester'),
                         datasets: [
                             {
-                                label: 'Semester GPA',
-                                data: data.map((item) => item.gpa),
+                                label: 'IP Semester',
+                                data: data.map((item) => item.ipSemester),
                                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                                 borderColor: 'rgba(54, 162,235,1)',
                                 borderWidth: 2,

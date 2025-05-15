@@ -15,6 +15,7 @@ const MyProgress = () => {
     const [takValue, setTakValue] = useState(0);
     const [sksValue, setSksValue] = useState(0);
     const [ipkValue, setIpkValue] = useState(0);
+    const [ipsValue, setIpsValue] = useState([]);
 
     // Fetch data from the query file using useEffect
     useEffect(() => {
@@ -25,6 +26,7 @@ const MyProgress = () => {
                     setTakValue(response.data.tak);
                     setSksValue(response.data.sksTotal);
                     setIpkValue(response.data.ipk);
+                    setIpsValue(response.data.ips);
                 }
             } catch (error) {
                 console.error('Error fetching TAK:', error);
@@ -46,7 +48,7 @@ const MyProgress = () => {
 
             {/* Card IP Semester */}
             <div className="mb-5 p-[min(0.8em, 12%)]">
-                <IPSemesterCard dataSemester={mockupDataSemester} />
+                <IPSemesterCard dataSemester={ipsValue} />
             </div>
 
             {/* Cards untuk IPK, SKS, dan TAK */}
@@ -67,7 +69,7 @@ const MyProgress = () => {
                 <div className="rounded-lg p-3 min-h-[120px] flex flex-wrap justify-evenly items-center gap-5">
                     <ChartContainer
                         id="IPSemesterChart"
-                        data={mockupDataSemester}
+                        data={ipsValue}
                         type="semester"
                     />
 
