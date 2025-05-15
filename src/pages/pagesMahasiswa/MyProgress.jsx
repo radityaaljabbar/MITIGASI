@@ -69,7 +69,7 @@ const MyProgress = () => {
                 <div className="rounded-lg p-3 min-h-[120px] flex flex-wrap justify-evenly items-center gap-5">
                     <ChartContainer
                         id="IPSemesterChart"
-                        data={mockupDataSemester}
+                        data={ipsValue}
                         type="semester"
                     />
 

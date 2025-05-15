@@ -4,7 +4,7 @@ const IPSemesterCard = ({ dataSemester }) => {
     return (
         <div className="bg-white shadow-md rounded-lg p-3 min-h-[120px] max-h-[250px] flex flex-col justify-evenly items-center gap-[1px] overflow-y-auto">
             <h2 className="text-xl mb-2 text-center">
-                Semester GPA (IP Semester)
+                IP Semester
             </h2>
 
             <ul className="p-3 m-0 w-full max-w-full flex flex-row flex-wrap justify-center gap-3 list-none overflow-y-auto">
