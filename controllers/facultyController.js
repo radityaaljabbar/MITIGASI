@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const response = require('../utils/response');
+const { validationResult } = require('express-validator');
 // Import queries
 const responseDosWalModel = require('../models/responseDosenWali');
 const {
@@ -357,6 +358,92 @@ exports.getAvailableCourse = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc Get detail mata kuliah untuk rekomendasi mata kuliah
+ * @route GET /api/faculty/courseAdvisor/sendRekomendasiMK
+ * @access Private (dosen_wali only)
+ */
+exports.sendCourseRecommendation = async (req, res) => {
+    try {
+        // Validate request:
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation error',
+                errors: errors.array(),
+            });
+        }
+
+        const { nim, courseCodes } = req.body;
+
+        // get kode dosen
+        const kodeDosen = req.user.code;
+
+        if (
+            !nim ||
+            !courseCodes ||
+            !Array.isArray(courseCodes) ||
+            courseCodes.length === 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Data tidak lengkap atau format tidak valid',
+            });
+        }
+
+        // Kalkulasi total sks:
+        // ger value sks pada tiap rekomendasi mk:
+        const courseCodePLaceholders = courseCodes.map(() => '?').join(',');
+        const [coursesData] = await pool.query(
+            `SELECT kode_mk, sks_mk FROM mata_kuliah_baru WHERE kode_mk IN (${courseCodePLaceholders})`,
+            courseCodes
+        );
+
+        // Hitung total sksnya:
+        const totalSKS = coursesData.reduce((total, course) => {
+            return total + (parseInt(course.sks_mk) || 0);
+        }, 0);
+
+        try {
+            // Hapus dlu data klo data yg sama udh ada agar tidak ada konflik
+            await pool.query(
+                'DELETE FROM mata_kuliah_rekomendasi WHERE nim_mahasiswa = ? AND kode_dosen = ?',
+                [nim, kodeDosen]
+            );
+
+            // Masukan (insert) data ke tabel:
+            for (const courseCode of courseCodes) {
+                await pool.execute(
+                    `INSERT INTO mata_kuliah_rekomendasi 
+                    (kode_mk, kode_dosen, nim_mahasiswa, tanggal_dibuat, total_sks) 
+                    VALUES (?, ?, ?, NOW(), ?)`,
+                    [courseCode, kodeDosen, nim, totalSKS]
+                );
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Rekomendasi mata kuliah berhasil disimpan',
+                totalSKS: totalSKS,
+                count: courseCodes.length,
+            });
+        } catch (error) {
+            await pool.rollback();
+            pool.release();
+            throw error;
+        }
+    } catch (error) {
+        console.error('Error in sendRecommendations controller:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat menyimpan rekomendasi',
+            error: error.message,
+        });
+    }
+};
+
 exports.getStudentAcademicDetails = async (req, res) => {
     try {
         const nim = req.query.nim;

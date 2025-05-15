@@ -46,6 +46,16 @@ router.get(
     facultyController.getAvailableCourse
 );
 
+// @desc    Endpoint backend untuk fitur MyCourseAdvisor
+// @fitur   FR-02 - MyCourseAdvisor - Mengirim Rekomendasi Mata Kuliah
+// MyCourseAdvisorPage.jsx
+router.post(
+    '/courseAdvisor/sendRekomendasiMK',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.sendCourseRecommendation
+);
+
 // @desc    Endpoint backend untuk fitur MyReport
 // @fitur   FR-03.1 - MyReport - Overview
 // /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx
