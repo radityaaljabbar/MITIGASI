@@ -378,7 +378,7 @@ exports.sendPsiResult = async (req, res) => {
         }
 
         // Get current date for the tanggalTes field
-        const currentDateTime = new Date().toISOString();
+        const currentDate = new Date().toISOString();
 
         // Step 1: Delete any existing records for this nim
         const deleteQuery = `DELETE FROM hasil_tes_psikologi WHERE nim = ?`;
