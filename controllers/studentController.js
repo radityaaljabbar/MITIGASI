@@ -378,7 +378,13 @@ exports.sendPsiResult = async (req, res) => {
         }
 
         // Get current date for the tanggalTes field
-        const currentDate = new Date().toISOString();
+        const now = new Date();
+
+        // Konversi ke waktu lokal (WIB = UTC+7)
+        const wibOffset = 7 * 60; // dalam menit
+        const currentDate = new Date(
+            now.getTime() + wibOffset * 60000
+        ).toISOString();
 
         // Step 1: Delete any existing records for this nim
         const deleteQuery = `DELETE FROM hasil_tes_psikologi WHERE nim = ?`;
