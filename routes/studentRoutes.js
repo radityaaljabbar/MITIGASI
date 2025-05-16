@@ -30,4 +30,16 @@ router.get(
     studentController.getCourseHistory
 );
 
+/**
+ * @desc Endpoint backend untuk fitur MyCourse
+ * @FR-05 - MyCourse - Tabel rekomendasi mata kuliah
+ * RekomendasiMataKuliah.jsx frontend component
+ */
+router.get(
+    '/rekomendasiMataKuliah',
+    protect,
+    authorize('mahasiswa'),
+    studentController.getCourseRecommendation
+);
+
 module.exports = router;

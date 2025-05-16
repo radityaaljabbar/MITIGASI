@@ -1,3 +1,4 @@
+const { pool } = require('../config/database');
 // Import queries2 dari folder models
 const {
     getStudentGrades,
@@ -39,30 +40,32 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
 
         // Ekstrak TAK saja
         const takValue = rowsTAK.length > 0 ? rowsTAK[0].tak : 0;
-        const sksTotalValue = rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
+        const sksTotalValue =
+            rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
         const ipkValue = rowsIPK.length > 0 ? rowsIPK[0].ipk_lulus : 0;
-        
+
         const ipsValue = [];
 
-        rowsIPS.forEach(row => {
-            if (row.semester && row.ip_semester !== null) { // Pastikan ada data semester
+        rowsIPS.forEach((row) => {
+            if (row.semester && row.ip_semester !== null) {
+                // Pastikan ada data semester
                 ipsValue.push({
                     semester: row.semester,
-                    ipSemester: row.ip_semester
+                    ipSemester: row.ip_semester,
                 });
             }
         });
 
-        console.log("Data Mahasiswa Ditemukan (dari getStudentAcademicData):");
-        console.log("tak: ", takValue);
-        console.log("sks total: ", sksTotalValue);
-        console.log("ips: ", ipsValue)
+        console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
+        console.log('tak: ', takValue);
+        console.log('sks total: ', sksTotalValue);
+        console.log('ips: ', ipsValue);
 
         const ipkSksTakIps = {
             ipk: ipkValue,
             sksTotal: sksTotalValue,
             tak: takValue,
-            ips: ipsValue
+            ips: ipsValue,
         };
 
         return res.status(200).json({
@@ -78,9 +81,6 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
     }
 };
 
-// @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
-// @route GET /api/student/riwayatMataKuliah
-// @access Private (khusus mahasiswa)
 // @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
 // @route GET /api/student/riwayatMataKuliah
 // @access Private (khusus mahasiswa)
@@ -230,6 +230,58 @@ exports.getCourseHistory = async (req, res) => {
             message:
                 'Terjadi kesalahan server saat mengambil riwayat mata kuliah',
             error: error.message,
+        });
+    }
+};
+
+// @desc Ambil daftar matakuliah yang direkomendasikan oleh dosen wali
+// @route GET /api/student/rekomendasiMataKuliah
+// @access Private (khusus mahasiswa)
+exports.getCourseRecommendation = async (req, res) => {
+    try {
+        // Ambil nim mahasiswa dari session
+        const nim = req.user.id;
+
+        // Cek dulu kalau id/nim nya ada
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'NIM tidak ditemukan, pastikan kamu sudah login dengan benar',
+            });
+        }
+
+        // get data dari query:
+        const [mataKuliahRekomendasi] = await pool.execute(
+            `SELECT mkr.kode_mk,
+                    mkb.nama_mk, mkb.kode_mk AS kode_mk_baru, mkb.sks_mk, mkb.jenis_mk
+            FROM mata_kuliah_rekomendasi mkr
+            JOIN mata_kuliah_baru mkb ON mkr.kode_mk = mkb.kode_mk
+            WHERE mkr.nim_mahasiswa = ?
+            ORDER BY mkb.nama_mk`,
+            [nim]
+        );
+
+        // Cek data ada atau tidak:
+        // console.log(mataKuliahRekomendasi);
+        if (mataKuliahRekomendasi.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Belum ada rekomendasi mata kuliah',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: mataKuliahRekomendasi,
+            message: 'Berhasil mendapatkan data rekomendasi mata kuliah',
+        });
+    } catch (error) {
+        console.error('Error mendapatkan rekomendasi mata kuliah:', error);
+        return res.status(500).json({
+            success: false,
+            message:
+                'Terjadi kesalahan dalam mengambil data rekomendasi mata kuliah',
         });
     }
 };
