@@ -42,4 +42,26 @@ router.get(
     studentController.getCourseRecommendation
 );
 
+/**
+ * @desc Endpoint backend untuk fitur MyWellness
+ * @FR-05 - MyWellness - Fetching all nim list from result
+ * MyWellnessPage.jsx frontend component
+ */
+router.get(
+    '/getPsiResult',
+    protect,
+    authorize('mahasiswa'),
+    studentController.getPsiResults
+);
+
+/**
+ * @desck Endpoint backend untuk fitur MyWellness
+ * FR-05 - MyWellness - Sending / Mengirim hasil tes mahasiswa untuk disimpan di database
+ */
+router.post(
+    '/sendPsiResult',
+    protect,
+    authorize('mahasiswa'),
+    studentController.sendPsiResult
+);
 module.exports = router;

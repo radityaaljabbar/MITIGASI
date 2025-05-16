@@ -515,9 +515,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
             data: responseData,
         });
     } catch (error) {
-        console.error('Error in getStudentAcademicDetails:', error); // Lebih spesifik nama fungsinya
-        // Periksa jenis error jika perlu untuk respons yang lebih detail
-        // if (error.message.includes("timeout")) { ... }
+        console.error('Error in getStudentAcademicDetails:', error);
         res.status(500).json({
             success: false,
             message: 'Server error while fetching student academic details.',

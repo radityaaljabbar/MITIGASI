@@ -16,6 +16,10 @@ const {
     fetchStudentIPS,
 } = require('../models/mahasiswaQueries/MyProgress');
 
+const {
+    fetchPsiResult,
+} = require('../models/mahasiswaQueries/myWellnessQueries');
+
 // @desc Ambil tak dari mahasisw yang login
 // @route GET /api/student/takMahasiswa
 // @access Private (khusus mahasiswa)
@@ -282,6 +286,152 @@ exports.getCourseRecommendation = async (req, res) => {
             success: false,
             message:
                 'Terjadi kesalahan dalam mengambil data rekomendasi mata kuliah',
+        });
+    }
+};
+
+// @desc Ambil daftar nim mahasiswa yang sudah pernah mengisi
+// @route GET /api/student/getPsiResult
+// @access Private (khusus mahasiswa)
+exports.getPsiResults = async (req, res) => {
+    try {
+        // get nim from localStorage
+        const nim = req.user.id;
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'NIM tidak ditemukan, pastikan kamu sudah login dengan benar',
+            });
+        }
+
+        // Querying
+        const psiResult = await fetchPsiResult(nim);
+
+        if (psiResult.length === 0) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            count: psiResult.length,
+            data: psiResult,
+        });
+    } catch (error) {
+        console.error('Error mendapatkan hasil tes psikologi:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while fetching psychology result.',
+        });
+    }
+};
+
+// @desc Mengirim data insert ke database.
+// @route GET /api/student/sendPsiResult
+// @access Private (khusus mahasiswa)
+exports.sendPsiResult = async (req, res) => {
+    try {
+        const nim = req.user.id;
+        // Extract data from request body
+        const {
+            skor_depression,
+            skor_anxiety,
+            skor_stress,
+            total_skor,
+            kesimpulan,
+            saran,
+            klasifikasi,
+        } = req.body;
+
+        // Validate required fields
+        if (
+            !nim ||
+            skor_depression === undefined ||
+            skor_anxiety === undefined ||
+            skor_stress === undefined ||
+            total_skor === undefined ||
+            !kesimpulan ||
+            !saran ||
+            !klasifikasi
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Missing required fields for psychological test results',
+                data: [],
+            });
+        }
+
+        // Verify that nim from token matches nim in request
+        // This is an additional security check
+        if (req.user.id !== nim) {
+            return res.status(403).json({
+                success: false,
+                message:
+                    'You are not authorized to submit test results for this student',
+                data: [],
+            });
+        }
+
+        // Get current date for the tanggalTes field
+        const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+        // Step 1: Delete any existing records for this nim
+        const deleteQuery = `DELETE FROM hasil_tes_psikologi WHERE nim = ?`;
+        const [deleteResult] = await pool.execute(deleteQuery, [nim]);
+
+        console.log(
+            `Deleted ${deleteResult.affectedRows} existing records for nim: ${nim}`
+        );
+
+        // Step 2: Insert new data
+        const insertQuery = `
+            INSERT INTO hasil_tes_psikologi 
+            (nim, skor_depression, skor_anxiety, skor_stress, total_skor, kesimpulan, saran, klasifikasi, tanggalTes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        // Values to be inserted
+        const insertValues = [
+            nim,
+            skor_depression,
+            skor_anxiety,
+            skor_stress,
+            total_skor,
+            kesimpulan,
+            saran,
+            klasifikasi,
+            currentDate,
+        ];
+
+        // Execute the insert query
+        const [insertResult] = await pool.execute(insertQuery, insertValues);
+
+        // Check if insert was successful
+        if (insertResult.affectedRows > 0) {
+            return res.status(201).json({
+                success: true,
+                message: 'Hasil tes psikologi berhasil disimpan',
+                data: {
+                    id: insertResult.insertId,
+                    nim,
+                    tanggalTes: currentDate,
+                },
+            });
+        } else {
+            throw new Error('Failed to insert data');
+        }
+    } catch (error) {
+        console.error('Error in sendPsiResult controller:', error);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat menyimpan hasil tes psikologi',
+            data: [],
         });
     }
 };
