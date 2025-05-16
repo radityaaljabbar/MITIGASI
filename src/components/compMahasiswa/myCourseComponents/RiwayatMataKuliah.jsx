@@ -7,7 +7,7 @@ const RiwayatMataKuliah = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // handle file service
+    // handle dta dri service
     useEffect(() => {
         const fetchCourseHistory = async () => {
             try {

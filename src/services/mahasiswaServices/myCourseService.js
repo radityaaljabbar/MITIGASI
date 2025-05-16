@@ -43,3 +43,52 @@ export const getCourseHistory = async () => {
         };
     }
 };
+
+// Get rekomendasi MK yang dikirimkan oleh dosen wali
+export const getRecommendedCourse = async () => {
+    try {
+        // Get dan validasi token dari localStorage user
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return {
+                success: false,
+                message: 'No Token Found',
+                data: [],
+            };
+        }
+
+        // Fetch api
+        const response = await fetch(`${API_URL}/rekomendasiMataKuliah`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message:
+                    result.message || 'Failed to fetch recommended courses',
+                data: [],
+            };
+        }
+
+        return {
+            success: true,
+            message:
+                result.message || 'successfully fetch recommended course data',
+            data: result.data || [],
+        };
+    } catch (error) {
+        console.error('Error fetching recommended courses: ', error);
+        return {
+            success: false,
+            message: 'An error occurred while fetching recommended courses',
+            data: [],
+        };
+    }
+};
