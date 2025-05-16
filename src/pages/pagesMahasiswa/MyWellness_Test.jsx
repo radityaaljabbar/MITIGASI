@@ -258,9 +258,16 @@ const MyWellness_Test = () => {
 
     return (
         <div className="p-8 w-full overflow-y-auto text-sm">
-            <h1 className="text-[#333] mb-6 text-center text-2xl font-bold">
-                Evaluasi Psikologis Mahasiswa
-            </h1>
+            <div className="text-[#333] mb-6 text-center text-2xl font-bold">
+                <h1 className="pb-4">Evaluasi Psikologis Mahasiswa</h1>
+                <p className="text-sm  max-w-xl mx-auto">
+                    Bacalah setiap pernyataan dan pilihlah pilihan yang
+                    menunjukkan seberapa besar pernyataan tersebut berlaku bagi
+                    Anda selama seminggu terakhir. Tidak ada jawaban yang benar
+                    atau salah. Jangan menghabiskan terlalu banyak waktu untuk
+                    setiap pernyataan.
+                </p>
+            </div>
             <div className="max-w-2xl mx-auto p-4">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {pertanyaanPsikologi.map((item) => (
