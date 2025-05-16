@@ -15,6 +15,12 @@ const MyWellness_Tested = ({ dataPsikologi }) => {
         );
     }
 
+    const dateString = dataPsikologi.tanggalTes;
+    const formattedDate = new Date(dateString).toLocaleString('en-US', {
+        dateStyle: 'medium', // Try: 'short', 'medium', 'long'
+        timeStyle: 'short', // Or remove this if you don't want time
+    });
+
     return (
         <div className="p-6 w-full flex flex-col gap-6 text-sm">
             <div className="w-full max-w-[900px] mx-auto p-6 bg-white rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.05)] flex flex-col gap-5">
@@ -22,10 +28,8 @@ const MyWellness_Tested = ({ dataPsikologi }) => {
                     Evaluasi Kondisi Psikologis Mahasiswa
                 </h1>
                 <p className="text-[clamp(0.9rem,2.5vw,1rem)] text-[#444] leading-[1.5] max-w-[700px]">
-                    Evaluasi kondisi psikologis Anda untuk membantu meningkatkan
-                    kesejahteraan dan performa akademik. Jawablah
-                    pertanyaan-pertanyaan dengan jujur untuk mendapatkan hasil
-                    yang optimal.
+                    Anda telah mengisi questioner evaluasi psikologi pada:{' '}
+                    {formattedDate}
                 </p>
             </div>
 
@@ -34,13 +38,13 @@ const MyWellness_Tested = ({ dataPsikologi }) => {
                     Hasil Evaluasi Psikologis Anda
                 </h2>
                 <p className="text-[clamp(0.85rem,2vw,0.95rem)] text-[#444] leading-[1.5] w-full p-[0.6rem] bg-[#f9f9f9] rounded-md border-l-[3px] border-l-[#951A22]">
-                    <b>Ringkasan: {dataPsikologi.summary}</b>
+                    <b>Ringkasan: {dataPsikologi.kesimpulan}</b>
                 </p>
                 <p className="text-[clamp(0.85rem,2vw,0.95rem)] text-[#444] leading-[1.5] w-full p-[0.6rem] bg-[#f9f9f9] rounded-md border-l-[3px] border-l-[#951A22]">
-                    <b>Saran: {dataPsikologi.suggestions}</b>
+                    <b>Saran: {dataPsikologi.saran}</b>
                 </p>
                 <p className="text-[clamp(0.85rem,2vw,0.95rem)] text-[#444] leading-[1.5] w-full p-[0.6rem] bg-[#f9f9f9] rounded-md border-l-[3px] border-l-[#951A22]">
-                    <b>Tanggal Tes: {dataPsikologi.testDate}</b>
+                    <b>Tanggal Tes: {formattedDate}</b>
                 </p>
                 <div className="flex flex-wrap gap-[0.8rem] mt-[0.8rem]">
                     <Link to="/student/my-wellness/psi-test">

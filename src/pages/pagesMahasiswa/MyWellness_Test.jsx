@@ -1,19 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import pertanyaanPsikologi from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyWellness/pertanyaanPsikologi.json';
-import scoreCategories from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyWellness/scoreCategories.json';
+import pertanyaanPsikologi from '../../assets/data/UsedData/DASS12Questionnaire_questions.json';
+import scoreCategories from '../../assets/data/UsedData/scoreCategories.json';
+import { sendPsiResult } from '../../services/mahasiswaServices/myWellnessService';
 
-const MyWellness_Test = ({ submitTestPsikologi }) => {
-    // Hardcode NIM dan Nama nanti diambil dri backend pas session mereka login
-    const testNIM = 11032100102;
-    const testName = 'Kiboy';
+const MyWellness_Test = () => {
     // Make useState untuk tracking kondisi jawaban yang dipilih:
     const [selectedAnswers, setSelectedAnswers] = useState({});
     // Make useState juga untuk tracking kondisi jawaban yang belum dipilih:
     const [unansweredQuestions, setUnansweredQuestions] = useState([]);
+    // useState untuk simpen data akhir:
+    const [psiTestData, setPsiTestData] = useState({});
+    // Add loading state for API calls
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        try {
+            // If we have psiTestData and it's not empty (meaning the form was submitted)
+            if (psiTestData && Object.keys(psiTestData).length > 0) {
+                const sendData = async () => {
+                    setIsSubmitting(true);
+                    const result = await sendPsiResult(psiTestData);
+
+                    if (result.success) {
+                        toast.success(
+                            result.message || 'Data berhasil disimpan!'
+                        );
+                        navigate('/student/my-wellness');
+                    } else {
+                        toast.error(result.message || 'Gagal menyimpan data');
+                        setIsSubmitting(false);
+                    }
+                };
+
+                sendData();
+            }
+        } catch (error) {
+            console.error('Error in useEffect:', error);
+            toast.error('Terjadi kesalahan saat mengirim data');
+            setIsSubmitting(false);
+        }
+    }, [psiTestData, navigate]);
 
     // Handler untuk seleksi pilihan:
     const handleOptionChange = (idPertanyaan, choice, score) => {
@@ -28,11 +58,41 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
         );
     };
 
-    // Function untuk menentukan kategori berdasarkan skor
-    const getCategoryFromScore = (score) => {
-        for (const category of scoreCategories) {
-            const [min, max] = category.rentang.split('-').map(Number);
-            if (score >= min && score <= max) {
+    // Function untuk menentukan kategori berdasarkan skor dari domain tertentu
+    const getDomainCategory = (domain, score) => {
+        if (!scoreCategories[domain]) return 'Tidak Diketahui';
+
+        for (const category of scoreCategories[domain]) {
+            const [min, max] = category.rentang.split('-').map((str) => {
+                return str.includes('+')
+                    ? Number.MAX_SAFE_INTEGER
+                    : Number(str);
+            });
+
+            if (
+                score >= min &&
+                (score <= max || max === Number.MAX_SAFE_INTEGER)
+            ) {
+                return category.kategori;
+            }
+        }
+
+        return 'Tidak Diketahui';
+    };
+
+    // Function untuk menentukan kategori berdasarkan skor overall
+    const getOverallCategory = (score) => {
+        for (const category of scoreCategories.overall) {
+            const [min, max] = category.rentang.split('-').map((str) => {
+                return str.includes('+')
+                    ? Number.MAX_SAFE_INTEGER
+                    : Number(str);
+            });
+
+            if (
+                score >= min &&
+                (score <= max || max === Number.MAX_SAFE_INTEGER)
+            ) {
                 return {
                     summary: category.summary,
                     suggestions: category.suggestions,
@@ -49,48 +109,87 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
         };
     };
 
+    // Function untuk menentukan klasifikasi (Aman, Siaga, Bermasalah) berdasarkan skor domain
+    const getKlasifikasi = (depressionScore, anxietyScore, stressScore) => {
+        // Get kategori untuk setiap domain
+        const depressionCategory = getDomainCategory(
+            'depression',
+            depressionScore
+        );
+        const anxietyCategory = getDomainCategory('anxiety', anxietyScore);
+        const stressCategory = getDomainCategory('stress', stressScore);
+
+        // Logic untuk menentukan klasifikasi keseluruhan
+        if (
+            depressionCategory === 'Normal' &&
+            anxietyCategory === 'Normal' &&
+            stressCategory === 'Normal'
+        ) {
+            return 'Aman';
+        } else if (
+            depressionCategory === 'Parah' ||
+            depressionCategory === 'Sangat Parah' ||
+            anxietyCategory === 'Parah' ||
+            anxietyCategory === 'Sangat Parah' ||
+            stressCategory === 'Parah' ||
+            stressCategory === 'Sangat Parah'
+        ) {
+            return 'Bermasalah';
+        } else {
+            return 'Siaga';
+        }
+    };
+
     // Function untuk menghitung skor berdasarkan domain
     const calculateDomainScores = (answers) => {
-        const domainScores = {};
+        const domainScores = {
+            depression: 0,
+            anxiety: 0,
+            stress: 0,
+        };
 
         pertanyaanPsikologi.forEach((question) => {
-            const domain = question.domain;
+            const domain = question.domain.toLowerCase(); // Convert to lowercase to ensure matching
             const answer = answers[question.idPertanyaan];
 
             if (answer) {
-                if (!domainScores[domain]) {
-                    domainScores[domain] = {
-                        total: 0,
-                        count: 0,
-                        average: 0,
-                    };
+                // Ensure we only add to domains that exist in our object
+                if (
+                    domain === 'depression' ||
+                    domain === 'anxiety' ||
+                    domain === 'stress'
+                ) {
+                    domainScores[domain] += answer.score;
+                }
+                // Handle case where domain might be stored differently in the question data
+                else if (domain === 'depresi') {
+                    domainScores.depression += answer.score;
+                } else if (domain === 'kecemasan') {
+                    domainScores.anxiety += answer.score;
+                } else if (domain === 'stres') {
+                    domainScores.stress += answer.score;
                 }
 
-                domainScores[domain].total += answer.score;
-                domainScores[domain].count++;
-                domainScores[domain].average =
-                    domainScores[domain].total / domainScores[domain].count;
+                // Log unutk debugging
+                // console.log(
+                //     `Question ${question.idPertanyaan} - Domain: ${domain}, Score: ${answer.score}`
+                // );
             }
         });
 
+        console.log('Final domain scores:', domainScores);
         return domainScores;
     };
 
     // Function untuk menghitung total skor
     const calculateTotalScore = (answers) => {
         let totalScore = 0;
-        let answeredQuestions = 0;
 
         for (const key in answers) {
             totalScore += answers[key].score;
-            answeredQuestions++;
         }
 
-        return {
-            score: totalScore,
-            average: answeredQuestions > 0 ? totalScore / answeredQuestions : 0,
-            count: answeredQuestions,
-        };
+        return totalScore;
     };
 
     // Handler saat submit si form:
@@ -123,43 +222,38 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
             return;
         }
 
-        // Hitung hasil berdasarkan domain
+        // Hitung skor per domain
         const domainScores = calculateDomainScores(selectedAnswers);
 
         // Hitung total skor
-        const totalScoreResult = calculateTotalScore(selectedAnswers);
+        const totalScore = calculateTotalScore(selectedAnswers);
 
-        // Mendapatkan skor yang dinormalisasi ke skala 0-100
-        const maxPossibleScore = pertanyaanPsikologi.length * 5; // Asumsi skor maksimum per pertanyaan adalah 5
-        const normalizedScore = Math.round(
-            (totalScoreResult.score / maxPossibleScore) * 100
+        // Dapatkan kategori & saran berdasarkan overall score
+        const overallCategory = getOverallCategory(totalScore);
+
+        // Dapatkan klasifikasi (Aman, Siaga, Bermasalah)
+        const klasifikasi = getKlasifikasi(
+            domainScores.depression,
+            domainScores.anxiety,
+            domainScores.stress
         );
 
-        // Dapatkan kategori berdasarkan skor
-        const category = getCategoryFromScore(normalizedScore);
-
-        // Prepare psychological test submission
+        // Prepare data untuk dikirim ke database
         const jawabanTestPsikologi = {
-            NIM: testNIM,
-            Name: testName,
-            answers: selectedAnswers,
-            domainScores: domainScores,
-            totalScore: totalScoreResult,
-            normalizedScore: normalizedScore,
-            summary: category.summary,
-            suggestions: category.suggestions,
-            klasifikasiPsikologi: category.klasifikasiPsikologi,
-            testDate: new Date().toISOString().split('T')[0], // Format YYYY-MM-DD
+            skor_depression: domainScores.depression,
+            skor_anxiety: domainScores.anxiety,
+            skor_stress: domainScores.stress,
+            total_skor: totalScore,
+            kesimpulan: overallCategory.summary,
+            saran: overallCategory.suggestions,
+            klasifikasi: klasifikasi,
         };
 
-        // Call submit function from parent component
-        submitTestPsikologi(jawabanTestPsikologi);
+        // Log untuk debugging
+        console.log('Preparing to send data:', jawabanTestPsikologi);
 
-        // Tambahkan toast success
-        toast.success('Tes Psikologi Berhasil Dikirim!');
-
-        // Navigate to results page
-        return navigate('/student/my-wellness');
+        // Simpen data ke useState - this will trigger the useEffect
+        setPsiTestData(jawabanTestPsikologi);
     };
 
     return (
@@ -190,7 +284,7 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
                                 Pertanyaan {item.idPertanyaan}: {item.question}
                             </h2>
                             <div className="text-gray-600 mb-3">
-                                Domain: {item.domain}
+                                {/* Domain: {item.domain} */}
                             </div>
 
                             <div className="space-y-3">
@@ -232,8 +326,18 @@ const MyWellness_Test = ({ submitTestPsikologi }) => {
 
                     <button
                         type="submit"
-                        className="bg-[#951A22] text-white py-3 px-6 rounded-lg block mx-auto w-fit min-w-[10cm] hover:bg-[#7A1118] hover:translate-y-[2px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#951A22]">
-                        Submit
+                        disabled={isSubmitting}
+                        className={`
+                            bg-[#951A22] text-white py-3 px-6 rounded-lg block mx-auto 
+                            w-fit min-w-[10cm] transition-all duration-300 focus:outline-none 
+                            focus:ring-2 focus:ring-offset-2 focus:ring-[#951A22]
+                            ${
+                                isSubmitting
+                                    ? 'opacity-70 cursor-not-allowed'
+                                    : 'hover:bg-[#7A1118] hover:translate-y-[2px]'
+                            }
+                        `}>
+                        {isSubmitting ? 'Memproses...' : 'Submit'}
                     </button>
                 </form>
             </div>

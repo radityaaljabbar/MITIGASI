@@ -1,0 +1,254 @@
+[
+    {
+        "idPertanyaan": 1,
+        "question": "Saya merasa sulit untuk tenang",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 2,
+        "question": "Saya menyadari mulut saya terasa kering",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 3,
+        "question": "Saya sepertinya tidak dapat merasakan perasaan positif sama sekali",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 4,
+        "question": "Saya mengalami kesulitan bernapas (misalnya, napas terlalu cepat, sesak napas tanpa aktivitas fisik)",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 5,
+        "question": "Saya merasa sulit untuk memulai inisiatif melakukan sesuatu",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 6,
+        "question": "Saya cenderung bereaksi berlebihan terhadap situasi",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 7,
+        "question": "Saya mengalami gemetar (misalnya pada tangan)",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 8,
+        "question": "Saya merasa menggunakan banyak energi saraf",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 9,
+        "question": "Saya khawatir tentang situasi di mana saya mungkin panik dan mempermalukan diri sendiri",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 10,
+        "question": "Saya merasa tidak ada yang bisa saya harapkan",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 11,
+        "question": "Saya mendapati diri saya mudah gelisah",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 12,
+        "question": "Saya merasa sulit untuk rileks",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 13,
+        "question": "Saya merasa sedih dan murung",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 14,
+        "question": "Saya tidak toleran terhadap apapun yang menghalangi saya menyelesaikan apa yang sedang saya kerjakan",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 15,
+        "question": "Saya merasa hampir panik",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 16,
+        "question": "Saya tidak mampu menjadi antusias tentang apapun",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 17,
+        "question": "Saya merasa tidak berharga sebagai seorang manusia",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 18,
+        "question": "Saya merasa bahwa saya mudah tersinggung",
+        "domain": "Stress",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 19,
+        "question": "Saya menyadari detak jantung saya tanpa melakukan aktivitas fisik (misalnya, merasa detak jantung meningkat, jantung berdebar)",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 20,
+        "question": "Saya merasa takut tanpa alasan yang jelas",
+        "domain": "Anxiety",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    },
+    {
+        "idPertanyaan": 21,
+        "question": "Saya merasa hidup ini tidak berarti",
+        "domain": "Depression",
+        "choices": [
+            "Tidak berlaku untuk saya sama sekali",
+            "Berlaku untuk saya sampai tingkat tertentu, atau kadang-kadang",
+            "Berlaku untuk saya sampai tingkat yang cukup besar atau sebagian besar waktu",
+            "Sangat berlaku untuk saya atau berlaku hampir sepanjang waktu"
+        ],
+        "scores": [0, 1, 2, 3]
+    }
+]

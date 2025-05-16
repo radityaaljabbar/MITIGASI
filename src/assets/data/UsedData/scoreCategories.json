@@ -1,0 +1,100 @@
+{
+    "overall": [
+        {
+            "rentang": "0-29",
+            "summary": "Kondisi psikologis sangat baik. Mahasiswa menunjukkan kesehatan mental yang optimal dan kemampuan mengelola stres yang baik.",
+            "suggestions": "Pertahankan kebiasaan positif dan aktivitas yang mendukung kesehatan mental.",
+            "klasifikasiPsikologi": "Sangat Sehat"
+        },
+        {
+            "rentang": "30-49",
+            "summary": "Kondisi psikologis baik. Mahasiswa umumnya berfungsi dengan baik meskipun mungkin mengalami beberapa tantangan ringan.",
+            "suggestions": "Pertahankan strategi koping yang efektif dan pertimbangkan untuk meningkatkan area yang lebih lemah.",
+            "klasifikasiPsikologi": "Sehat"
+        },
+        {
+            "rentang": "50-79",
+            "summary": "Kondisi psikologis cukup. Mahasiswa mungkin mengalami beberapa tekanan yang perlu diperhatikan.",
+            "suggestions": "Identifikasi sumber stres dan kembangkan strategi untuk mengelolanya. Pertimbangkan untuk berbicara dengan konselor kampus.",
+            "klasifikasiPsikologi": "Cukup Sehat"
+        },
+        {
+            "rentang": "80-99",
+            "summary": "Kondisi psikologis kurang baik. Mahasiswa mungkin mengalami tekanan signifikan yang mempengaruhi fungsi sehari-hari.",
+            "suggestions": "Disarankan untuk mencari dukungan dari layanan konseling kampus. Prioritaskan perawatan diri dan strategi pengelolaan stres.",
+            "klasifikasiPsikologi": "Cemas Ringan"
+        },
+        {
+            "rentang": "100+",
+            "summary": "Kondisi psikologis tidak baik. Mahasiswa mungkin mengalami tekanan berat yang memerlukan perhatian segera.",
+            "suggestions": "Segera hubungi layanan kesehatan mental kampus atau profesional kesehatan mental. Dukungan aktif sangat direkomendasikan.",
+            "klasifikasiPsikologi": "Cemas Berat"
+        }
+    ],
+    "depression": [
+        {
+            "rentang": "0-9",
+            "kategori": "Normal"
+        },
+        {
+            "rentang": "10-13",
+            "kategori": "Ringan"
+        },
+        {
+            "rentang": "14-20",
+            "kategori": "Sedang"
+        },
+        {
+            "rentang": "21-27",
+            "kategori": "Parah"
+        },
+        {
+            "rentang": "28+",
+            "kategori": "Sangat Parah"
+        }
+    ],
+    "anxiety": [
+        {
+            "rentang": "0-7",
+            "kategori": "Normal"
+        },
+        {
+            "rentang": "8-9",
+            "kategori": "Ringan"
+        },
+        {
+            "rentang": "10-14",
+            "kategori": "Sedang"
+        },
+        {
+            "rentang": "15-19",
+            "kategori": "Parah"
+        },
+        {
+            "rentang": "20+",
+            "kategori": "Sangat Parah"
+        }
+    ],
+    "stress": [
+        {
+            "rentang": "0-14",
+            "kategori": "Normal"
+        },
+        {
+            "rentang": "15-18",
+            "kategori": "Ringan"
+        },
+        {
+            "rentang": "19-25",
+            "kategori": "Sedang"
+        },
+        {
+            "rentang": "26-33",
+            "kategori": "Parah"
+        },
+        {
+            "rentang": "34+",
+            "kategori": "Sangat Parah"
+        }
+    ]
+}

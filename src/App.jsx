@@ -32,9 +32,6 @@ import MyStudentList from './pages/lecturer/myStudent/studentList.jsx';
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
 
 const App = () => {
-    const kirimTestPsikologi = (jawabanTestPsikologi) => {
-        console.log(jawabanTestPsikologi);
-    };
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route>
@@ -72,11 +69,7 @@ const App = () => {
                     <Route path="my-wellness" element={<MyWellnessPage />} />
                     <Route
                         path="my-wellness/psi-test"
-                        element={
-                            <MyWellness_Test
-                                submitTestPsikologi={kirimTestPsikologi}
-                            />
-                        }
+                        element={<MyWellness_Test />}
                     />
                 </Route>
 

@@ -1,31 +1,59 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-//Import Data json:
-import psikologiMahasiswa from '../../assets/data/mockupjsonMahasiswa/mockupjsonMyWellness/psikologiMahasiswa.json';
 //Importing komponen2 MyWellness
 import MyWellness_Tested from '../../components/compMahasiswa/myWellnessComponents/MyWellness_Tested';
 import MyWellness_NotTested from '../../components/compMahasiswa/myWellnessComponents/MyWellness_NotTested';
 
-const MyWellnessPage = () => {
-    const NIMTest = 1103210099;
-    const [dataPsikologi, setDataPsikologi] = useState(null);
+//Import fungsi service
+import { getPsiResult } from '../../services/mahasiswaServices/myWellnessService';
 
-    // Fungsi untuk ngasih data tergantung NIM avail atau tidak:
+const MyWellnessPage = () => {
+    const [dataPsikologi, setDataPsikologi] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // get data from service
     useEffect(() => {
-        // Fungsi untuk ambil data berdasarkan NIM
-        const getDataPsikologi = () => {
-            const result = psikologiMahasiswa.find(
-                (data) => data.NIM === NIMTest
-            );
-            setDataPsikologi(result);
+        const getDataPsikologi = async () => {
+            try {
+                setLoading(true);
+                const response = await getPsiResult();
+
+                if (response.success && response.data.length > 0) {
+                    // Get the first result from the data array
+                    setDataPsikologi(response.data[0]);
+                } else {
+                    // If response is successful but no data, or if response failed
+                    setDataPsikologi(null);
+                    if (!response.success) {
+                        setError(response.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching psychological data:', error);
+                setError('Failed to load data. Please try again later.');
+                setDataPsikologi(null);
+            } finally {
+                setLoading(false);
+            }
         };
 
         getDataPsikologi();
-    }, [NIMTest]);
+    }, []);
+
+    // console.log(dataPsikologi);
 
     return (
         <div className="flex flex-col items-center justify-center h-screen p-5 gap-7 w-full">
-            {dataPsikologi ? (
+            {loading ? (
+                <div className="text-center">
+                    <p>Loading wellness data...</p>
+                </div>
+            ) : error ? (
+                <div className="text-center text-red-500">
+                    <p>{error}</p>
+                </div>
+            ) : dataPsikologi ? (
                 <MyWellness_Tested dataPsikologi={dataPsikologi} />
             ) : (
                 <MyWellness_NotTested />
