@@ -82,7 +82,7 @@ const FinanceHistoryPage = () => {
                                         <thead className="bg-[#951A22] text-white">
                                             <tr>
                                                 <th className="p-3 text-left">Tanggal Pengisian</th>
-                                                <th className="p-3 text-left">Ringkasan</th>
+                                                <th className="p-3 text-left">Kategori Alasan</th>
                                                 <th className="p-3 text-center">Aksi</th>
                                             </tr>
                                         </thead>

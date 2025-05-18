@@ -154,7 +154,7 @@ const DetailPengajuanFinansial = ({
 
                             <button
                                 onClick={() => onApprove(selectedRequest.id)}
-                                className="px-4 py-2 bg-[#951A22] text-white rounded hover: bg-red-700">
+                                className="px-4 py-2 bg-[#951A22] text-white rounded hover:">
                                 Setujui
                             </button>
                         </div>

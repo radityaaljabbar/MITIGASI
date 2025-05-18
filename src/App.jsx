@@ -13,13 +13,19 @@ import MainLayout from './layout/MainLayout.jsx';
 import FeedbackList from './pages/pagesMahasiswa/Feedback/FeedbackList.jsx';
 import FeedbackDetail from './pages/pagesMahasiswa/Feedback/FeedbackDetail.jsx';
 import NewFeedback from './pages/pagesMahasiswa/Feedback/NewFeedback.jsx';
+
 import FinanceMain from './pages/pagesMahasiswa/Finance/Main.jsx';
-import FinanceApp from './pages/pagesMahasiswa/Finance/Application.jsx';
-import FinanceHistory from './pages/pagesMahasiswa/Finance/ApplicationHistory.jsx';
+import FinanceApp from './pages/pagesMahasiswa/Finance/Application2.jsx';
+import FinanceHistory from './pages/pagesMahasiswa/Finance/ApplicationHistory2.jsx';
+
 import MyProgress from './pages/pagesMahasiswa/MyProgress.jsx';
+
 import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage.jsx';
+
 import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage.jsx';
+
 import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test.jsx';
+
 import Login from './pages/Login/LoginPage.jsx';
 
 //  Lecturer Pages

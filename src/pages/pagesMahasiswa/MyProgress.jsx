@@ -72,12 +72,6 @@ const MyProgress = () => {
                         data={ipsValue}
                         type="semester"
                     />
-
-                    <ChartContainer
-                        id="attendanceChart"
-                        data={mockupDataKehadiran}
-                        type="attendance"
-                    />
                 </div>
             </div>
 
