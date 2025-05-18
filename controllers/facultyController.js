@@ -26,6 +26,7 @@ const {
     getOldCoursesNames,
     processCourseHistory,
 } = require('../models/mahasiswaQueries/myCourseQueries');
+const myReportQueries = require('../models/dosenWaliQueries/myReport_Queries');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
@@ -81,11 +82,10 @@ exports.getKeluhanMahasiswa = async (req, res) => {
     const dosenNIP = req.user.id;
 
     try {
-        const [data] = await responseDosWalModel.getKeluhan(dosenNIP);
-        // console.log(dosenNIP);
+        const data = await myReportQueries.getKeluhan(dosenNIP);
         response(200, data, 'dapat semua keluhan', res);
     } catch (err) {
-        if (err) throw err;
+        console.error('Error fetching keluhan mahasiswa:', err);
         response(
             500,
             null,
@@ -100,13 +100,10 @@ exports.getKeluhanMahasiswa = async (req, res) => {
 // @access  Private (dosen_wali only)
 exports.getResponDosWal = async (req, res) => {
     const dosenNIP = req.user.id;
-    const feedbackId = req.query.feedbackId; // Add this to get the specific feedback ID
+    const feedbackId = req.query.feedbackId;
 
     try {
-        const [data] = await responseDosWalModel.getResponse(
-            dosenNIP,
-            feedbackId
-        );
+        const data = await myReportQueries.getResponse(dosenNIP, feedbackId);
         response(200, data, 'dapat semua response', res);
     } catch (err) {
         console.error('Error fetching response:', err);
@@ -116,6 +113,66 @@ exports.getResponDosWal = async (req, res) => {
             'tidak dapat mengambil data response dosen wali',
             res
         );
+    }
+};
+
+exports.getKeluhanDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return response(400, null, 'ID keluhan diperlukan', res);
+        }
+
+        const data = await myReportQueries.getKeluhanDetail(id);
+
+        if (data.status === 'error') {
+            return response(404, null, data.message, res);
+        }
+
+        response(200, data, 'detail keluhan berhasil diambil', res);
+    } catch (err) {
+        console.error('Error fetching keluhan detail:', err);
+        response(
+            500,
+            null,
+            'tidak dapat mengambil detail keluhan mahasiswa',
+            res
+        );
+    }
+};
+
+exports.sendResponDosWal = async (req, res) => {
+    try {
+        const { id_keluhan, response_keluhan, status_keluhan } = req.body;
+        const nip_dosen_wali = req.user.id;
+
+        if (!id_keluhan || !response_keluhan || !status_keluhan) {
+            return response(400, null, 'Data tidak lengkap', res);
+        }
+
+        const responseData = {
+            nip_dosen_wali,
+            id_keluhan,
+            response_keluhan,
+            status_keluhan,
+        };
+
+        const result = await myReportQueries.createOrUpdateResponse(
+            responseData
+        );
+
+        response(
+            200,
+            result,
+            result.payload.operation === 'insert'
+                ? 'Response berhasil dibuat'
+                : 'Response berhasil diperbarui',
+            res
+        );
+    } catch (err) {
+        console.error('Error sending/updating response:', err);
+        response(500, null, 'tidak dapat mengirim/memperbarui response', res);
     }
 };
 

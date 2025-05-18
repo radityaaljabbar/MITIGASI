@@ -73,6 +73,22 @@ router.get(
     facultyController.getResponDosWal
 );
 
+// Route to get detail of a specific keluhan/feedback
+router.get(
+    '/keluhanMahasiswa/:id',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getKeluhanDetail
+);
+
+// Route to send/update response to student feedback
+router.post(
+    '/sendResponDosWal',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.sendResponDosWal
+);
+
 router.get('/datamahasiswa', protect, authorize('dosen_wali'));
 
 router.get(
