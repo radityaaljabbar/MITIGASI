@@ -1,82 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
-import { getFeedbackList } from '../../../services/dosenWali/myReport/listFeedbackMahasiswaService';
 
-const StudentListView = ({ onViewDetail }) => {
-    const [students, setStudents] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+// Updated to accept students directly as a prop
+const StudentListView = ({ onViewDetail, students = [] }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterKelas, setFilterKelas] = useState('');
 
-    // Fetch data dri API (dri file service)
-    useEffect(() => {
-        const fetchFeedback = async () => {
-            setLoading(true);
-            try {
-                const response = await getFeedbackList();
+    console.log('StudentListView received students:', students);
 
-                if (response.success) {
-                    setStudents(response.data);
-                } else {
-                    setError(
-                        response.message ||
-                            'Failed to fetch student feedback data'
-                    );
-                }
-            } catch (error) {
-                setError('An error occured while fetching the data');
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFeedback();
-    }, []);
-
-    // Filter mahasiswa berdasarkan search sama kelas
+    // Filter students based on search and class
     const filteredStudents = students.filter((student) => {
-        const matchesSearch =
-            student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.nim.includes(searchTerm) ||
-            student.kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.title.toLowerCase().includes(searchTerm.toLowerCase());
+        // Add null checks for all properties
+        const name = student?.name || '';
+        const nim = student?.nim || '';
+        const kelas = student?.kelas || '';
+        const title = student?.title || '';
 
-        const matchesFilter = !filterKelas || student.kelas === filterKelas;
+        const matchesSearch =
+            name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            nim.includes(searchTerm) ||
+            kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            title.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesFilter = !filterKelas || kelas === filterKelas;
 
         return matchesSearch && matchesFilter;
     });
 
-    // Ekstrak value class untuk dropdown filter
+    // Extract unique classes for dropdown filter
     const uniqueClasses = [
-        ...new Set(students.map((student) => student.kelas)),
+        ...new Set(
+            students
+                .filter((student) => student?.kelas)
+                .map((student) => student.kelas)
+        ),
     ];
-
-    // State loading
-    if (loading) {
-        return (
-            <div className="bg-white rounded-xl shadow p-4 md:p-6 flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-            </div>
-        );
-    }
-
-    // State error
-    if (error) {
-        return (
-            <div className="bg-white rounded-xl shadow p-4 md:p-6">
-                <div className="text-center p-4 text-red-600">
-                    <p className="font-medium">Error: {error}</p>
-                    <button
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        onClick={() => window.location.reload()}>
-                        Coba Lagi
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="bg-white rounded-xl shadow p-4 md:p-6 transition-all duration-300 hover:shadow-lg">
@@ -102,8 +60,10 @@ const StudentListView = ({ onViewDetail }) => {
                             value={filterKelas}
                             onChange={(e) => setFilterKelas(e.target.value)}>
                             <option value="">Semua Kelas</option>
-                            {uniqueClasses.map((kelas) => (
-                                <option key={kelas} value={kelas}>
+                            {uniqueClasses.map((kelas, index) => (
+                                <option
+                                    key={`class-${index}-${kelas}`}
+                                    value={kelas}>
                                     {kelas}
                                 </option>
                             ))}
@@ -138,39 +98,62 @@ const StudentListView = ({ onViewDetail }) => {
                             <th className="text-left px-4 py-3 font-semibold">
                                 Tanggal
                             </th>
+                            <th className="text-left px-4 py-3 font-semibold">
+                                Status
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredStudents.length > 0 ? (
                             filteredStudents.map((student, idx) => (
                                 <tr
-                                    key={student.feedbackId}
+                                    key={`feedback-${
+                                        student.feedbackId || idx
+                                    }`}
                                     className="hover:bg-blue-50 cursor-pointer border-t transition-colors"
                                     onClick={() => onViewDetail(student)}>
                                     <td className="px-4 py-3 font-medium">
                                         {idx + 1}
                                     </td>
                                     <td className="px-4 py-3">
-                                        {student.name}
+                                        {student.name || 'N/A'}
                                     </td>
-                                    <td className="px-4 py-3">{student.nim}</td>
                                     <td className="px-4 py-3">
-                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs">
-                                            {student.kelas}
-                                        </span>
+                                        {student.nim || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {student.kelas ? (
+                                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs">
+                                                {student.kelas}
+                                            </span>
+                                        ) : (
+                                            'N/A'
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
-                                        {student.title}
+                                        {student.title || 'N/A'}
                                     </td>
                                     <td className="px-4 py-3 text-gray-600">
-                                        {student.feedbackDate}
+                                        {student.feedbackDate || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                student.status ===
+                                                'Sudah Direspon'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                            {student.status ||
+                                                'Menunggu Respon'}
+                                        </span>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td
-                                    colSpan="6"
+                                    colSpan="7"
                                     className="px-4 py-6 text-center text-gray-500">
                                     Tidak ada data yang ditemukan
                                 </td>
