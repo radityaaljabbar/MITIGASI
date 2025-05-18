@@ -78,7 +78,7 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
 
             <div className="overflow-x-auto rounded-xl border">
                 <table className="w-full text-sm">
-                    <thead className="bg-neutral-100">
+                    <thead className="bg-[#951A22] text-white">
                         <tr>
                             <th className="text-left px-4 py-3 font-semibold">
                                 #
