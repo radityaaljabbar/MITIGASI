@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import handleBack from '../../../components/handleBack';
-import { submitFeedback } from '../../../services/mahasiswaServices/feedbackService';
+import {
+    submitFeedback,
+    isValidFileType,
+    getAllowedFileExtensions,
+} from '../../../services/mahasiswaServices/feedbackService';
+import { toast } from 'react-toastify';
 
 const FeedbackForm = () => {
     const navigate = useNavigate();
@@ -12,14 +17,38 @@ const FeedbackForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const fileInputRef = useRef(null);
+
+    // Helper function to get file extension
+    const getFileExtension = (filename) => {
+        return filename
+            .slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2)
+            .toLowerCase();
+    };
 
     // Handle file selection
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
-        if (selectedFile) {
-            setFile(selectedFile);
-            setFileName(selectedFile.name);
+
+        if (!selectedFile) {
+            return;
         }
+
+        // Validate file type
+        if (!isValidFileType(selectedFile)) {
+            setError(
+                `Format file tidak didukung. Hanya ${getAllowedFileExtensions()} yang diperbolehkan.`
+            );
+            e.target.value = null; // Reset file input
+            return;
+        }
+
+        // Clear any previous errors
+        setError('');
+
+        // Set the file
+        setFile(selectedFile);
+        setFileName(selectedFile.name);
     };
 
     // Handle form submission
@@ -29,6 +58,14 @@ const FeedbackForm = () => {
         // Validate form
         if (!content.trim()) {
             setError('Isi feedback tidak boleh kosong');
+            return;
+        }
+
+        // Final validation of file if one is selected
+        if (file && !isValidFileType(file)) {
+            setError(
+                `Format file tidak didukung. Hanya ${getAllowedFileExtensions()} yang diperbolehkan.`
+            );
             return;
         }
 
@@ -44,6 +81,7 @@ const FeedbackForm = () => {
             );
 
             setSuccessMessage('Feedback berhasil dikirim!');
+            toast.success('Feedback berhasil dikirim!');
 
             // Reset form after successful submission
             setTitle('');
@@ -60,6 +98,9 @@ const FeedbackForm = () => {
             setError(
                 error.message || 'Gagal mengirim feedback. Silakan coba lagi.'
             );
+            toast.error(
+                error.message || 'Gagal mengirim feedback. Silakan coba lagi.'
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -74,8 +115,9 @@ const FeedbackForm = () => {
         setFile(null);
         setFileName('');
         // Reset the input file element
-        const fileInput = document.getElementById('supportDocument');
-        if (fileInput) fileInput.value = '';
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     return (
@@ -131,6 +173,10 @@ const FeedbackForm = () => {
                         Unggah Dokumen Pendukung (Opsional)
                     </label>
 
+                    <div className="mb-1 text-sm text-gray-500">
+                        Format yang didukung: {getAllowedFileExtensions()}
+                    </div>
+
                     {fileName ? (
                         <div className="mb-6 p-3 border border-gray-300 rounded-lg flex justify-between items-center">
                             <span className="text-sm truncate max-w-[80%]">
@@ -158,7 +204,9 @@ const FeedbackForm = () => {
                             type="file"
                             id="supportDocument"
                             name="supportDocument"
+                            ref={fileInputRef}
                             onChange={handleFileChange}
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                             className="w-full px-3 py-2 mb-6 border-2 border-dashed border-gray-300 
                                         rounded-md file:mr-4 file:rounded-md file:border-0
                                         file:bg-[#951A22] file:text-white file:px-4 file:py-2
