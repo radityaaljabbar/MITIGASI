@@ -8,6 +8,7 @@ import logoutIcon from '../../assets/images/imageDosenWali/sidebarImages/LogoutI
 import myStudentsIcon from '../../assets/images/imageDosenWali/sidebarImages/MyStudentsIcon.png';
 import myCourseAdvisorIcon from '../../assets/images/imageDosenWali/sidebarImages/MyCourseAdvisorIcon.png';
 import myReportIcon from '../../assets/images/imageDosenWali/sidebarImages/MyReportIcon.png';
+import logoMITIGASI from '../../assets/images/logoMITIGASI.png';
 
 const SidebarDosenWali = ({ expanded, setExpanded }) => {
     const navigate = useNavigate();
@@ -94,23 +95,36 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
 
     return (
         <aside className="h-screen sticky top-0 flex-shrink-0">
-            <nav className="h-full flex flex-col bg-[#951A22] border-r border-[#FAF0E6] shadow-sm">
+            <nav className="h-full flex flex-col bg-[#951A22] border-r border-[#FAF0E6] shadow-sm transition-all duration-300 ease-in-out">
                 {/* Header dari sidebar (Logo dan Tombol Toggle Sidebar) */}
-                <div className="p-4 pb-2 flex justify-between items-center">
+                <div
+                    className={`p-4 pb-2 flex justify-between items-center border-b border-white/10 transition-all duration-300 ease-in-out ${
+                        expanded ? 'gap-4' : ''
+                    }`}>
                     <span
-                        className={`font-bold text-lg text-white overflow-hidden transition-all ${
-                            expanded ? 'w-40' : 'w-0'
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expanded ? 'w-40 opacity-100' : 'w-0 opacity-0'
                         }`}>
-                        MITIGASI
+                        {expanded && (
+                            <div className="bg-white rounded-lg p-2 w-full h-24 flex items-center justify-center">
+                                <img
+                                    src={logoMITIGASI}
+                                    alt="MITIGASI Logo"
+                                    className="max-h-20 max-w-[90%] object-contain"
+                                />
+                            </div>
+                        )}
                     </span>
                     <button
                         onClick={() => setExpanded((curr) => !curr)}
                         aria-label="Toggle Sidebar"
-                        className="p-1.5 rounded-lg bg-transparent hover:bg-white/20 transition-all duration-300">
+                        className={`p-1.5 rounded-lg bg-transparent hover:bg-white/20 transition-all duration-300 ease-in-out ${
+                            expanded ? '' : 'ml-auto mr-auto'
+                        }`}>
                         <img
                             src={toggleSidebarIcon}
                             alt="Toggle Sidebar Button"
-                            className="w-5 h-5 fill-white transition-transform duration-300"
+                            className="w-5 h-5 fill-white transition-transform duration-300 ease-in-out"
                         />
                     </button>
                 </div>
@@ -124,8 +138,8 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                                 end={item.end}
                                 className={({ isActive }) => {
                                     return isActive
-                                        ? `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group bg-white/20 shadow-md`
-                                        : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 hover:translate-x-1 text-white group hover:bg-white/20`;
+                                        ? `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 ease-in-out hover:translate-x-1 text-white group bg-white/20 shadow-md`
+                                        : `relative flex items-center py-2 px-3 font-medium rounded-lg cursor-pointer transition-all duration-300 ease-in-out hover:translate-x-1 text-white group hover:bg-white/20`;
                                 }}>
                                 <img
                                     src={item.icon}
@@ -133,14 +147,16 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                                     className="w-5 h-5 fill-white"
                                 />
                                 <span
-                                    className={`overflow-hidden transition-all text-sm ${
-                                        expanded ? 'w-40 ml-3' : 'w-0'
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out text-sm ${
+                                        expanded
+                                            ? 'opacity-100 max-w-40 ml-3'
+                                            : 'opacity-0 max-w-0'
                                     }`}>
                                     {item.name}
                                 </span>
                                 {!expanded && (
                                     <div
-                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-white text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
+                                        className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-white text-[#951A22] text-sm invisible opacity-0 -translate-x-3 transition-all duration-300 ease-in-out group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-black/10`}>
                                         {item.name}
                                     </div>
                                 )}
@@ -152,11 +168,11 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                 {/* Footer Profil User */}
                 <div className="border-t border-black/20 bg-black/20 p-3">
                     <div
-                        className={`flex justify-between items-center w-full ${
-                            !expanded && 'justify-center'
-                        }`}>
+                        className={`flex ${
+                            expanded ? 'justify-between' : 'justify-center'
+                        } items-center w-full`}>
                         {expanded && (
-                            <div className="flex-grow overflow-hidden mr-2">
+                            <div className="flex-grow overflow-hidden mr-2 transition-opacity duration-300 ease-in-out">
                                 {isLoading ? (
                                     <div className="leading-4">
                                         <span className="block font-bold text-white text-xs">
@@ -179,11 +195,11 @@ const SidebarDosenWali = ({ expanded, setExpanded }) => {
                             </div>
                         )}
 
-                        {/* Updated logout button with onClick handler */}
+                        {/* Updated logout button with fixed alignment */}
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="text-white no-underline flex items-center hover:opacity-80"
+                            className="text-white no-underline flex items-center justify-center hover:opacity-80 transition-all duration-300 ease-in-out"
                             title="Logout">
                             <img
                                 src={logoutIcon}
