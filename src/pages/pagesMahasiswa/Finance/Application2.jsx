@@ -4,33 +4,22 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const TuitionReliefForm = () => {
   const [formData, setFormData] = useState({
-    // Identitas Mahasiswa
-    fullName: '',
-    studentId: '',
-    faculty: '',
-    study: '',
-    semester: '',
-    email: '',
-    phone: '',
     
     // Informasi Ekonomi
     monthlyIncome: '',
     parentIncome: '',
     dependents: '',
-    housingStatus: 'kost', // kost, rumah sendiri, rumah orangtua
+    housingStatus: '', 
     housingCost: '',
     transportationCost: '',
     otherExpenses: '',
 
 
     // Detail Keringanan
-    reliefType: 'partial', // full, partial, installment
-    reasonCategory: '', // covid, phk, sakit, lainnya
+    reliefType: '', 
+    reasonCategory: '', 
     requestedAmount: '',
     reliefReason: '',
-    
-    // Persetujuan
-    agreement: false
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -204,11 +193,10 @@ const TuitionReliefForm = () => {
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#951A22] focus:border-[#951A22]"
                   >
-                    <option value="kost">Kost/Kontrakan</option>
-                    <option value="rumah sendiri">Rumah Sendiri</option>
-                    <option value="rumah orangtua">Rumah Orang Tua</option>
-                    <option value="asrama">Asrama</option>
-                    <option value="lainnya">Lainnya</option>
+                    <option value="Kost/Kontrakan">Kost/Kontrakan</option>
+                    <option value="Rumah Sendiri">Rumah Sendiri</option>
+                    <option value="Rumah Orang Tua">Rumah Orang Tua</option>
+                    <option value="Asrama">Asrama</option>
                   </select>
                 </div>
                 <div>
@@ -251,9 +239,9 @@ const TuitionReliefForm = () => {
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#951A22] focus:border-[#951A22]"
                   >
-                    <option value="partial">Potongan Biaya Sebagian</option>
-                    <option value="full">Pembebasan Biaya Penuh</option>
-                    <option value="installment">Cicilan Pembayaran</option>
+                    <option value="Potongan Biaya Sebagian">Potongan Biaya Sebagian</option>
+                    <option value="Pembebasan Biaya Penuh">Pembebasan Biaya Penuh</option>
+                    <option value="Cicilan Pembayaran">Cicilan Pembayaran</option>
                   </select>
                 </div>
                 

@@ -27,7 +27,7 @@ const MyFinanceMain = () => {
                          transform hover:-translate-y-1 hover:shadow-lg
                          focus:outline-none focus:ring-2 focus:ring-[#951A22] focus:ring-opacity-50"
             >
-              Mulai Evaluasi
+              Buat Pengajuan
             </Link>
             
             <Link 
