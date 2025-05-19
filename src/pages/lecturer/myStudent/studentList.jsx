@@ -217,7 +217,9 @@ export default function DaftarMahasiswaWali() {
                                                 {student.kelas}
                                             </td>
                                             <td className="py-3 px-4 text-center">
-                                                {student.ipk.toFixed(2)}
+                                                {typeof student.ipk === 'number'
+                                                    ? student.ipk.toFixed(2)
+                                                    : student.ipk}
                                             </td>
                                             <td className="py-3 px-4 text-center">
                                                 {student.tak}
@@ -316,7 +318,10 @@ export default function DaftarMahasiswaWali() {
                                                     IPK
                                                 </p>
                                                 <p className="text-lg font-bold">
-                                                    {student.ipk.toFixed(2)}
+                                                    {typeof student.ipk ===
+                                                    'number'
+                                                        ? student.ipk.toFixed(2)
+                                                        : student.ipk}
                                                 </p>
                                             </div>
                                             <div className="p-3 bg-gray-50 rounded">
