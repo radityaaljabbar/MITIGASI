@@ -20,17 +20,18 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
                 ipkt.ipk_lulus,
                 takt.tak
             FROM mahasiswa mhs 
-            JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
-            JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
-            WHERE kelas = "${kelas}"`
+            LEFT JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
+            LEFT JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
+            WHERE mhs.kelas = ?`,
+            [kelas]
         );
 
         const formattedStudents = students.map((student) => ({
             name: student.nama,
             nim: student.nim,
             kelas: student.kelas,
-            ipk: student.ipk_lulus, // Placeholder for now
-            tak: student.tak, // Placeholder for now
+            ipk: student.ipk_lulus || '-', // Placeholder if NULL
+            tak: student.tak || '-', // Placeholder if NULL
             status: 'Aman', // Default status
             details: {
                 akademik: 'Aman',

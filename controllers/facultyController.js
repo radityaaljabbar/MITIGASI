@@ -46,6 +46,7 @@ exports.getStudentList = async (req, res) => {
 
         // Get classes associated with this dosen
         const classes = await getKelasWali(dosenCode);
+        // console.log(classes);
 
         if (classes.length === 0) {
             return res.status(200).json({
@@ -57,6 +58,7 @@ exports.getStudentList = async (req, res) => {
 
         // Get all class codes for this dosen
         const classCodesList = classes.map((cls) => cls.kode_kelas);
+        console.log(classCodesList);
 
         // Get students from all classes
         const studentList = await getStudentsByClassCodes(classCodesList);
