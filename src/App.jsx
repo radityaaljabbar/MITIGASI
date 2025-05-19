@@ -15,8 +15,8 @@ import FeedbackDetail from './pages/pagesMahasiswa/Feedback/FeedbackDetail.jsx';
 import NewFeedback from './pages/pagesMahasiswa/Feedback/NewFeedback.jsx';
 
 import FinanceMain from './pages/pagesMahasiswa/Finance/Main.jsx';
-import FinanceApp from './pages/pagesMahasiswa/Finance/Application2.jsx';
-import FinanceHistory from './pages/pagesMahasiswa/Finance/ApplicationHistory2.jsx';
+import FinanceApp from './pages/pagesMahasiswa/Finance/Application.jsx';
+import FinanceHistory from './pages/pagesMahasiswa/Finance/ApplicationHistory.jsx';
 
 import MyProgress from './pages/pagesMahasiswa/MyProgress.jsx';
 
