@@ -80,9 +80,14 @@ exports.getStudentList = async (req, res) => {
 // @access  Private (dosen_wali only)
 exports.getKeluhanMahasiswa = async (req, res) => {
     const dosenNIP = req.user.id;
+    const dosenCode = req.user.code;
+
+    if (!dosenCode) {
+        return response(400, null, 'Kode dosen tidak ditemukan', res);
+    }
 
     try {
-        const data = await myReportQueries.getKeluhan(dosenNIP);
+        const data = await myReportQueries.getKeluhan(dosenNIP, dosenCode);
         response(200, data, 'dapat semua keluhan', res);
     } catch (err) {
         console.error('Error fetching keluhan mahasiswa:', err);

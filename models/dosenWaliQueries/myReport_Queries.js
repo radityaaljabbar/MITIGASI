@@ -1,18 +1,19 @@
 const { pool } = require('../../config/database');
 
 /**
- * @desc Get all keluhan/feedback assigned to a specific dosen wali
+ * @desc Get all keluhan/feedback assigned to a specific dosen wali's classes
  * @param {string} dosenNIP - NIP of the dosen wali
+ * @param {string} dosenCode - Code of the dosen wali
  * @returns {Promise<Array>} - Array of feedback with student information
  */
-const getKeluhan = async (dosenNIP) => {
+const getKeluhan = async (dosenNIP, dosenCode) => {
     try {
         const [rows] = await pool.execute(
             `SELECT 
                 km.id_keluhan, 
                 km.nim_keluhan AS nim, 
                 m.nama,
-                m.kelas,  /* Corrected: using 'kelas' instead of 'kode_kelas' */
+                m.kelas,
                 km.title_keluhan, 
                 km.detail_keluhan, 
                 km.tanggal_keluhan,
@@ -23,13 +24,17 @@ const getKeluhan = async (dosenNIP) => {
                 rdw.status_keluhan
             FROM 
                 keluhan_mahasiswa km
-            LEFT JOIN 
+            JOIN 
                 mahasiswa m ON km.nim_keluhan = m.nim
+            JOIN 
+                kelas k ON m.kelas = k.kode_kelas
             LEFT JOIN 
                 response_dosen_wali rdw ON km.id_keluhan = rdw.id_keluhan AND rdw.nip_dosen_wali = ?
+            WHERE 
+                k.kode_dosen = ?
             ORDER BY 
                 km.tanggal_keluhan DESC`,
-            [dosenNIP]
+            [dosenNIP, dosenCode]
         );
 
         return [{ status: 'success', payload: rows }];

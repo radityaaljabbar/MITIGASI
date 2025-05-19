@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const storage = new Storage({
     keyFilename: path.join(
         __dirname,
-        '../config/GCPKeys/CloudStorageAdmin/elliptical-flow-459613-j8-4156c814b021.json'
+        '../config/GCPKeys/CloudStorageAdmin/elliptical-flow-459613-j8-c1617bebfac0.json'
     ),
     projectId: 'elliptical-flow-459613-j8', // Replace with your actual GCP project ID
 });
