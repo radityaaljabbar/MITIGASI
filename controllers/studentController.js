@@ -30,6 +30,11 @@ const {
     getMyFeedbackList,
 } = require('../models/mahasiswaQueries/myFeedbackQueries');
 
+
+const {
+    submitRelief,
+} = require('../models/mahasiswaQueries/myFinanceQueries')
+
 // @desc Ambil tak dari mahasisw yang login
 // @route GET /api/student/takMahasiswa
 // @access Private (khusus mahasiswa)
@@ -680,6 +685,111 @@ exports.getKeluhanDetail = async (req, res) => {
             success: false,
             message: 'Terjadi kesalahan saat mengambil detail feedback',
             error: error.message,
+        });
+    }
+};
+
+
+// myFinance
+exports.sendRelief = async (req, res) => {
+    try {
+        const nim = req.user.id;
+
+        // Extract data from request body
+        const {
+            penghasilanBulanan,
+            penghasilanOrangTua,
+            tanggunganOrangTua,
+            tempatTinggal,
+            pengeluaranPerbulan,
+
+
+            // Detail Keringanan
+            jenisKeringanan, 
+            alasankeringanan, 
+            jumlahDiajukan,
+            detailAlasan,
+        } = req.body;
+
+        // Validate required fields
+        if (
+            !nim ||
+            penghasilanBulanan === undefined ||
+            penghasilanOrangTua === undefined ||
+            tanggunganOrangTua === undefined ||
+            tempatTinggal === undefined ||
+            pengeluaranPerbulan === undefined ||
+
+            // Detail Keringanan
+            jenisKeringanan === undefined || 
+            alasankeringanan === undefined || 
+            jumlahDiajukan === undefined ||
+            detailAlasan === undefined
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Missing required fields for psychological test results',
+                data: [],
+            });
+        }
+
+        // Verify that nim from token matches nim in request
+        // This is an additional security check
+        if (req.user.id !== nim) {
+            return res.status(403).json({
+                success: false,
+                message:
+                    'You are not authorized to submit test results for this student',
+                data: [],
+            });
+        }
+
+        // Get current date for the tanggalTes field
+        const now = new Date();
+
+        // Konversi ke waktu lokal (WIB = UTC+7)
+        const wibOffset = 7 * 60; // dalam menit
+        const currentDate = new Date(
+            now.getTime() + wibOffset * 60000
+        ).toISOString();
+
+        const valueRelief = [
+            nim,
+            parseInt(penghasilanBulanan),
+            parseInt(penghasilanOrangTua),
+            parseInt(tanggunganOrangTua),
+            tempatTinggal,
+            parseInt(pengeluaranPerbulan),
+            jenisKeringanan, 
+            alasankeringanan, 
+            parseInt(jumlahDiajukan),
+            detailAlasan,
+            currentDate
+        ]
+
+        // Execute the insert query
+        const insertRelief = await submitRelief(valueRelief);
+
+        // Check if insert was successful
+        if (insertRelief.affectedRows > 0) {
+            return res.status(201).json({
+                success: true,
+                message: 'Hasil tes psikologi berhasil disimpan',
+                data: {
+                    data: insertRelief
+                },
+            });
+        } else {
+            throw new Error('Failed to insert data');
+        }
+    } catch (error) {
+        console.error('Error in sendPsiResult controller:', error);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat menyimpan hasil jawaban formulir',
+            data: [],
         });
     }
 };
