@@ -5,8 +5,9 @@ const RekomendasiMataKuliah = () => {
     const [recommendedCourse, setRecommendedCourse] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [noRecommendations, setNoRecommendations] = useState(false);
 
-    // Handle data dri service
+    // Handle data dari service
     useEffect(() => {
         const fetchRecommendedCourse = async () => {
             try {
@@ -14,16 +15,27 @@ const RekomendasiMataKuliah = () => {
 
                 const response = await getRecommendedCourse();
 
-                if (response.success && response.data) {
-                    setRecommendedCourse(response.data);
+                // Check if success is true regardless of status code
+                if (response.success) {
+                    if (response.data && response.data.length > 0) {
+                        setRecommendedCourse(response.data);
+                    } else {
+                        // Handle case where response is successful but there are no recommendations
+                        setNoRecommendations(true);
+                    }
                 } else {
                     setError(
                         response.message || 'Failed to fetch recommended course'
                     );
                 }
             } catch (error) {
-                console.error('An error occured while recommended course');
+                console.error(
+                    'An error occurred while fetching recommended course'
+                );
                 console.log(error);
+                setError(
+                    'Terjadi kesalahan dalam mengambil data rekomendasi mata kuliah'
+                );
             } finally {
                 setLoading(false);
             }
@@ -56,12 +68,15 @@ const RekomendasiMataKuliah = () => {
         );
     }
 
-    if (recommendedCourse.length === 0) {
+    if (noRecommendations || recommendedCourse.length === 0) {
         return (
-            <p className="text-gray-500 italic">
-                Tidak ada riwayat mata kuliah untuk mahasiswa ini atau gagal
-                memuat.
-            </p>
+            <div className="bg-white w-full max-w-[1200px] min-h-[300px] p-6 rounded-2xl shadow-xl border border-gray-200 flex justify-center items-center">
+                <div className="text-center">
+                    <p className="text-gray-500 italic">
+                        Belum ada mata kuliah rekomendasi. . .
+                    </p>
+                </div>
+            </div>
         );
     }
 
