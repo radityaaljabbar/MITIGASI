@@ -2,61 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router';
+import { getReliefList } from '../../../services/mahasiswaServices/myFinanceService';
 
 const TuitionReliefHistory = () => {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [reliefList, setReliefList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
+  
 
   // Simulasi data dari server
   useEffect(() => {
-    const fetchApplications = async () => {
-      setLoading(true);
-      try {
-        // Simulasi API call dengan timeout
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockApplications = [
-          {
-            date: '2025-05-15',
-            reliefType: 'partial',
-            reliefTypeLabel: 'Potongan Biaya Sebagian',
-            requestedAmount: 2500000,
-            reasonCategory: 'PHK Orang Tua/Wali',
-            reliefReason: 'Ayah saya baru saja di-PHK dari pekerjaannya sebagai karyawan pabrik tekstil. Saat ini keluarga kami hanya mengandalkan penghasilan ibu sebagai guru honorer.',
+      const fetchRelief = async () => {
+          try {
+              setIsLoading(true);
+              const response = await getReliefList();
 
-          },
-          {
-            date: '2025-05-10',
-            reliefType: 'installment',
-            reliefTypeLabel: 'Cicilan Pembayaran',
-            requestedAmount: 5000000,
-            reasonCategory: 'Sakit Berkepanjangan',
-            reliefReason: 'Saya sedang dalam masa pemulihan setelah kecelakaan yang mengharuskan saya istirahat dan tidak bisa bekerja paruh waktu seperti biasa.',
-          },
-          {
-            date: '2025-04-01',
-            reliefType: 'full',
-            reliefTypeLabel: 'Pembebasan Biaya Penuh',
-            requestedAmount: 0,
-            reasonCategory: 'Bencana Alam',
-            reliefReason: 'Rumah keluarga saya terkena dampak banjir bandang yang melanda kota kami pada Maret 2025. Hampir seluruh perabotan dan barang elektronik rusak, termasuk laptop yang saya gunakan untuk kuliah.',
+              if (response.success) {
+                  setReliefList(response.data || []);
+                  setError('');
+              } else {
+                  setError(
+                      response.message || 'Failed to fetch Relief list'
+                  );
+                  setReliefList([]);
+              }
+          } catch (error) {
+              console.error('Error fetching Relief:', error);
+              setError('Terjadi kesalahan saat mengambil data Relief');
+              setReliefList([]);
+          } finally {
+              setIsLoading(false);
           }
-        ];
-        
-        setApplications(mockApplications);
-      } catch (error) {
-        console.error('Error fetching applications:', error);
-        toast.error('Gagal memuat data pengajuan. Silakan coba lagi.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchApplications();
+      };
+
+      fetchRelief();
   }, []);
 
   const handleViewDetail = (application) => {
@@ -82,9 +63,9 @@ const TuitionReliefHistory = () => {
     }).format(amount);
   };
   
-  const filteredApplications = applications.filter(app => {
+  const filteredApplications = reliefList.filter(app => {
     if (filterStatus === 'all') return true;
-    return app.reliefTypeLabel === filterStatus;
+    return reliefList.jenis_keringan === filterStatus;
   });
 
   return (
@@ -125,14 +106,14 @@ const TuitionReliefHistory = () => {
           </div>
           
           {/* Loading State */}
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center items-center py-12">
               <svg className="animate-spin h-8 w-8 text-[#951A22]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
-          ) : applications.length === 0 ? (
+          ) : reliefList.length === 0 ? (
             <div className="text-center py-12">
               <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -168,13 +149,13 @@ const TuitionReliefHistory = () => {
                   {filteredApplications.map((application) => (
                     <tr key={application.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(application.date)}
+                        {formatDate(application.tanggal_dibuat)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {application.reliefTypeLabel}
+                        {application.jenis_keringanan}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {application.reliefType === 'full' ? 'Pembebasan Penuh' : formatCurrency(application.requestedAmount)}
+                        {application.jenis_keringanan === 'Pembebasan Biaya Penuh' ? 'Pembebasan Penuh' : formatCurrency(application.jumlah_diajukan)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
@@ -215,26 +196,26 @@ const TuitionReliefHistory = () => {
                       <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                         <div className="sm:col-span-1">
                           <dt className="text-sm font-medium text-gray-500">Tanggal Pengajuan</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{formatDate(selectedApplication.date)}</dd>
+                          <dd className="mt-1 text-sm text-gray-900">{formatDate(selectedApplication.tanggal_dibuat)}</dd>
                         </div>
                         <div className="sm:col-span-1">
                           <dt className="text-sm font-medium text-gray-500">Jenis Keringanan</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{selectedApplication.reliefTypeLabel}</dd>
+                          <dd className="mt-1 text-sm text-gray-900">{selectedApplication.jenis_keringanan}</dd>
                         </div>
                         <div className="sm:col-span-1">
                           <dt className="text-sm font-medium text-gray-500">Kategori Alasan</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{selectedApplication.reasonCategory}</dd>
+                          <dd className="mt-1 text-sm text-gray-900">{selectedApplication.jenis_keringanan}</dd>
                         </div>
                         <div className="sm:col-span-2">
                           <dt className="text-sm font-medium text-gray-500">Jumlah Pengajuan</dt>
                           <dd className="mt-1 text-sm text-gray-900">
-                            {selectedApplication.reliefType === 'full' ? 'Pembebasan Biaya Penuh' : formatCurrency(selectedApplication.requestedAmount)}
+                            {selectedApplication.jenis_keringanan === 'Pembebasan Biaya Penuh' ? 'Pembebasan Biaya Penuh' : formatCurrency(selectedApplication.jumlah_keringanan)}
                           </dd>
                         </div>
                         <div className="sm:col-span-2">
                           <dt className="text-sm font-medium text-gray-500">Alasan Pengajuan</dt>
                           <dd className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded">
-                            {selectedApplication.reliefReason}
+                            {selectedApplication.detail_alasan}
                           </dd>
                         </div>
                       </dl>

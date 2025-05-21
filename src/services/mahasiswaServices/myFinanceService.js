@@ -52,3 +52,36 @@ export const submitRelief = async (formData) => {
         };
     }
 }
+
+
+export const getReliefList = async () => {
+    try {
+        // Get auth token from localStorage
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            throw new Error('Authentication token not found');
+        }
+
+        // Make the API request
+        const response = await fetch(`${API_URL}/getStudentsRelief`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Parse response
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to get relief list');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error in getReliefList:', error);
+        throw error;
+    }
+};
