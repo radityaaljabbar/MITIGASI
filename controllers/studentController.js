@@ -33,6 +33,7 @@ const {
 
 const {
     submitRelief,
+    fetchRelief
 } = require('../models/mahasiswaQueries/myFinanceQueries')
 
 // @desc Ambil tak dari mahasisw yang login
@@ -790,6 +791,57 @@ exports.sendRelief = async (req, res) => {
             success: false,
             message: 'Terjadi kesalahan saat menyimpan hasil jawaban formulir',
             data: [],
+        });
+    }
+};
+
+
+exports.getStudentsRelief = async (req, res) => {
+    try {
+        // Ambil nim mahasiswa dari localStorage:
+        const nim = req.user.id;
+
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'NIM not found, make sure you have logged in correctly',
+            });
+        }
+
+        // Ambil data tak dari query:
+        const rowsRelief = await fetchRelief(nim);
+
+        // Ekstrak TAK saja
+
+        // const reliefsValue = [];
+
+        // rowsRelief.forEach((row) => {
+        //     if (row.nim !== null) {
+        //         // Pastikan ada data semester
+        //         reliefsValue.push({
+        //             semester: row.semester,
+        //             ipSemester: row.ip_semester,
+        //         });
+        //     }
+        // });
+
+        console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
+        console.log('Jawaban formulir keuangan: ', rowsRelief);
+
+        // const ipkSksTakIps = {
+        //     relief: ipkValue
+        // };
+
+        return res.status(200).json({
+            success: true,
+            data: rowsRelief,
+        });
+    } catch (error) {
+        console.error('Error fetching students TAK:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
         });
     }
 };

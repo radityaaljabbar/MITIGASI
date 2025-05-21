@@ -110,4 +110,17 @@ router.post(
     authorize('mahasiswa'),
     studentController.sendRelief
 );
+
+/**
+ * @desck Endpoint backend untuk fitur MyWellness
+ * FR-07 - MyFinance - fetching / Menangkap jawaban formulir keringanan biaya kuliah mahasiswa untuk disimpan di database
+ */
+router.get(
+    '/getStudentsRelief',
+    protect,
+    authorize('mahasiswa'),
+    studentController.getStudentsRelief
+);
+
+
 module.exports = router;
