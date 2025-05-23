@@ -7,6 +7,7 @@ import { getReliefList } from '../../../services/mahasiswaServices/myFinanceServ
 const TuitionReliefHistory = () => {
   const [reliefList, setReliefList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -18,7 +19,16 @@ const TuitionReliefHistory = () => {
               const response = await getReliefList();
 
               if (response.success) {
-                  setReliefList(response.data || []);
+                  // Process the data to determine the correct status
+                  const processedData = (response.data || []).map(item => ({
+                      ...item,
+                      // Determine final status based on the logic:
+                      // If status_response_finansial exists and has status, use that
+                      // Otherwise, use 'Menunggu' as default
+                      final_status: item.status_pengajuan || 'Menunggu'
+                  }));
+                  
+                  setReliefList(processedData);
                   setError('');
               } else {
                   setError(
@@ -76,7 +86,6 @@ const TuitionReliefHistory = () => {
     }
   };
   
-  
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('id-ID', options);
@@ -92,7 +101,7 @@ const TuitionReliefHistory = () => {
   
   const filteredApplications = reliefList.filter(app => {
     if (filterStatus === 'all') return true;
-    return app.status_pengajuan === filterStatus;
+    return app.final_status === filterStatus;
   });
 
   return (
@@ -118,6 +127,13 @@ const TuitionReliefHistory = () => {
         
         {/* Content */}
         <div className="bg-white rounded-b-lg shadow-md py-6 px-8">
+          {/* Error Display */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+          
           {/* Filter dan Tombol */}
           <div className="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0">
             <div>
@@ -203,7 +219,7 @@ const TuitionReliefHistory = () => {
                         {application.jenis_keringanan === 'Pembebasan Biaya Penuh' ? 'Pembebasan Penuh' : formatCurrency(application.jumlah_diajukan)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(application.status_pengajuan)}
+                        {getStatusBadge(application.final_status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
@@ -247,12 +263,16 @@ const TuitionReliefHistory = () => {
                           <dd className="mt-1 text-sm text-gray-900">{formatDate(selectedApplication.tanggal_dibuat)}</dd>
                         </div>
                         <div className="sm:col-span-1">
+                          <dt className="text-sm font-medium text-gray-500">Status</dt>
+                          <dd className="mt-1">{getStatusBadge(selectedApplication.final_status)}</dd>
+                        </div>
+                        <div className="sm:col-span-1">
                           <dt className="text-sm font-medium text-gray-500">Jenis Keringanan</dt>
                           <dd className="mt-1 text-sm text-gray-900">{selectedApplication.jenis_keringanan}</dd>
                         </div>
                         <div className="sm:col-span-1">
                           <dt className="text-sm font-medium text-gray-500">Kategori Alasan</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{selectedApplication.jenis_keringanan}</dd>
+                          <dd className="mt-1 text-sm text-gray-900">{selectedApplication.alasan_keringan}</dd>
                         </div>
                         <div className="sm:col-span-2">
                           <dt className="text-sm font-medium text-gray-500">Jumlah Pengajuan</dt>

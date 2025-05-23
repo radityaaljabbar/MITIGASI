@@ -3,7 +3,8 @@ import { toast } from 'react-toastify';
 import studentFinancialData from '../../../../assets/data/mockupjsonDosenWali/MyStudent/AnalisisFinansial/mockupFinansialMahasiswa.json';
 
 // Updated function with better error handling
-export const fetchStudentFinancialData = async (nim) => {
+export const fetchStudentFinancialData = async () => { // ini harusnya ada nim sebagai parameter
+    const nim = "1234567890" // ini sementara doang
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             try {
