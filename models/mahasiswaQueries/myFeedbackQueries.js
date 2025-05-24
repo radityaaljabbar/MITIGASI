@@ -79,7 +79,7 @@ const getFeedbackDetail = async (id_keluhan) => {
             lf.file_type,
             lf.file_size
         FROM 
-            lampiranFeedback lf
+            lampiranfeedback lf
         WHERE 
             lf.id_keluhan = ?`,
         [id_keluhan]

@@ -6,6 +6,9 @@ const lampiranModel = require('../models/lampiranTable');
 
 const { uploadFile } = require('../utils/cloudStorage');
 
+// ADDED: Import dateHelper for MySQL datetime formatting
+const { getCurrentMySQLDateTime } = require('../utils/dateHelper');
+
 const {
     getStudentGrades,
     getNewCourses,
@@ -30,11 +33,10 @@ const {
     getMyFeedbackList,
 } = require('../models/mahasiswaQueries/myFeedbackQueries');
 
-
 const {
     submitRelief,
-    fetchRelief
-} = require('../models/mahasiswaQueries/myFinanceQueries')
+    fetchRelief,
+} = require('../models/mahasiswaQueries/myFinanceQueries');
 
 // @desc Ambil tak dari mahasisw yang login
 // @route GET /api/student/takMahasiswa
@@ -347,7 +349,7 @@ exports.getPsiResults = async (req, res) => {
 };
 
 // @desc Mengirim data insert ke database.
-// @route GET /api/student/sendPsiResult
+// @route POST /api/student/sendPsiResult
 // @access Private (khusus mahasiswa)
 exports.sendPsiResult = async (req, res) => {
     try {
@@ -357,11 +359,13 @@ exports.sendPsiResult = async (req, res) => {
             skor_depression,
             skor_anxiety,
             skor_stress,
-            total_skor,
             kesimpulan,
             saran,
             klasifikasi,
         } = req.body;
+
+        // Calculate total score
+        const total_skor = skor_depression + skor_anxiety + skor_stress;
 
         // Validate required fields
         if (
@@ -369,7 +373,6 @@ exports.sendPsiResult = async (req, res) => {
             skor_depression === undefined ||
             skor_anxiety === undefined ||
             skor_stress === undefined ||
-            total_skor === undefined ||
             !kesimpulan ||
             !saran ||
             !klasifikasi
@@ -378,60 +381,50 @@ exports.sendPsiResult = async (req, res) => {
                 success: false,
                 message:
                     'Missing required fields for psychological test results',
-                data: [],
             });
         }
 
         // Verify that nim from token matches nim in request
-        // This is an additional security check
         if (req.user.id !== nim) {
             return res.status(403).json({
                 success: false,
                 message:
                     'You are not authorized to submit test results for this student',
-                data: [],
             });
         }
 
-        // Get current date for the tanggalTes field
-        const now = new Date();
-
-        // Konversi ke waktu lokal (WIB = UTC+7)
-        const wibOffset = 7 * 60; // dalam menit
-        const currentDate = new Date(
-            now.getTime() + wibOffset * 60000
-        ).toISOString();
+        // FIXED: Use MySQL-compatible datetime format
+        const tanggalTes = getCurrentMySQLDateTime();
 
         // Step 1: Delete any existing records for this nim
-        const deleteQuery = `DELETE FROM hasil_tes_psikologi WHERE nim = ?`;
-        const [deleteResult] = await pool.execute(deleteQuery, [nim]);
+        const [deleteResult] = await pool.execute(
+            'DELETE FROM hasil_tes_psikologi WHERE nim = ?',
+            [nim]
+        );
 
         console.log(
             `Deleted ${deleteResult.affectedRows} existing records for nim: ${nim}`
         );
 
         // Step 2: Insert new data
-        const insertQuery = `
+        const [insertResult] = await pool.execute(
+            `
             INSERT INTO hasil_tes_psikologi 
             (nim, skor_depression, skor_anxiety, skor_stress, total_skor, kesimpulan, saran, klasifikasi, tanggalTes) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        // Values to be inserted
-        const insertValues = [
-            nim,
-            skor_depression,
-            skor_anxiety,
-            skor_stress,
-            total_skor,
-            kesimpulan,
-            saran,
-            klasifikasi,
-            currentDate,
-        ];
-
-        // Execute the insert query
-        const [insertResult] = await pool.execute(insertQuery, insertValues);
+        `,
+            [
+                nim,
+                skor_depression,
+                skor_anxiety,
+                skor_stress,
+                total_skor,
+                kesimpulan,
+                saran,
+                klasifikasi,
+                tanggalTes,
+            ]
+        );
 
         // Check if insert was successful
         if (insertResult.affectedRows > 0) {
@@ -441,7 +434,9 @@ exports.sendPsiResult = async (req, res) => {
                 data: {
                     id: insertResult.insertId,
                     nim,
-                    tanggalTes: currentDate,
+                    total_skor,
+                    tanggalTes,
+                    klasifikasi,
                 },
             });
         } else {
@@ -449,11 +444,13 @@ exports.sendPsiResult = async (req, res) => {
         }
     } catch (error) {
         console.error('Error in sendPsiResult controller:', error);
-
         return res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan saat menyimpan hasil tes psikologi',
-            data: [],
+            error:
+                process.env.NODE_ENV === 'development'
+                    ? error.message
+                    : 'Internal server error',
         });
     }
 };
@@ -481,11 +478,14 @@ exports.uploadLampiranKeluhan = async (req, res) => {
             });
         }
 
+        // FIXED: Use MySQL-compatible datetime format
+        const tanggalKeluhan = getCurrentMySQLDateTime();
+
         // Use Promise-based query execution consistently
         const [result] = await pool.execute(
             `INSERT INTO keluhan_mahasiswa (nim_keluhan, title_keluhan, detail_keluhan, tanggal_keluhan) 
-             VALUES (?, ?, ?, NOW())`,
-            [nim, title_keluhan, detail_keluhan]
+             VALUES (?, ?, ?, ?)`,
+            [nim, title_keluhan, detail_keluhan, tanggalKeluhan]
         );
 
         const id_keluhan = result.insertId;
@@ -550,6 +550,7 @@ exports.uploadLampiranKeluhan = async (req, res) => {
                 nim,
                 title_keluhan,
                 detail_keluhan,
+                tanggal_keluhan: tanggalKeluhan,
                 lampiran: fileData
                     ? {
                           url: fileData.url,
@@ -690,7 +691,6 @@ exports.getKeluhanDetail = async (req, res) => {
     }
 };
 
-
 // myFinance
 exports.sendRelief = async (req, res) => {
     try {
@@ -704,10 +704,9 @@ exports.sendRelief = async (req, res) => {
             tempatTinggal,
             pengeluaranPerbulan,
 
-
             // Detail Keringanan
-            jenisKeringanan, 
-            alasankeringanan, 
+            jenisKeringanan,
+            alasankeringanan,
             jumlahDiajukan,
             detailAlasan,
         } = req.body;
@@ -720,40 +719,29 @@ exports.sendRelief = async (req, res) => {
             tanggunganOrangTua === undefined ||
             tempatTinggal === undefined ||
             pengeluaranPerbulan === undefined ||
-
             // Detail Keringanan
-            jenisKeringanan === undefined || 
-            alasankeringanan === undefined || 
+            jenisKeringanan === undefined ||
+            alasankeringanan === undefined ||
             jumlahDiajukan === undefined ||
             detailAlasan === undefined
         ) {
             return res.status(400).json({
                 success: false,
-                message:
-                    'Missing required fields for psychological test results',
-                data: [],
+                message: 'Missing required fields for relief application',
             });
         }
 
         // Verify that nim from token matches nim in request
-        // This is an additional security check
         if (req.user.id !== nim) {
             return res.status(403).json({
                 success: false,
                 message:
-                    'You are not authorized to submit test results for this student',
-                data: [],
+                    'You are not authorized to submit relief application for this student',
             });
         }
 
-        // Get current date for the tanggalTes field
-        const now = new Date();
-
-        // Konversi ke waktu lokal (WIB = UTC+7)
-        const wibOffset = 7 * 60; // dalam menit
-        const currentDate = new Date(
-            now.getTime() + wibOffset * 60000
-        ).toISOString();
+        // FIXED: Use MySQL-compatible datetime format
+        const currentDate = getCurrentMySQLDateTime();
 
         const valueRelief = [
             nim,
@@ -762,12 +750,12 @@ exports.sendRelief = async (req, res) => {
             parseInt(tanggunganOrangTua),
             tempatTinggal,
             parseInt(pengeluaranPerbulan),
-            jenisKeringanan, 
-            alasankeringanan, 
+            jenisKeringanan,
+            alasankeringanan,
             parseInt(jumlahDiajukan),
             detailAlasan,
-            currentDate
-        ]
+            currentDate,
+        ];
 
         // Execute the insert query
         const insertRelief = await submitRelief(valueRelief);
@@ -776,25 +764,29 @@ exports.sendRelief = async (req, res) => {
         if (insertRelief.affectedRows > 0) {
             return res.status(201).json({
                 success: true,
-                message: 'Hasil tes psikologi berhasil disimpan',
+                message: 'Pengajuan keringanan biaya berhasil disimpan',
                 data: {
-                    data: insertRelief
+                    id: insertRelief.insertId,
+                    nim,
+                    tanggal_pengajuan: currentDate,
                 },
             });
         } else {
-            throw new Error('Failed to insert data');
+            throw new Error('Failed to insert relief data');
         }
     } catch (error) {
-        console.error('Error in sendPsiResult controller:', error);
+        console.error('Error in sendRelief controller:', error);
 
         return res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan saat menyimpan hasil jawaban formulir',
-            data: [],
+            message: 'Terjadi kesalahan saat menyimpan pengajuan keringanan',
+            error:
+                process.env.NODE_ENV === 'development'
+                    ? error.message
+                    : 'Internal server error',
         });
     }
 };
-
 
 // Controller untuk mengambil history pengajuan keringanan biaya
 exports.getStudentsRelief = async (req, res) => {
@@ -805,7 +797,8 @@ exports.getStudentsRelief = async (req, res) => {
         if (!nim) {
             return res.status(400).json({
                 success: false,
-                message: 'NIM not found, make sure you have logged in correctly'
+                message:
+                    'NIM not found, make sure you have logged in correctly',
             });
         }
 
@@ -818,14 +811,13 @@ exports.getStudentsRelief = async (req, res) => {
         return res.status(200).json({
             success: true,
             data: rowsRelief,
-            message: 'Relief history retrieved successfully'
+            message: 'Relief history retrieved successfully',
         });
-        
     } catch (error) {
         console.error('Error fetching students relief history:', error);
         return res.status(500).json({
             success: false,
-            message: 'Server error while fetching relief history'
+            message: 'Server error while fetching relief history',
         });
     }
 };

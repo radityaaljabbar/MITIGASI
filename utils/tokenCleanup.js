@@ -1,11 +1,14 @@
-// utils/tokenCleanup.js
-const { pool } = require('../config/database');
+// utils/tokenCleanup.js - Fixed to use shared pool properly
+const { pool, quickConnectionTest } = require('../config/database');
 
 const cleanupBlacklist = async () => {
     try {
-        // Check if pool is available
-        if (!pool) {
-            console.warn('Database pool not available, skipping token cleanup');
+        // Quick connection test first
+        const isConnected = await quickConnectionTest();
+        if (!isConnected) {
+            console.warn(
+                'Database not available for token cleanup, skipping...'
+            );
             return;
         }
 
@@ -19,14 +22,14 @@ const cleanupBlacklist = async () => {
         );
     } catch (error) {
         // Handle specific database connection errors
-        if (error.code === 'ECONNABORTED') {
-            console.error('Database connection timed out during token cleanup');
+        if (error.code === 'ETIMEDOUT') {
+            console.warn('Database connection timed out during token cleanup');
         } else if (error.code === 'EHOSTUNREACH') {
-            console.error('Database server unreachable during token cleanup');
+            console.warn('Database server unreachable during token cleanup');
         } else if (error.code === 'ECONNREFUSED') {
-            console.error('Database connection refused during token cleanup');
+            console.warn('Database connection refused during token cleanup');
         } else {
-            console.error('Error cleaning up token blacklist:', error.message);
+            console.warn('Error cleaning up token blacklist:', error.message);
         }
 
         // Don't crash the application, just log and continue
@@ -34,51 +37,30 @@ const cleanupBlacklist = async () => {
     }
 };
 
-// Function to test database connectivity
-const testDatabaseConnection = async () => {
-    try {
-        await pool.execute('SELECT 1');
-        console.log('Database connection test successful');
-        return true;
-    } catch (error) {
-        console.error('Database connection test failed:', error.message);
-        return false;
-    }
-};
-
-// Run cleanup with initial connection test
+// Initialize cleanup service (removed the complex retry logic)
 const initializeCleanup = async () => {
     console.log('Initializing token cleanup service...');
 
-    // Test connection before starting cleanup
-    const isConnected = await testDatabaseConnection();
-
-    if (isConnected) {
-        // Run initial cleanup
+    try {
+        // Run initial cleanup (will skip if DB not available)
         await cleanupBlacklist();
 
-        // Set up recurring cleanup
+        // Set up recurring cleanup every hour
         setInterval(cleanupBlacklist, 60 * 60 * 1000);
         console.log('Token cleanup service started successfully');
-    } else {
+    } catch (error) {
         console.warn(
-            'Database not available, token cleanup service will retry...'
+            'Token cleanup service initialization failed:',
+            error.message
         );
+        console.log('Service will still attempt periodic cleanup');
 
-        // Retry connection every 5 minutes if initial connection fails
-        const retryInterval = setInterval(async () => {
-            const connected = await testDatabaseConnection();
-            if (connected) {
-                clearInterval(retryInterval);
-                await cleanupBlacklist();
-                setInterval(cleanupBlacklist, 60 * 60 * 1000);
-                console.log('Token cleanup service started after retry');
-            }
-        }, 5 * 60 * 1000);
+        // Still set up the interval even if first cleanup fails
+        setInterval(cleanupBlacklist, 60 * 60 * 1000);
     }
 };
 
-// Initialize the cleanup service
+// Initialize the cleanup service when module is loaded
 initializeCleanup();
 
 module.exports = cleanupBlacklist;

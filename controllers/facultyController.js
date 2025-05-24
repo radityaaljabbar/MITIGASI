@@ -1,6 +1,10 @@
 const { pool } = require('../config/database');
 const response = require('../utils/response');
 const { validationResult } = require('express-validator');
+
+// ADDED: Import dateHelper for MySQL datetime formatting
+const { getCurrentMySQLDateTime } = require('../utils/dateHelper');
+
 // Import queries
 const responseDosWalModel = require('../models/responseDosenWali');
 const {
@@ -428,10 +432,12 @@ exports.getAvailableCourse = async (req, res) => {
 
 /**
  * @desc Get detail mata kuliah untuk rekomendasi mata kuliah
- * @route GET /api/faculty/courseAdvisor/sendRekomendasiMK
+ * @route POST /api/faculty/courseAdvisor/sendRekomendasiMK
  * @access Private (dosen_wali only)
  */
 exports.sendCourseRecommendation = async (req, res) => {
+    let connection; // Declare connection variable for proper cleanup
+
     try {
         // Validate request:
         const errors = validationResult(req);
@@ -460,54 +466,110 @@ exports.sendCourseRecommendation = async (req, res) => {
             });
         }
 
+        // Get a connection from the pool for transaction
+        connection = await pool.getConnection();
+
+        // Start transaction
+        await connection.beginTransaction();
+
         // Kalkulasi total sks:
-        // ger value sks pada tiap rekomendasi mk:
-        const courseCodePLaceholders = courseCodes.map(() => '?').join(',');
-        const [coursesData] = await pool.query(
-            `SELECT kode_mk, sks_mk FROM mata_kuliah_baru WHERE kode_mk IN (${courseCodePLaceholders})`,
+        // get value sks pada tiap rekomendasi mk:
+        const courseCodePlaceholders = courseCodes.map(() => '?').join(',');
+        const [coursesData] = await connection.query(
+            `SELECT kode_mk, sks_mk FROM mata_kuliah_baru WHERE kode_mk IN (${courseCodePlaceholders})`,
             courseCodes
         );
+
+        // Validate that all course codes exist
+        if (coursesData.length !== courseCodes.length) {
+            throw new Error('Some course codes are invalid or not found');
+        }
 
         // Hitung total sksnya:
         const totalSKS = coursesData.reduce((total, course) => {
             return total + (parseInt(course.sks_mk) || 0);
         }, 0);
 
-        try {
-            // Hapus dlu data klo data yg sama udh ada agar tidak ada konflik
-            await pool.query(
-                'DELETE FROM mata_kuliah_rekomendasi WHERE nim_mahasiswa = ? AND kode_dosen = ?',
-                [nim, kodeDosen]
+        // FIXED: Use MySQL-compatible datetime format
+        const tanggalDibuat = getCurrentMySQLDateTime();
+
+        // IMPORTANT: Hapus data yang sudah ada agar tidak ada konflik
+        // This ensures old recommendations are replaced with new ones
+        const [deleteResult] = await connection.execute(
+            'DELETE FROM mata_kuliah_rekomendasi WHERE nim_mahasiswa = ? AND kode_dosen = ?',
+            [nim, kodeDosen]
+        );
+
+        console.log(
+            `Deleted ${deleteResult.affectedRows} old recommendations for NIM: ${nim}`
+        );
+
+        // Masukan (insert) data ke tabel:
+        let insertedCount = 0;
+        for (const courseCode of courseCodes) {
+            await connection.execute(
+                `INSERT INTO mata_kuliah_rekomendasi 
+                (kode_mk, kode_dosen, nim_mahasiswa, tanggal_dibuat, total_sks) 
+                VALUES (?, ?, ?, ?, ?)`,
+                [courseCode, kodeDosen, nim, tanggalDibuat, totalSKS]
             );
+            insertedCount++;
+        }
 
-            // Masukan (insert) data ke tabel:
-            for (const courseCode of courseCodes) {
-                await pool.execute(
-                    `INSERT INTO mata_kuliah_rekomendasi 
-                    (kode_mk, kode_dosen, nim_mahasiswa, tanggal_dibuat, total_sks) 
-                    VALUES (?, ?, ?, NOW(), ?)`,
-                    [courseCode, kodeDosen, nim, totalSKS]
-                );
-            }
+        // Commit the transaction
+        await connection.commit();
 
-            return res.status(200).json({
-                success: true,
-                message: 'Rekomendasi mata kuliah berhasil disimpan',
+        console.log(
+            `Successfully inserted ${insertedCount} new recommendations for NIM: ${nim}`
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Rekomendasi mata kuliah berhasil disimpan',
+            data: {
                 totalSKS: totalSKS,
                 count: courseCodes.length,
-            });
-        } catch (error) {
-            await pool.rollback();
-            pool.release();
-            throw error;
-        }
+                tanggal_dibuat: tanggalDibuat,
+                nim: nim,
+                deletedOldRecommendations: deleteResult.affectedRows,
+                insertedNewRecommendations: insertedCount,
+            },
+        });
     } catch (error) {
-        console.error('Error in sendRecommendations controller:', error);
+        // Rollback transaction if there's an error
+        if (connection) {
+            try {
+                await connection.rollback();
+                console.log('Transaction rolled back due to error');
+            } catch (rollbackError) {
+                console.error('Error during rollback:', rollbackError.message);
+            }
+        }
+
+        console.error('Error in sendCourseRecommendation controller:', error);
+
+        // Return appropriate error message
+        let errorMessage = 'Terjadi kesalahan saat menyimpan rekomendasi';
+
+        if (error.message.includes('course codes are invalid')) {
+            errorMessage = 'Beberapa kode mata kuliah tidak valid';
+        } else if (error.code === 'ER_DUP_ENTRY') {
+            errorMessage = 'Data rekomendasi sudah ada';
+        }
+
         return res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan saat menyimpan rekomendasi',
-            error: error.message,
+            message: errorMessage,
+            error:
+                process.env.NODE_ENV === 'development'
+                    ? error.message
+                    : undefined,
         });
+    } finally {
+        // Always release the connection back to the pool
+        if (connection) {
+            connection.release();
+        }
     }
 };
 

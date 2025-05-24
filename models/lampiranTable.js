@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS lampiran (
 // Function to save file data to database
 const saveLampiran = async (lampiranData) => {
     const query = `
-        INSERT INTO lampiranFeedback 
+        INSERT INTO lampiranfeedback 
         (id_keluhan, file_name, original_name, file_url, file_type, file_size) 
         VALUES (?, ?, ?, ?, ?, ?)
     `;
