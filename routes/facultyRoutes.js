@@ -98,4 +98,16 @@ router.get(
     facultyController.getStudentAcademicDetails
 );
 
+/**
+ * @desc Endpoint backend untuk fitur MyStudents - Analisis Psikologi
+ * @fitur FR-01.3 - MyStudents - WellnessAnalysis
+ */
+
+router.get(
+    '/analisisPsikologi/:nim',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getStudentWellness
+);
+
 module.exports = router;

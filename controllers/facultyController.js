@@ -27,6 +27,9 @@ const {
     processCourseHistory,
 } = require('../models/mahasiswaQueries/myCourseQueries');
 const myReportQueries = require('../models/dosenWaliQueries/myReport_Queries');
+const {
+    getWellnessResult,
+} = require('../models/dosenWaliQueries/myStudent_AnalisisPsikologiQueries');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
@@ -555,14 +558,14 @@ exports.getStudentAcademicDetails = async (req, res) => {
             }
         });
 
-        console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
-        console.log('Nama:', namaMahasiswa);
-        console.log('NIM:', nim); // NIM dari input, bisa juga studentData.nim
-        console.log('Kelas:', kelasMahasiswa);
-        console.log('IPK Lulus:', ipk);
-        console.log('SKS Lulus:', sksTotal);
-        console.log('TAK:', tak);
-        console.log('sks:', perSemester);
+        // console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
+        // console.log('Nama:', namaMahasiswa);
+        // console.log('NIM:', nim); // NIM dari input, bisa juga studentData.nim
+        // console.log('Kelas:', kelasMahasiswa);
+        // console.log('IPK Lulus:', ipk);
+        // console.log('SKS Lulus:', sksTotal);
+        // console.log('TAK:', tak);
+        // console.log('sks:', perSemester);
 
         const responseData = {
             nama: namaMahasiswa,
@@ -583,6 +586,46 @@ exports.getStudentAcademicDetails = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Server error while fetching student academic details.',
+        });
+    }
+};
+
+/**
+ * @desc Controller untuk get hasil psikoligi mahasiswa tertentu
+ */
+exports.getStudentWellness = async (req, res) => {
+    try {
+        const nim = req.params.nim;
+
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM is not found, make sure it passed correctly',
+            });
+        }
+
+        const result = await getWellnessResult(nim);
+
+        if (!result || result.length === 0) {
+            // Check jika array kosong
+            return res.status(200).json({
+                success: true,
+                message: 'Mahasiswa ini belum mengisi quesioner psikologis',
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Data hasil quesioner psikologi berhasil didapatkan',
+            data: result,
+        });
+    } catch (error) {
+        console.error('Error mengambil data hasil quesioner psikologi:', error);
+        res.status(500).json({
+            success: false,
+            message:
+                'Server error ketika mengambil data hasil quesioner psikologi',
         });
     }
 };

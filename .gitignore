@@ -1,3 +1,14 @@
-node_modules
+# Dependencies
+node_modules/
 
-config/GCPKeys
+# Environment Variables
+
+# Production/Build
+build/
+dist/
+
+# Secrets
+config/GCPKeys/
+*.pem
+*.key
+
