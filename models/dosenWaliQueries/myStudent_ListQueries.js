@@ -31,7 +31,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
             nim: student.nim,
             kelas: student.kelas,
             ipk: student.ipk_lulus || '-', // Placeholder if NULL
-            tak: student.tak || '-', // Placeholder if NULL
+            tak: student.tak ,
             status: 'Aman', // Default status
             details: {
                 akademik: 'Aman',
