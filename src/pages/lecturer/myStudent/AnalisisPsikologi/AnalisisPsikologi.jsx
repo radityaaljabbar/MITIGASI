@@ -29,15 +29,18 @@ export default function AnalisaPsikologiDetailPage() {
                 // Get psychology data from backend
                 const response = await getAnalisisPsikologi(nim);
 
+                // Add debug logs
+                console.log('Response from API:', response);
+
                 // Check if request was successful
                 if (!response.success) {
                     setError(response.message);
                     setHasFilledQuestionnaire(false);
                     setStudent({
                         id: 1,
-                        name: 'Budi Santoso', // Replace with actual student name from API
+                        name: 'Budi Santoso',
                         nim: nim,
-                        semester: 5, // Replace with actual semester from API
+                        semester: 5,
                         statusPsikologi: 'Data Tidak Tersedia',
                         statusKuesioner: response.message.includes('Token')
                             ? 'Unauthorized'
@@ -48,28 +51,46 @@ export default function AnalisaPsikologiDetailPage() {
 
                 const transformedData = transformPsychologyData(response);
 
+                // Add debug logs
+                console.log('Transformed data:', transformedData);
+                console.log(
+                    'transformedData.currentSemester:',
+                    transformedData?.currentSemester
+                );
+
                 if (transformedData) {
                     // Student has filled questionnaire
                     setHasFilledQuestionnaire(true);
                     setPsychologyData(transformedData);
 
-                    // Set student info using data from backend
-                    setStudent({
+                    // Add debug log
+                    console.log(
+                        'About to set student with semester:',
+                        transformedData.currentSemester
+                    );
+
+                    const studentData = {
                         id: transformedData.id,
-                        name: transformedData.nama, // Now using actual student name from database
+                        name: transformedData.nama,
                         nim: transformedData.nim,
-                        semester: 5, // You might want to add semester to your JOIN query too
+                        semester: transformedData.currentSemester,
                         statusPsikologi: transformedData.statusPsikologi,
                         tanggalTes: transformedData.tanggalTes,
-                    });
+                    };
+
+                    console.log('Setting student data:', studentData);
+
+                    // Set student info using data from backend
+                    setStudent(studentData);
                 } else {
                     // Student hasn't filled questionnaire
+                    console.log('No transformed data, setting default student');
                     setHasFilledQuestionnaire(false);
                     setStudent({
                         id: 1,
-                        name: 'Student Name', // You might want to fetch this separately
+                        name: 'Student Name',
                         nim: nim,
-                        semester: 5, // You might want to fetch this separately
+                        semester: 5,
                         statusPsikologi: 'Belum Dianalisis',
                         statusKuesioner: 'Belum Mengisi',
                     });
@@ -81,7 +102,7 @@ export default function AnalisaPsikologiDetailPage() {
                 // Set default student data for error case
                 setStudent({
                     id: 1,
-                    name: 'Budi Santoso', // Replace with actual student name
+                    name: 'Budi Santoso',
                     nim: nim,
                     semester: 5,
                     statusPsikologi: 'Data Tidak Tersedia',

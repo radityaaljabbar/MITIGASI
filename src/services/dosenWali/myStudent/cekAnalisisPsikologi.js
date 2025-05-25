@@ -5,6 +5,7 @@
  */
 
 const BASE_URL = 'http://localhost:5000/api/faculty';
+
 /**
  * Fetch data analisis psikologi berdasarkan NIM
  * @param {string} nim - Nomor Induk Mahasiswa
@@ -93,10 +94,15 @@ export const transformPsychologyData = (backendData) => {
 
     const result = backendData.data[0]; // Ambil data pertama
 
+    console.log('Raw backend result:', result); // Debug log
+    console.log('Current semester from backend:', result.current_semester); // Debug log
+
     return {
         id: result.idHasil,
         nim: result.nim,
-        nama: result.nama, // Now includes student name from JOIN
+        nama: result.nama, // Student name from JOIN
+        kelas: result.kelas, // Student class from JOIN
+        currentSemester: result.current_semester, // Calculated current semester
         hasData: true,
         statusPsikologi: result.klasifikasi,
         tanggalTes: new Date(result.tanggalTes).toLocaleDateString('id-ID', {

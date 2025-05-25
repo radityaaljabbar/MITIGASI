@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { getStudentTAKIPKSKS } from '../../../../services/dosenWali/myStudent/academicMahasiswaService';
 
-
 const StudentInfoAkademik = ({ studentData }) => {
     const [student, setStudentValue] = useState(0);
-
 
     const mockStatusAkademik = 'Aman';
     //? Componen di page: Informasi Mahasiswa
@@ -58,16 +56,16 @@ const AkademikDashboard = ({ studentData }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h4 className="text-lg font-medium mb-3">
-                        SKS Semester
-                    </h4>
+                    <h4 className="text-lg font-medium mb-3">SKS Semester</h4>
                     <div className="space-y-2">
                         {studentData.perSemester.map((sks, index) => (
                             <div
                                 key={index}
                                 className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                                <span>Semester {index+1}</span>
-                                <span className="font-medium">{sks.sksSemester} SKS</span>
+                                <span>Semester {index + 1}</span>
+                                <span className="font-medium">
+                                    {sks.sksSemester} SKS
+                                </span>
                             </div>
                         ))}
                     </div>
@@ -80,7 +78,9 @@ const AkademikDashboard = ({ studentData }) => {
                                 key={index}
                                 className="flex justify-between items-center bg-gray-50 p-2 rounded">
                                 <span>Semester {index + 1}</span>
-                                <span className="font-medium">{ip.ipSemester.toFixed(2)}</span>
+                                <span className="font-medium">
+                                    {ip.ipSemester.toFixed(2)}
+                                </span>
                             </div>
                         ))}
                     </div>
@@ -145,7 +145,7 @@ const AnalisisAkademikPage = () => {
         const fetchTAK = async () => {
             try {
                 const response = await getStudentTAKIPKSKS(nim);
-                console.log(response)
+                console.log(response);
                 if (response.success) {
                     setTakValue(response.data.tak);
                     setSksValue(response.data.sksTotal);
@@ -153,7 +153,6 @@ const AnalisisAkademikPage = () => {
                     setnamaValue(response.data.nama);
                     setkelasValue(response.data.kelas);
                     setperSemesterValue(response.data.perSemester);
-
                 }
             } catch (error) {
                 console.error('Error fetching TAK:', error);
@@ -164,13 +163,13 @@ const AnalisisAkademikPage = () => {
     }, []);
 
     // mengambil data semester sekarang
-    const semuaSemester = perSemesterValue.map(item => item.semester);
+    const semuaSemester = perSemesterValue.map((item) => item.semester);
 
     //? Mock data untuk simulasi
     const mockStudentData = {
         name: namaValue,
         nim: nim,
-        semester: Math.max(...semuaSemester)+1,
+        semester: Math.max(...semuaSemester) + 1,
         kelas: kelasValue,
         ipk: ipkValue,
         sksTotal: sksValue,
