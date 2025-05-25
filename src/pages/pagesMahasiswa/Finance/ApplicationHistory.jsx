@@ -19,7 +19,6 @@ const TuitionReliefHistory = () => {
 
               if (response.success) {
                   setReliefList(response.data || []);
-                  setError('');
               } else {
                   setError(
                       response.message || 'Failed to fetch Relief list'
