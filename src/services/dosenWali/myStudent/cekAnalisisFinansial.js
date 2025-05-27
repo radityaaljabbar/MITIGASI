@@ -93,7 +93,7 @@ const transformFinancialData = (backendData, nim) => {
     return {
         name: latestEntry.nama,
         nim: nim,
-        semester: '-', // Backend doesn't provide semester info
+        semester: latestEntry.current_semester, // Backend doesn't provide semester info
         financialStatus: determineFinancialStatus(backendData),
         lastUpdated: lastUpdated,
         pendingRequests: pendingRequests,
