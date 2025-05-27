@@ -35,7 +35,7 @@ const {
     getWellnessResult,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisPsikologiQueries');
 
-const { fetchRelief } = require('../models/mahasiswaQueries/myFinanceQueries');
+const { fetchStudentsRelief } = require('../models/dosenWaliQueries/myStudent_AnalisisFinansialQueries');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
@@ -706,7 +706,7 @@ exports.getStudentFinancial = async (req, res) => {
         }
 
         // Panggil fetchRelief yang seharusnya mengembalikan semua data yang dibutuhkan
-        const financialDataArray = await fetchRelief(nim); // Pastikan di-await!
+        const financialDataArray = await fetchStudentsRelief(nim); // Pastikan di-await!
 
         // Periksa apakah data mahasiswa ditemukan
         if (!financialDataArray || financialDataArray.length === 0) {
