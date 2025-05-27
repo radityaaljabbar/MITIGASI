@@ -99,29 +99,7 @@ const DetailPengajuanFinansial = ({
                         </div>
                     </div>
 
-                    <div className="mb-6">
-                        <p className="text-sm text-gray-600">
-                            Dokumen Pendukung
-                        </p>
-                        <div className="bg-gray-50 p-3 rounded space-y-2">
-                            {selectedRequest.attachments.map((file, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center justify-between">
-                                    <span>{file}</span>
-                                    <button
-                                        onClick={() =>
-                                            onDownloadAttachment(file)
-                                        }
-                                        className="text-[#951A22] hover:text-red-700 flex items-center">
-                                        <FaFileDownload className="mr-1" />{' '}
-                                        Unduh
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
+                
                     {selectedRequest.installmentPlan && (
                         <div className="mb-6">
                             <p className="text-sm text-gray-600 mb-1">

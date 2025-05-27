@@ -1,85 +1,115 @@
 import React from 'react';
 import { toast } from 'react-toastify';
-import studentFinancialData from '../../../../assets/data/mockupjsonDosenWali/MyStudent/AnalisisFinansial/mockupFinansialMahasiswa.json';
+import { getFinancialRelief } from '../../../../services/dosenWali/myStudent/cekAnalisisFinansial';
 
-// Updated function with better error handling
-export const fetchStudentFinancialData = async () => { // ini harusnya ada nim sebagai parameter
-    const nim = "1234567890" // ini sementara doang
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            try {
-                // Make sure the data structure exists
-                if (
-                    !studentFinancialData ||
-                    !studentFinancialData.studentsData ||
-                    !Array.isArray(studentFinancialData.studentsData)
-                ) {
-                    console.error(
-                        'Invalid data structure:',
-                        studentFinancialData
-                    );
-                    reject(new Error('Invalid data structure in mockup data'));
-                    return;
-                }
+// Updated function to use real API call
+export const fetchStudentFinancialData = async (nim) => {
+    try {
+        if (!nim) {
+            throw new Error('NIM is required');
+        }
 
-                if (!nim) {
-                    // If no NIM is provided, return the first student as default (optional)
-                    toast.warning('No NIM provided, showing default student');
-                    resolve(studentFinancialData.studentsData[0]);
-                    return;
-                }
-
-                // Find the student with the matching NIM
-                const student = studentFinancialData.studentsData.find(
-                    (student) => student && student.nim === nim
-                );
-
-                if (!student) {
-                    console.error(`Student with NIM ${nim} not found`);
-                    toast.error(
-                        `Data mahasiswa dengan NIM ${nim} tidak ditemukan`,
-                        {
-                            toastId: `student-not-found-${nim}`, // This ensures only one toast with this ID appears
-                        }
-                    );
-                    // Return a safe default object to prevent null reference errors
-                    resolve({
-                        name: 'Data Tidak Ditemukan',
-                        nim: nim,
-                        semester: '-',
-                        financialStatus: '-',
-                        lastUpdated: '-',
-                        pendingRequests: [],
-                        previousRequests: [],
-                    });
-                    return;
-                }
-
-                // Return the found student data
-                resolve(student);
-            } catch (error) {
-                console.error('Error fetching student data:', error);
-                toast.error('Gagal memuat data mahasiswa');
-                reject(error);
-            }
-        }, 1000);
-    });
+        console.log('Fetching financial data for NIM:', nim);
+        
+        // Call the real API service
+        const data = await getFinancialRelief(nim);
+        
+        console.log('Financial data received:', data);
+        return data;
+        
+    } catch (error) {
+        console.error('Error fetching student financial data:', error);
+        
+        // Show appropriate error message
+        if (error.message.includes('not found') || error.message.includes('404')) {
+            toast.error(`Data mahasiswa dengan NIM ${nim} tidak ditemukan`, {
+                toastId: `student-not-found-${nim}`,
+            });
+        } else if (error.message.includes('Authentication')) {
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.', {
+                toastId: 'auth-error',
+            });
+        } else {
+            toast.error('Gagal memuat data mahasiswa. Silakan coba lagi.', {
+                toastId: 'fetch-error',
+            });
+        }
+        
+        // Return safe default object to prevent null reference errors
+        return {
+            name: 'Data Tidak Ditemukan',
+            nim: nim || '-',
+            semester: '-',
+            financialStatus: '-',
+            lastUpdated: '-',
+            pendingRequests: [],
+            previousRequests: [],
+        };
+    }
 };
 
 export const approveRequest = async (id) => {
-    // disini jga bakal call API
-    toast.info(`Approving Request ${id}`);
-    return { success: true };
+    try {
+        // TODO: Replace with actual API call
+        // const response = await fetch(`${API_URL}/approve-financial-request/${id}`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        //         'Content-Type': 'application/json',
+        //     },
+        // });
+        
+        // For now, show success message
+        toast.success(`Pengajuan berhasil disetujui`);
+        return { success: true };
+        
+    } catch (error) {
+        console.error('Error approving request:', error);
+        toast.error('Gagal menyetujui pengajuan');
+        throw error;
+    }
 };
 
 export const rejectRequest = async (id) => {
-    // disini jga bakal call API
-    toast.info(`Rejecting Request ${id}`);
-    return { success: true };
+    try {
+        // TODO: Replace with actual API call
+        // const response = await fetch(`${API_URL}/reject-financial-request/${id}`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({ rejectionReason: 'Tidak memenuhi kriteria' })
+        // });
+        
+        // For now, show success message
+        toast.success(`Pengajuan berhasil ditolak`);
+        return { success: true };
+        
+    } catch (error) {
+        console.error('Error rejecting request:', error);
+        toast.error('Gagal menolak pengajuan');
+        throw error;
+    }
 };
 
 export const downloadAttachment = async (filename) => {
-    // disini jga bakal call API
-    toast.info(`Downloading ${filename}. . .`);
-    return { success: true };
+    try {
+        // TODO: Replace with actual API call
+        // const response = await fetch(`${API_URL}/download-attachment/${filename}`, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        //     },
+        // });
+        
+        // For now, show info message
+        toast.info(`Mengunduh ${filename}...`);
+        return { success: true };
+        
+    } catch (error) {
+        console.error('Error downloading attachment:', error);
+        toast.error('Gagal mengunduh lampiran');
+        throw error;
+    }
 };
