@@ -35,6 +35,8 @@ const {
     getWellnessResult,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisPsikologiQueries');
 
+const { fetchRelief } = require('../models/mahasiswaQueries/myFinanceQueries');
+
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
 // @access  Private (dosen_wali only)
@@ -688,6 +690,51 @@ exports.getStudentWellness = async (req, res) => {
             success: false,
             message:
                 'Server error ketika mengambil data hasil quesioner psikologi',
+        });
+    }
+};
+
+exports.getStudentFinancial = async (req, res) => {
+    try {
+        const nim = req.params.nim;
+
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM is required as a query parameter.', // Pesan lebih spesifik
+            });
+        }
+
+        // Panggil fetchRelief yang seharusnya mengembalikan semua data yang dibutuhkan
+        const financialDataArray = await fetchRelief(nim); // Pastikan di-await!
+
+        // Periksa apakah data mahasiswa ditemukan
+        if (!financialDataArray || financialDataArray.length === 0) {
+            return res.status(404).json({
+                // 404 Not Found lebih tepat
+                success: false,
+                message: `Student academic data not found for NIM: ${nim}`,
+            });
+        }
+
+        // financialDataArray.forEach((row) => {
+        //     if (row.semester  !== null) {
+        //         // Pastikan ada data semester
+        //         perSemester.push({
+        //             semester: row.semester
+        //         });
+        //     }
+        // });
+
+        return res.status(200).json({
+            success: true,
+            data: financialDataArray
+        });
+    } catch (error) {
+        console.error('Error in getStudentAcademicDetails:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while fetching student academic details.',
         });
     }
 };

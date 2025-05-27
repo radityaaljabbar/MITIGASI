@@ -1,37 +1,59 @@
 const { pool } = require('../../config/database');
 
 const submitRelief = async (valueRelief) => {
-
-    const submitQuery = 
-    `   INSERT INTO response_finansial 
-        (nim,
-        penghasilan_mahasiswa, 
-        penghasilan_orangtua, 
-        tanggungan_orangtua,
-        tempat_tinggal,
-        pengeluaran_perbulan,
-        jenis_keringanan,
-        alasan_keringan,
-        jumlah_diajukan,
-        detail_alasan,
-        tanggal_dibuat)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-
+    const connection = await pool.getConnection(); // Dapatkan connection dari pool
+    
     try {
-        // Eksekusi query dengan pool.execute
-        // Destructuring [rows] akan mengambil array hasil query
-        const [rowsRelief] = await pool.execute(submitQuery, valueRelief);
+        // Mulai transaction
+        await connection.beginTransaction();
         
-        // rowsAcademicData akan menjadi array. Jika Anda mengharapkan satu mahasiswa,
-        // bisa jadi array ini berisi satu objek atau kosong.
-        // Mirip dengan rowsTAK, rowsAcademicData adalah array dari baris hasil.
-        return rowsRelief; 
+        const submitQuery = 
+        `   INSERT INTO response_finansial 
+            (nim,
+            penghasilan_mahasiswa, 
+            penghasilan_orangtua, 
+            tanggungan_orangtua,
+            tempat_tinggal,
+            pengeluaran_perbulan,
+            jenis_keringanan,
+            alasan_keringan,
+            jumlah_diajukan,
+            detail_alasan,
+            tanggal_dibuat)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+        // Eksekusi query insert response_finansial
+        const [rowsRelief] = await connection.execute(submitQuery, valueRelief);
+        
+        // Dapatkan ID dari insert result (bukan dari rowsRelief)
+        const responseId = rowsRelief.insertId; // insertId adalah property dari insert result
+        const nim = valueRelief[0]; // nim dari parameter valueRelief array
+        
+        // INSERT ke klasifikasi_finansial
+        await connection.execute(
+            `INSERT INTO klasifikasi_finansial (nim, status_finansial, id_response) 
+             VALUES (?, '1', ?)`,
+            [nim, responseId]
+        );
+
+        // Commit transaction
+        await connection.commit();
+        
+        return {
+            success: true,
+            insertId: responseId,
+            affectedRows: rowsRelief.affectedRows,
+            message: 'Data relief dan klasifikasi berhasil disimpan'
+        };
+        
     } catch (error) {
-        console.error("Error fetching student academic data:", error);
-        // Anda mungkin ingin melempar error lagi atau mengembalikan array kosong/null
-        // tergantung pada bagaimana Anda ingin menangani error di pemanggil fungsi ini.
-        throw error; // atau return [];
+        // Rollback jika ada error
+        await connection.rollback();
+        console.error("Error submitting relief data:", error);
+        throw error;
+    } finally {
+        // Release connection kembali ke pool
+        connection.release();
     }
 };
 
@@ -39,6 +61,7 @@ const submitRelief = async (valueRelief) => {
 const fetchRelief = async (nim) => {
     const SQLQuery = `
         SELECT 
+            mhs.nama,
             rf.id,
             rf.nim,
             rf.penghasilan_mahasiswa,
@@ -56,6 +79,7 @@ const fetchRelief = async (nim) => {
             srf.tanggal_dibuat as tanggal_response
         FROM response_finansial rf
         LEFT JOIN status_response_finansial srf ON rf.id = srf.id_response_finansial
+        LEFT JOIN mahasiswa mhs ON rf.nim = mhs.nim
         WHERE rf.nim = ?
         ORDER BY rf.tanggal_dibuat DESC
     `;

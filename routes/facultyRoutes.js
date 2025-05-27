@@ -110,4 +110,11 @@ router.get(
     facultyController.getStudentWellness
 );
 
+router.get(
+    '/analisisFinansial/:nim',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getStudentFinancial
+)
+
 module.exports = router;
