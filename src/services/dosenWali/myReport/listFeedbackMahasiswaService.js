@@ -146,10 +146,12 @@ export const getFeedbackList = async () => {
                 feedbackDate: item.tanggal_keluhan
                     ? formatDateOnly(new Date(item.tanggal_keluhan))
                     : 'N/A',
+                // FIXED: Use the new 'status' field from backend
                 status:
-                    item.has_response === 1
+                    item.status ||
+                    (item.has_response === 1
                         ? 'Sudah Direspon'
-                        : 'Menunggu Respon',
+                        : 'Menunggu Respon'),
                 statusCode: item.status_keluhan || 0,
             }));
 
@@ -197,10 +199,12 @@ export const getFeedbackList = async () => {
                 feedbackDate: item.tanggal_keluhan
                     ? formatDateOnly(new Date(item.tanggal_keluhan))
                     : 'N/A',
+                // FIXED: Use the new 'status' field from backend
                 status:
-                    item.has_response === 1
+                    item.status ||
+                    (item.has_response === 1
                         ? 'Sudah Direspon'
-                        : 'Menunggu Respon',
+                        : 'Menunggu Respon'),
                 statusCode: item.status_keluhan || 0,
             }));
 
@@ -247,7 +251,7 @@ export const getFeedbackDetail = async (id) => {
         });
 
         const rawData = await response.json();
-        console.log('Detail Raw API Response:', rawData);
+        console.log('🔧 Detail Raw API Response:', rawData);
 
         // Helper function to find the details object at any nesting level
         const findDetailObject = (data) => {
@@ -279,7 +283,16 @@ export const getFeedbackDetail = async (id) => {
         const detailItem = findDetailObject(rawData);
 
         if (detailItem) {
-            console.log('Found detail item:', detailItem);
+            console.log('🔧 Found detail item:', detailItem);
+            console.log('🔧 Detail item status field:', detailItem.status);
+            console.log(
+                '🔧 Detail item status_keluhan field:',
+                detailItem.status_keluhan
+            );
+            console.log(
+                '🔧 Detail item has_response field:',
+                detailItem.has_response
+            );
 
             return {
                 success: true,
@@ -294,10 +307,15 @@ export const getFeedbackDetail = async (id) => {
                         ? formatDateOnly(new Date(detailItem.tanggal_keluhan))
                         : 'N/A',
                     lampiran: detailItem.lampiran || null,
+                    // FIXED: Use the new 'status' field from backend, with fallback logic
                     status:
-                        detailItem.has_response === 1
+                        detailItem.status ||
+                        (detailItem.status_keluhan === 1
                             ? 'Sudah Direspon'
-                            : 'Menunggu Respon',
+                            : detailItem.has_response === 1
+                            ? 'Sudah Direspon'
+                            : 'Menunggu Respon'),
+                    statusCode: detailItem.status_keluhan || 0,
                 },
             };
         }
@@ -331,7 +349,7 @@ export const getFeedbackResponse = async (id) => {
             };
         }
 
-        console.log(`Fetching response for feedback ID: ${id}`);
+        console.log(`🔧 Fetching response for feedback ID: ${id}`);
 
         // Use the correct endpoint with query parameter
         const response = await fetch(
@@ -346,7 +364,7 @@ export const getFeedbackResponse = async (id) => {
         );
 
         const rawData = await response.json();
-        console.log('Response data (raw):', rawData);
+        console.log('🔧 Response data (raw):', rawData);
 
         // Helper function to find response data at any level of nesting
         const findResponseData = (data) => {
@@ -394,7 +412,12 @@ export const getFeedbackResponse = async (id) => {
         const responseItem = findResponseData(rawData);
 
         if (responseItem) {
-            console.log('Found response item:', responseItem);
+            console.log('🔧 Found response item:', responseItem);
+            console.log('🔧 Response item status field:', responseItem.status);
+            console.log(
+                '🔧 Response item status_keluhan field:',
+                responseItem.status_keluhan
+            );
 
             return {
                 success: true,
@@ -406,10 +429,12 @@ export const getFeedbackResponse = async (id) => {
                     responseDate: formatDateOnly(
                         new Date(responseItem.tanggal_response)
                     ),
+                    // FIXED: Use the new 'status' field from backend, with fallback logic
                     status:
-                        responseItem.status_keluhan === 1
+                        responseItem.status ||
+                        (responseItem.status_keluhan === 1
                             ? 'Sudah Direspon'
-                            : 'Menunggu Respon',
+                            : 'Menunggu Respon'),
                     statusCode: responseItem.status_keluhan,
                 },
             };
@@ -445,7 +470,7 @@ export const sendResponse = async (responseData) => {
         }
 
         // Log the request payload for debugging
-        console.log('Sending response with payload:', responseData);
+        console.log('🔧 Sending response with payload:', responseData);
 
         const response = await fetch(`${API_URL}/sendResponDosWal`, {
             method: 'POST',
@@ -458,7 +483,7 @@ export const sendResponse = async (responseData) => {
 
         // Log HTTP status for debugging
         console.log(
-            `Response status: ${response.status} ${response.statusText}`
+            `🔧 Response status: ${response.status} ${response.statusText}`
         );
 
         if (!response.ok) {
@@ -472,7 +497,7 @@ export const sendResponse = async (responseData) => {
         }
 
         const data = await response.json();
-        console.log('Server response data:', data);
+        console.log('🔧 Server response data:', data);
 
         // Now we understand the exact structure from your backend:
         // {

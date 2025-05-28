@@ -76,6 +76,13 @@ const StudentDetailView = ({ student, onBack }) => {
     const [activePdf, setActivePdf] = useState(null);
     const [refreshKey, setRefreshKey] = useState(0); // For forcing refreshes
 
+    // DEBUG: Log initial student data
+    console.log('🔍 StudentDetailView - Initial student prop:', student);
+    console.log(
+        '🔍 StudentDetailView - Initial studentDetail state:',
+        studentDetail
+    );
+
     // Function to refresh data
     const refreshData = useCallback(() => {
         setRefreshKey((prevKey) => prevKey + 1);
@@ -84,6 +91,11 @@ const StudentDetailView = ({ student, onBack }) => {
     // Fetch detailed feedback data including attachments
     useEffect(() => {
         const fetchFeedbackDetails = async () => {
+            console.log(
+                '🔍 Fetching feedback details for feedbackId:',
+                student.feedbackId
+            );
+
             if (student.feedbackId) {
                 setLoading(true);
                 try {
@@ -91,19 +103,33 @@ const StudentDetailView = ({ student, onBack }) => {
                         student.feedbackId
                     );
 
+                    console.log('🔍 Feedback detail response:', detailResponse);
+
                     if (detailResponse.success) {
-                        setStudentDetail((prev) => ({
-                            ...prev,
-                            ...detailResponse.data,
-                        }));
+                        console.log(
+                            '🔍 Setting studentDetail with feedback details:',
+                            detailResponse.data
+                        );
+
+                        setStudentDetail((prev) => {
+                            const updated = {
+                                ...prev,
+                                ...detailResponse.data,
+                            };
+                            console.log(
+                                '🔍 Updated studentDetail after feedback details:',
+                                updated
+                            );
+                            return updated;
+                        });
                     } else {
                         console.warn(
-                            'Failed to get feedback details:',
+                            '⚠️ Failed to get feedback details:',
                             detailResponse
                         );
                     }
                 } catch (error) {
-                    console.error('Error fetching feedback details:', error);
+                    console.error('❌ Error fetching feedback details:', error);
                 } finally {
                     setLoading(false);
                 }
@@ -116,32 +142,55 @@ const StudentDetailView = ({ student, onBack }) => {
     // Fetch dosen response if exists
     useEffect(() => {
         const fetchDosenResponse = async () => {
+            console.log(
+                '🔍 Fetching dosen response for feedbackId:',
+                student.feedbackId
+            );
+
             if (student.feedbackId) {
                 try {
                     const response = await getFeedbackResponse(
                         student.feedbackId
                     );
 
-                    console.log('Dosen response data:', response);
+                    console.log('🔍 Dosen response data:', response);
 
                     if (response.success && response.data) {
+                        console.log('🔍 Setting response data:', response.data);
                         setResponseData(response.data);
                         setResponseText(response.data.responseText); // Pre-fill the response text for editing
 
                         // Update student status based on response data
-                        setStudentDetail((prev) => ({
-                            ...prev,
-                            status: response.data.status,
-                        }));
+                        setStudentDetail((prev) => {
+                            const updated = {
+                                ...prev,
+                                status:
+                                    response.data.status || 'Sudah Direspon', // Ensure we have a status
+                            };
+                            console.log(
+                                '🔍 Updated studentDetail after dosen response:',
+                                updated
+                            );
+                            return updated;
+                        });
+                    } else {
+                        console.log(
+                            '🔍 No dosen response found or unsuccessful response'
+                        );
+                        // If no response exists, keep the original status from the list
+                        console.log(
+                            '🔍 Keeping original status from student prop:',
+                            student.status
+                        );
                     }
                 } catch (error) {
-                    console.error('Error fetching dosen response:', error);
+                    console.error('❌ Error fetching dosen response:', error);
                 }
             }
         };
 
         fetchDosenResponse();
-    }, [student.feedbackId, refreshKey]);
+    }, [student.feedbackId, refreshKey, student.status]); // Added student.status as dependency
 
     const handleSubmitResponse = async () => {
         if (!responseText.trim()) {
@@ -158,9 +207,11 @@ const StudentDetailView = ({ student, onBack }) => {
                 status_keluhan: 1, // 1 for "Sudah Direspon"
             };
 
+            console.log('🔍 Submitting response payload:', responsePayload);
+
             // Using our inline implementation for guaranteed behavior
             const result = await sendResponse(responsePayload);
-            console.log('Response result:', result);
+            console.log('🔍 Response result:', result);
 
             // Always assume success if we don't get an explicit error message
             // This is a workaround to avoid the "undefined" error
@@ -179,13 +230,21 @@ const StudentDetailView = ({ student, onBack }) => {
                     statusCode: 1,
                 };
 
+                console.log('🔍 Setting new response data:', newResponseData);
                 setResponseData(newResponseData);
 
                 // Update student status
-                setStudentDetail((prev) => ({
-                    ...prev,
-                    status: 'Sudah Direspon',
-                }));
+                setStudentDetail((prev) => {
+                    const updated = {
+                        ...prev,
+                        status: 'Sudah Direspon',
+                    };
+                    console.log(
+                        '🔍 Updated studentDetail after successful submission:',
+                        updated
+                    );
+                    return updated;
+                });
 
                 // Show success message
                 toast.success('Tanggapan berhasil dikirim');
@@ -200,7 +259,7 @@ const StudentDetailView = ({ student, onBack }) => {
                 );
             }
         } catch (error) {
-            console.error('Error submitting response:', error);
+            console.error('❌ Error submitting response:', error);
             toast.error(
                 `Terjadi kesalahan: ${error.message || 'Unknown error'}`
             );
@@ -236,6 +295,13 @@ const StudentDetailView = ({ student, onBack }) => {
         }
     };
 
+    // DEBUG: Log current status before rendering
+    console.log(
+        '🔍 Current studentDetail.status before render:',
+        studentDetail.status
+    );
+    console.log('🔍 Current responseData before render:', responseData);
+
     if (loading) {
         return (
             <div className="bg-white rounded-xl shadow p-4 md:p-6 flex justify-center items-center h-64">
@@ -267,6 +333,11 @@ const StudentDetailView = ({ student, onBack }) => {
         );
     }
 
+    // Determine the actual status to display
+    const actualStatus =
+        studentDetail.status || student.status || 'Menunggu Respon';
+    console.log('🔍 Final status to display:', actualStatus);
+
     return (
         <div className="bg-white rounded-xl shadow overflow-hidden transition-all duration-300 hover:shadow-lg">
             {/* Header with breadcrumb */}
@@ -281,11 +352,11 @@ const StudentDetailView = ({ student, onBack }) => {
                     <div className="flex items-center gap-2">
                         <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                studentDetail.status === 'Sudah Direspon'
+                                actualStatus === 'Sudah Direspon'
                                     ? 'bg-green-100 text-green-800'
                                     : 'bg-yellow-100 text-yellow-800'
                             }`}>
-                            {studentDetail.status || 'Menunggu Respon'}
+                            {actualStatus}
                         </span>
                         <button
                             onClick={refreshData}
