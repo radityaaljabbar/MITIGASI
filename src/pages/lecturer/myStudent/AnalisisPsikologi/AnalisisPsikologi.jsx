@@ -98,7 +98,7 @@ export default function AnalisaPsikologiDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-amber-50 py-8">
+            <div className="min-h-screen py-8">
                 <div className="bg-white container mx-auto max-w-6xl px-4 py-8 shadow-md rounded-xl">
                     <div className="flex justify-center items-center h-64">
                         <p className="text-xl text-gray-500">
@@ -112,7 +112,7 @@ export default function AnalisaPsikologiDetailPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-amber-50 py-8">
+            <div className="min-h-screen py-8">
                 <div className="bg-white container mx-auto max-w-6xl px-4 py-8 shadow-md rounded-xl">
                     <div className="mb-6">
                         <button
@@ -134,7 +134,7 @@ export default function AnalisaPsikologiDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-amber-50 py-8">
+        <div className="min-h-screen py-8">
             {/* Main Content */}
             <div className="bg-white container mx-auto max-w-6xl px-4 py-8 shadow-md rounded-xl w-fit">
                 {/* Header & Export Button */}

@@ -1,0 +1,82 @@
+const API_URL = 'http://localhost:5000/api/faculty';
+
+/**
+ * @desc Get detail riwayat nilai mata kuliah mahasiswa
+ * @param {string}
+ * @return {Promise <Object>}
+ */
+
+export const getStudentCourseHistory = async (nim) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return {
+                success: false,
+                message: 'Not authorized, No token found',
+                data: [],
+            };
+        }
+
+        console.log('Fetching riwayat mata kuliah untuk: ', nim);
+
+        const response = await fetch(
+            `${API_URL}/MyStudentDetailNilaiMK/${nim}`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        console.log('Respon dari backend:', response.status);
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                return {
+                    success: false,
+                    message: 'Unauthorized: Please login again',
+                    data: [],
+                };
+            } else if (response.status === 404) {
+                return {
+                    success: false,
+                    message:
+                        'Data riwayat mata kuliah tidak ditemukan untuk NIM ini',
+                    data: [],
+                };
+            } else if (response.status === 403) {
+                return {
+                    success: false,
+                    message: 'Forbidden: Anda tidak memiliki akses ke data ini',
+                    data: [],
+                };
+            } else {
+                return {
+                    success: false,
+                    message: `HTTP error! status: ${response.status}`,
+                    data: [],
+                };
+            }
+        }
+
+        const data = await response.json();
+        console.log('API Response:', data);
+
+        return {
+            success: data.success || true,
+            message: data.message || 'Data berhasil diambil',
+            data: data.data || [],
+            count: data.count || 0,
+        };
+    } catch (error) {
+        console.error('Error fetching course history:', error);
+        return {
+            success: false,
+            message:
+                error.message || 'Gagal mengambil data riwayat mata kuliah',
+            data: [],
+        };
+    }
+};
