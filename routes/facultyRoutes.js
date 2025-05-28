@@ -115,6 +115,17 @@ router.get(
     protect,
     authorize('dosen_wali'),
     facultyController.getStudentFinancial
-)
+);
+
+/**
+ * @decs Endpoint backend untuk fitur MyStudents - Analisis Akademik - Detal Nilai Akademik
+ * @fitur
+ */
+router.get(
+    '/MyStudentDetailNilaiMK/:nim',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getHistoryMKMyCourseAdvisor
+);
 
 module.exports = router;

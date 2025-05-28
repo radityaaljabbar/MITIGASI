@@ -35,7 +35,9 @@ const {
     getWellnessResult,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisPsikologiQueries');
 
-const { fetchStudentsRelief } = require('../models/dosenWaliQueries/myStudent_AnalisisFinansialQueries');
+const {
+    fetchStudentsRelief,
+} = require('../models/dosenWaliQueries/myStudent_AnalisisFinansialQueries');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
@@ -253,8 +255,11 @@ exports.getClassesAndStudents = async (req, res) => {
  */
 exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
     try {
-        // Ambil id (nim) dari query parameter
-        const id = req.query.nim;
+        // Ambil id (nim) dari query parameter atau param
+        const idParam = req.params.nim;
+        const idQuery = req.query.nim;
+
+        const id = idParam || idQuery;
         console.log(id);
 
         // Cek nim nya ada atau tidak:
@@ -728,7 +733,7 @@ exports.getStudentFinancial = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data: financialDataArray
+            data: financialDataArray,
         });
     } catch (error) {
         console.error('Error in getStudentAcademicDetails:', error);

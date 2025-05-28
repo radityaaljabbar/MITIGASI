@@ -7,7 +7,7 @@ const { pool } = require('../../config/database');
  */
 const getStudentGrades = async (studentId) => {
     const [nilaiRows] = await pool.execute(
-        'SELECT kode_mk, indeks_nilai, semester, tahun_ajaran FROM nilai WHERE nim_mahasiswa = ?',
+        'SELECT kode_mk, indeks_nilai, semester AS jenis_semester, tahun_ajaran FROM nilai WHERE nim_mahasiswa = ?',
         [studentId]
     );
     return nilaiRows;
@@ -22,8 +22,8 @@ const getNewCourses = async (courseCodeArray) => {
     // Bikin placeholders buat query IN clause
     const placeholders = Array(courseCodeArray.length).fill('?').join(',');
     const [newCoursesRows] = await pool.execute(
-        // Tambahkan ekivalensi di sini untuk mengambil kode lama
-        `SELECT kode_mk, nama_mk, sks_mk, jenis_mk, ekivalensi FROM mata_kuliah_baru WHERE kode_mk IN (${placeholders})`,
+        // UPDATED: Tambahkan kolom semester dari mata_kuliah_baru
+        `SELECT kode_mk, nama_mk, sks_mk, jenis_mk, semester, ekivalensi FROM mata_kuliah_baru WHERE kode_mk IN (${placeholders})`,
         courseCodeArray
     );
     return newCoursesRows;
@@ -37,7 +37,8 @@ const getNewCourses = async (courseCodeArray) => {
 const getEquivalentCourses = async (oldCourseCodeArray) => {
     const placeholders = Array(oldCourseCodeArray.length).fill('?').join(',');
     const [equivalentRows] = await pool.execute(
-        `SELECT kode_mk, nama_mk, sks_mk, jenis_mk, ekivalensi FROM mata_kuliah_baru 
+        // UPDATED: Tambahkan kolom semester dari mata_kuliah_baru
+        `SELECT kode_mk, nama_mk, sks_mk, jenis_mk, semester, ekivalensi FROM mata_kuliah_baru 
         WHERE ekivalensi IN (${placeholders})`,
         oldCourseCodeArray
     );
@@ -85,7 +86,8 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
     const courseHistory = [];
 
     grades.forEach((grade) => {
-        const { kode_mk, indeks_nilai, semester, tahun_ajaran } = grade;
+        // UPDATED: Ganti nama variabel semester jadi jenis_semester
+        const { kode_mk, indeks_nilai, jenis_semester, tahun_ajaran } = grade;
         const courseDetails = coursesMap[kode_mk];
 
         if (courseDetails) {
@@ -119,7 +121,10 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 kode_mata_kuliah: kodeMataKuliah,
                 jenis: courseDetails.jenis_mk || '-',
                 sks: courseDetails.sks_mk || courseDetails.sks_mk_lama || 0,
-                semester: semester,
+                // UPDATED: Tambahkan semester dari mata_kuliah_baru/lama
+                semester: courseDetails.semester || '-',
+                // UPDATED: Ganti nama dari semester ke jenis_semester (GANJIL/GENAP)
+                jenis_semester: jenis_semester,
                 nilai: indeks_nilai,
                 tahun_ajaran: tahun_ajaran,
             });
@@ -130,7 +135,9 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 kode_mata_kuliah: kode_mk,
                 jenis: '-',
                 sks: 0,
-                semester: semester,
+                // UPDATED: Set default values
+                semester: '-',
+                jenis_semester: jenis_semester,
                 nilai: indeks_nilai,
                 tahun_ajaran: tahun_ajaran,
             });
