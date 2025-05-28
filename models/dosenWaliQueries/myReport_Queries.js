@@ -21,6 +21,11 @@ const getKeluhan = async (dosenNIP, dosenCode) => {
                     WHEN rdw.id_response IS NOT NULL THEN 1
                     ELSE 0
                 END AS has_response,
+                CASE 
+                    WHEN rdw.status_keluhan = 1 THEN 'Sudah Direspon'
+                    WHEN rdw.id_response IS NOT NULL THEN 'Sudah Direspon'
+                    ELSE 'Menunggu Respon'
+                END AS status,
                 rdw.status_keluhan
             FROM 
                 keluhan_mahasiswa km
@@ -51,20 +56,28 @@ const getKeluhan = async (dosenNIP, dosenCode) => {
  */
 const getKeluhanDetail = async (keluhanId) => {
     try {
-        // Get the feedback details with student info
+        // Get the feedback details with student info and response status
         const [feedbackDetails] = await pool.execute(
             `SELECT 
                 km.id_keluhan, 
                 km.nim_keluhan AS nim, 
                 m.nama,
-                m.kelas,  /* Corrected: using 'kelas' instead of 'kode_kelas' */
+                m.kelas,
                 km.title_keluhan, 
                 km.detail_keluhan, 
-                km.tanggal_keluhan
+                km.tanggal_keluhan,
+                CASE 
+                    WHEN rdw.status_keluhan = 1 THEN 'Sudah Direspon'
+                    WHEN rdw.id_response IS NOT NULL THEN 'Sudah Direspon'
+                    ELSE 'Menunggu Respon'
+                END AS status,
+                rdw.status_keluhan
             FROM 
                 keluhan_mahasiswa km
             LEFT JOIN 
                 mahasiswa m ON km.nim_keluhan = m.nim
+            LEFT JOIN 
+                response_dosen_wali rdw ON km.id_keluhan = rdw.id_keluhan
             WHERE 
                 km.id_keluhan = ?`,
             [keluhanId]
@@ -116,7 +129,12 @@ const getResponse = async (dosenNIP, feedbackId) => {
                 rdw.id_keluhan,
                 rdw.response_keluhan,
                 rdw.tanggal_response,
-                rdw.status_keluhan
+                rdw.status_keluhan,
+                CASE 
+                    WHEN rdw.status_keluhan = 1 THEN 'Sudah Direspon'
+                    WHEN rdw.id_response IS NOT NULL THEN 'Sudah Direspon'
+                    ELSE 'Menunggu Respon'
+                END AS status
             FROM 
                 response_dosen_wali rdw
             WHERE 
