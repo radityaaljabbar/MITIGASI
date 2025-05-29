@@ -1,38 +1,52 @@
 const { pool } = require('../../config/database');
 
-// ngambil ipk dan tak student tertentu
+// ngambil ipk dan tak student tertentu dengan LEFT JOIN untuk handle missing data
 exports.getStudentAcademicData = async (nimMhs) => {
-    const SQLQuery = 
-    `   SELECT 
+    const SQLQuery = `   SELECT 
             mhs.nama,
             mhs.nim, 
             mhs.kelas,
-            ipkt.ipk_lulus,
-            ipkt.sks_lulus, 
-            takt.tak,
+            COALESCE(ipkt.ipk_lulus, 0) as ipk_lulus,
+            COALESCE(ipkt.sks_lulus, 0) as sks_lulus, 
+            COALESCE(takt.tak, 0) as tak,
             sem.semester,
-            sem.sks_semester,
-            sem.ip_semester
+            COALESCE(sem.sks_semester, 0) as sks_semester,
+            COALESCE(sem.ip_semester, 0) as ip_semester
         FROM mahasiswa mhs 
-        JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
-        JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
-        JOIN persemester sem ON sem.nim_mahasiswa = mhs.nim
-        WHERE mhs.nim = ?`; // Gunakan placeholder '?' untuk keamanan (mencegah SQL Injection)
-                          // dan lebih baik spesifikasikan tabel mhs.nim jika nim ada di tabel lain juga
+        LEFT JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
+        LEFT JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
+        LEFT JOIN persemester sem ON sem.nim_mahasiswa = mhs.nim
+        WHERE mhs.nim = ?
+        ORDER BY sem.semester ASC`; // Tambahkan ORDER BY untuk urutan semester
 
     try {
         // Eksekusi query dengan pool.execute
-        // Destructuring [rows] akan mengambil array hasil query
         const [rowsAcademicData] = await pool.execute(SQLQuery, [nimMhs]);
-        
-        // rowsAcademicData akan menjadi array. Jika Anda mengharapkan satu mahasiswa,
-        // bisa jadi array ini berisi satu objek atau kosong.
-        // Mirip dengan rowsTAK, rowsAcademicData adalah array dari baris hasil.
-        return rowsAcademicData; 
+
+        // Jika tidak ada data mahasiswa sama sekali, return array kosong
+        if (!rowsAcademicData || rowsAcademicData.length === 0) {
+            // Coba ambil data dasar mahasiswa saja
+            const basicStudentQuery = `
+                SELECT 
+                    nama,
+                    nim, 
+                    kelas,
+                    0 as ipk_lulus,
+                    0 as sks_lulus,
+                    0 as tak,
+                    NULL as semester,
+                    0 as sks_semester,
+                    0 as ip_semester
+                FROM mahasiswa 
+                WHERE nim = ?`;
+
+            const [basicData] = await pool.execute(basicStudentQuery, [nimMhs]);
+            return basicData.length > 0 ? basicData : [];
+        }
+
+        return rowsAcademicData;
     } catch (error) {
-        console.error("Error fetching student academic data:", error);
-        // Anda mungkin ingin melempar error lagi atau mengembalikan array kosong/null
-        // tergantung pada bagaimana Anda ingin menangani error di pemanggil fungsi ini.
-        throw error; // atau return [];
+        console.error('Error fetching student academic data:', error);
+        throw error;
     }
 };

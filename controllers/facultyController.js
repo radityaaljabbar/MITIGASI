@@ -587,58 +587,73 @@ exports.getStudentAcademicDetails = async (req, res) => {
         if (!nim) {
             return res.status(400).json({
                 success: false,
-                message: 'NIM is required as a query parameter.', // Pesan lebih spesifik
+                message: 'NIM is required as a query parameter.',
             });
         }
 
-        // Panggil getStudentAcademicData yang seharusnya mengembalikan semua data yang dibutuhkan
-        const academicDataArray = await getStudentAcademicData(nim); // Pastikan di-await!
+        // Panggil getStudentAcademicData
+        const academicDataArray = await getStudentAcademicData(nim);
 
         // Periksa apakah data mahasiswa ditemukan
         if (!academicDataArray || academicDataArray.length === 0) {
             return res.status(404).json({
-                // 404 Not Found lebih tepat
                 success: false,
-                message: `Student academic data not found for NIM: ${nim}`,
+                message: `Student not found for NIM: ${nim}`,
             });
         }
 
-        // Karena kita mencari berdasarkan NIM unik, ambil objek pertama dari array
+        // Ambil data pertama untuk info dasar mahasiswa
         const studentData = academicDataArray[0];
 
-        // Ekstrak nilai-nilai yang dibutuhkan dari studentData
-        // Ini lebih aman dan langsung dari sumber data yang komprehensif
-        const namaMahasiswa = studentData.nama;
-        const kelasMahasiswa = studentData.kelas;
-        const ipk = studentData.ipk_lulus; // Sesuaikan nama field jika berbeda di DB
-        const sksTotal = studentData.sks_lulus; // Sesuaikan nama field jika berbeda di DB
-        const tak = studentData.tak; // Sesuaikan nama field jika berbeda di DB
+        // Ekstrak nilai dengan default fallbacks
+        const namaMahasiswa = studentData.nama || '-';
+        const kelasMahasiswa = studentData.kelas || '-';
+        const ipk =
+            studentData.ipk_lulus != null
+                ? parseFloat(studentData.ipk_lulus)
+                : 0;
+        const sksTotal =
+            studentData.sks_lulus != null ? parseInt(studentData.sks_lulus) : 0;
+        const tak = studentData.tak != null ? parseInt(studentData.tak) : 0;
+
+        // Process semester data dengan handling untuk data kosong
         const perSemester = [];
-        // NIM juga ada di studentData.nim, bisa digunakan untuk verifikasi jika perlu
+        const semesterMap = new Map(); // Untuk avoid duplicate semester
 
         academicDataArray.forEach((row) => {
-            if (row.semester && row.sks_semester !== null) {
-                // Pastikan ada data semester
+            // Hanya tambahkan jika ada data semester yang valid
+            if (row.semester != null && !semesterMap.has(row.semester)) {
                 perSemester.push({
-                    semester: row.semester,
-                    sksSemester: row.sks_semester,
-                    ipSemester: row.ip_semester,
+                    semester: parseInt(row.semester) || 0,
+                    sksSemester:
+                        row.sks_semester != null
+                            ? parseInt(row.sks_semester)
+                            : 0,
+                    ipSemester:
+                        row.ip_semester != null
+                            ? parseFloat(row.ip_semester)
+                            : 0,
                 });
+                semesterMap.set(row.semester, true);
             }
         });
 
-        // console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
-        // console.log('Nama:', namaMahasiswa);
-        // console.log('NIM:', nim); // NIM dari input, bisa juga studentData.nim
-        // console.log('Kelas:', kelasMahasiswa);
-        // console.log('IPK Lulus:', ipk);
-        // console.log('SKS Lulus:', sksTotal);
-        // console.log('TAK:', tak);
-        // console.log('sks:', perSemester);
+        // Sort semester data
+        perSemester.sort((a, b) => a.semester - b.semester);
+
+        // Log untuk debugging
+        console.log('Academic Data Processing:');
+        console.log('- Nama:', namaMahasiswa);
+        console.log('- NIM:', nim);
+        console.log('- Kelas:', kelasMahasiswa);
+        console.log('- IPK:', ipk);
+        console.log('- SKS Total:', sksTotal);
+        console.log('- TAK:', tak);
+        console.log('- Per Semester Data:', perSemester.length, 'records');
 
         const responseData = {
             nama: namaMahasiswa,
-            nim: nim, // Menggunakan nim dari input, atau bisa juga studentData.nim
+            nim: nim,
             kelas: kelasMahasiswa,
             ipk: ipk,
             sksTotal: sksTotal,
@@ -649,12 +664,19 @@ exports.getStudentAcademicDetails = async (req, res) => {
         return res.status(200).json({
             success: true,
             data: responseData,
+            message: 'Student academic data retrieved successfully',
         });
     } catch (error) {
         console.error('Error in getStudentAcademicDetails:', error);
-        res.status(500).json({
+
+        // Return structured error response
+        return res.status(500).json({
             success: false,
             message: 'Server error while fetching student academic details.',
+            error:
+                process.env.NODE_ENV === 'development'
+                    ? error.message
+                    : undefined,
         });
     }
 };
