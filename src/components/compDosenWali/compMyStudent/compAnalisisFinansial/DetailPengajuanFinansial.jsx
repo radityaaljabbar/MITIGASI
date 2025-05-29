@@ -6,8 +6,7 @@ const DetailPengajuanFinansial = ({
     selectedRequest,
     onClose,
     onApprove,
-    onReject,
-    onDownloadAttachment,
+    onReject
 }) => {
     if (!selectedRequest) return null;
 
