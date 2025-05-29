@@ -23,6 +23,7 @@ const {
     fetchStudentSKSTotal,
     fetchStudentIPK,
     fetchStudentIPS,
+    fetchStudentStatus
 } = require('../models/mahasiswaQueries/MyProgress');
 
 const {
@@ -59,14 +60,14 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
         const rowsSKSTotal = await fetchStudentSKSTotal(nim);
         const rowsIPK = await fetchStudentIPK(nim);
         const rowsIPS = await fetchStudentIPS(nim);
+        const rowsStatus = await fetchStudentStatus(nim);
 
-        // Ekstrak TAK saja
         const takValue = rowsTAK.length > 0 ? rowsTAK[0].tak : 0;
         const sksTotalValue =
             rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
         const ipkValue = rowsIPK.length > 0 ? rowsIPK[0].ipk_lulus : 0;
-
         const ipsValue = [];
+        const statusValue = rowsStatus[0].hasil_klasifikasi
 
         rowsIPS.forEach((row) => {
             if (row.semester && row.ip_semester !== null) {
@@ -82,12 +83,14 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
         console.log('tak: ', takValue);
         console.log('sks total: ', sksTotalValue);
         console.log('ips: ', ipsValue);
+        console.log('klasifikasi akademik: ', statusValue)
 
         const ipkSksTakIps = {
             ipk: ipkValue,
             sksTotal: sksTotalValue,
             tak: takValue,
             ips: ipsValue,
+            klasifikasi: statusValue,
         };
 
         return res.status(200).json({
