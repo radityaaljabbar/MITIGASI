@@ -24,6 +24,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
                 ipkt.ipk_lulus,
                 ipkt.sks_lulus,
                 takt.tak,
+                ku.hasil_klasifikasi_umum,
                 COALESCE(
                 (SELECT MAX(p.semester) + 1 
                  FROM persemester p 
@@ -32,7 +33,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
                 ) as current_semester,
                 CASE 
                     WHEN fin.nim IS NOT NULL THEN 1 
-                    ELSE 0 
+                    ELSE 0
                 END as status_finansial_bin
             FROM mahasiswa mhs 
             LEFT JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
@@ -40,6 +41,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
             LEFT JOIN klasifikasi_akademik akd ON akd.nim = mhs.nim
             LEFT JOIN hasil_tes_psikologi psi ON psi.nim = mhs.nim
             LEFT JOIN klasifikasi_finansial fin ON fin.nim = mhs.nim
+            LEFT JOIN klasifikasi_umum ku ON ku.nim = mhs.nim
             WHERE mhs.kelas = ?`,
             [kelas]
         );
@@ -52,7 +54,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
             sks: student.sks_lulus,
             semester: student.current_semester,
             tak: student.tak ,
-            status: 'aman', // Default status
+            status: student.hasil_klasifikasi_umum || "BLANK", // Default status
             skor_psikologi: student.total_skor,
             status_fin: student.status_finansial_bin,
             details: {
