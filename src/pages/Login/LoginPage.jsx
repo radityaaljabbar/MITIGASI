@@ -57,22 +57,27 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-blue-50 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-[#FAF0E6] flex items-center justify-center px-4">
             <div className="bg-white shadow-2xl rounded-3xl overflow-hidden w-full max-w-5xl">
                 {/* Header with Logo and Title */}
-                <div className="bg-gradient-to-r from-red-800 to-red-600 text-white p-6 text-center">
-                    <div className="flex items-center justify-center mb-4">
-                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-3">
-                            <svg
-                                className="w-8 h-8 text-red-600"
-                                fill="currentColor"
-                                viewBox="0 0 24 24">
-                                <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" />
-                            </svg>
+                <div className="bg-gradient-to-r from-red-800 to-red-600 text-white py-4 px-5 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center p-1">
+                            <img
+                                src="/src/assets/images/FIX_LOGO.png"
+                                alt="Logo MITIGASI"
+                                className="w-16 h-16 object-contain"
+                            />
                         </div>
-                        <h1 className="text-2xl font-bold">MITIGASI Portal</h1>
+                        <div>
+                            <h1 className="text-2xl font-bold leading-tight">
+                                MITIGASI
+                            </h1>
+                            <p className="text-red-100 text-sm">
+                                Mitigasi Akademik Terintegrasi
+                            </p>
+                        </div>
                     </div>
-                    <p className="text-red-100">Sistem Informasi Akademik</p>
                 </div>
 
                 <div className="p-8">
