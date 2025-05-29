@@ -16,6 +16,7 @@ const MyProgress = () => {
     const [sksValue, setSksValue] = useState(0);
     const [ipkValue, setIpkValue] = useState(0);
     const [ipsValue, setIpsValue] = useState([]);
+    const [klasifikasiValue, setKlasifikasiValue] = useState(0)
 
     // Fetch data from the query file using useEffect
     useEffect(() => {
@@ -27,6 +28,7 @@ const MyProgress = () => {
                     setSksValue(response.data.sksTotal);
                     setIpkValue(response.data.ipk);
                     setIpsValue(response.data.ips);
+                    setKlasifikasiValue(response.data.klasifikasi);
                 }
             } catch (error) {
                 console.error('Error fetching TAK:', error);
@@ -77,7 +79,7 @@ const MyProgress = () => {
 
             {/* Card status klasifikasi akademik */}
             <div className="mb-5 p-[min(0.8em,12%)]">
-                <KlasifikasiAkademikCard status={muStatusAca} />
+                <KlasifikasiAkademikCard status={klasifikasiValue} />
             </div>
         </div>
     );
