@@ -39,6 +39,50 @@ const fetchStudentsRelief = async (nim) => {
     }
 }
 
+const financialResponse = async (id, status) => {
+    try {
+        // Ubah kondisi ini:
+        // Jika status tidak ada (undefined) atau null, kita anggap ini adalah operasi SELECT
+        if (status === undefined || status === null) { // atau bisa juga if (status == null) karena (undefined == null) itu true
+            // Check if record exists
+            const query = `SELECT * FROM status_response_finansial WHERE id_response_finansial = ?`;
+
+            // Pastikan 'id' tidak undefined juga, meskipun controller sudah memvalidasi
+            if (id === undefined) {
+                throw new Error('ID is required for financial response query.');
+            }
+            const [rows] = await pool.execute(query, [id]);
+            return rows[0] || null;
+        } else {
+            // Insert new record
+            const query = `
+                INSERT INTO status_response_finansial
+                (id_response_finansial, status, tanggal_dibuat, tanggal_diubah)
+                VALUES (?, ?, NOW(), NOW())`;
+
+            // Pastikan 'id' dan 'status' tidak undefined
+            if (id === undefined || status === undefined) {
+                throw new Error('ID and Status are required for inserting financial response.');
+            }
+
+            const [result] = await pool.execute(query, [id, status]);
+
+            // Return the inserted record
+            const selectQuery = `SELECT * FROM status_response_finansial WHERE id = ?`;
+            const [rowsAfterInsert] = await pool.execute(selectQuery, [result.insertId]); // Mengganti nama variabel agar tidak konflik
+            return rowsAfterInsert[0] || null;
+        }
+    } catch (error) {
+        // Lebih baik melempar error asli jika itu sudah deskriptif,
+        // atau bungkus dengan konteks yang lebih baik jika perlu.
+        // Pesan error asli sudah cukup jelas: "Bind parameters must not contain undefined"
+        // jadi mungkin tidak perlu diawali "Error with financial response: "
+        console.error('Error in financialResponse:', error); // Log error internal
+        throw error; // Re-throw error asli agar stack trace terjaga dan controller bisa menangkapnya
+    }
+}
+
 module.exports = {
-    fetchStudentsRelief
+    fetchStudentsRelief,
+    financialResponse
 }

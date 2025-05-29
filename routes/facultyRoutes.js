@@ -128,4 +128,12 @@ router.get(
     facultyController.getHistoryMKMyCourseAdvisor
 );
 
+router.post(
+    '/analisisFinansial/responseFinancial/:id',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.sendResponseFinancial
+);
+
+
 module.exports = router;
