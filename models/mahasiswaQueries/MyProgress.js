@@ -25,6 +25,14 @@ exports.fetchStudentIPK = async (nim) => {
     return rowsIPK;
 };
 
+exports.fetchStudentStatus = async (nim) => {
+    const [rowsStatus] = await pool.execute(
+        'SELECT hasil_klasifikasi from klasifikasi_akademik WHERE nim = ?',
+        [nim]
+    );
+    return rowsStatus;
+};
+
 exports.fetchStudentIPS = async (nim) => {
     const SQLQuery = `SELECT semester, ip_semester FROM persemester WHERE nim_mahasiswa = ?`;
     try {
