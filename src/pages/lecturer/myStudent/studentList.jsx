@@ -663,11 +663,6 @@ export default function DaftarMahasiswaWali() {
                                                         <Eye className="h-4 w-4 mr-2" />
                                                         Detail Lengkap
                                                     </button>
-                                                    <button
-                                                        onClick={() => setShowDetail(null)}
-                                                        className="bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200 text-sm sm:text-base">
-                                                        Tutup
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
