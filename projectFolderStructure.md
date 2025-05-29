@@ -1,11 +1,5 @@
 ```
 └── 📁frontendCode
-    └── 📁.vite
-        └── 📁deps
-            └── _metadata.json
-            └── package.json
-    └── 📁public
-        └── vite.svg
     └── 📁src
         └── App.jsx
         └── 📁assets
@@ -34,6 +28,7 @@
                     └── DASS12Questionnaire_questions.json
                     └── scoreCategories.json
             └── 📁images
+                └── FIX_LOGO.png
                 └── 📁imageDosenWali
                     └── 📁sidebarImages
                         └── LogoutIcon.png
@@ -59,6 +54,9 @@
         └── 📁components
             └── 📁compDosenWali
                 └── 📁compMyStudent
+                    └── 📁compAnalisisAkademik
+                        └── AnalisisTrendContent.jsx
+                        └── DetailNilaiContent.jsx
                     └── 📁compAnalisisFinansial
                         └── AnalisisFinansialDataLoader.jsx
                         └── BelumMengisiFinansial.jsx
@@ -123,6 +121,7 @@
                         └── belumMengisi.jsx
                     └── DetailMahasiswaPage.jsx
                     └── studentList.jsx
+                    └── studentListRill.jsx
                 └── NotFoundPage.jsx
             └── 📁Login
                 └── LoginPage.jsx
@@ -149,6 +148,7 @@
                 └── 📁myReport
                     └── listFeedbackMahasiswaService.js
                 └── 📁myStudent
+                    └── academicDetailService.js
                     └── academicMahasiswaService.js
                     └── cekAnalisisFinansial.js
                     └── cekAnalisisPsikologi.js
@@ -159,9 +159,6 @@
                 └── myFinanceService.js
                 └── myProgress_takSksIpkService.js
                 └── myWellnessService.js
-    └── .env.development
-    └── .env.gcp_dev
-    └── .env.production
     └── .gitignore
     └── eslint.config.js
     └── index.html

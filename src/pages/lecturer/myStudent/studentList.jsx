@@ -17,9 +17,11 @@ import {
     Sparkles,
     BarChart3,
     Calendar,
-    Award
+    Award,
+    Loader2,
 } from 'lucide-react';
 import { getListMahasiswa } from '../../../services/dosenWali/myStudent/listMahasiswaService';
+import { mlPredictionService } from '../../../services/dosenWali/myStudent/mlPredictionService';
 
 export default function DaftarMahasiswaWali() {
     const [selectedClass, setSelectedClass] = useState('all');
@@ -33,6 +35,8 @@ export default function DaftarMahasiswaWali() {
     const [activeTab, setActiveTab] = useState('overview');
     const [showPrediction, setShowPrediction] = useState(false);
     const [isLoadingPrediction, setIsLoadingPrediction] = useState(false);
+    const [predictionResult, setPredictionResult] = useState(null);
+    const [predictionError, setPredictionError] = useState(null);
 
     // New state for sorting
     const [sortConfig, setSortConfig] = useState({
@@ -43,20 +47,20 @@ export default function DaftarMahasiswaWali() {
     const navigate = useNavigate();
 
     // Mock prediction result (replace with actual API call)
-    const getPredictionResult = (student) => ({
-        predictedStatus: "Bermasalah",
-        confidence: 78,
-        riskFactors: [
-            { factor: "IPK Menurun", weight: 35, status: "high" },
-            { factor: "Masalah Finansial", weight: 28, status: "high" },
-            { factor: "Absensi Rendah", weight: 15, status: "medium" }
-        ],
-        recommendations: [
-            "Konseling akademik intensif",
-            "Bantuan beasiswa/keringanan biaya",
-            "Monitoring kehadiran ketat"
-        ]
-    });
+    // const getPredictionResult = (student) => ({
+    //     predictedStatus: 'Bermasalah',
+    //     confidence: 78,
+    //     riskFactors: [
+    //         { factor: 'IPK Menurun', weight: 35, status: 'high' },
+    //         { factor: 'Masalah Finansial', weight: 28, status: 'high' },
+    //         { factor: 'Absensi Rendah', weight: 15, status: 'medium' },
+    //     ],
+    //     recommendations: [
+    //         'Konseling akademik intensif',
+    //         'Bantuan beasiswa/keringanan biaya',
+    //         'Monitoring kehadiran ketat',
+    //     ],
+    // });
 
     // Fetch data from backend when component mounts
     useEffect(() => {
@@ -94,6 +98,8 @@ export default function DaftarMahasiswaWali() {
             setActiveTab('overview');
             setShowPrediction(false);
             setIsLoadingPrediction(false);
+            setPredictionResult(null);
+            setPredictionError(null);
         }
     }, [showDetail]);
 
@@ -146,10 +152,14 @@ export default function DaftarMahasiswaWali() {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'aman': return <CheckCircle className="h-4 w-4" />;
-            case 'siaga': return <AlertTriangle className="h-4 w-4" />;
-            case 'bermasalah': return <X className="h-4 w-4" />;
-            default: return <Eye className="h-4 w-4" />;
+            case 'aman':
+                return <CheckCircle className="h-4 w-4" />;
+            case 'siaga':
+                return <AlertTriangle className="h-4 w-4" />;
+            case 'bermasalah':
+                return <X className="h-4 w-4" />;
+            default:
+                return <Eye className="h-4 w-4" />;
         }
     };
 
@@ -157,13 +167,55 @@ export default function DaftarMahasiswaWali() {
         navigate(`/lecturer/detailMahasiswa/${nim}`);
     };
 
+    // GANTI SELURUH FUNCTION INI:
     const handlePrediction = async () => {
         setIsLoadingPrediction(true);
-        // Simulate API call - replace with actual ML prediction API
-        setTimeout(() => {
-            setShowPrediction(true);
+        setPredictionError(null);
+
+        try {
+            // Get current student data
+            const currentStudent = students.find((s) => s.nim === showDetail);
+            if (!currentStudent) {
+                throw new Error('Student data not found');
+            }
+
+            // Prepare prediction data sesuai backend expectation
+            const predictionData = {
+                ipk: parseFloat(currentStudent.ipk) || 0,
+                skor_psikologi: parseInt(currentStudent.skor_psikologi) || 0,
+                finansial: parseInt(currentStudent.status_fin) || 0,
+            };
+
+            console.log('Sending prediction data for NIM:', currentStudent.nim);
+            console.log('Prediction data:', predictionData);
+
+            // Call ML prediction service
+            const result = await mlPredictionService.predictStudentStatus(
+                currentStudent.nim,
+                predictionData
+            );
+
+            if (result.success) {
+                setPredictionResult(result.data);
+                setShowPrediction(true);
+                console.log('Prediction successful:', result.data);
+
+                // Show success message if saved to database
+                if (result.data.database_saved) {
+                    console.log('Prediction saved to database successfully');
+                }
+            } else {
+                setPredictionError(result.error || 'Prediction failed');
+                console.error('Prediction failed:', result.error);
+            }
+        } catch (error) {
+            console.error('Prediction error:', error);
+            setPredictionError(
+                error.message || 'Terjadi kesalahan saat melakukan prediksi'
+            );
+        } finally {
             setIsLoadingPrediction(false);
-        }, 2000);
+        }
     };
 
     // Enhanced filtering and sorting
@@ -420,14 +472,13 @@ export default function DaftarMahasiswaWali() {
                 {showDetail && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start sm:items-center p-2 sm:p-4 z-50 overflow-y-auto">
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-4 sm:my-0 max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
-                            
                             {(() => {
                                 const student = students.find(
                                     (s) => s.nim === showDetail
                                 );
                                 if (!student) return null;
 
-                                const predictionResult = getPredictionResult(student);
+                                // const predictionResult = getPredictionResult(student);
 
                                 return (
                                     <>
@@ -435,25 +486,41 @@ export default function DaftarMahasiswaWali() {
                                         <div className="bg-[#951A22] p-4 sm:p-6 text-white relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -mr-16 -mt-16"></div>
                                             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white bg-opacity-10 rounded-full -ml-12 -mb-12"></div>
-                                            
+
                                             <div className="relative flex justify-between items-start">
                                                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 flex-1 min-w-0">
                                                     <div className="bg-white bg-opacity-20 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center backdrop-blur-sm flex-shrink-0">
                                                         <User className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h3 className="text-xl sm:text-2xl font-bold mb-1 truncate">{student.name}</h3>
-                                                        <p className="text-blue-100 text-xs sm:text-sm break-all sm:break-normal">{student.nim} • {student.kelas}</p>
+                                                        <h3 className="text-xl sm:text-2xl font-bold mb-1 truncate">
+                                                            {student.name}
+                                                        </h3>
+                                                        <p className="text-blue-100 text-xs sm:text-sm break-all sm:break-normal">
+                                                            {student.nim} •{' '}
+                                                            {student.kelas}
+                                                        </p>
                                                         <div className="flex items-center mt-2">
-                                                            <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(student.status)}`}>
-                                                                {getStatusIcon(student.status)}
-                                                                <span className="ml-1">{student.status}</span>
+                                                            <span
+                                                                className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                                                                    student.status
+                                                                )}`}>
+                                                                {getStatusIcon(
+                                                                    student.status
+                                                                )}
+                                                                <span className="ml-1">
+                                                                    {
+                                                                        student.status
+                                                                    }
+                                                                </span>
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <button
-                                                    onClick={() => setShowDetail(null)}
+                                                    onClick={() =>
+                                                        setShowDetail(null)
+                                                    }
                                                     className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all duration-200 flex-shrink-0 ml-2">
                                                     <X className="h-5 w-5 sm:h-6 sm:w-6" />
                                                 </button>
@@ -464,7 +531,9 @@ export default function DaftarMahasiswaWali() {
                                         <div className="border-b border-gray-200 overflow-x-auto">
                                             <div className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max">
                                                 <button
-                                                    onClick={() => setActiveTab('overview')}
+                                                    onClick={() =>
+                                                        setActiveTab('overview')
+                                                    }
                                                     className={`py-3 sm:py-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
                                                         activeTab === 'overview'
                                                             ? 'border-blue-500 text-blue-600'
@@ -473,9 +542,14 @@ export default function DaftarMahasiswaWali() {
                                                     Overview
                                                 </button>
                                                 <button
-                                                    onClick={() => setActiveTab('prediction')}
+                                                    onClick={() =>
+                                                        setActiveTab(
+                                                            'prediction'
+                                                        )
+                                                    }
                                                     className={`py-3 sm:py-4 border-b-2 font-medium text-sm transition-colors duration-200 flex items-center whitespace-nowrap ${
-                                                        activeTab === 'prediction'
+                                                        activeTab ===
+                                                        'prediction'
                                                             ? 'border-blue-500 text-blue-600'
                                                             : 'border-transparent text-gray-500 hover:text-gray-700'
                                                     }`}>
@@ -486,7 +560,11 @@ export default function DaftarMahasiswaWali() {
                                         </div>
 
                                         {/* Content - Mobile Optimized */}
-                                        <div className="p-4 sm:p-6 overflow-y-auto" style={{ maxHeight: 'calc(95vh - 200px)' }}>
+                                        <div
+                                            className="p-4 sm:p-6 overflow-y-auto"
+                                            style={{
+                                                maxHeight: 'calc(95vh - 200px)',
+                                            }}>
                                             {activeTab === 'overview' && (
                                                 <div className="space-y-4 sm:space-y-6">
                                                     {/* Stats Cards - Responsive Grid */}
@@ -494,40 +572,64 @@ export default function DaftarMahasiswaWali() {
                                                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4 rounded-xl border border-blue-200">
                                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                                                                 <div className="mb-2 sm:mb-0">
-                                                                    <p className="text-xs sm:text-sm text-blue-600 font-medium">IPK</p>
+                                                                    <p className="text-xs sm:text-sm text-blue-600 font-medium">
+                                                                        IPK
+                                                                    </p>
                                                                     <p className="text-lg sm:text-2xl font-bold text-blue-800">
-                                                                        {typeof student.ipk === 'number' ? student.ipk.toFixed(2) : student.ipk}
+                                                                        {typeof student.ipk ===
+                                                                        'number'
+                                                                            ? student.ipk.toFixed(
+                                                                                  2
+                                                                              )
+                                                                            : student.ipk}
                                                                     </p>
                                                                 </div>
                                                                 <Award className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 self-end sm:self-auto" />
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-3 sm:p-4 rounded-xl border border-purple-200">
                                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                                                                 <div className="mb-2 sm:mb-0">
-                                                                    <p className="text-xs sm:text-sm text-purple-600 font-medium">TAK</p>
-                                                                    <p className="text-lg sm:text-2xl font-bold text-purple-800">{student.tak}</p>
+                                                                    <p className="text-xs sm:text-sm text-purple-600 font-medium">
+                                                                        TAK
+                                                                    </p>
+                                                                    <p className="text-lg sm:text-2xl font-bold text-purple-800">
+                                                                        {
+                                                                            student.tak
+                                                                        }
+                                                                    </p>
                                                                 </div>
                                                                 <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 self-end sm:self-auto" />
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <div className="bg-gradient-to-br from-green-50 to-green-100 p-3 sm:p-4 rounded-xl border border-green-200">
                                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                                                                 <div className="mb-2 sm:mb-0">
-                                                                    <p className="text-xs sm:text-sm text-green-600 font-medium">Semester</p>
-                                                                    <p className="text-lg sm:text-2xl font-bold text-green-800">{student.semester || 0}</p>
+                                                                    <p className="text-xs sm:text-sm text-green-600 font-medium">
+                                                                        Semester
+                                                                    </p>
+                                                                    <p className="text-lg sm:text-2xl font-bold text-green-800">
+                                                                        {student.semester ||
+                                                                            0}
+                                                                    </p>
                                                                 </div>
                                                                 <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 self-end sm:self-auto" />
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-3 sm:p-4 rounded-xl border border-orange-200">
                                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                                                                 <div className="mb-2 sm:mb-0">
-                                                                    <p className="text-xs sm:text-sm text-orange-600 font-medium">Total SKS</p>
-                                                                    <p className="text-lg sm:text-2xl font-bold text-orange-800">{student.sks || 0}</p>
+                                                                    <p className="text-xs sm:text-sm text-orange-600 font-medium">
+                                                                        Total
+                                                                        SKS
+                                                                    </p>
+                                                                    <p className="text-lg sm:text-2xl font-bold text-orange-800">
+                                                                        {student.sks ||
+                                                                            0}
+                                                                    </p>
                                                                 </div>
                                                                 <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 self-end sm:self-auto" />
                                                             </div>
@@ -536,19 +638,44 @@ export default function DaftarMahasiswaWali() {
 
                                                     {/* Quick Status Overview - Mobile Optimized */}
                                                     <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
-                                                        <h4 className="font-semibold text-gray-800 mb-3 text-sm sm:text-base">Status Monitoring</h4>
+                                                        <h4 className="font-semibold text-gray-800 mb-3 text-sm sm:text-base">
+                                                            Status Monitoring
+                                                        </h4>
                                                         <div className="grid grid-cols-1 gap-3">
-                                                            {student.details && Object.entries(student.details).map(([key, value]) => (
-                                                                <div key={key} className="bg-white p-3 rounded-lg border border-gray-200">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <span className="text-xs sm:text-sm font-medium capitalize text-gray-700 truncate flex-1 mr-2">{key}</span>
-                                                                        <div className="flex items-center flex-shrink-0">
-                                                                            <span className={`w-2 h-2 rounded-full mr-2 ${getStatusDot(value)}`}></span>
-                                                                            <span className="text-xs sm:text-sm font-medium capitalize-text">{value}</span>
+                                                            {student.details &&
+                                                                Object.entries(
+                                                                    student.details
+                                                                ).map(
+                                                                    ([
+                                                                        key,
+                                                                        value,
+                                                                    ]) => (
+                                                                        <div
+                                                                            key={
+                                                                                key
+                                                                            }
+                                                                            className="bg-white p-3 rounded-lg border border-gray-200">
+                                                                            <div className="flex items-center justify-between">
+                                                                                <span className="text-xs sm:text-sm font-medium capitalize text-gray-700 truncate flex-1 mr-2">
+                                                                                    {
+                                                                                        key
+                                                                                    }
+                                                                                </span>
+                                                                                <div className="flex items-center flex-shrink-0">
+                                                                                    <span
+                                                                                        className={`w-2 h-2 rounded-full mr-2 ${getStatusDot(
+                                                                                            value
+                                                                                        )}`}></span>
+                                                                                    <span className="text-xs sm:text-sm font-medium capitalize-text">
+                                                                                        {
+                                                                                            value
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                                    )
+                                                                )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -560,23 +687,97 @@ export default function DaftarMahasiswaWali() {
                                                         <div className="text-center py-6 sm:py-8">
                                                             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 sm:p-8 border border-purple-200">
                                                                 <Brain className="h-12 w-12 sm:h-16 sm:w-16 text-purple-500 mx-auto mb-4" />
-                                                                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">AI Prediction Analysis</h3>
+                                                                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                                                                    AI
+                                                                    Prediction
+                                                                    Analysis
+                                                                </h3>
                                                                 <p className="text-gray-600 mb-6 text-sm sm:text-base px-2">
-                                                                    Gunakan machine learning untuk memprediksi status mahasiswa berdasarkan data historis dan pola perilaku
+                                                                    Gunakan
+                                                                    machine
+                                                                    learning
+                                                                    untuk
+                                                                    memprediksi
+                                                                    status
+                                                                    mahasiswa
+                                                                    berdasarkan
+                                                                    data
+                                                                    historis dan
+                                                                    pola
+                                                                    perilaku
                                                                 </p>
+                                                                {/* Show current student data */}
+                                                                <div className="bg-white rounded-lg p-4 mb-6 border border-gray-200">
+                                                                    <h4 className="font-semibold text-gray-800 mb-3 text-sm">
+                                                                        Data
+                                                                        Input
+                                                                        untuk
+                                                                        Prediksi:
+                                                                    </h4>
+                                                                    <div className="grid grid-cols-1 gap-2 text-sm">
+                                                                        <div className="flex justify-between">
+                                                                            <span className="text-gray-600">
+                                                                                IPK:
+                                                                            </span>
+                                                                            <span className="font-medium">
+                                                                                {student.ipk.toFixed(
+                                                                                    2
+                                                                                ) ||
+                                                                                    'N/A'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex justify-between">
+                                                                            <span className="text-gray-600">
+                                                                                Skor
+                                                                                Psikologi:
+                                                                            </span>
+                                                                            <span className="font-medium">
+                                                                                {student.skor_psikologi ||
+                                                                                    'N/A'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex justify-between">
+                                                                            <span className="text-gray-600">
+                                                                                Status
+                                                                                Finansial:
+                                                                            </span>
+                                                                            <span className="font-medium">
+                                                                                {student.status_fin ===
+                                                                                1
+                                                                                    ? 'Bermasalah'
+                                                                                    : 'Aman'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {/* Error Display */}
+                                                                {predictionError && (
+                                                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                                                        <p className="text-red-700 text-sm">
+                                                                            {
+                                                                                predictionError
+                                                                            }
+                                                                        </p>
+                                                                    </div>
+                                                                )}
                                                                 <button
-                                                                    onClick={handlePrediction}
-                                                                    disabled={isLoadingPrediction}
+                                                                    onClick={
+                                                                        handlePrediction
+                                                                    }
+                                                                    disabled={
+                                                                        isLoadingPrediction
+                                                                    }
                                                                     className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 flex items-center mx-auto text-sm sm:text-base">
                                                                     {isLoadingPrediction ? (
                                                                         <>
-                                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                                                             Menganalisis...
                                                                         </>
                                                                     ) : (
                                                                         <>
                                                                             <Sparkles className="h-4 w-4 mr-2" />
-                                                                            Mulai Prediksi
+                                                                            Mulai
+                                                                            Prediksi
                                                                         </>
                                                                     )}
                                                                 </button>
@@ -585,62 +786,249 @@ export default function DaftarMahasiswaWali() {
                                                     ) : (
                                                         <div className="space-y-4 sm:space-y-6">
                                                             {/* Prediction Result - Mobile Optimized */}
-                                                            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 sm:p-6 border border-red-200">
+                                                            <div
+                                                                className={`rounded-xl p-4 sm:p-6 border ${
+                                                                    predictionResult?.predicted_status ===
+                                                                    'aman'
+                                                                        ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
+                                                                        : predictionResult?.predicted_status ===
+                                                                          'siaga'
+                                                                        ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200'
+                                                                        : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                                                                }`}>
                                                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
-                                                                    <h3 className="text-base sm:text-lg font-semibold text-red-800">Prediksi Status</h3>
-                                                                    <span className="text-xs sm:text-sm text-red-600">Confidence: {predictionResult.confidence}%</span>
+                                                                    <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+                                                                        Hasil
+                                                                        Prediksi
+                                                                        ML
+                                                                    </h3>
+                                                                    <div className="flex flex-col sm:flex-row sm:items-center text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0 sm:space-x-4">
+                                                                        <span>
+                                                                            Confidence:{' '}
+                                                                            {
+                                                                                predictionResult?.confidence
+                                                                            }
+                                                                            %
+                                                                        </span>
+                                                                        {predictionResult?.database_saved && (
+                                                                            <span className="text-green-600">
+                                                                                ✓
+                                                                                Saved
+                                                                                to
+                                                                                Database
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                                 <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                                                                    <span className={`inline-flex items-center px-3 sm:px-4 py-2 rounded-full text-sm sm:text-lg font-bold border w-fit ${getStatusColor(predictionResult.predictedStatus)}`}>
-                                                                        {getStatusIcon(predictionResult.predictedStatus)}
-                                                                        <span className="ml-2">{predictionResult.predictedStatus}</span>
+                                                                    <span
+                                                                        className={`inline-flex items-center px-3 sm:px-4 py-2 rounded-full text-sm sm:text-lg font-bold border w-fit ${getStatusColor(
+                                                                            predictionResult?.predicted_status
+                                                                        )}`}>
+                                                                        {getStatusIcon(
+                                                                            predictionResult?.predicted_status
+                                                                        )}
+                                                                        <span className="ml-2 capitalize">
+                                                                            {
+                                                                                predictionResult?.predicted_status
+                                                                            }
+                                                                        </span>
                                                                     </span>
                                                                     <div className="flex-1">
-                                                                        <div className="w-full bg-red-200 rounded-full h-2 sm:h-3">
-                                                                            <div 
-                                                                                className="bg-red-500 h-2 sm:h-3 rounded-full transition-all duration-1000"
-                                                                                style={{ width: `${predictionResult.confidence}%` }}>
-                                                                            </div>
+                                                                        <div
+                                                                            className={`w-full rounded-full h-2 sm:h-3 ${
+                                                                                predictionResult?.predicted_status ===
+                                                                                'aman'
+                                                                                    ? 'bg-green-200'
+                                                                                    : predictionResult?.predicted_status ===
+                                                                                      'siaga'
+                                                                                    ? 'bg-yellow-200'
+                                                                                    : 'bg-red-200'
+                                                                            }`}>
+                                                                            <div
+                                                                                className={`h-2 sm:h-3 rounded-full transition-all duration-1000 ${
+                                                                                    predictionResult?.predicted_status ===
+                                                                                    'aman'
+                                                                                        ? 'bg-green-500'
+                                                                                        : predictionResult?.predicted_status ===
+                                                                                          'siaga'
+                                                                                        ? 'bg-yellow-500'
+                                                                                        : 'bg-red-500'
+                                                                                }`}
+                                                                                style={{
+                                                                                    width: `${predictionResult?.confidence}%`,
+                                                                                }}></div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
 
-                                                            {/* Risk Factors - Mobile Optimized */}
-                                                            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
-                                                                <h4 className="font-semibold text-gray-800 mb-4 text-sm sm:text-base">Faktor Risiko</h4>
-                                                                <div className="space-y-3">
-                                                                    {predictionResult.riskFactors.map((factor, index) => (
-                                                                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-lg space-y-2 sm:space-y-0">
-                                                                            <span className="font-medium text-gray-700 text-sm sm:text-base">{factor.factor}</span>
-                                                                            <div className="flex items-center space-x-2">
-                                                                                <div className="w-16 sm:w-20 bg-gray-200 rounded-full h-2">
-                                                                                    <div 
-                                                                                        className={`h-2 rounded-full ${
-                                                                                            factor.status === 'high' ? 'bg-red-500' : 
-                                                                                            factor.status === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                                                                                        }`}
-                                                                                        style={{ width: `${factor.weight}%` }}>
+                                                            {/* Probabilities Details */}
+                                                            {predictionResult?.probabilities && (
+                                                                <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+                                                                    <h4 className="font-semibold text-gray-800 mb-4 text-sm sm:text-base">
+                                                                        Detail
+                                                                        Probabilitas
+                                                                    </h4>
+                                                                    <div className="space-y-3">
+                                                                        {Object.entries(
+                                                                            predictionResult.probabilities
+                                                                        ).map(
+                                                                            ([
+                                                                                status,
+                                                                                probability,
+                                                                            ]) => (
+                                                                                <div
+                                                                                    key={
+                                                                                        status
+                                                                                    }
+                                                                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                                                    <div className="flex items-center">
+                                                                                        <span
+                                                                                            className={`w-3 h-3 rounded-full mr-3 ${getStatusDot(
+                                                                                                status
+                                                                                            )}`}></span>
+                                                                                        <span className="font-medium text-gray-700 text-sm sm:text-base capitalize">
+                                                                                            {
+                                                                                                status
+                                                                                            }
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div className="flex items-center space-x-2">
+                                                                                        <div className="w-16 sm:w-20 bg-gray-200 rounded-full h-2">
+                                                                                            <div
+                                                                                                className={`h-2 rounded-full ${
+                                                                                                    status ===
+                                                                                                    'aman'
+                                                                                                        ? 'bg-green-500'
+                                                                                                        : status ===
+                                                                                                          'siaga'
+                                                                                                        ? 'bg-yellow-500'
+                                                                                                        : 'bg-red-500'
+                                                                                                }`}
+                                                                                                style={{
+                                                                                                    width: `${probability}%`,
+                                                                                                }}></div>
+                                                                                        </div>
+                                                                                        <span className="text-xs sm:text-sm font-medium text-gray-600 min-w-max">
+                                                                                            {
+                                                                                                probability
+                                                                                            }
+
+                                                                                            %
+                                                                                        </span>
                                                                                     </div>
                                                                                 </div>
-                                                                                <span className="text-xs sm:text-sm font-medium text-gray-600 min-w-max">{factor.weight}%</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {/* Input Data Used */}
+                                                            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+                                                                <h4 className="font-semibold text-gray-800 mb-4 text-sm sm:text-base">
+                                                                    Data yang
+                                                                    Digunakan
+                                                                </h4>
+                                                                <div className="grid grid-cols-1 gap-3">
+                                                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                                        <span className="font-medium text-gray-700 text-sm sm:text-base">
+                                                                            IPK
+                                                                        </span>
+                                                                        <span className="text-sm sm:text-base font-medium">
+                                                                            {predictionResult?.input_data?.ipk.toFixed(
+                                                                                2
+                                                                            )}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                                        <span className="font-medium text-gray-700 text-sm sm:text-base">
+                                                                            Skor
+                                                                            Psikologi
+                                                                        </span>
+                                                                        <span className="text-sm sm:text-base font-medium">
+                                                                            {
+                                                                                predictionResult
+                                                                                    ?.input_data
+                                                                                    ?.skor_psikologi
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                                        <span className="font-medium text-gray-700 text-sm sm:text-base">
+                                                                            Status
+                                                                            Finansial
+                                                                        </span>
+                                                                        <span className="text-sm sm:text-base font-medium">
+                                                                            {predictionResult
+                                                                                ?.input_data
+                                                                                ?.finansial ===
+                                                                            1
+                                                                                ? 'Bermasalah'
+                                                                                : 'Aman'}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
-                                                            {/* Recommendations - Mobile Optimized */}
+                                                            {/* Prediction Time & Database Status */}
                                                             <div className="bg-blue-50 rounded-xl p-4 sm:p-6 border border-blue-200">
-                                                                <h4 className="font-semibold text-blue-800 mb-4 text-sm sm:text-base">Rekomendasi Tindakan</h4>
-                                                                <ul className="space-y-2">
-                                                                    {predictionResult.recommendations.map((rec, index) => (
-                                                                        <li key={index} className="flex items-start">
-                                                                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                                                                            <span className="text-blue-800 text-sm sm:text-base leading-relaxed">{rec}</span>
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
+                                                                <div className="space-y-3">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-blue-800 font-medium text-sm sm:text-base">
+                                                                            Waktu
+                                                                            Prediksi
+                                                                        </span>
+                                                                        <span className="text-blue-600 text-xs sm:text-sm">
+                                                                            {predictionResult?.prediction_time
+                                                                                ? new Date(
+                                                                                      predictionResult.prediction_time
+                                                                                  ).toLocaleString(
+                                                                                      'id-ID'
+                                                                                  )
+                                                                                : 'N/A'}
+                                                                        </span>
+                                                                    </div>
+                                                                    {predictionResult?.database_saved !==
+                                                                        undefined && (
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="text-blue-800 font-medium text-sm sm:text-base">
+                                                                                Status
+                                                                                Database
+                                                                            </span>
+                                                                            <span
+                                                                                className={`text-xs sm:text-sm font-medium ${
+                                                                                    predictionResult.database_saved
+                                                                                        ? 'text-green-600'
+                                                                                        : 'text-red-600'
+                                                                                }`}>
+                                                                                {predictionResult.database_saved
+                                                                                    ? '✓ Tersimpan'
+                                                                                    : '✗ Gagal Simpan'}
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Reset Button */}
+                                                            <div className="text-center">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setShowPrediction(
+                                                                            false
+                                                                        );
+                                                                        setPredictionResult(
+                                                                            null
+                                                                        );
+                                                                        setPredictionError(
+                                                                            null
+                                                                        );
+                                                                    }}
+                                                                    className="text-blue-600 hover:text-blue-800 underline text-sm">
+                                                                    Prediksi
+                                                                    Ulang
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     )}
@@ -651,14 +1039,15 @@ export default function DaftarMahasiswaWali() {
                                         {/* Footer - Mobile Optimized */}
                                         <div className="border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
                                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
-                                                <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">
-                                                </p>
+                                                <p className="text-xs sm:text-sm text-gray-500 hidden sm:block"></p>
                                                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                                                     <button
                                                         className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center text-sm sm:text-base"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            navigate(`/lecturer/detailMahasiswa/${student.nim}`);
+                                                            navigate(
+                                                                `/lecturer/detailMahasiswa/${student.nim}`
+                                                            );
                                                         }}>
                                                         <Eye className="h-4 w-4 mr-2" />
                                                         Detail Lengkap

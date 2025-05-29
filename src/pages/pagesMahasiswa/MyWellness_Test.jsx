@@ -5,7 +5,7 @@ import pertanyaanPsikologi from '../../assets/data/UsedData/DASS12Questionnaire_
 import scoreCategories from '../../assets/data/UsedData/scoreCategories.json';
 import { sendPsiResult } from '../../services/mahasiswaServices/myWellnessService';
 
-const MyWellness_Test = () => {
+const MyWelness_Test = () => {
     // Make useState untuk tracking kondisi jawaban yang dipilih:
     const [selectedAnswers, setSelectedAnswers] = useState({});
     // Make useState juga untuk tracking kondisi jawaban yang belum dipilih:
@@ -58,7 +58,27 @@ const MyWellness_Test = () => {
         );
     };
 
-    // Function untuk menentukan kategori berdasarkan skor dari domain tertentu
+    // UPDATED: Function to convert raw total score (0-63) to 1-100 scale
+    const convertToHundredScale = (rawTotalScore) => {
+        // Raw score range: 0-63 (DASS-21: 0 = terbaik, 63 = terburuk)
+        // Target scale: 1-100 (1 = terburuk, 100 = terbaik)
+
+        // Pastikan rawTotalScore dalam range yang benar
+        const clampedScore = Math.max(0, Math.min(63, rawTotalScore));
+
+        // Inversi skor: 0 menjadi 63, 63 menjadi 0
+        const invertedScore = 63 - clampedScore;
+
+        // Konversi ke skala 1-100
+        // 63 (inversi dari 0) → 100
+        // 0 (inversi dari 63) → 1
+        const scaledScore = Math.round((invertedScore / 63) * 99) + 1;
+
+        // Pastikan hasil dalam range 1-100
+        return Math.max(1, Math.min(100, scaledScore));
+    };
+
+    // Function untuk menentukan kategori berdasarkan skor dari domain tertentu (tetap DASS-21 system untuk interpretasi klinis)
     const getDomainCategory = (domain, score) => {
         if (!scoreCategories[domain]) return 'Tidak Diketahui';
 
@@ -80,7 +100,7 @@ const MyWellness_Test = () => {
         return 'Tidak Diketahui';
     };
 
-    // Function untuk menentukan kategori berdasarkan skor overall
+    // Function untuk menentukan kategori berdasarkan skor overall (skala 1-100)
     const getOverallCategory = (score) => {
         for (const category of scoreCategories.overall) {
             const [min, max] = category.rentang.split('-').map((str) => {
@@ -101,46 +121,26 @@ const MyWellness_Test = () => {
             }
         }
 
-        // Default category jika skor di luar rentang (unlikely but as a fallback)
+        // Default category jika skor di luar rentang
         return {
             summary: 'Belum dapat dikategorikan dengan jelas.',
             suggestions: 'Hubungi konselor untuk evaluasi lebih lanjut.',
-            klasifikasiPsikologi: 'Belum Terkategorisasi',
+            klasifikasiPsikologi: 'Siaga',
         };
     };
 
-    // Function untuk menentukan klasifikasi (Aman, Siaga, Bermasalah) berdasarkan skor domain
-    const getKlasifikasi = (depressionScore, anxietyScore, stressScore) => {
-        // Get kategori untuk setiap domain
-        const depressionCategory = getDomainCategory(
-            'depression',
-            depressionScore
-        );
-        const anxietyCategory = getDomainCategory('anxiety', anxietyScore);
-        const stressCategory = getDomainCategory('stress', stressScore);
-
-        // Logic untuk menentukan klasifikasi keseluruhan
-        if (
-            depressionCategory === 'Normal' &&
-            anxietyCategory === 'Normal' &&
-            stressCategory === 'Normal'
-        ) {
-            return 'aman';
-        } else if (
-            depressionCategory === 'Parah' ||
-            depressionCategory === 'Sangat Parah' ||
-            anxietyCategory === 'Parah' ||
-            anxietyCategory === 'Sangat Parah' ||
-            stressCategory === 'Parah' ||
-            stressCategory === 'Sangat Parah'
-        ) {
-            return 'bermasalah';
+    // Function untuk menentukan klasifikasi berdasarkan converted score (1-100)
+    const getKlasifikasi = (convertedScore) => {
+        if (convertedScore >= 75) {
+            return 'Aman';
+        } else if (convertedScore >= 50) {
+            return 'Siaga';
         } else {
-            return 'siaga';
+            return 'Bermasalah';
         }
     };
 
-    // Function untuk menghitung skor berdasarkan domain
+    // Function untuk menghitung skor berdasarkan domain (tetap DASS-21 system untuk analisis klinis)
     const calculateDomainScores = (answers) => {
         const domainScores = {
             depression: 0,
@@ -149,11 +149,10 @@ const MyWellness_Test = () => {
         };
 
         pertanyaanPsikologi.forEach((question) => {
-            const domain = question.domain.toLowerCase(); // Convert to lowercase to ensure matching
+            const domain = question.domain.toLowerCase();
             const answer = answers[question.idPertanyaan];
 
             if (answer) {
-                // Ensure we only add to domains that exist in our object
                 if (
                     domain === 'depression' ||
                     domain === 'anxiety' ||
@@ -161,7 +160,7 @@ const MyWellness_Test = () => {
                 ) {
                     domainScores[domain] += answer.score;
                 }
-                // Handle case where domain might be stored differently in the question data
+                // Handle alternative domain names
                 else if (domain === 'depresi') {
                     domainScores.depression += answer.score;
                 } else if (domain === 'kecemasan') {
@@ -169,27 +168,23 @@ const MyWellness_Test = () => {
                 } else if (domain === 'stres') {
                     domainScores.stress += answer.score;
                 }
-
-                // Log unutk debugging
-                // console.log(
-                //     `Question ${question.idPertanyaan} - Domain: ${domain}, Score: ${answer.score}`
-                // );
             }
         });
 
-        console.log('Final domain scores:', domainScores);
+        console.log('DASS-21 domain scores (raw):', domainScores);
         return domainScores;
     };
 
-    // Function untuk menghitung total skor
-    const calculateTotalScore = (answers) => {
-        let totalScore = 0;
+    // Function untuk menghitung total skor raw (DASS-21 system)
+    const calculateRawTotalScore = (answers) => {
+        let rawTotalScore = 0;
 
         for (const key in answers) {
-            totalScore += answers[key].score;
+            rawTotalScore += answers[key].score;
         }
 
-        return totalScore;
+        console.log('Raw total score (DASS-21):', rawTotalScore, '/ 63');
+        return rawTotalScore;
     };
 
     // Handler saat submit si form:
@@ -222,35 +217,39 @@ const MyWellness_Test = () => {
             return;
         }
 
-        // Hitung skor per domain
+        // Hitung skor per domain (tetap DASS-21 system untuk interpretasi klinis)
         const domainScores = calculateDomainScores(selectedAnswers);
 
-        // Hitung total skor
-        const totalScore = calculateTotalScore(selectedAnswers);
+        // Hitung raw total skor (DASS-21 system: 0-63)
+        const rawTotalScore = calculateRawTotalScore(selectedAnswers);
 
-        // Dapatkan kategori & saran berdasarkan overall score
-        const overallCategory = getOverallCategory(totalScore);
+        // KONVERSI: Raw total score ke skala 1-100 (skor utama untuk display)
+        const finalScore = convertToHundredScale(rawTotalScore);
 
-        // Dapatkan klasifikasi (Aman, Siaga, Bermasalah)
-        const klasifikasi = getKlasifikasi(
-            domainScores.depression,
-            domainScores.anxiety,
-            domainScores.stress
-        );
+        // Dapatkan kategori & saran berdasarkan converted score (1-100)
+        const overallCategory = getOverallCategory(finalScore);
+
+        // Dapatkan klasifikasi berdasarkan converted score
+        const klasifikasi = getKlasifikasi(finalScore);
 
         // Prepare data untuk dikirim ke database
         const jawabanTestPsikologi = {
-            skor_depression: domainScores.depression,
-            skor_anxiety: domainScores.anxiety,
-            skor_stress: domainScores.stress,
-            total_skor: totalScore,
+            skor_depression: domainScores.depression, // Raw DASS-21 scores untuk interpretasi klinis
+            skor_anxiety: domainScores.anxiety, // Raw DASS-21 scores untuk interpretasi klinis
+            skor_stress: domainScores.stress, // Raw DASS-21 scores untuk interpretasi klinis
+            total_skor: finalScore, // Skor dalam skala 1-100
             kesimpulan: overallCategory.summary,
             saran: overallCategory.suggestions,
             klasifikasi: klasifikasi,
         };
 
         // Log untuk debugging
-        console.log('Preparing to send data:', jawabanTestPsikologi);
+        console.log('=== SCORING SUMMARY ===');
+        console.log('Raw DASS-21 total score:', rawTotalScore, '/ 63');
+        console.log('Final converted score:', finalScore, '/ 100');
+        console.log('Klasifikasi:', klasifikasi);
+        console.log('Domain scores:', domainScores);
+        console.log('Data to send:', jawabanTestPsikologi);
 
         // Simpen data ke useState - this will trigger the useEffect
         setPsiTestData(jawabanTestPsikologi);
@@ -260,13 +259,49 @@ const MyWellness_Test = () => {
         <div className="p-8 w-full overflow-y-auto text-sm">
             <div className="text-[#333] mb-6 text-center text-2xl font-bold">
                 <h1 className="pb-4">Evaluasi Psikologis Mahasiswa</h1>
-                <p className="text-sm  max-w-xl mx-auto">
+                <p className="text-sm max-w-xl mx-auto">
                     Bacalah setiap pernyataan dan pilihlah pilihan yang
                     menunjukkan seberapa besar pernyataan tersebut berlaku bagi
                     Anda selama seminggu terakhir. Tidak ada jawaban yang benar
                     atau salah. Jangan menghabiskan terlalu banyak waktu untuk
                     setiap pernyataan.
                 </p>
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg max-w-lg mx-auto">
+                    <p className="text-sm text-blue-800 font-medium">
+                        <strong>Sistem Penilaian Baru:</strong>
+                    </p>
+                    <div className="mt-2 text-xs text-blue-700 space-y-1">
+                        <div className="flex justify-between">
+                            <span>Skor Akhir:</span>
+                            <span>
+                                <strong>1 - 100</strong>
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>100 = Sangat Sehat Mental</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>1 = Perlu Perhatian Segera</span>
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-blue-200">
+                            <div className="text-xs">
+                                <span className="text-green-600">
+                                    75-100: Aman
+                                </span>{' '}
+                                |
+                                <span className="text-yellow-600">
+                                    {' '}
+                                    50-74: Siaga
+                                </span>{' '}
+                                |
+                                <span className="text-red-600">
+                                    {' '}
+                                    1-49: Bermasalah
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div className="max-w-2xl mx-auto p-4">
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -290,9 +325,6 @@ const MyWellness_Test = () => {
                             <h2 className="text-[#333] mb-4 text-xl font-semibold leading-relaxed">
                                 Pertanyaan {item.idPertanyaan}: {item.question}
                             </h2>
-                            <div className="text-gray-600 mb-3">
-                                {/* Domain: {item.domain} */}
-                            </div>
 
                             <div className="space-y-3">
                                 {item.choices.map((choice, choiceIndex) => (
@@ -352,4 +384,4 @@ const MyWellness_Test = () => {
     );
 };
 
-export default MyWellness_Test;
+export default MyWelness_Test;

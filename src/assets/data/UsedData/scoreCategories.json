@@ -1,34 +1,34 @@
 {
     "overall": [
         {
-            "rentang": "0-29",
+            "rentang": "90-100",
             "summary": "Kondisi psikologis sangat baik. Mahasiswa menunjukkan kesehatan mental yang optimal dan kemampuan mengelola stres yang baik.",
             "suggestions": "Pertahankan kebiasaan positif dan aktivitas yang mendukung kesehatan mental.",
-            "klasifikasiPsikologi": "Sangat Sehat"
+            "klasifikasiPsikologi": "Aman"
         },
         {
-            "rentang": "30-49",
+            "rentang": "75-89",
             "summary": "Kondisi psikologis baik. Mahasiswa umumnya berfungsi dengan baik meskipun mungkin mengalami beberapa tantangan ringan.",
             "suggestions": "Pertahankan strategi koping yang efektif dan pertimbangkan untuk meningkatkan area yang lebih lemah.",
-            "klasifikasiPsikologi": "Sehat"
+            "klasifikasiPsikologi": "Aman"
         },
         {
-            "rentang": "50-79",
+            "rentang": "50-74",
             "summary": "Kondisi psikologis cukup. Mahasiswa mungkin mengalami beberapa tekanan yang perlu diperhatikan.",
             "suggestions": "Identifikasi sumber stres dan kembangkan strategi untuk mengelolanya. Pertimbangkan untuk berbicara dengan konselor kampus.",
-            "klasifikasiPsikologi": "Cukup Sehat"
+            "klasifikasiPsikologi": "Siaga"
         },
         {
-            "rentang": "80-99",
+            "rentang": "25-49",
             "summary": "Kondisi psikologis kurang baik. Mahasiswa mungkin mengalami tekanan signifikan yang mempengaruhi fungsi sehari-hari.",
             "suggestions": "Disarankan untuk mencari dukungan dari layanan konseling kampus. Prioritaskan perawatan diri dan strategi pengelolaan stres.",
-            "klasifikasiPsikologi": "Cemas Ringan"
+            "klasifikasiPsikologi": "Siaga"
         },
         {
-            "rentang": "100+",
+            "rentang": "1-24",
             "summary": "Kondisi psikologis tidak baik. Mahasiswa mungkin mengalami tekanan berat yang memerlukan perhatian segera.",
             "suggestions": "Segera hubungi layanan kesehatan mental kampus atau profesional kesehatan mental. Dukungan aktif sangat direkomendasikan.",
-            "klasifikasiPsikologi": "Cemas Berat"
+            "klasifikasiPsikologi": "Bermasalah"
         }
     ],
     "depression": [
