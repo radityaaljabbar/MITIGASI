@@ -8,6 +8,16 @@ import {
     User,
     ChevronUp,
     ArrowUpDown,
+    X,
+    Brain,
+    TrendingUp,
+    AlertTriangle,
+    CheckCircle,
+    Eye,
+    Sparkles,
+    BarChart3,
+    Calendar,
+    Award
 } from 'lucide-react';
 import { getListMahasiswa } from '../../../services/dosenWali/myStudent/listMahasiswaService';
 
@@ -20,6 +30,9 @@ export default function DaftarMahasiswaWali() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [classOptions, setClassOptions] = useState([]);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [showPrediction, setShowPrediction] = useState(false);
+    const [isLoadingPrediction, setIsLoadingPrediction] = useState(false);
 
     // New state for sorting
     const [sortConfig, setSortConfig] = useState({
@@ -28,6 +41,22 @@ export default function DaftarMahasiswaWali() {
     });
 
     const navigate = useNavigate();
+
+    // Mock prediction result (replace with actual API call)
+    const getPredictionResult = (student) => ({
+        predictedStatus: "Bermasalah",
+        confidence: 78,
+        riskFactors: [
+            { factor: "IPK Menurun", weight: 35, status: "high" },
+            { factor: "Masalah Finansial", weight: 28, status: "high" },
+            { factor: "Absensi Rendah", weight: 15, status: "medium" }
+        ],
+        recommendations: [
+            "Konseling akademik intensif",
+            "Bantuan beasiswa/keringanan biaya",
+            "Monitoring kehadiran ketat"
+        ]
+    });
 
     // Fetch data from backend when component mounts
     useEffect(() => {
@@ -59,6 +88,15 @@ export default function DaftarMahasiswaWali() {
         fetchStudents();
     }, []);
 
+    // Reset popup states when showDetail changes
+    useEffect(() => {
+        if (showDetail) {
+            setActiveTab('overview');
+            setShowPrediction(false);
+            setIsLoadingPrediction(false);
+        }
+    }, [showDetail]);
+
     // Sorting function
     const handleSort = (key) => {
         let direction = 'asc';
@@ -82,32 +120,50 @@ export default function DaftarMahasiswaWali() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Aman':
-                return 'bg-green-100';
-            case 'Siaga':
-                return 'bg-yellow-100';
-            case 'Bermasalah':
-                return 'bg-red-100';
+            case 'aman':
+                return 'bg-green-100 text-green-800 border-green-200 capitalize-text';
+            case 'siaga':
+                return 'bg-yellow-100 text-yellow-800 border-yellow-200 capitalize-text';
+            case 'bermasalah':
+                return 'bg-red-100 text-red-800 border-red-200 capitalize-text';
             default:
-                return 'bg-white';
+                return 'bg-gray-100 text-gray-800 border-gray-200 capitalize-text';
         }
     };
 
     const getStatusDot = (status) => {
         switch (status) {
-            case 'Aman':
+            case 'aman':
                 return 'bg-green-500';
-            case 'Siaga':
+            case 'siaga':
                 return 'bg-yellow-500';
-            case 'Bermasalah':
+            case 'bermasalah':
                 return 'bg-red-500';
             default:
                 return 'bg-gray-500';
         }
     };
 
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case 'aman': return <CheckCircle className="h-4 w-4" />;
+            case 'siaga': return <AlertTriangle className="h-4 w-4" />;
+            case 'bermasalah': return <X className="h-4 w-4" />;
+            default: return <Eye className="h-4 w-4" />;
+        }
+    };
+
     const handleRowClick = (nim) => {
         navigate(`/lecturer/detailMahasiswa/${nim}`);
+    };
+
+    const handlePrediction = async () => {
+        setIsLoadingPrediction(true);
+        // Simulate API call - replace with actual ML prediction API
+        setTimeout(() => {
+            setShowPrediction(true);
+            setIsLoadingPrediction(false);
+        }, 2000);
     };
 
     // Enhanced filtering and sorting
@@ -360,140 +416,303 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 )}
 
-                {/* Student Detail Popup */}
+                {/* Enhanced Student Detail Popup */}
                 {showDetail && (
-                    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center p-4 z-50">
-                        <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 max-h-screen overflow-y-auto">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-bold">
-                                    Detail Mahasiswa
-                                </h3>
-                                <button
-                                    onClick={() => setShowDetail(null)}
-                                    className="text-gray-500 hover:text-gray-700">
-                                    &times;
-                                </button>
-                            </div>
-
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                            
                             {(() => {
                                 const student = students.find(
                                     (s) => s.nim === showDetail
                                 );
                                 if (!student) return null;
 
+                                const predictionResult = getPredictionResult(student);
+
                                 return (
                                     <>
-                                        <div className="flex flex-col md:flex-row items-center mb-6 gap-4">
-                                            <div className="bg-gray-200 rounded-full w-20 h-20 flex items-center justify-center">
-                                                <User className="h-12 w-12 text-gray-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-lg font-semibold">
-                                                    {student.name}
-                                                </h4>
-                                                <p className="text-gray-600">
-                                                    {student.nim}
-                                                </p>
-                                                <p className="text-gray-600">
-                                                    {student.kelas}
-                                                </p>
-                                                <p className="mt-1">
-                                                    <span
-                                                        className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
-                                                            student.status
-                                                        )}`}></span>
-                                                    {student.status}
-                                                </p>
+                                        {/* Header */}
+                                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -mr-16 -mt-16"></div>
+                                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white bg-opacity-10 rounded-full -ml-12 -mb-12"></div>
+                                            
+                                            <div className="relative flex justify-between items-start">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center backdrop-blur-sm">
+                                                        <User className="h-8 w-8 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-2xl font-bold mb-1">{student.name}</h3>
+                                                        <p className="text-blue-100 text-sm">{student.nim} • {student.kelas}</p>
+                                                        <div className="flex items-center mt-2">
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(student.status)}`}>
+                                                                {getStatusIcon(student.status)}
+                                                                <span className="ml-1">{student.status}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => setShowDetail(null)}
+                                                    className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all duration-200">
+                                                    <X className="h-6 w-6" />
+                                                </button>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div className="p-3 bg-gray-50 rounded">
+                                        {/* Tabs */}
+                                        <div className="border-b border-gray-200">
+                                            <div className="flex space-x-8 px-6">
+                                                <button
+                                                    onClick={() => setActiveTab('overview')}
+                                                    className={`py-4 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                                                        activeTab === 'overview'
+                                                            ? 'border-blue-500 text-blue-600'
+                                                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                                                    }`}>
+                                                    Overview
+                                                </button>
+                                                {/* <button
+                                                    onClick={() => setActiveTab('status')}
+                                                    className={`py-4 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                                                        activeTab === 'status'
+                                                            ? 'border-blue-500 text-blue-600'
+                                                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                                                    }`}>
+                                                    Status Detail
+                                                </button> */}
+                                                <button
+                                                    onClick={() => setActiveTab('prediction')}
+                                                    className={`py-4 border-b-2 font-medium text-sm transition-colors duration-200 flex items-center ${
+                                                        activeTab === 'prediction'
+                                                            ? 'border-blue-500 text-blue-600'
+                                                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                                                    }`}>
+                                                    <Brain className="h-4 w-4 mr-1" />
+                                                    AI Prediction
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="p-6 overflow-y-auto max-h-96">
+                                            {activeTab === 'overview' && (
+                                                <div className="space-y-6">
+                                                    {/* Stats Cards */}
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                                                            <div className="flex items-center justify-between">
+                                                                <div>
+                                                                    <p className="text-sm text-blue-600 font-medium">IPK</p>
+                                                                    <p className="text-2xl font-bold text-blue-800">
+                                                                        {typeof student.ipk === 'number' ? student.ipk.toFixed(2) : student.ipk}
+                                                                    </p>
+                                                                </div>
+                                                                <Award className="h-8 w-8 text-blue-500" />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+                                                            <div className="flex items-center justify-between">
+                                                                <div>
+                                                                    <p className="text-sm text-purple-600 font-medium">TAK</p>
+                                                                    <p className="text-2xl font-bold text-purple-800">{student.tak}</p>
+                                                                </div>
+                                                                <BarChart3 className="h-8 w-8 text-purple-500" />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                                                            <div className="flex items-center justify-between">
+                                                                <div>
+                                                                    <p className="text-sm text-green-600 font-medium">Semester</p>
+                                                                    <p className="text-2xl font-bold text-green-800">{student.semester || 0}</p>
+                                                                </div>
+                                                                <Calendar className="h-8 w-8 text-green-500" />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-xl border border-orange-200">
+                                                            <div className="flex items-center justify-between">
+                                                                <div>
+                                                                    <p className="text-sm text-orange-600 font-medium">Total SKS</p>
+                                                                    <p className="text-2xl font-bold text-orange-800">{student.sks || 0}</p>
+                                                                </div>
+                                                                <TrendingUp className="h-8 w-8 text-orange-500" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Quick Status Overview */}
+                                                    <div className="bg-gray-50 rounded-xl p-4">
+                                                        <h4 className="font-semibold text-gray-800 mb-3">Status Monitoring</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                            {student.details && Object.entries(student.details).map(([key, value]) => (
+                                                                <div key={key} className="bg-white p-3 rounded-lg border border-gray-200">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-sm font-medium capitalize text-gray-700">{key}</span>
+                                                                        <div className="flex items-center">
+                                                                            <span className={`w-2 h-2 rounded-full mr-2 ${getStatusDot(value)}`}></span>
+                                                                            <span className="text-sm font-medium capitalize-text">{value}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {activeTab === 'status' && (
+                                                <div className="space-y-4">
+                                                    {student.details && Object.entries(student.details).map(([category, status]) => (
+                                                        <div key={category} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <h4 className="text-lg font-semibold capitalize text-gray-800">{category}</h4>
+                                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(status)}`}>
+                                                                    {getStatusIcon(status)}
+                                                                    <span className="ml-1">{status}</span>
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            {/* Progress Bar */}
+                                                            <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                                                <div 
+                                                                    className={`h-2 rounded-full transition-all duration-300 ${
+                                                                        status === 'Aman' ? 'bg-green-500 w-full' :
+                                                                        status === 'Siaga' ? 'bg-yellow-500 w-2/3' :
+                                                                        'bg-red-500 w-1/3'
+                                                                    }`}>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <p className="text-sm text-gray-600">
+                                                                {category === 'akademik' && 'Berdasarkan IPK, kehadiran, dan nilai mata kuliah'}
+                                                                {category === 'psikologis' && 'Berdasarkan konseling dan observasi dosen wali'}
+                                                                {category === 'finansial' && 'Berdasarkan riwayat pembayaran dan bantuan yang diterima'}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {activeTab === 'prediction' && (
+                                                <div className="space-y-6">
+                                                    {!showPrediction ? (
+                                                        <div className="text-center py-8">
+                                                            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-8 border border-purple-200">
+                                                                <Brain className="h-16 w-16 text-purple-500 mx-auto mb-4" />
+                                                                <h3 className="text-xl font-semibold text-gray-800 mb-2">AI Prediction Analysis</h3>
+                                                                <p className="text-gray-600 mb-6">
+                                                                    Gunakan machine learning untuk memprediksi status mahasiswa berdasarkan data historis dan pola perilaku
+                                                                </p>
+                                                                <button
+                                                                    onClick={handlePrediction}
+                                                                    disabled={isLoadingPrediction}
+                                                                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 flex items-center mx-auto">
+                                                                    {isLoadingPrediction ? (
+                                                                        <>
+                                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                                            Menganalisis...
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Sparkles className="h-4 w-4 mr-2" />
+                                                                            Mulai Prediksi
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-6">
+                                                            {/* Prediction Result */}
+                                                            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
+                                                                <div className="flex items-center justify-between mb-4">
+                                                                    <h3 className="text-lg font-semibold text-red-800">Prediksi Status</h3>
+                                                                    <span className="text-sm text-red-600">Confidence: {predictionResult.confidence}%</span>
+                                                                </div>
+                                                                <div className="flex items-center space-x-4">
+                                                                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-lg font-bold border ${getStatusColor(predictionResult.predictedStatus)}`}>
+                                                                        {getStatusIcon(predictionResult.predictedStatus)}
+                                                                        <span className="ml-2">{predictionResult.predictedStatus}</span>
+                                                                    </span>
+                                                                    <div className="flex-1">
+                                                                        <div className="w-full bg-red-200 rounded-full h-3">
+                                                                            <div 
+                                                                                className="bg-red-500 h-3 rounded-full transition-all duration-1000"
+                                                                                style={{ width: `${predictionResult.confidence}%` }}>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Risk Factors */}
+                                                            <div className="bg-white rounded-xl p-6 border border-gray-200">
+                                                                <h4 className="font-semibold text-gray-800 mb-4">Faktor Risiko</h4>
+                                                                <div className="space-y-3">
+                                                                    {predictionResult.riskFactors.map((factor, index) => (
+                                                                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                                            <span className="font-medium text-gray-700">{factor.factor}</span>
+                                                                            <div className="flex items-center space-x-2">
+                                                                                <div className="w-20 bg-gray-200 rounded-full h-2">
+                                                                                    <div 
+                                                                                        className={`h-2 rounded-full ${
+                                                                                            factor.status === 'high' ? 'bg-red-500' : 
+                                                                                            factor.status === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                                                                        }`}
+                                                                                        style={{ width: `${factor.weight}%` }}>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <span className="text-sm font-medium text-gray-600">{factor.weight}%</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Recommendations */}
+                                                            <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                                                                <h4 className="font-semibold text-blue-800 mb-4">Rekomendasi Tindakan</h4>
+                                                                <ul className="space-y-2">
+                                                                    {predictionResult.recommendations.map((rec, index) => (
+                                                                        <li key={index} className="flex items-start">
+                                                                            <CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                                                                            <span className="text-blue-800">{rec}</span>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="border-t border-gray-200 p-6 bg-gray-50">
+                                            <div className="flex justify-between items-center">
                                                 <p className="text-sm text-gray-500">
-                                                    IPK
+                                                    Terakhir diperbarui: {student.lastActivity || '2025-05-25'}
                                                 </p>
-                                                <p className="text-lg font-bold">
-                                                    {typeof student.ipk ===
-                                                    'number'
-                                                        ? student.ipk.toFixed(2)
-                                                        : student.ipk}
-                                                </p>
-                                            </div>
-                                            <div className="p-3 bg-gray-50 rounded">
-                                                <p className="text-sm text-gray-500">
-                                                    TAK
-                                                </p>
-                                                <p className="text-lg font-bold">
-                                                    {student.tak}{' '}
-                                                    {typeof student.tak !==
-                                                        'string' && 'poin'}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <h5 className="font-semibold mb-2">
-                                            Status Monitoring
-                                        </h5>
-                                        <div className="space-y-2 mb-6">
-                                            <div className="flex justify-between p-2 bg-gray-50 rounded">
-                                                <span>Akademik:</span>
-                                                <div className="flex items-center">
-                                                    <span
-                                                        className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
-                                                            student.details
-                                                                ?.akademik ||
-                                                                'Aman'
-                                                        )}`}></span>
-                                                    {student.details
-                                                        ?.akademik || 'Aman'}
+                                                <div className="flex space-x-3">
+                                                    <button
+                                                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/lecturer/detailMahasiswa/${student.nim}`);
+                                                        }}>
+                                                        <Eye className="h-4 w-4 mr-2" />
+                                                        Detail Lengkap
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setShowDetail(null)}
+                                                        className="bg-gray-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200">
+                                                        Tutup
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between p-2 bg-gray-50 rounded">
-                                                <span>Psikologis:</span>
-                                                <div className="flex items-center">
-                                                    <span
-                                                        className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
-                                                            student.details
-                                                                ?.psikologis ||
-                                                                'Aman'
-                                                        )}`}></span>
-                                                    {student.details
-                                                        ?.psikologis || 'Aman'}
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between p-2 bg-gray-50 rounded">
-                                                <span>Finansial:</span>
-                                                <div className="flex items-center">
-                                                    <span
-                                                        className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
-                                                            student.details
-                                                                ?.finansial ||
-                                                                'Aman'
-                                                        )}`}></span>
-                                                    {student.details
-                                                        ?.finansial || 'Aman'}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex justify-between">
-                                            <button
-                                                className="bg-blue-600 text-white px-4 py-2 rounded"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    navigate(
-                                                        `/lecturer/detailMahasiswa/${student.nim}`
-                                                    );
-                                                }}>
-                                                Lihat Detail Lengkap
-                                            </button>
-                                            <button
-                                                className="bg-red-800 text-white px-4 py-2 rounded"
-                                                onClick={() =>
-                                                    setShowDetail(null)
-                                                }>
-                                                Tutup
-                                            </button>
                                         </div>
                                     </>
                                 );
@@ -509,21 +728,6 @@ export default function DaftarMahasiswaWali() {
                             Menampilkan {filteredAndSortedStudents.length} dari{' '}
                             {students.length} mahasiswa
                         </p>
-                        <div className="flex gap-1">
-                            <button className="px-3 py-1 border border-gray-300 rounded bg-white">
-                                1
-                            </button>
-                            {students.length > 10 && (
-                                <>
-                                    <button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-400">
-                                        2
-                                    </button>
-                                    <button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-400">
-                                        3
-                                    </button>
-                                </>
-                            )}
-                        </div>
                     </div>
                 )}
             </main>

@@ -125,7 +125,7 @@ const MyWellness_Test = () => {
             anxietyCategory === 'Normal' &&
             stressCategory === 'Normal'
         ) {
-            return 'Aman';
+            return 'aman';
         } else if (
             depressionCategory === 'Parah' ||
             depressionCategory === 'Sangat Parah' ||
@@ -134,9 +134,9 @@ const MyWellness_Test = () => {
             stressCategory === 'Parah' ||
             stressCategory === 'Sangat Parah'
         ) {
-            return 'Bermasalah';
+            return 'bermasalah';
         } else {
-            return 'Siaga';
+            return 'siaga';
         }
     };
 

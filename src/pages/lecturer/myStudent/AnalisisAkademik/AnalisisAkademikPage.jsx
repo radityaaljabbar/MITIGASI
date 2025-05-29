@@ -30,7 +30,7 @@ const StudentInfoAkademik = ({ studentData }) => {
             </div>
             <div className="mt-2">
                 <p className="text-sm text-gray-600">Status Akademik</p>
-                <h4 className="font-medium">{mockStatusAkademik}</h4>
+                <h4 className="font-medium">{studentData.klasifikasi}</h4>
             </div>
         </div>
     );
@@ -128,6 +128,7 @@ const AnalisisAkademikPage = () => {
     const [ipkValue, setIpkValue] = useState(0);
     const [namaValue, setnamaValue] = useState('');
     const [kelasValue, setkelasValue] = useState('');
+    const [klasfikasiValue, setklasfikasiValue] = useState(0);
     const [perSemesterValue, setperSemesterValue] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -145,6 +146,7 @@ const AnalisisAkademikPage = () => {
                     setIpkValue(response.data.ipk);
                     setnamaValue(response.data.nama);
                     setkelasValue(response.data.kelas);
+                    setklasfikasiValue(response.data.klas_akademik);
                     setperSemesterValue(response.data.perSemester || []);
                 } else {
                     setError(response.message || 'Gagal memuat data akademik');
@@ -175,6 +177,7 @@ const AnalisisAkademikPage = () => {
         sksTotal: sksValue,
         perSemester: perSemesterValue,
         takTotal: takValue,
+        klasifikasi : klasfikasiValue
     };
 
     // Function to render content based on active tab
