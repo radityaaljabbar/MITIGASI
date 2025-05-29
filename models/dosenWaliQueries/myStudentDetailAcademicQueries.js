@@ -6,6 +6,7 @@ exports.getStudentAcademicData = async (nimMhs) => {
             mhs.nama,
             mhs.nim, 
             mhs.kelas,
+            akd.hasil_klasifikasi,
             COALESCE(ipkt.ipk_lulus, 0) as ipk_lulus,
             COALESCE(ipkt.sks_lulus, 0) as sks_lulus, 
             COALESCE(takt.tak, 0) as tak,
@@ -16,6 +17,7 @@ exports.getStudentAcademicData = async (nimMhs) => {
         LEFT JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
         LEFT JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
         LEFT JOIN persemester sem ON sem.nim_mahasiswa = mhs.nim
+        LEFT JOIN klasifikasi_akademik akd ON akd.nim = mhs.nim
         WHERE mhs.nim = ?
         ORDER BY sem.semester ASC`; // Tambahkan ORDER BY untuk urutan semester
 

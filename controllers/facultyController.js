@@ -616,6 +616,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
         const sksTotal =
             studentData.sks_lulus != null ? parseInt(studentData.sks_lulus) : 0;
         const tak = studentData.tak != null ? parseInt(studentData.tak) : 0;
+        const klas_akademik = studentData.hasil_klasifikasi
 
         // Process semester data dengan handling untuk data kosong
         const perSemester = [];
@@ -650,6 +651,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
         console.log('- IPK:', ipk);
         console.log('- SKS Total:', sksTotal);
         console.log('- TAK:', tak);
+        console.log('- hasil klasifikasi', klas_akademik)
         console.log('- Per Semester Data:', perSemester.length, 'records');
 
         const responseData = {
@@ -659,6 +661,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
             ipk: ipk,
             sksTotal: sksTotal,
             tak: tak,
+            klas_akademik:klas_akademik,
             perSemester: perSemester,
         };
 

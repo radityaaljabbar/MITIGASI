@@ -29,6 +29,16 @@ const submitRelief = async (valueRelief) => {
         const responseId = rowsRelief.insertId; // insertId adalah property dari insert result
         const nim = valueRelief[0]; // nim dari parameter valueRelief array
         
+        // Step 1: Delete any existing records for this nim
+        const [deleteResult] = await pool.execute(
+            'DELETE FROM klasifikasi_finansial WHERE nim = ?',
+            [nim]
+        );
+
+        console.log(
+            `Deleted ${deleteResult.affectedRows} existing records for nim: ${nim}`
+        );
+
         // INSERT ke klasifikasi_finansial
         await connection.execute(
             `INSERT INTO klasifikasi_finansial (nim, status_finansial, id_response) 
