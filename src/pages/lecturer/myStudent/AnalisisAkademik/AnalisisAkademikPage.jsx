@@ -122,7 +122,7 @@ const AkademikDashboard = ({ studentData }) => {
 
 const AnalisisAkademikPage = () => {
     const { nim } = useParams();
-    const [activeSubTab, setActiveSubTab] = useState('detailNilai'); // Default ke Detail Nilai
+    const [activeSubTab, setActiveSubTab] = useState('analisisTrend'); // Default ke Detail Nilai
     const [takValue, setTakValue] = useState(0);
     const [sksValue, setSksValue] = useState(0);
     const [ipkValue, setIpkValue] = useState(0);
@@ -181,11 +181,11 @@ const AnalisisAkademikPage = () => {
     const renderContent = () => {
         switch (activeSubTab) {
             case 'analisisTrend':
-                return <AnalisisTrendContent />;
+                return <AnalisisTrendContent studentData={mockStudentData} />;
             case 'detailNilai':
                 return <DetailNilaiContent nim={nim} />;
             default:
-                return <DetailNilaiContent nim={nim} />; // Default to Detail Nilai
+                return <AnalisisTrendContent studentData={mockStudentData} />; // Default to Detail Nilai
         }
     };
 

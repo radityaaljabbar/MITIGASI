@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, ChevronDown, Search, Filter, User } from 'lucide-react';
+import {
+    Info,
+    ChevronDown,
+    Search,
+    Filter,
+    User,
+    ChevronUp,
+    ArrowUpDown,
+} from 'lucide-react';
 import { getListMahasiswa } from '../../../services/dosenWali/myStudent/listMahasiswaService';
 
 export default function DaftarMahasiswaWali() {
@@ -12,6 +20,13 @@ export default function DaftarMahasiswaWali() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [classOptions, setClassOptions] = useState([]);
+
+    // New state for sorting
+    const [sortConfig, setSortConfig] = useState({
+        key: null,
+        direction: 'asc',
+    });
+
     const navigate = useNavigate();
 
     // Fetch data from backend when component mounts
@@ -44,6 +59,27 @@ export default function DaftarMahasiswaWali() {
         fetchStudents();
     }, []);
 
+    // Sorting function
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // Get sort icon
+    const getSortIcon = (columnKey) => {
+        if (sortConfig.key !== columnKey) {
+            return <ArrowUpDown className="h-4 w-4 ml-1 text-white" />;
+        }
+        return sortConfig.direction === 'asc' ? (
+            <ChevronUp className="h-4 w-4 ml-1 text-white" />
+        ) : (
+            <ChevronDown className="h-4 w-4 ml-1 text-white" />
+        );
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'Aman':
@@ -74,7 +110,8 @@ export default function DaftarMahasiswaWali() {
         navigate(`/lecturer/detailMahasiswa/${nim}`);
     };
 
-    const filteredStudents = students
+    // Enhanced filtering and sorting
+    const filteredAndSortedStudents = students
         .filter(
             (student) =>
                 selectedClass === 'all' || student.kelas === selectedClass
@@ -87,7 +124,27 @@ export default function DaftarMahasiswaWali() {
             (student) =>
                 student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 student.nim.includes(searchTerm)
-        );
+        )
+        .sort((a, b) => {
+            if (!sortConfig.key) return 0;
+
+            let aValue = a[sortConfig.key];
+            let bValue = b[sortConfig.key];
+
+            // Handle numeric values (IPK and TAK)
+            if (sortConfig.key === 'ipk' || sortConfig.key === 'tak') {
+                aValue = parseFloat(aValue) || 0;
+                bValue = parseFloat(bValue) || 0;
+            }
+
+            if (aValue < bValue) {
+                return sortConfig.direction === 'asc' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return sortConfig.direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
 
     return (
         <div className="min-h-screen bg-orange-50">
@@ -150,6 +207,31 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 </div>
 
+                {/* Sorting Info */}
+                {sortConfig.key && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p className="text-sm text-blue-800">
+                            <Info className="h-4 w-4 inline mr-1" />
+                            Data diurutkan berdasarkan{' '}
+                            {sortConfig.key.toUpperCase()}(
+                            {sortConfig.direction === 'asc'
+                                ? 'terkecil ke terbesar'
+                                : 'terbesar ke terkecil'}
+                            )
+                            <button
+                                onClick={() =>
+                                    setSortConfig({
+                                        key: null,
+                                        direction: 'asc',
+                                    })
+                                }
+                                className="ml-2 text-blue-600 hover:text-blue-800 underline">
+                                Reset pengurutan
+                            </button>
+                        </p>
+                    </div>
+                )}
+
                 {/* Loading State */}
                 {loading && (
                     <div className="bg-white p-8 rounded-lg shadow text-center">
@@ -183,10 +265,20 @@ export default function DaftarMahasiswaWali() {
                                         KELAS
                                     </th>
                                     <th className="py-3 px-4 text-center">
-                                        IPK
+                                        <button
+                                            onClick={() => handleSort('ipk')}
+                                            className="flex items-center justify-center w-full hover:bg-red-700 px-2 py-1 rounded transition-colors">
+                                            IPK
+                                            {getSortIcon('ipk')}
+                                        </button>
                                     </th>
                                     <th className="py-3 px-4 text-center">
-                                        TAK
+                                        <button
+                                            onClick={() => handleSort('tak')}
+                                            className="flex items-center justify-center w-full hover:bg-red-700 px-2 py-1 rounded transition-colors">
+                                            TAK
+                                            {getSortIcon('tak')}
+                                        </button>
                                     </th>
                                     <th className="py-3 px-4 text-center">
                                         STATUS
@@ -197,59 +289,62 @@ export default function DaftarMahasiswaWali() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredStudents.length > 0 ? (
-                                    filteredStudents.map((student, index) => (
-                                        <tr
-                                            key={student.nim || index}
-                                            className={`${getStatusColor(
-                                                student.status
-                                            )} border-b hover:bg-gray-50 cursor-pointer`}
-                                            onClick={() =>
-                                                handleRowClick(student.nim)
-                                            }>
-                                            <td className="py-3 px-4">
-                                                {student.name}
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                {student.nim}
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                {student.kelas}
-                                            </td>
-                                            <td className="py-3 px-4 text-center">
-                                                {typeof student.ipk === 'number'
-                                                    ? student.ipk.toFixed(2)
-                                                    : student.ipk}
-                                            </td>
-                                            <td className="py-3 px-4 text-center">
-                                                {student.tak}
-                                            </td>
-                                            <td className="py-3 px-4 text-center">
-                                                <span className="inline-flex items-center">
-                                                    <span
-                                                        className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
-                                                            student.status
-                                                        )}`}></span>
-                                                    {student.status}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4 text-center">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setShowDetail(
-                                                            showDetail ===
-                                                                student.nim
-                                                                ? null
-                                                                : student.nim
-                                                        );
-                                                    }}
-                                                    className="text-blue-600 hover:text-blue-800">
-                                                    <Info className="h-5 w-5 mx-auto" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
+                                {filteredAndSortedStudents.length > 0 ? (
+                                    filteredAndSortedStudents.map(
+                                        (student, index) => (
+                                            <tr
+                                                key={student.nim || index}
+                                                className={`${getStatusColor(
+                                                    student.status
+                                                )} border-b hover:bg-gray-50 cursor-pointer`}
+                                                onClick={() =>
+                                                    handleRowClick(student.nim)
+                                                }>
+                                                <td className="py-3 px-4">
+                                                    {student.name}
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    {student.nim}
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    {student.kelas}
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    {typeof student.ipk ===
+                                                    'number'
+                                                        ? student.ipk.toFixed(2)
+                                                        : student.ipk}
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    {student.tak}
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    <span className="inline-flex items-center">
+                                                        <span
+                                                            className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusDot(
+                                                                student.status
+                                                            )}`}></span>
+                                                        {student.status}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setShowDetail(
+                                                                showDetail ===
+                                                                    student.nim
+                                                                    ? null
+                                                                    : student.nim
+                                                            );
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-800">
+                                                        <Info className="h-5 w-5 mx-auto" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    )
                                 ) : (
                                     <tr>
                                         <td
@@ -408,10 +503,10 @@ export default function DaftarMahasiswaWali() {
                 )}
 
                 {/* Pagination - Only show if we have data */}
-                {!loading && !error && filteredStudents.length > 0 && (
+                {!loading && !error && filteredAndSortedStudents.length > 0 && (
                     <div className="mt-4 flex justify-between items-center">
                         <p className="text-sm text-gray-600">
-                            Menampilkan {filteredStudents.length} dari{' '}
+                            Menampilkan {filteredAndSortedStudents.length} dari{' '}
                             {students.length} mahasiswa
                         </p>
                         <div className="flex gap-1">
