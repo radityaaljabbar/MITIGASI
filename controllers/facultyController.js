@@ -37,7 +37,7 @@ const {
 
 const {
     fetchStudentsRelief,
-    financialResponse
+    financialResponse,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisFinansialQueries');
 
 // @desc    Get list of students for dosen wali
@@ -738,10 +738,10 @@ exports.getStudentFinancial = async (req, res) => {
 
         // Periksa apakah data mahasiswa ditemukan
         if (!financialDataArray || financialDataArray.length === 0) {
-            return res.status(404).json({
+            return res.status(200).json({
                 // 404 Not Found lebih tepat
-                success: false,
-                message: `Student academic data not found for NIM: ${nim}`,
+                success: true,
+                message: `Student financial data not found for NIM: ${nim}`,
             });
         }
 
@@ -759,10 +759,10 @@ exports.getStudentFinancial = async (req, res) => {
             data: financialDataArray,
         });
     } catch (error) {
-        console.error('Error in getStudentAcademicDetails:', error);
+        console.error('Error in get student financial data:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error while fetching student academic details.',
+            message: 'Server error while fetching student financial details.',
         });
     }
 };
@@ -772,41 +772,42 @@ exports.sendResponseFinancial = async (req, res) => {
     try {
         const { id } = req.params;
         const { action } = req.body; // 'approve' or 'reject'
-        
+
         // Validasi ID
         if (!id) {
             return res.status(400).json({
                 success: false,
-                message: 'ID response finansial diperlukan'
+                message: 'ID response finansial diperlukan',
             });
         }
-        
+
         // Validasi action
         if (!action || !['approve', 'reject'].includes(action)) {
             return res.status(400).json({
                 success: false,
-                message: 'Action harus berupa "approve" atau "reject"'
+                message: 'Action harus berupa "approve" atau "reject"',
             });
         }
-        
+
         // Cek apakah record sudah ada (panggil dengan 1 parameter saja)
         const existingRecord = await financialResponse(id); // status = null (default)
         if (existingRecord) {
             return res.status(409).json({
                 success: false,
-                message: 'Response untuk pengajuan ini sudah ada'
+                message: 'Response untuk pengajuan ini sudah ada',
             });
         }
-        
+
         // Tentukan status dan message berdasarkan action
         const status = action === 'approve' ? 'Disetujui' : 'Ditolak';
-        const message = action === 'approve' 
-            ? 'Pengajuan finansial berhasil disetujui'
-            : 'Pengajuan finansial berhasil ditolak';
-        
+        const message =
+            action === 'approve'
+                ? 'Pengajuan finansial berhasil disetujui'
+                : 'Pengajuan finansial berhasil ditolak';
+
         // Insert response ke database (panggil dengan 2 parameter)
         const result = await financialResponse(id, status);
-        
+
         return res.status(200).json({
             success: true,
             message: message,
@@ -815,17 +816,15 @@ exports.sendResponseFinancial = async (req, res) => {
                 id_response_finansial: result.id_response_finansial,
                 status: result.status,
                 tanggal_dibuat: result.tanggal_dibuat,
-                tanggal_diubah: result.tanggal_diubah
-            }
+                tanggal_diubah: result.tanggal_diubah,
+            },
         });
-        
     } catch (error) {
         console.error('Error handling financial action:', error);
         return res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan saat memproses pengajuan',
-            error: error.message
+            error: error.message,
         });
     }
 };
-
