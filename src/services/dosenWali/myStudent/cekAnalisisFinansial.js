@@ -76,7 +76,6 @@ const transformFinancialData = (backendData, nim) => {
         familyDependents: item.tanggungan_orangtua || 0,
         residenceType: item.tempat_tinggal || '-',
         detailReason: item.detail_alasan || item.alasan_keringan || 'Tidak ada detail',
-        attachments: ['Dokumen_Pendukung.pdf'], // Placeholder since backend doesn't have attachment info
         installmentPlan: item.status_pengajuan === 'Disetujui' ? 'Rencana cicilan akan dibahas lebih lanjut' : null,
         rejectionReason: item.status_pengajuan === 'Ditolak' ? 'Tidak memenuhi kriteria bantuan' : null
     }));
@@ -158,6 +157,6 @@ const determineFinancialStatus = (data) => {
     const hasPendingRequest = data.some(item => item.status_pengajuan === 'Menunggu');
     
     if (hasActiveRelief) return 'Mendapat Bantuan';
-    if (hasPendingRequest) return 'Sedang Diproses';
+    if (hasPendingRequest) return 'Siaga';
     return 'Siaga';
 };

@@ -50,16 +50,7 @@ export const fetchStudentFinancialData = async (nim) => {
 
 export const approveRequest = async (id) => {
     try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`${API_URL}/approve-financial-request/${id}`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        //         'Content-Type': 'application/json',
-        //     },
-        // });
         
-        // For now, show success message
         toast.success(`Pengajuan berhasil disetujui`);
         return { success: true };
         
@@ -72,15 +63,6 @@ export const approveRequest = async (id) => {
 
 export const rejectRequest = async (id) => {
     try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`${API_URL}/reject-financial-request/${id}`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({ rejectionReason: 'Tidak memenuhi kriteria' })
-        // });
         
         // For now, show success message
         toast.success(`Pengajuan berhasil ditolak`);
@@ -95,14 +77,7 @@ export const rejectRequest = async (id) => {
 
 export const downloadAttachment = async (filename) => {
     try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`${API_URL}/download-attachment/${filename}`, {
-        //     method: 'GET',
-        //     headers: {
-        //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        //     },
-        // });
-        
+       
         // For now, show info message
         toast.info(`Mengunduh ${filename}...`);
         return { success: true };
