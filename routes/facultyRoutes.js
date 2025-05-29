@@ -135,5 +135,16 @@ router.post(
     facultyController.sendResponseFinancial
 );
 
+router.get(
+    '/ml/test',
+
+    facultyController.testMLEnvironment
+);
+
+router.post(
+    '/ml/predict',
+
+    facultyController.predictStudentStatus
+);
 
 module.exports = router;

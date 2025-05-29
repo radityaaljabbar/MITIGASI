@@ -1,282 +1,11 @@
 ```
 └── 📁backendCode
-        └── COMMIT_EDITMSG
-        └── config
-        └── description
-        └── FETCH_HEAD
-        └── HEAD
-        └── 📁hooks
-            └── applypatch-msg.sample
-            └── commit-msg.sample
-            └── fsmonitor-watchman.sample
-            └── post-update.sample
-            └── pre-applypatch.sample
-            └── pre-commit.sample
-            └── pre-merge-commit.sample
-            └── pre-push.sample
-            └── pre-rebase.sample
-            └── pre-receive.sample
-            └── prepare-commit-msg.sample
-            └── push-to-checkout.sample
-            └── sendemail-validate.sample
-            └── update.sample
-        └── index
-        └── 📁info
-            └── exclude
-        └── 📁logs
-            └── HEAD
-            └── 📁refs
-                └── 📁heads
-                    └── kode_backend_fix
-                └── 📁remotes
-                    └── 📁origin
-                        └── andre
-                        └── farid-branch
-                        └── HEAD
-                        └── kode_backend_branch
-                        └── kode_backend_fix
-                        └── main
-                        └── main-project-branch
-                        └── ML
-                        └── radit-branch
-        └── 📁objects
-            └── 📁01
-                └── 28e93fefdc93824b2764b6bb17435e89ca02bb
-            └── 📁02
-                └── 11856e20d7d0d0ac2da479a9f96dc7df8c8183
-            └── 📁06
-                └── 7df6d1c89a67e5419939eccfb9464a96969244
-            └── 📁17
-                └── 0d9e7420a33e93e4141323430a5c21c2a60c4a
-            └── 📁18
-                └── 1bff262e92458e4b841962ed351df918c5a077
-                └── 253709376628b682a2d37753a6d3cb489860a9
-                └── 7af0d56f318dced3d90c608e32dcaecb38958d
-            └── 📁1a
-                └── 85c9dab3142f1121e92dd459511cdc4d0fe5fa
-                └── 8b8b605b1fdc3bb96cb2239f5773d15038864b
-            └── 📁1b
-                └── bcb3b54d9740850a865391068d17966bc8e5aa
-            └── 📁1d
-                └── 6b0b4a817bc6e4583ad65595a802c34fb4d224
-                └── b38ff47d6a164fab308198eae7723811dc58b8
-            └── 📁1f
-                └── 996c5a7d06cdaaae5193a1eaebde66b83f896b
-            └── 📁21
-                └── 15cb46c1dac6d0b0ffbda85940a3317aeb2038
-                └── 636b49eec636049d0fae7f90ae4016f105f13e
-                └── e7f5ffacd2e062f81ba977e6f68158103d2948
-            └── 📁24
-                └── dd09621068fa2af31e2d353df19aeada2a281f
-            └── 📁27
-                └── b6eef4ad90463fcecb335c176b299c73f1a177
-            └── 📁28
-                └── 52e581320838eb9df4450bd61baff57661c560
-                └── edc27114cb35f722fc44d8f4f60873b4eb1fc9
-            └── 📁2b
-                └── dab00059d1407ff1bb487021060ae5f55293fb
-            └── 📁2c
-                └── 5b1e9133ba4a36c82b01565db1d627e09d846e
-                └── 9ac550abb5e35bbd8312e8a362d6a3da89bb44
-            └── 📁2d
-                └── 0aac03e3d193621b6c972820eeadc700486831
-                └── 108857605035611be17015e893e772e14230ec
-            └── 📁2e
-                └── bae815f31f43a05e88b3bd8513c1942babbd9e
-            └── 📁33
-                └── f46028c5d7be86f7726e62dc4e5568dcecd56c
-            └── 📁35
-                └── e03ad64c61da6b9fb7be973370137a3652b9b2
-            └── 📁3d
-                └── 95331e4409fbfc40c6cee13f96876043060703
-            └── 📁43
-                └── 3bc3a8dfedd76463702a3b6b194dd2b6d73920
-            └── 📁45
-                └── 9b0af811ac3353befc1ec214cb18056f25eac2
-            └── 📁46
-                └── 2284d68117adc73e512e8bc7b8507a23a2b339
-                └── 2676533d1268a53ae9534a2d8e8cf5defb4a26
-                └── 95c8ba8192573996b3e7a42732ef69f42659a6
-            └── 📁4e
-                └── 91596d19405899d492b32f7b47f159a9fcbad6
-            └── 📁51
-                └── 78d873387390883a04230155c156b082096588
-            └── 📁53
-                └── bdf61011a5024226e3e71b166107bf726e31a8
-            └── 📁56
-                └── c2e8be081047033126dccca2abc88bee3a5937
-            └── 📁59
-                └── f674f620bf242b61a11d0219c87794b4f02986
-            └── 📁60
-                └── 89615de079a824ade6a1408a97acb6cfa171e8
-            └── 📁61
-                └── c9638c3f6df438c6447c740464754c579af022
-            └── 📁64
-                └── 26e37e1a9269368bdee7b29c69e8ca07b541ac
-                └── e3a834b6a8e34028a6ba37eac885318cabd54d
-            └── 📁6b
-                └── 75bc5e4e54a29f09f4ecfe4f5f588613758863
-            └── 📁6c
-                └── 6d4de199dceb48c2a4f2d9f8cb5443290889e5
-            └── 📁72
-                └── 50f5530a4c1a5befe532f6c244a38c8d0d62c5
-            └── 📁73
-                └── 4545c6d2c719ed9e218c6c6d3d2181a976fbd0
-            └── 📁74
-                └── 0a3fa668406f2b3b8640f82364844a84d46e93
-                └── daf50805180bd9f38a4492b51023ac517581ff
-            └── 📁79
-                └── af2ccea4c2184486fec9c325c5f7efe06b4523
-            └── 📁7a
-                └── e650e084d4e8c96157c017104afc5fc05dcbdd
-            └── 📁7c
-                └── 57e813efb9ba188096137b561d949862f5fd05
-            └── 📁7d
-                └── 757d1f9d72c7049b0a4e4ce710bde87ead0a0c
-            └── 📁7e
-                └── 4a094d78656a71cbb476e29df41ff40a4df203
-            └── 📁83
-                └── 1c280efdb02c86e7d362c4903345b6f93a386d
-            └── 📁84
-                └── 803e64f178a0ee5c4147d695d2230c3a1f4b01
-            └── 📁87
-                └── b456973ba1c21df236eb85b95c2cd82d03067f
-            └── 📁8b
-                └── ba790cc014f09f638f3ba8516da67ac8fb349c
-            └── 📁8c
-                └── 028d372ce3ba64467ba16126619330599d11b9
-            └── 📁8d
-                └── 6dba4b6036eb2fc2cbbdd93dc44b7da7d668a4
-                └── 9f45aabf8de27a40e9681ae29f4886d45e8107
-            └── 📁8f
-                └── e0a554d917eebb72c87c6f1391d6314e70e107
-            └── 📁92
-                └── 0eee71c807f68a25289b6ed91581669e2e512e
-            └── 📁94
-                └── 6c2cb4a3f87752361379c7cd651dc6fc30eef6
-            └── 📁9b
-                └── 109e9c2ef4e465db69a3dcd0bb494383d313c9
-            └── 📁a3
-                └── 8133d8c4490b2b6fecb1b03cba6ac5839aac21
-                └── 8a68b4a76b9ae001761df13a5caa50b86d689e
-            └── 📁a4
-                └── 5f92bdeda9210e022bd344a2cf9b6521b0ec98
-            └── 📁a5
-                └── 462fc19ec3ef1002fcef61efe34354ee81f3cf
-            └── 📁a6
-                └── e31ad18e4c03aa633c37940ca69f9828291418
-            └── 📁a7
-                └── a4431fe0d72cf87f3c951b3ebaf1a16e80b738
-            └── 📁a8
-                └── f605312ce4157c7f8394bf139f4e7c8d75935d
-            └── 📁af
-                └── 22633c4eb13cd4112ab138e2aa1e7b3d2dfacb
-                └── a94acb1e9115147577e872651c1525cad866aa
-                └── ab3a39f647063384d28bd466a577d13df85c7e
-            └── 📁b3
-                └── 4261e0d379bf3a480b7dbb18b9c1f82e304acc
-            └── 📁b4
-                └── 42c89eb535c3fc4f38a6eb67cd0d0ad78c7371
-                └── 5bff00eb0efddd03fdd7cdd627202980e14a02
-            └── 📁b5
-                └── 0d9e4d4b26faf7ec430b357429ba4f774009ef
-                └── 21fa1a5464b90c4bebb5dab00d90f9d117163c
-            └── 📁b8
-                └── 5e65ade4d4f2f87b7bef6ba279e40eb1f94125
-            └── 📁b9
-                └── 054377504de24ea65cd9dca4784988091e1db7
-                └── 9ad3fcd69043718a0d63577bf0130b0664b86e
-            └── 📁bc
-                └── 193708293c52057213251d2fe97d1204000bcb
-                └── 2f10f90380dd1472afe68d944195e690f76640
-            └── 📁be
-                └── 701a999d77bd17c8d5bbe1d191cd5ec5d337e8
-            └── 📁c1
-                └── f8e489102c06539bc4739fc3a3227d915541a9
-            └── 📁c4
-                └── 38fb2619d013c0d696d553f33099b311bbf7d2
-                └── 74da76e29380ab4ddddc263dcf67282f1d0255
-            └── 📁c6
-                └── 018e6921d435e6c11290be49c59ee8d7a5bc93
-                └── 7445996d71484821b679bec8085f7c80389553
-            └── 📁c8
-                └── b0797158c5b553fd365eaf50a9dcae9b7aa255
-            └── 📁cb
-                └── a12c52f9db4741e0afe4b006a6f276f41442b6
-            └── 📁cd
-                └── 225cc2e71037010d28161c7f2d9d48ea94e318
-                └── 687ed6d553c494e584187ce078155395040990
-                └── e95721942bb7d89860a4e373b14eb7e4a1c23c
-            └── 📁d1
-                └── a79cc89e5f0f6f87757679c984704956535766
-                └── b693b298e269c90df3165cd182e19c6231c601
-            └── 📁d3
-                └── b589f05df98e52a72fa634858c01b3ec5b5e20
-            └── 📁d4
-                └── e2f76d86e874ddf405fc85c9d21d0edba1dd07
-            └── 📁d9
-                └── 0e46214dea1927511da2dab784170312a5bd68
-                └── ae4c177f0cedb739deeb69b081b5de4084fa4c
-            └── 📁dd
-                └── c79f3322e2ba62333e14854cc5b2b538c92e42
-            └── 📁df
-                └── 76e36247a6905c27b3db20b9569d1fae06f41f
-            └── 📁e0
-                └── 0e643411b9798852b742f844b87ea6bb86a5f9
-            └── 📁e6
-                └── 19b9b69d3d54f28eb017fb2309af401e645009
-            └── 📁e7
-                └── 59487c40fc84d8bb68fb176b77f36b0471a12e
-            └── 📁e9
-                └── 5cc0d2e50e53a81a8fb5d6fb1390039a55942d
-            └── 📁eb
-                └── 9b1db9cbd5a3a3549a00577d58ca06fa12c530
-            └── 📁ee
-                └── 8995bef23c88e3e0bc02e8c2f15a117043bed6
-            └── 📁f0
-                └── b50854da03c38dd9c484f7cf8c06a3a5654ba7
-            └── 📁f1
-                └── a3330f906eb1ba77880e8b2e77bc083642b3cf
-            └── 📁f5
-                └── ae99558da6e161337fd3c0a89faaa277ab6889
-            └── 📁f9
-                └── 2d938577679621ba3fa56667f41b80b220591d
-            └── 📁fa
-                └── b5136b833c402c5d9f6e9fdf185ec930ee33f6
-            └── 📁fb
-                └── 06c5f5904c518a1841280f6f91fbb6844c7dd9
-            └── 📁fc
-                └── 6d8968b15126fb0b1e1938ddfcbef13581169e
-            └── 📁fe
-                └── bdfd011f9e768f142c007c411903609ebdcdac
-            └── 📁ff
-                └── 101fdd7f95ab32393d4d969eee18e319fd6185
-            └── 📁info
-            └── 📁pack
-                └── pack-1ebf298db3b621f6e6f3105f7054958b28db1a5d.idx
-                └── pack-1ebf298db3b621f6e6f3105f7054958b28db1a5d.pack
-                └── pack-1ebf298db3b621f6e6f3105f7054958b28db1a5d.rev
-        └── ORIG_HEAD
-        └── 📁refs
-            └── 📁heads
-                └── kode_backend_fix
-            └── 📁remotes
-                └── 📁origin
-                    └── andre
-                    └── farid-branch
-                    └── HEAD
-                    └── kode_backend_branch
-                    └── kode_backend_fix
-                    └── main
-                    └── main-project-branch
-                    └── ML
-                    └── radit-branch
-            └── 📁tags
     └── 📁config
         └── config.js
         └── database.js
         └── 📁GCPKeys
             └── 📁CloudStorageAdmin
+                └── capstoneproject-460811-1e2c9b707d5c.json
                 └── elliptical-flow-459613-j8-c1617bebfac0.json
     └── 📁controllers
         └── adminController.js
@@ -292,6 +21,8 @@
         └── 📁dosenWaliQueries
             └── myCourseAdvisor_Queries.js
             └── myReport_Queries.js
+            └── myStudent_AnalisisFinansialQueries.js
+            └── myStudent_AnalisisPsikologiQueries.js
             └── myStudent_ListQueries.js
             └── myStudentDetailAcademicQueries.js
         └── dosenWaliTable.js
@@ -312,14 +43,18 @@
         └── studentRoutes.js
     └── 📁utils
         └── cloudStorage.js
+        └── dateHelper.js
         └── helpers.js
         └── logger.js
         └── response.js
         └── tokenCleanup.js
         └── validator.js
-    └── .env
+    └── .env.development
+    └── .env.gcp_dev
     └── .gitignore
     └── BackendStructure.md
+    └── DockerFile
+    └── healthCheck.js
     └── package-lock.json
     └── package.json
     └── README.md
