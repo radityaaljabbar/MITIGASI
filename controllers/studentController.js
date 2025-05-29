@@ -359,13 +359,11 @@ exports.sendPsiResult = async (req, res) => {
             skor_depression,
             skor_anxiety,
             skor_stress,
+            total_skor,
             kesimpulan,
             saran,
             klasifikasi,
         } = req.body;
-
-        // Calculate total score
-        const total_skor = skor_depression + skor_anxiety + skor_stress;
 
         // Validate required fields
         if (
@@ -730,7 +728,6 @@ exports.sendRelief = async (req, res) => {
                 message: 'Missing required fields for relief application',
             });
         }
-
 
         // Verify that nim from token matches nim in request
         if (req.user.id !== nim) {

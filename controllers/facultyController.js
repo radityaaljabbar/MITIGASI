@@ -1,6 +1,9 @@
 const { pool } = require('../config/database');
 const response = require('../utils/response');
 const { validationResult } = require('express-validator');
+// const { PythonShell } = require('python-shell');
+const { spawn } = require('child_process'); // TAMBAH INI
+const path = require('path');
 
 // ADDED: Import dateHelper for MySQL datetime formatting
 const { getCurrentMySQLDateTime } = require('../utils/dateHelper');
@@ -616,7 +619,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
         const sksTotal =
             studentData.sks_lulus != null ? parseInt(studentData.sks_lulus) : 0;
         const tak = studentData.tak != null ? parseInt(studentData.tak) : 0;
-        const klas_akademik = studentData.hasil_klasifikasi
+        const klas_akademik = studentData.hasil_klasifikasi;
 
         // Process semester data dengan handling untuk data kosong
         const perSemester = [];
@@ -651,7 +654,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
         console.log('- IPK:', ipk);
         console.log('- SKS Total:', sksTotal);
         console.log('- TAK:', tak);
-        console.log('- hasil klasifikasi', klas_akademik)
+        console.log('- hasil klasifikasi', klas_akademik);
         console.log('- Per Semester Data:', perSemester.length, 'records');
 
         const responseData = {
@@ -661,7 +664,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
             ipk: ipk,
             sksTotal: sksTotal,
             tak: tak,
-            klas_akademik:klas_akademik,
+            klas_akademik: klas_akademik,
             perSemester: perSemester,
         };
 
@@ -827,6 +830,188 @@ exports.sendResponseFinancial = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan saat memproses pengajuan',
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * @desc Controller buat ML
+ */
+exports.testMLEnvironment = async (req, res) => {
+    try {
+        console.log('=== Starting ML Test ===');
+
+        let responseAlreadySent = false; // FLAG untuk prevent double response
+
+        const python = spawn('python', [
+            '-c',
+            'import sys; import joblib; import numpy; import sklearn; print("Python environment OK")',
+        ]);
+
+        let output = '';
+        let error = '';
+
+        python.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        python.stderr.on('data', (data) => {
+            error += data.toString();
+        });
+
+        python.on('close', (code) => {
+            if (responseAlreadySent) return; // Prevent double response
+            responseAlreadySent = true;
+
+            clearTimeout(timeoutId); // Clear timeout
+
+            console.log('=== Python completed with code:', code, '===');
+
+            if (code === 0) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'Python environment is ready',
+                    data: output.trim().split('\n'),
+                });
+            } else {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Python test failed',
+                    error: error,
+                });
+            }
+        });
+
+        // Timeout dengan clear dan flag
+        const timeoutId = setTimeout(() => {
+            if (responseAlreadySent) return; // Prevent double response
+            responseAlreadySent = true;
+
+            python.kill();
+            return res.status(500).json({
+                success: false,
+                error: 'Python process timeout after 10 seconds',
+            });
+        }, 10000);
+    } catch (error) {
+        console.error('=== Test Error ===', error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * @desc Prediksi status mahasiswa dengan ML
+ * POST /api/faculty/predict
+ * Body: { akademik, finansial, psikologis }
+ */
+exports.predictStudentStatus = async (req, res) => {
+    try {
+        const { ipk, skor_psikologi, finansial } = req.body; // GANTI NAMA PARAMETER
+
+        if (
+            ipk === undefined ||
+            skor_psikologi === undefined ||
+            finansial === undefined
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Missing required fields: ipk, skor_psikologi, finansial',
+            });
+        }
+
+        const scriptPath = path.join(__dirname, '../ml_models/predict.py');
+
+        console.log('=== Starting Prediction ===');
+
+        let responseAlreadySent = false; // FLAG
+
+        const python = spawn('python', [
+            scriptPath,
+            ipk,
+            skor_psikologi,
+            finansial,
+        ]);
+
+        let output = '';
+        let error = '';
+
+        python.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        python.stderr.on('data', (data) => {
+            error += data.toString();
+        });
+
+        python.on('close', (code) => {
+            if (responseAlreadySent) return;
+            responseAlreadySent = true;
+
+            clearTimeout(timeoutId);
+
+            console.log('=== Python completed with code:', code, '===');
+
+            if (code === 0 && output) {
+                try {
+                    const result = JSON.parse(output.trim());
+
+                    if (result.success) {
+                        // RETURN RESULT LANGSUNG, jangan nested
+                        return res.status(200).json({
+                            success: true,
+                            message: 'Prediction successful',
+                            predicted_status: result.predicted_status,
+                            confidence: result.confidence,
+                            probabilities: result.probabilities,
+                            input_data: result.input_data,
+                            prediction_time: new Date().toISOString(),
+                        });
+                    } else {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Prediction failed',
+                            error: result.error,
+                        });
+                    }
+                } catch (parseError) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Failed to parse Python output',
+                        error: parseError.message,
+                        output: output,
+                    });
+                }
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Python script failed',
+                    error: error,
+                    exitCode: code,
+                });
+            }
+        });
+
+        // Timeout with flag
+        const timeoutId = setTimeout(() => {
+            if (responseAlreadySent) return;
+            responseAlreadySent = true;
+
+            python.kill();
+            return res.status(500).json({
+                success: false,
+                error: 'Python process timeout after 30 seconds',
+            });
+        }, 30000);
+    } catch (error) {
+        console.error('ML Prediction error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Prediction error',
             error: error.message,
         });
     }
