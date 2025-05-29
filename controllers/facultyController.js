@@ -74,6 +74,8 @@ exports.getStudentList = async (req, res) => {
 
         // Get students from all classes
         const studentList = await getStudentsByClassCodes(classCodesList);
+        
+        console.log(studentList)
 
         return res.status(200).json({
             success: true,

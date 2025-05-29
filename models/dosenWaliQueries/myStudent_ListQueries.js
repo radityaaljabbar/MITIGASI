@@ -19,6 +19,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
                 mhs.kelas,
                 akd.hasil_klasifikasi,
                 psi.klasifikasi,
+                psi.total_skor,
                 fin.status_finansial,
                 ipkt.ipk_lulus,
                 ipkt.sks_lulus,
@@ -28,7 +29,11 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
                  FROM persemester p 
                  WHERE p.nim_mahasiswa = mhs.nim), 
                 1
-            ) as current_semester
+                ) as current_semester,
+                CASE 
+                    WHEN fin.nim IS NOT NULL THEN 1 
+                    ELSE 0 
+                END as status_finansial_bin
             FROM mahasiswa mhs 
             LEFT JOIN ipk_mahasiswa ipkt ON ipkt.nim = mhs.nim
             LEFT JOIN tak_mahasiswa takt ON takt.nim = mhs.nim
@@ -48,6 +53,8 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
             semester: student.current_semester,
             tak: student.tak ,
             status: 'aman', // Default status
+            skor_psikologi: student.total_skor,
+            status_fin: student.status_finansial_bin,
             details: {
                 akademik: student.hasil_klasifikasi ,
                 psikologis: student.klasifikasi || '-',
