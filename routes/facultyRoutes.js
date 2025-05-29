@@ -135,16 +135,14 @@ router.post(
     facultyController.sendResponseFinancial
 );
 
-router.get(
-    '/ml/test',
+router.get('/ml/test', facultyController.testMLEnvironment);
 
-    facultyController.testMLEnvironment
-);
-
+// Ganti route yang ada jadi:
 router.post(
-    '/ml/predict',
-
-    facultyController.predictStudentStatus
+    '/ml/predict/:nim',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.predictStudentByNim
 );
 
 module.exports = router;

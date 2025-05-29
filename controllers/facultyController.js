@@ -77,8 +77,8 @@ exports.getStudentList = async (req, res) => {
 
         // Get students from all classes
         const studentList = await getStudentsByClassCodes(classCodesList);
-        
-        console.log(studentList)
+
+        console.log(studentList);
 
         return res.status(200).json({
             success: true,
@@ -910,9 +910,23 @@ exports.testMLEnvironment = async (req, res) => {
  * POST /api/faculty/predict
  * Body: { akademik, finansial, psikologis }
  */
-exports.predictStudentStatus = async (req, res) => {
+/**
+ * Prediksi berdasarkan NIM mahasiswa + save to database
+ * POST /api/faculty/ml/predict/:nim
+ * Body: { ipk, skor_psikologi, finansial }
+ */
+exports.predictStudentByNim = async (req, res) => {
     try {
-        const { ipk, skor_psikologi, finansial } = req.body; // GANTI NAMA PARAMETER
+        const { nim } = req.params;
+        const { ipk, skor_psikologi, finansial } = req.body;
+
+        // Validasi input
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM is required',
+            });
+        }
 
         if (
             ipk === undefined ||
@@ -928,9 +942,10 @@ exports.predictStudentStatus = async (req, res) => {
 
         const scriptPath = path.join(__dirname, '../ml_models/predict.py');
 
-        console.log('=== Starting Prediction ===');
+        console.log('=== Starting Prediction for NIM:', nim, '===');
+        console.log('Input data:', { ipk, skor_psikologi, finansial });
 
-        let responseAlreadySent = false; // FLAG
+        let responseAlreadySent = false;
 
         const python = spawn('python', [
             scriptPath,
@@ -950,7 +965,7 @@ exports.predictStudentStatus = async (req, res) => {
             error += data.toString();
         });
 
-        python.on('close', (code) => {
+        python.on('close', async (code) => {
             if (responseAlreadySent) return;
             responseAlreadySent = true;
 
@@ -963,16 +978,65 @@ exports.predictStudentStatus = async (req, res) => {
                     const result = JSON.parse(output.trim());
 
                     if (result.success) {
-                        // RETURN RESULT LANGSUNG, jangan nested
-                        return res.status(200).json({
-                            success: true,
-                            message: 'Prediction successful',
-                            predicted_status: result.predicted_status,
-                            confidence: result.confidence,
-                            probabilities: result.probabilities,
-                            input_data: result.input_data,
-                            prediction_time: new Date().toISOString(),
-                        });
+                        // === SAVE TO DATABASE ===
+                        try {
+                            const predicted_status = result.predicted_status;
+
+                            // Use REPLACE INTO to avoid duplicate (delete + insert)
+                            // DELETE existing record first
+                            const [deleteResult] = await pool.execute(
+                                'DELETE FROM klasifikasi_umum WHERE nim = ?',
+                                [nim]
+                            );
+
+                            console.log(
+                                `=== Deleted existing records for NIM ${nim}: ${deleteResult.affectedRows} rows ===`
+                            );
+
+                            // INSERT new prediction result
+                            const [insertResult] = await pool.execute(
+                                'INSERT INTO klasifikasi_umum (nim, hasil_klasifikasi_umum) VALUES (?, ?)',
+                                [nim, predicted_status]
+                            );
+
+                            console.log(
+                                `=== Prediction saved to database: ${nim} -> ${predicted_status} ===`
+                            );
+
+                            // Return success response
+                            return res.status(200).json({
+                                success: true,
+                                message: 'Prediction successful and saved',
+                                predicted_status: result.predicted_status,
+                                confidence: result.confidence,
+                                probabilities: result.probabilities,
+                                input_data: result.input_data,
+                                student_nim: nim,
+                                prediction_time: new Date().toISOString(),
+                                database_saved: true,
+                                database_info: {
+                                    deleted_rows: deleteResult.affectedRows,
+                                    inserted_rows: insertResult.affectedRows,
+                                },
+                            });
+                        } catch (dbError) {
+                            console.error('Database save error:', dbError);
+
+                            // Return prediction result even if database save fails
+                            return res.status(200).json({
+                                success: true,
+                                message:
+                                    'Prediction successful but database save failed',
+                                predicted_status: result.predicted_status,
+                                confidence: result.confidence,
+                                probabilities: result.probabilities,
+                                input_data: result.input_data,
+                                student_nim: nim,
+                                prediction_time: new Date().toISOString(),
+                                database_saved: false,
+                                database_error: dbError.message,
+                            });
+                        }
                     } else {
                         return res.status(400).json({
                             success: false,
@@ -998,7 +1062,7 @@ exports.predictStudentStatus = async (req, res) => {
             }
         });
 
-        // Timeout with flag
+        // Timeout
         const timeoutId = setTimeout(() => {
             if (responseAlreadySent) return;
             responseAlreadySent = true;
