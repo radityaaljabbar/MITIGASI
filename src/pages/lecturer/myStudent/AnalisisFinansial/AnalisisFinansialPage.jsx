@@ -29,54 +29,58 @@ const AnalisisFinansial = () => {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [error, setError] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
 
+    // Function to load student data
+    const loadStudentData = async (showRefreshingIndicator = false) => {
+        if (!nim) {
+            setError('NIM tidak ditemukan');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            if (showRefreshingIndicator) {
+                setRefreshing(true);
+            } else {
+                setLoading(true);
+            }
+            setError(null);
+            
+            console.log('Loading financial data for NIM:', nim);
+            
+            const data = await fetchStudentFinancialData(nim);
+            console.log('Received student data:', data);
+            
+            setStudentData(data);
+        } catch (error) {
+            console.error('Error fetching student data:', error);
+            
+            setError(error.message || 'Gagal memuat data mahasiswa');
+            
+            // Set empty default data structure to prevent errors
+            setStudentData({
+                name: 'Data Tidak Ditemukan',
+                nim: nim || '-',
+                semester: '-',
+                financialStatus: '-',
+                lastUpdated: '-',
+                pendingRequests: [],
+                previousRequests: [],
+            });
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    // Initial data load
     useEffect(() => {
         let isMounted = true;
 
         const loadData = async () => {
-            if (!nim) {
-                if (isMounted) {
-                    setError('NIM tidak ditemukan');
-                    setLoading(false);
-                }
-                return;
-            }
-
-            try {
-                if (isMounted) {
-                    setLoading(true);
-                    setError(null);
-                }
-                
-                console.log('Loading financial data for NIM:', nim);
-                
-                const data = await fetchStudentFinancialData(nim);
-                console.log('Received student data:', data);
-                
-                if (isMounted) {
-                    setStudentData(data);
-                }
-            } catch (error) {
-                console.error('Error fetching student data:', error);
-                
-                if (isMounted) {
-                    setError(error.message || 'Gagal memuat data mahasiswa');
-                    
-                    // Set empty default data structure to prevent errors
-                    setStudentData({
-                        name: 'Data Tidak Ditemukan',
-                        nim: nim || '-',
-                        semester: '-',
-                        financialStatus: '-',
-                        lastUpdated: '-',
-                        pendingRequests: [],
-                        previousRequests: [],
-                    });
-                }
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
+            if (isMounted) {
+                await loadStudentData();
             }
         };
 
@@ -96,25 +100,39 @@ const AnalisisFinansial = () => {
 
     const handleApproveRequest = async (id) => {
         try {
+            console.log('Approving request with ID:', id);
             await approveRequest(id);
+            
+            // Close modal
             setShowDetailModal(false);
+            setSelectedRequest(null);
+            
             // Refresh the data after approval
-            const refreshedData = await fetchStudentFinancialData(nim);
-            setStudentData(refreshedData);
+            await loadStudentData(true);
+            
         } catch (error) {
             console.error('Error approving request:', error);
+            // Error message is already shown by the approveRequest function
+            // Keep modal open so user can try again if needed
         }
     };
 
     const handleRejectRequest = async (id) => {
         try {
+            console.log('Rejecting request with ID:', id);
             await rejectRequest(id);
+            
+            // Close modal
             setShowDetailModal(false);
+            setSelectedRequest(null);
+            
             // Refresh the data after rejection
-            const refreshedData = await fetchStudentFinancialData(nim);
-            setStudentData(refreshedData);
+            await loadStudentData(true);
+            
         } catch (error) {
             console.error('Error rejecting request:', error);
+            // Error message is already shown by the rejectRequest function
+            // Keep modal open so user can try again if needed
         }
     };
 
@@ -153,7 +171,12 @@ const AnalisisFinansial = () => {
                             <p className="text-lg font-medium mb-2">
                                 Gagal memuat data mahasiswa dengan NIM: {nim}
                             </p>
-                            <p className="text-sm">{error}</p>
+                            <p className="text-sm mb-4">{error}</p>
+                            <button
+                                onClick={() => loadStudentData()}
+                                className="px-4 py-2 bg-[#951A22] text-white rounded hover:bg-red-800">
+                                Coba Lagi
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -171,12 +194,20 @@ const AnalisisFinansial = () => {
         <div className="p-4 max-w-6xl mx-auto">
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
                 <div className="bg-red-800 p-4 text-white">
-                    <button
-                        onClick={handleBack}
-                        className="text-white hover:underline flex items-center">
-                        &lt; Kembali ke Daftar Mahasiswa
-                    </button>
-                    <p className="text-sm opacity-90">
+                    <div className="flex justify-between items-center">
+                        <button
+                            onClick={handleBack}
+                            className="text-white hover:underline flex items-center">
+                            &lt; Kembali ke Daftar Mahasiswa
+                        </button>
+                        {refreshing && (
+                            <div className="flex items-center text-sm">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Memperbarui data...
+                            </div>
+                        )}
+                    </div>
+                    <p className="text-sm opacity-90 mt-2">
                         {hasFinancialData
                             ? `Data terakhir diperbarui: ${studentData.lastUpdated}`
                             : 'Belum ada data pengajuan'}
@@ -216,7 +247,10 @@ const AnalisisFinansial = () => {
             {showDetailModal && selectedRequest && (
                 <DetailPengajuanFinansial
                     selectedRequest={selectedRequest}
-                    onClose={() => setShowDetailModal(false)}
+                    onClose={() => {
+                        setShowDetailModal(false);
+                        setSelectedRequest(null);
+                    }}
                     onApprove={handleApproveRequest}
                     onReject={handleRejectRequest}
                     onDownloadAttachment={handleDownloadAttachment}

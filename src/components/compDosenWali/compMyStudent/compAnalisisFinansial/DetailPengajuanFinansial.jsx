@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaFileDownload } from 'react-icons/fa';
 import StatusAksiDosen from './StatusAksiDosen';
 
@@ -8,7 +8,28 @@ const DetailPengajuanFinansial = ({
     onApprove,
     onReject
 }) => {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [processingAction, setProcessingAction] = useState('');
+
     if (!selectedRequest) return null;
+
+    // Handle approve action
+    const handleApprove = async () => {
+        if (isProcessing) return;
+        
+        setIsProcessing(true);
+        setProcessingAction('approve');
+        
+        try {
+            await onApprove(selectedRequest.id);
+            // Modal will be closed by parent component after successful operation
+        } catch (error) {
+            console.error('Error in approve handler:', error);
+        } finally {
+            setIsProcessing(false);
+            setProcessingAction('');
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

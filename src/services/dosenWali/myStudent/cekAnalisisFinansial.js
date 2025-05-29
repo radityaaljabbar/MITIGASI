@@ -160,3 +160,46 @@ const determineFinancialStatus = (data) => {
     if (hasPendingRequest) return 'Siaga';
     return 'Siaga';
 };
+
+
+/**
+ * Send response for financial request (approve/reject)
+ * @param {number} id - Financial request ID
+ * @param {string} action - 'approve' or 'reject'
+ */
+export const sendFinancialResponse = async (id, action) => {
+    try {
+        // Get auth token from localStorage
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            throw new Error('Authentication token not found');
+        }
+
+        console.log(`Sending ${action} response for financial request ID:`, id);
+
+        // Make the API request
+        const response = await fetch(`${API_URL}/analisisFinansial/responseFinancial/${id}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ action })
+        });
+
+        // Parse response
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || `Failed to ${action} financial request`);
+        }
+
+        console.log(`Financial request ${action} successful:`, result);
+        return result;
+
+    } catch (error) {
+        console.error(`Error ${action}ing financial request:`, error);
+        throw error;
+    }
+};
