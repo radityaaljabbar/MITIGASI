@@ -103,25 +103,7 @@ const PORT = process.env.PORT || 8080;
 
 const startServer = async () => {
     try {
-        // Test database connection
-        const dbConnected = await testConnection();
-        if (!dbConnected) {
-            console.error('Database connection failed. Server will not start.');
-            process.exit(1);
-        }
-
-        // Test storage connection
-        console.log('Testing Cloud Storage connection...');
-        console.log('Storage Info:', getStorageInfo());
-        const storageConnected = await testStorageConnection();
-
-        if (!storageConnected) {
-            console.warn(
-                '⚠️ Storage connection failed. File uploads may not work.'
-            );
-        }
-
-        // Start the server
+        // Start the server FIRST (most important for Cloud Run)
         app.listen(PORT, '0.0.0.0', () => {
             console.log(
                 `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
@@ -129,9 +111,32 @@ const startServer = async () => {
             console.log(`Health check available at: /health`);
             console.log('Token blacklist cleanup service started');
         });
+
+        // Test database connection IN BACKGROUND (don't block server)
+        console.log('Testing database connection...');
+        const dbConnected = await testConnection();
+        if (!dbConnected) {
+            console.warn(
+                '⚠️ Database connection failed. Some features may not work.'
+            );
+        } else {
+            console.log('✅ Database connected successfully');
+        }
+
+        // Test storage connection
+        console.log('Testing Cloud Storage connection...');
+        console.log('Storage Info:', getStorageInfo());
+        const storageConnected = await testStorageConnection();
+        if (!storageConnected) {
+            console.warn(
+                '⚠️ Storage connection failed. File uploads may not work.'
+            );
+        } else {
+            console.log('✅ Cloud Storage connected successfully');
+        }
     } catch (error) {
         console.error('Server startup error:', error);
-        process.exit(1);
+        // Don't exit - let server run even with errors
     }
 };
 

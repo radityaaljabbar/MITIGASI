@@ -17,6 +17,8 @@
         └── errorMiddleware.js
         └── uploadMiddleware.js
         └── validationMiddleware.js
+    └── 📁ml_models
+        └── predict.py
     └── 📁models
         └── 📁dosenWaliQueries
             └── myCourseAdvisor_Queries.js
@@ -51,6 +53,7 @@
         └── validator.js
     └── .env.development
     └── .env.gcp_dev
+    └── .env.production
     └── .gitignore
     └── BackendStructure.md
     └── DockerFile
