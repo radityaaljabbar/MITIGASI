@@ -1,5 +1,4 @@
-const API_URL = 'http://localhost:5000/api/student';
-
+import { getApiUrl, getAuthHeaders } from '../../config/api';
 // Get data mahasiswa di tabel hasil (untuk cek user sudah isi atau belum)
 export const getPsiResult = async () => {
     try {
@@ -15,10 +14,10 @@ export const getPsiResult = async () => {
         }
 
         // Fetch API
-        const response = await fetch(`${API_URL}/getPsiResult`, {
+        const response = await fetch(getApiUrl('/getPsiResult'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -65,10 +64,10 @@ export const sendPsiResult = async (psiTestData) => {
         }
 
         // API
-        const response = await fetch(`${API_URL}/sendPsiResult`, {
+        const response = await fetch(getApiUrl('/sendPsiResult'), {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(psiTestData),

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/faculty/courseAdvisor';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 export const getClassAndStudentList = async () => {
     try {
@@ -11,10 +11,10 @@ export const getClassAndStudentList = async () => {
             };
         }
 
-        const response = await fetch(`${API_URL}/classesAndStudents`, {
+        const response = await fetch(getApiUrl('/classesAndStudents'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -60,10 +60,10 @@ export const getStudentCourseHistory = async (nim) => {
             };
         }
 
-        const response = await fetch(`${API_URL}/courseHistory?nim=${nim}`, {
+        const response = await fetch(getApiUrl(`/courseHistory?nim=${nim}`), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -137,11 +137,11 @@ export const getAvailableCourse = async () => {
             };
         }
 
-        const fetchResponse = await fetch(`${API_URL}/mataKuliahAvail`, {
+        const fetchResponse = await fetch(getApiUrl('/mataKuliahAvail'), {
             // Assuming API_URL is defined
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -200,10 +200,10 @@ export const sendRecommendedCourses = async (nim, recommendedCourses) => {
             courseCodes: courseCodes,
         };
 
-        const response = await fetch(`${API_URL}/sendRekomendasiMK`, {
+        const response = await fetch(getApiUrl('/sendRekomendasiMK'), {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(requestData),

@@ -153,6 +153,7 @@
                     └── cekAnalisisFinansial.js
                     └── cekAnalisisPsikologi.js
                     └── listMahasiswaService.js
+                    └── mlPredictionService.js
             └── 📁mahasiswaServices
                 └── feedbackService.js
                 └── myCourseService.js

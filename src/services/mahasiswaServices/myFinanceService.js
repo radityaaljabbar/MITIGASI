@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000/api/student';
+// src/services/mahasiswaServices/myFinanceService.js
+import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
 export const submitRelief = async (formData) => {
     try {
@@ -16,10 +17,10 @@ export const submitRelief = async (formData) => {
         // Log the request payload for debugging
         console.log('Sending response with payload:', formData);
 
-        const response = await fetch(`${API_URL}/sendRelief`, {
+        const response = await fetch(getApiUrl('/student/sendRelief'), {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData),
@@ -32,7 +33,8 @@ export const submitRelief = async (formData) => {
             return {
                 success: false,
                 message:
-                    data.message || 'Gagal mengirim jawab formulir keringanan biaya',
+                    data.message ||
+                    'Gagal mengirim jawab formulir keringanan biaya',
                 data: data,
             };
         }
@@ -48,26 +50,18 @@ export const submitRelief = async (formData) => {
         return {
             success: false,
             message: 'Terjadi kesalahan saat menghubungi server',
-            error: error.message
+            error: error.message,
         };
     }
-}
-
+};
 
 export const getReliefList = async () => {
     try {
-        // Get auth token from localStorage
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            throw new Error('Authentication token not found');
-        }
-
         // Make the API request
-        const response = await fetch(`${API_URL}/getStudentsRelief`, {
+        const response = await fetch(getApiUrl('/student/getStudentsRelief'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });

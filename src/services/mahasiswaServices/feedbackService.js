@@ -1,9 +1,5 @@
-/**
- * Service for handling feedback-related API calls
- */
-
-// Base API URL - replace with your actual API URL
-const API_URL = 'http://localhost:5000/api';
+// src/services/mahasiswaServices/feedbackService.js
+import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
 // Valid file types
 const VALID_FILE_TYPES = [
@@ -60,20 +56,14 @@ export const submitFeedback = async (title, detail, file) => {
             formData.append('file', file);
         }
 
-        // Get auth token from localStorage
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            throw new Error('Authentication token not found');
-        }
-
         // Make the API request
         const response = await fetch(
-            `${API_URL}/student/uploadLampiranKeluhan`,
+            getApiUrl('/student/uploadLampiranKeluhan'),
             {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    ...getAuthHeaders(),
+                    // Don't set Content-Type for FormData - let browser set it with boundary
                 },
                 body: formData,
             }
@@ -111,18 +101,11 @@ export const submitFeedback = async (title, detail, file) => {
  */
 export const getFeedbackList = async () => {
     try {
-        // Get auth token from localStorage
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            throw new Error('Authentication token not found');
-        }
-
         // Make the API request
-        const response = await fetch(`${API_URL}/student/myKeluhan`, {
+        const response = await fetch(getApiUrl('/student/myKeluhan'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -148,18 +131,11 @@ export const getFeedbackList = async () => {
  */
 export const getFeedbackDetail = async (id) => {
     try {
-        // Get auth token from localStorage
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            throw new Error('Authentication token not found');
-        }
-
         // Make the API request
-        const response = await fetch(`${API_URL}/student/myKeluhan/${id}`, {
+        const response = await fetch(getApiUrl(`/student/myKeluhan/${id}`), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });

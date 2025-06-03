@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000/api/student';
+// src/services/mahasiswaServices/myCourseService.js
+import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
 // Get list riwayat MK mahasiswa dari backend:
 /**
@@ -18,10 +19,10 @@ export const getCourseHistory = async () => {
         }
 
         // Fetch API:
-        const response = await fetch(`${API_URL}/riwayatMataKuliah`, {
+        const response = await fetch(getApiUrl('/student/riwayatMataKuliah'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -58,13 +59,16 @@ export const getRecommendedCourse = async () => {
         }
 
         // Fetch api
-        const response = await fetch(`${API_URL}/rekomendasiMataKuliah`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch(
+            getApiUrl('/student/rekomendasiMataKuliah'),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         const result = await response.json();
 

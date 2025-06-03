@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/faculty';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
  * Format date to Indonesian format without time
@@ -106,10 +106,10 @@ export const getFeedbackList = async () => {
             };
         }
 
-        const response = await fetch(`${API_URL}/keluhanMahasiswa`, {
+        const response = await fetch(getApiUrl('/keluhanMahasiswa'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -242,10 +242,10 @@ export const getFeedbackDetail = async (id) => {
             };
         }
 
-        const response = await fetch(`${API_URL}/keluhanMahasiswa/${id}`, {
+        const response = await fetch(getApiUrl(`/keluhanMahasiswa/${id}`), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -353,11 +353,11 @@ export const getFeedbackResponse = async (id) => {
 
         // Use the correct endpoint with query parameter
         const response = await fetch(
-            `${API_URL}/responseDosenWali?feedbackId=${id}`,
+            getApiUrl(`/responseDosenWali?feedbackId=${id}`),
             {
                 method: 'GET',
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    ...getAuthHeaders(),
                     'Content-Type': 'application/json',
                 },
             }
@@ -472,10 +472,10 @@ export const sendResponse = async (responseData) => {
         // Log the request payload for debugging
         console.log('🔧 Sending response with payload:', responseData);
 
-        const response = await fetch(`${API_URL}/sendResponDosWal`, {
+        const response = await fetch(getApiUrl('/sendResponDosWal'), {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(responseData),

@@ -1,10 +1,10 @@
-// authService.js
-const API_URL = 'http://localhost:5000/api'; // Base backend URL
+// src/services/authService.js - Updated with dynamic API configuration
+import { getApiUrl, getAuthHeaders } from '../config/api.js';
 
 // Login function
 export const loginUser = async (id, password, role) => {
     try {
-        const response = await fetch(`${API_URL}/login`, {
+        const response = await fetch(getApiUrl('/login'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,10 +65,10 @@ export const logoutUser = async () => {
         }
 
         // Call the backend logout endpoint with the token
-        const response = await fetch(`${API_URL}/logout`, {
+        const response = await fetch(getApiUrl('/logout'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
             },
         });
 
@@ -99,10 +99,10 @@ export const fetchCurrentUser = async () => {
             return { success: false, message: 'No token found' };
         }
 
-        const response = await fetch(`${API_URL}/me`, {
+        const response = await fetch(getApiUrl('/me'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
             },
         });
 
