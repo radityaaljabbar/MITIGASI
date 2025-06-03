@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api/faculty';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
  * Service untuk ML Prediction API calls
@@ -18,12 +18,11 @@ export const mlPredictionService = {
         try {
             const token = localStorage.getItem('token');
 
-            const response = await axios.post(
-                `${API_BASE_URL}/ml/predict/${nim}`,
+            const response = await axios.post(getApiUrl(`/faculty/ml/predict/${nim}`),
                 predictionData,
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        ...getAuthHeaders(),
                         'Content-Type': 'application/json',
                     },
                     timeout: 35000, // 35 seconds timeout (sedikit lebih lama dari backend)
@@ -61,9 +60,9 @@ export const mlPredictionService = {
         try {
             const token = localStorage.getItem('token');
 
-            const response = await axios.get(`${API_BASE_URL}/ml/test`, {
+            const response = await axios.get(getApiUrl(`/faculty/ml/test`), {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    ...getAuthHeaders(),
                     'Content-Type': 'application/json',
                 },
                 timeout: 15000,

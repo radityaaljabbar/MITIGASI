@@ -4,7 +4,7 @@
  * Service untuk mengambil data analisis psikologi mahasiswa dari backend
  */
 
-const BASE_URL = 'http://localhost:5000/api/faculty';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
  * Fetch data analisis psikologi berdasarkan NIM
@@ -25,13 +25,13 @@ export const getAnalisisPsikologi = async (nim) => {
         }
 
         console.log('Fetching psychology data for NIM:', nim);
-        console.log('API URL:', `${BASE_URL}/analisisPsikologi/${nim}`);
+        console.log('API URL:', getApiUrl(`/faculty/analisisPsikologi/${nim}`));
 
         // Fetch ke API:
-        const response = await fetch(`${BASE_URL}/analisisPsikologi/${nim}`, {
+        const response = await fetch(getApiUrl(`/faculty/analisisPsikologi/${nim}`), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });

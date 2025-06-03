@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/faculty';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
  * Fetch data analisis finansial berdasarkan NIM
@@ -14,13 +14,13 @@ export const getFinancialRelief = async (nim) => {
         }
 
         console.log('Fetching financial data for NIM:', nim);
-        console.log('API URL:', `${API_URL}/analisisFinansial/${nim}`);
+        console.log('API URL:', getApiUrl(`/faculty/analisisFinansial/${nim}`));
 
         // Make the API request
-        const response = await fetch(`${API_URL}/analisisFinansial/${nim}`, {
+        const response = await fetch(getApiUrl(`/faculty/analisisFinansial/${nim}`), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });
@@ -179,10 +179,10 @@ export const sendFinancialResponse = async (id, action) => {
         console.log(`Sending ${action} response for financial request ID:`, id);
 
         // Make the API request
-        const response = await fetch(`${API_URL}/analisisFinansial/responseFinancial/${id}`, {
+        const response = await fetch(getApiUrl(`/faculty/analisisFinansial/responseFinancial/${id}`), {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ action })

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/faculty';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
  * @desc Get detail riwayat nilai mata kuliah mahasiswa
@@ -20,11 +20,11 @@ export const getStudentCourseHistory = async (nim) => {
         console.log('Fetching riwayat mata kuliah untuk: ', nim);
 
         const response = await fetch(
-            `${API_URL}/MyStudentDetailNilaiMK/${nim}`,
+            getApiUrl(`/faculty/MyStudentDetailNilaiMK/${nim}`),
             {
                 method: 'GET',
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    ...getAuthHeaders(),
                     'Content-Type': 'application/json',
                 },
             }

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/faculty';
+import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
  * Get TAK dari mahasiswa yang sedang login
@@ -20,10 +20,10 @@ export const getStudentTAKIPKSKS = async (nim) => {
         }
 
         // Fetch ke API:
-        const response = await fetch(`${API_URL}/takipksksMahasiswa?nim=${nim}`, {
+        const response = await fetch(getApiUrl(`/faculty/takipksksMahasiswa?nim=${nim}`), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
                 'Content-Type': 'application/json',
             },
         });

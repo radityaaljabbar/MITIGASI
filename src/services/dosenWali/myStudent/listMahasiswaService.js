@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/faculty'; // Base backend URL
+import { getApiUrl, getAuthHeaders } from '../../../config/api.js';
 
 export const getListMahasiswa = async () => {
     try {
@@ -8,10 +8,10 @@ export const getListMahasiswa = async () => {
             return { success: false, message: 'No token found' };
         }
 
-        const response = await fetch(`${API_URL}/listMahasiswa`, {
+        const response = await fetch(getApiUrl('/faculty/listMahasiswa'), {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                ...getAuthHeaders(),
             },
         });
 
