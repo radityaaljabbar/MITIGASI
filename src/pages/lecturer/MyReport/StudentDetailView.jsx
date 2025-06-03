@@ -534,14 +534,6 @@ const StudentDetailView = ({ student, onBack }) => {
                         </div>
                     </div>
                 </div>
-
-                {/* Actions */}
-                <div className="flex flex-col md:flex-row justify-end gap-3 pt-6 border-t">
-                    <button className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm hover:bg-gray-200 transition-colors">
-                        <Printer size={16} />
-                        <span>Cetak Laporan</span>
-                    </button>
-                </div>
             </div>
 
             {/* PDF Viewer Modal */}

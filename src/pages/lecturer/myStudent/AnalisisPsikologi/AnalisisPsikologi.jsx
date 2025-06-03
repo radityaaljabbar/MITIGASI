@@ -147,20 +147,7 @@ export default function AnalisaPsikologiDetailPage() {
                         </button>
                     </div>
 
-                    {hasFilledQuestionnaire && (
-                        <div className="flex flex-wrap gap-4 mt-2 justify-start sm:flex-row flex-col">
-                            <button className="flex items-center bg-red-800 text-white px-4 py-2 rounded-lg">
-                                Lihat Detail
-                            </button>
 
-                            <button
-                                onClick={handleExportReport}
-                                className="flex items-center bg-green-700 text-white px-4 py-2 rounded-lg">
-                                <Download size={18} className="mr-2" />
-                                Export Laporan
-                            </button>
-                        </div>
-                    )}
                 </div>
 
                 {hasFilledQuestionnaire && student ? (
