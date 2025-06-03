@@ -14,7 +14,7 @@ export const getPsiResult = async () => {
         }
 
         // Fetch API
-        const response = await fetch(getApiUrl('/getPsiResult'), {
+        const response = await fetch(getApiUrl('/student/getPsiResult'), {
             method: 'GET',
             headers: {
                 ...getAuthHeaders(),
@@ -64,7 +64,7 @@ export const sendPsiResult = async (psiTestData) => {
         }
 
         // API
-        const response = await fetch(getApiUrl('/sendPsiResult'), {
+        const response = await fetch(getApiUrl('/student/sendPsiResult'), {
             method: 'POST',
             headers: {
                 ...getAuthHeaders(),

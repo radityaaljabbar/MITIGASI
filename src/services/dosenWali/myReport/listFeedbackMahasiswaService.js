@@ -106,7 +106,7 @@ export const getFeedbackList = async () => {
             };
         }
 
-        const response = await fetch(getApiUrl('/keluhanMahasiswa'), {
+        const response = await fetch(getApiUrl('/faculty/keluhanMahasiswa'), {
             method: 'GET',
             headers: {
                 ...getAuthHeaders(),
@@ -242,13 +242,16 @@ export const getFeedbackDetail = async (id) => {
             };
         }
 
-        const response = await fetch(getApiUrl(`/keluhanMahasiswa/${id}`), {
-            method: 'GET',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch(
+            getApiUrl(`/faculty/keluhanMahasiswa/${id}`),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         const rawData = await response.json();
         console.log('🔧 Detail Raw API Response:', rawData);
@@ -353,7 +356,7 @@ export const getFeedbackResponse = async (id) => {
 
         // Use the correct endpoint with query parameter
         const response = await fetch(
-            getApiUrl(`/responseDosenWali?feedbackId=${id}`),
+            getApiUrl(`faculty/responseDosenWali?feedbackId=${id}`),
             {
                 method: 'GET',
                 headers: {
@@ -472,7 +475,7 @@ export const sendResponse = async (responseData) => {
         // Log the request payload for debugging
         console.log('🔧 Sending response with payload:', responseData);
 
-        const response = await fetch(getApiUrl('/sendResponDosWal'), {
+        const response = await fetch(getApiUrl('/faculty/sendResponDosWal'), {
             method: 'POST',
             headers: {
                 ...getAuthHeaders(),

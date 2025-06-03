@@ -11,13 +11,16 @@ export const getClassAndStudentList = async () => {
             };
         }
 
-        const response = await fetch(getApiUrl('/classesAndStudents'), {
-            method: 'GET',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch(
+            getApiUrl('/faculty/courseAdvisor/classesAndStudents'),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         const data = await response.json();
         // console.log('API Response:', data);
@@ -60,13 +63,16 @@ export const getStudentCourseHistory = async (nim) => {
             };
         }
 
-        const response = await fetch(getApiUrl(`/courseHistory?nim=${nim}`), {
-            method: 'GET',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch(
+            getApiUrl(`/faculty/courseAdvisor/courseHistory?nim=${nim}`),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         const data = await response.json();
         // console.log('Course History API Raw Response:', data);
@@ -137,14 +143,17 @@ export const getAvailableCourse = async () => {
             };
         }
 
-        const fetchResponse = await fetch(getApiUrl('/mataKuliahAvail'), {
-            // Assuming API_URL is defined
-            method: 'GET',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-        });
+        const fetchResponse = await fetch(
+            getApiUrl('/faculty/courseAdvisor/mataKuliahAvail'),
+            {
+                // Assuming API_URL is defined
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         const data = await fetchResponse.json(); // Parse the JSON response
 
@@ -200,14 +209,17 @@ export const sendRecommendedCourses = async (nim, recommendedCourses) => {
             courseCodes: courseCodes,
         };
 
-        const response = await fetch(getApiUrl('/sendRekomendasiMK'), {
-            method: 'POST',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        });
+        const response = await fetch(
+            getApiUrl('/faculty/courseAdvisor/sendRekomendasiMK'),
+            {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            }
+        );
 
         const data = await response.json();
 

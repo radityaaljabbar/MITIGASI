@@ -20,7 +20,7 @@ export const getStudentTAK = async () => {
         }
 
         // Fetch ke API:
-        const response = await fetch(getApiUrl('/takMahasiswa'), {
+        const response = await fetch(getApiUrl('/student/takMahasiswa'), {
             method: 'GET',
             headers: {
                 ...getAuthHeaders(),
