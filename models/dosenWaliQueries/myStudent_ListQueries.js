@@ -55,7 +55,7 @@ exports.getStudentsByClassCodes = async (classCodesList) => {
             semester: student.current_semester,
             tak: student.tak ,
             status: student.hasil_klasifikasi_umum || "BLANK", // Default status
-            skor_psikologi: student.total_skor,
+            skor_psikologi: student.total_skor || "-",
             status_fin: student.status_finansial_bin,
             details: {
                 akademik: student.hasil_klasifikasi ,

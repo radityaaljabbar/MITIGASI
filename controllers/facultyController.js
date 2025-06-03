@@ -1040,7 +1040,7 @@ exports.predictStudentByNim = async (req, res) => {
                     } else {
                         return res.status(400).json({
                             success: false,
-                            message: 'Prediction failed',
+                            message: 'Prediction failed, data input tidak lengkap',
                             error: result.error,
                         });
                     }
