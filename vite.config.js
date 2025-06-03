@@ -6,6 +6,12 @@ export default defineConfig({
     plugins: [react()],
     server: {
         port: 3000,
+        host: true, // ← Tambahin ini
+        hmr: {
+            // ← Tambahin config HMR
+            port: 3000,
+            host: 'localhost',
+        },
         proxy: {
             '/api': {
                 target: 'https://capstone-backend-1059248723043.asia-southeast2.run.app',
