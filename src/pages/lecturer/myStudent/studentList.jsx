@@ -182,7 +182,7 @@ export default function DaftarMahasiswaWali() {
             // Prepare prediction data sesuai backend expectation
             const predictionData = {
                 ipk: parseFloat(currentStudent.ipk) || 0,
-                skor_psikologi: parseInt(currentStudent.skor_psikologi) || 0,
+                skor_psikologi: parseInt(currentStudent.skor_psikologi) || '-',
                 finansial: parseInt(currentStudent.status_fin) || 0,
             };
 
@@ -205,7 +205,7 @@ export default function DaftarMahasiswaWali() {
                     console.log('Prediction saved to database successfully');
                 }
             } else {
-                setPredictionError(result.error || 'Prediction failed');
+                setPredictionError(result.error || 'Prediction failed, data input tidak tersedia');
                 console.error('Prediction failed:', result.error);
             }
         } catch (error) {

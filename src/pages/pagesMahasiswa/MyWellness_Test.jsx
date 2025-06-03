@@ -132,11 +132,11 @@ const MyWelness_Test = () => {
     // Function untuk menentukan klasifikasi berdasarkan converted score (1-100)
     const getKlasifikasi = (convertedScore) => {
         if (convertedScore >= 75) {
-            return 'Aman';
+            return 'aman';
         } else if (convertedScore >= 50) {
-            return 'Siaga';
+            return 'siaga';
         } else {
-            return 'Bermasalah';
+            return 'bermasalah';
         }
     };
 
