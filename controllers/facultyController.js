@@ -73,7 +73,6 @@ exports.getStudentList = async (req, res) => {
 
         // Get all class codes for this dosen
         const classCodesList = classes.map((cls) => cls.kode_kelas);
-        console.log(classCodesList);
 
         // Get students from all classes
         const studentList = await getStudentsByClassCodes(classCodesList);
