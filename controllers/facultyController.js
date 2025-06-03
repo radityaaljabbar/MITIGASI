@@ -934,7 +934,7 @@ exports.predictStudentByNim = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message:
-                    'Missing required fields: ipk, skor_psikologi, finansial',
+                    'Data input tidak lengkap: IPK, Skor Psikologi, Finansial',
             });
         }
 
@@ -1038,7 +1038,7 @@ exports.predictStudentByNim = async (req, res) => {
                     } else {
                         return res.status(400).json({
                             success: false,
-                            message: 'Prediction failed, data input tidak lengkap',
+                            message: 'Prediction failed',
                             error: result.error,
                         });
                     }
