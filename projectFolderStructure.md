@@ -1,5 +1,11 @@
 ```
 └── 📁frontendCode
+    └── 📁.vite
+        └── 📁deps
+            └── _metadata.json
+            └── package.json
+    └── 📁public
+        └── vite.svg
     └── 📁src
         └── App.jsx
         └── 📁assets
@@ -89,6 +95,8 @@
             └── handleBack.jsx
             └── ProtectedRoute.jsx
             └── statusColor.jsx
+        └── 📁config
+            └── api.js
         └── index.css
         └── 📁layout
             └── MainLayout.jsx
@@ -160,6 +168,8 @@
                 └── myFinanceService.js
                 └── myProgress_takSksIpkService.js
                 └── myWellnessService.js
+    └── .env.development
+    └── .env.production
     └── .gitignore
     └── eslint.config.js
     └── index.html
