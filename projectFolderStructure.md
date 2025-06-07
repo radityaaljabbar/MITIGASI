@@ -1,11 +1,5 @@
 ```
 └── 📁frontendCode
-    └── 📁.vite
-        └── 📁deps
-            └── _metadata.json
-            └── package.json
-    └── 📁public
-        └── vite.svg
     └── 📁src
         └── App.jsx
         └── 📁assets

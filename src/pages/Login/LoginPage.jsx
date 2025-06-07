@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../services/authService';
+//Import gambar:
+import logoMitigasi from '/src/assets/images/FIX_LOGO.png';
 
 const Login = () => {
     const [isStudentLogin, setIsStudentLogin] = useState(true);
@@ -64,7 +66,7 @@ const Login = () => {
                     <div className="flex flex-col items-center justify-center space-y-2">
                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center p-1">
                             <img
-                                src="/src/assets/images/FIX_LOGO.png"
+                                src={logoMitigasi}
                                 alt="Logo MITIGASI"
                                 className="w-16 h-16 object-contain"
                             />
