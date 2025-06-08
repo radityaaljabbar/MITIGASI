@@ -30,8 +30,6 @@ export const getStudentCourseHistory = async (nim) => {
             }
         );
 
-        console.log('Respon dari backend:', response.status);
-
         if (!response.ok) {
             if (response.status === 401) {
                 return {

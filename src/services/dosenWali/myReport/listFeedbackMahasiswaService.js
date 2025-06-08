@@ -115,7 +115,6 @@ export const getFeedbackList = async () => {
         });
 
         const rawData = await response.json();
-        console.log('API Raw Response:', rawData);
 
         // TRIPLE-NESTED STRUCTURE HANDLING
         // [0].payload[0].payload is where the actual data lives
@@ -130,11 +129,6 @@ export const getFeedbackList = async () => {
         ) {
             // The actual data is 3 levels deep
             const actualData = rawData[0].payload[0].payload;
-            console.log(
-                'Found actual data array with length:',
-                actualData.length
-            );
-            console.log('First item sample:', actualData[0]);
 
             const formattedData = actualData.map((item) => ({
                 feedbackId: item.id_keluhan,
@@ -155,14 +149,8 @@ export const getFeedbackList = async () => {
                 statusCode: item.status_keluhan || 0,
             }));
 
-            console.log('Formatted data sample:', formattedData[0]);
             return { success: true, data: formattedData };
         }
-
-        // Fallback for different structure - try to find the data wherever it might be
-        console.log(
-            'Triple nested structure not found, trying alternative approaches'
-        );
 
         // Try to search for any array with id_keluhan property in first item
         const findDataArray = (obj, depth = 0, maxDepth = 5) => {
@@ -184,10 +172,6 @@ export const getFeedbackList = async () => {
 
         const foundData = findDataArray(rawData);
         if (foundData) {
-            console.log(
-                'Found data array using deep search:',
-                foundData.length
-            );
 
             const formattedData = foundData.map((item) => ({
                 feedbackId: item.id_keluhan,
@@ -254,7 +238,6 @@ export const getFeedbackDetail = async (id) => {
         );
 
         const rawData = await response.json();
-        console.log('🔧 Detail Raw API Response:', rawData);
 
         // Helper function to find the details object at any nesting level
         const findDetailObject = (data) => {
@@ -286,17 +269,6 @@ export const getFeedbackDetail = async (id) => {
         const detailItem = findDetailObject(rawData);
 
         if (detailItem) {
-            console.log('🔧 Found detail item:', detailItem);
-            console.log('🔧 Detail item status field:', detailItem.status);
-            console.log(
-                '🔧 Detail item status_keluhan field:',
-                detailItem.status_keluhan
-            );
-            console.log(
-                '🔧 Detail item has_response field:',
-                detailItem.has_response
-            );
-
             return {
                 success: true,
                 data: {
@@ -352,8 +324,6 @@ export const getFeedbackResponse = async (id) => {
             };
         }
 
-        console.log(`🔧 Fetching response for feedback ID: ${id}`);
-
         // Use the correct endpoint with query parameter
         const response = await fetch(
             getApiUrl(`faculty/responseDosenWali?feedbackId=${id}`),
@@ -367,7 +337,6 @@ export const getFeedbackResponse = async (id) => {
         );
 
         const rawData = await response.json();
-        console.log('🔧 Response data (raw):', rawData);
 
         // Helper function to find response data at any level of nesting
         const findResponseData = (data) => {
@@ -415,12 +384,6 @@ export const getFeedbackResponse = async (id) => {
         const responseItem = findResponseData(rawData);
 
         if (responseItem) {
-            console.log('🔧 Found response item:', responseItem);
-            console.log('🔧 Response item status field:', responseItem.status);
-            console.log(
-                '🔧 Response item status_keluhan field:',
-                responseItem.status_keluhan
-            );
 
             return {
                 success: true,
@@ -472,9 +435,6 @@ export const sendResponse = async (responseData) => {
             };
         }
 
-        // Log the request payload for debugging
-        console.log('🔧 Sending response with payload:', responseData);
-
         const response = await fetch(getApiUrl('/faculty/sendResponDosWal'), {
             method: 'POST',
             headers: {
@@ -483,11 +443,6 @@ export const sendResponse = async (responseData) => {
             },
             body: JSON.stringify(responseData),
         });
-
-        // Log HTTP status for debugging
-        console.log(
-            `🔧 Response status: ${response.status} ${response.statusText}`
-        );
 
         if (!response.ok) {
             console.error(
@@ -500,14 +455,6 @@ export const sendResponse = async (responseData) => {
         }
 
         const data = await response.json();
-        console.log('🔧 Server response data:', data);
-
-        // Now we understand the exact structure from your backend:
-        // {
-        //   status: 'success' | 'error',
-        //   message: 'Response berhasil dibuat' | 'Response berhasil diperbarui' | ...,
-        //   payload: {...}
-        // }
 
         return {
             success: data && data.status === 'success',

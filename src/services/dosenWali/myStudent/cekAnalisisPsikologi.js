@@ -24,9 +24,6 @@ export const getAnalisisPsikologi = async (nim) => {
             };
         }
 
-        console.log('Fetching psychology data for NIM:', nim);
-        console.log('API URL:', getApiUrl(`/faculty/analisisPsikologi/${nim}`));
-
         // Fetch ke API:
         const response = await fetch(getApiUrl(`/faculty/analisisPsikologi/${nim}`), {
             method: 'GET',
@@ -35,8 +32,6 @@ export const getAnalisisPsikologi = async (nim) => {
                 'Content-Type': 'application/json',
             },
         });
-
-        console.log('Response status:', response.status);
 
         // Check if response is ok
         if (!response.ok) {
@@ -93,9 +88,6 @@ export const transformPsychologyData = (backendData) => {
     }
 
     const result = backendData.data[0]; // Ambil data pertama
-
-    console.log('Raw backend result:', result); // Debug log
-    console.log('Current semester from backend:', result.current_semester); // Debug log
 
     return {
         id: result.idHasil,

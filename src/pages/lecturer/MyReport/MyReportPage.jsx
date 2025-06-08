@@ -17,10 +17,6 @@ function MyReportPage() {
                 const result = await getFeedbackList();
 
                 if (result.success) {
-                    console.log(
-                        'Feedback data loaded successfully:',
-                        result.data.length
-                    );
                     setFeedbackData(result.data);
                 } else {
                     throw new Error(

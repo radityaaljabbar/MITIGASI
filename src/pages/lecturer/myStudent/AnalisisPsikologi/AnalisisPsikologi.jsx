@@ -29,8 +29,6 @@ export default function AnalisaPsikologiDetailPage() {
                 // Get psychology data from backend
                 const response = await getAnalisisPsikologi(nim);
 
-                console.log('Response from API:', response);
-
                 // Check if request was successful
                 if (!response.success) {
                     setError(response.message);
@@ -42,7 +40,6 @@ export default function AnalisaPsikologiDetailPage() {
 
                 // Check if data array is empty (student hasn't filled questionnaire)
                 if (!response.data || response.data.length === 0) {
-                    console.log('Student has not filled questionnaire');
                     setHasFilledQuestionnaire(false);
                     // Don't set student data when they haven't filled questionnaire
                     setStudent(null);
@@ -52,7 +49,6 @@ export default function AnalisaPsikologiDetailPage() {
 
                 // Student has filled questionnaire - transform and set data
                 const transformedData = transformPsychologyData(response);
-                console.log('Transformed data:', transformedData);
 
                 if (transformedData) {
                     setHasFilledQuestionnaire(true);
@@ -67,7 +63,6 @@ export default function AnalisaPsikologiDetailPage() {
                         tanggalTes: transformedData.tanggalTes,
                     };
 
-                    console.log('Setting student data:', studentData);
                     setStudent(studentData);
                 }
             } catch (err) {

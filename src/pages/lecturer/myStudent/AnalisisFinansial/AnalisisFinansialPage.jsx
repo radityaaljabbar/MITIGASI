@@ -47,10 +47,7 @@ const AnalisisFinansial = () => {
             }
             setError(null);
             
-            console.log('Loading financial data for NIM:', nim);
-            
             const data = await fetchStudentFinancialData(nim);
-            console.log('Received student data:', data);
             
             setStudentData(data);
         } catch (error) {
@@ -93,14 +90,12 @@ const AnalisisFinansial = () => {
     }, [nim]);
 
     const handleViewDetail = (request) => {
-        console.log('Viewing detail for request:', request);
         setSelectedRequest(request);
         setShowDetailModal(true);
     };
 
     const handleApproveRequest = async (id) => {
         try {
-            console.log('Approving request with ID:', id);
             await approveRequest(id);
             
             // Close modal
@@ -119,7 +114,6 @@ const AnalisisFinansial = () => {
 
     const handleRejectRequest = async (id) => {
         try {
-            console.log('Rejecting request with ID:', id);
             await rejectRequest(id);
             
             // Close modal

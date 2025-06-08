@@ -138,7 +138,6 @@ const AnalisisAkademikPage = () => {
             try {
                 setLoading(true);
                 const response = await getStudentTAKIPKSKS(nim);
-                console.log('TAK response:', response);
 
                 if (response.success) {
                     setTakValue(response.data.tak);

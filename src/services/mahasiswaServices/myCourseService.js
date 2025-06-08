@@ -32,7 +32,6 @@ export const getCourseHistory = async () => {
         }
 
         const data = await response.json();
-        // console.log('API Response:', data);
 
         return data; // Return data dri API
     } catch (error) {

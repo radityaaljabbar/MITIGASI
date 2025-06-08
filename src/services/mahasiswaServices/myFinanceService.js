@@ -5,17 +5,12 @@ export const submitRelief = async (formData) => {
     try {
         const token = localStorage.getItem('token');
 
-        console.log('Sending data to backend:', formData);
-
         if (!token) {
             return {
                 success: false,
                 message: 'Token tidak ditemukan',
             };
         }
-
-        // Log the request payload for debugging
-        console.log('Sending response with payload:', formData);
 
         const response = await fetch(getApiUrl('/student/sendRelief'), {
             method: 'POST',

@@ -171,7 +171,6 @@ const MyWelness_Test = () => {
             }
         });
 
-        console.log('DASS-21 domain scores (raw):', domainScores);
         return domainScores;
     };
 
@@ -183,7 +182,6 @@ const MyWelness_Test = () => {
             rawTotalScore += answers[key].score;
         }
 
-        console.log('Raw total score (DASS-21):', rawTotalScore, '/ 63');
         return rawTotalScore;
     };
 
@@ -242,14 +240,6 @@ const MyWelness_Test = () => {
             saran: overallCategory.suggestions,
             klasifikasi: klasifikasi,
         };
-
-        // Log untuk debugging
-        console.log('=== SCORING SUMMARY ===');
-        console.log('Raw DASS-21 total score:', rawTotalScore, '/ 63');
-        console.log('Final converted score:', finalScore, '/ 100');
-        console.log('Klasifikasi:', klasifikasi);
-        console.log('Domain scores:', domainScores);
-        console.log('Data to send:', jawabanTestPsikologi);
 
         // Simpen data ke useState - this will trigger the useEffect
         setPsiTestData(jawabanTestPsikologi);

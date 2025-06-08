@@ -2,30 +2,19 @@
 
 // Get base URL from environment variables with fallbacks
 const getApiBaseUrl = () => {
-    console.log('🔍 Environment Debug:', {
-        VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
-        DEV: import.meta.env.DEV,
-        MODE: import.meta.env.MODE,
-    });
 
     // In production, use environment variable
     if (import.meta.env.VITE_API_BASE_URL) {
-        console.log(
-            '✅ Using env variable:',
-            import.meta.env.VITE_API_BASE_URL
-        );
         return import.meta.env.VITE_API_BASE_URL;
     }
 
     // Development fallbacks
     if (import.meta.env.DEV) {
         // For local development with proxy
-        console.log('✅ Using dev fallback: /api');
         return '/api';
     }
 
     // Production fallback (if env var is missing)
-    console.log('✅ Using prod fallback');
     return 'https://capstone-backend-1059248723043.asia-southeast2.run.app';
 };
 
@@ -64,7 +53,3 @@ export const ENV_INFO = {
     mode: import.meta.env.MODE,
 };
 
-// Log environment info in development
-if (import.meta.env.DEV) {
-    console.log('🔧 API Configuration:', ENV_INFO);
-}

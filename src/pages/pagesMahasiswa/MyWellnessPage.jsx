@@ -41,8 +41,6 @@ const MyWellnessPage = () => {
         getDataPsikologi();
     }, []);
 
-    // console.log(dataPsikologi);
-
     return (
         <div className="flex flex-col items-center justify-center h-screen p-5 gap-7 w-full">
             {loading ? (

@@ -19,7 +19,6 @@ const DetailNilaiContent = ({ nim }) => {
                 setError(null);
 
                 const response = await getStudentCourseHistory(nim);
-                console.log('Course history response:', response);
 
                 if (response.success) {
                     setCourseHistory(response.data);

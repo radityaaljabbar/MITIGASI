@@ -8,13 +8,10 @@ export const fetchStudentFinancialData = async (nim) => {
         if (!nim) {
             throw new Error('NIM is required');
         }
-
-        console.log('Fetching financial data for NIM:', nim);
         
         // Panggil API service
         const data = await getFinancialRelief(nim);
         
-        console.log('Financial data received:', data);
         return data;
         
     } catch (error) {
@@ -58,8 +55,6 @@ export const approveRequest = async (id) => {
         if (!id) {
             throw new Error('ID pengajuan diperlukan');
         }
-
-        console.log('Approving financial request with ID:', id);
         
         // Panggil API untuk approve request
         const result = await sendFinancialResponse(id, 'approve');
@@ -71,7 +66,6 @@ export const approveRequest = async (id) => {
             autoClose: 3000,
         });
         
-        console.log('Approve response:', result);
         return { success: true, data: result };
         
     } catch (error) {
@@ -110,8 +104,6 @@ export const rejectRequest = async (id) => {
         if (!id) {
             throw new Error('ID pengajuan diperlukan');
         }
-
-        console.log('Rejecting financial request with ID:', id);
         
         // Panggil API untuk reject request
         const result = await sendFinancialResponse(id, 'reject');
@@ -123,7 +115,6 @@ export const rejectRequest = async (id) => {
             autoClose: 3000,
         });
         
-        console.log('Reject response:', result);
         return { success: true, data: result };
         
     } catch (error) {
@@ -171,7 +162,6 @@ export const downloadAttachment = async (filename) => {
             autoClose: 2000,
         });
         
-        console.log('Downloading attachment:', filename);
         return { success: true };
         
     } catch (error) {
@@ -205,7 +195,6 @@ export const retryOperation = async (operation, maxRetries = 3, delay = 1000) =>
             
             // Hanya retry untuk server errors atau network issues
             if (i < maxRetries - 1) {
-                console.log(`Operation failed, retrying in ${delay}ms... (attempt ${i + 1}/${maxRetries})`);
                 await new Promise(resolve => setTimeout(resolve, delay));
                 delay *= 2; // Exponential backoff
             }

@@ -13,9 +13,6 @@ export const getFinancialRelief = async (nim) => {
             throw new Error('Authentication token not found');
         }
 
-        console.log('Fetching financial data for NIM:', nim);
-        console.log('API URL:', getApiUrl(`/faculty/analisisFinansial/${nim}`));
-
         // Make the API request
         const response = await fetch(getApiUrl(`/faculty/analisisFinansial/${nim}`), {
             method: 'GET',
@@ -176,7 +173,6 @@ export const sendFinancialResponse = async (id, action) => {
             throw new Error('Authentication token not found');
         }
 
-        console.log(`Sending ${action} response for financial request ID:`, id);
 
         // Make the API request
         const response = await fetch(getApiUrl(`/faculty/analisisFinansial/responseFinancial/${id}`), {
@@ -195,7 +191,6 @@ export const sendFinancialResponse = async (id, action) => {
             throw new Error(result.message || `Failed to ${action} financial request`);
         }
 
-        console.log(`Financial request ${action} successful:`, result);
         return result;
 
     } catch (error) {

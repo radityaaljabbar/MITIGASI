@@ -186,9 +186,6 @@ export default function DaftarMahasiswaWali() {
                 finansial: parseInt(currentStudent.status_fin) || 0,
             };
 
-            console.log('Sending prediction data for NIM:', currentStudent.nim);
-            console.log('Prediction data:', predictionData);
-
             // Call ML prediction service
             const result = await mlPredictionService.predictStudentStatus(
                 currentStudent.nim,
@@ -198,7 +195,6 @@ export default function DaftarMahasiswaWali() {
             if (result.success) {
                 setPredictionResult(result.data);
                 setShowPrediction(true);
-                console.log('Prediction successful:', result.data);
 
                 // Show success message if saved to database
                 if (result.data.database_saved) {

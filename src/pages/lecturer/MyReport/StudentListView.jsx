@@ -6,8 +6,6 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterKelas, setFilterKelas] = useState('');
 
-    console.log('StudentListView received students:', students);
-
     // Filter students based on search and class
     const filteredStudents = students.filter((student) => {
         // Add null checks for all properties

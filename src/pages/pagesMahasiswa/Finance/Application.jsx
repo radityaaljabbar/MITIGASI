@@ -105,7 +105,6 @@ const TuitionReliefForm = () => {
     try {
       // Simulasi proses validasi lokal - akan dilanjutkan dengan pengiriman ke server via useEffect
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Form data validated:', formData);
       
       // Set status submitted untuk trigger useEffect
       setIsSubmitted(true);

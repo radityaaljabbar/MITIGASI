@@ -73,7 +73,6 @@ export const sendPsiResult = async (psiTestData) => {
             body: JSON.stringify(psiTestData),
         });
 
-        // console.log('Ini dari file service:', psiTestData);
         const data = await response.json();
 
         // Check if response was successful
