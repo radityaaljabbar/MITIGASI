@@ -172,7 +172,6 @@ export const getFeedbackList = async () => {
 
         const foundData = findDataArray(rawData);
         if (foundData) {
-
             const formattedData = foundData.map((item) => ({
                 feedbackId: item.id_keluhan,
                 nim: item.nim || '',
@@ -384,7 +383,6 @@ export const getFeedbackResponse = async (id) => {
         const responseItem = findResponseData(rawData);
 
         if (responseItem) {
-
             return {
                 success: true,
                 data: {
@@ -427,12 +425,8 @@ export const getFeedbackResponse = async (id) => {
 export const sendResponse = async (responseData) => {
     try {
         const token = localStorage.getItem('token');
-
         if (!token) {
-            return {
-                success: false,
-                message: 'Token tidak ditemukan',
-            };
+            return { success: false, message: 'Token tidak ditemukan' };
         }
 
         const response = await fetch(getApiUrl('/faculty/sendResponDosWal'), {
@@ -444,33 +438,28 @@ export const sendResponse = async (responseData) => {
             body: JSON.stringify(responseData),
         });
 
+        console.log('HTTP Status:', response.status, response.statusText);
+
         if (!response.ok) {
-            console.error(
-                `HTTP Error: ${response.status} ${response.statusText}`
-            );
             return {
                 success: false,
-                message: `Server error: ${response.status} ${response.statusText}`,
+                message: `HTTP Error: ${response.status}`,
             };
         }
 
         const data = await response.json();
 
+        // Always return success if we got here and there's no explicit error
         return {
-            success: data && data.status === 'success',
-            message: data ? data.message : 'No message from server',
-            data:
-                data && data.payload && data.payload.payload
-                    ? data.payload.payload // Doubly nested payload
-                    : data && data.payload
-                    ? data.payload
-                    : {}, // Single nested payload or empty
+            success: true,
+            message: data.message || 'Tanggapan berhasil dikirim',
+            data: data.payload || {},
         };
     } catch (error) {
-        console.error('Error in sendResponse:', error);
+        console.error('Network error:', error);
         return {
             success: false,
-            message: `Network error: ${error.message || 'Unknown error'}`,
+            message: `Error: ${error.message || 'Unknown error'}`,
         };
     }
 };

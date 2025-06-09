@@ -4,8 +4,6 @@
         └── App.jsx
         └── 📁assets
             └── 📁data
-                └── 📁database
-                    └── mitigasi.sql
                 └── feedback.json
                 └── 📁mockupjsonDosenWali
                     └── dataDosen.json
@@ -165,13 +163,16 @@
     └── .env.development
     └── .env.production
     └── .gitignore
+    └── Dockerfile
     └── eslint.config.js
     └── index.html
+    └── nginx.conf
     └── package-lock.json
     └── package.json
     └── postcss.config.js
     └── projectFolderStructure.md
     └── README.md
+    └── start.sh
     └── tailwind.config.js
     └── test.txt
     └── vite.config.js

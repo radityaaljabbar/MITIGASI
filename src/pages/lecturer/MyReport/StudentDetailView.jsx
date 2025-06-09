@@ -13,54 +13,54 @@ import {
 import {
     getFeedbackResponse,
     getFeedbackDetail,
-    sendResponse as apiSendResponse,
+    sendResponse,
 } from '../../../services/dosenWali/myReport/listFeedbackMahasiswaService';
 
 // Direct implementation of sendResponse to ensure it works properly
-const sendResponse = async (responseData) => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            return { success: false, message: 'Token tidak ditemukan' };
-        }
+// const sendResponse = async (responseData) => {
+//     try {
+//         const token = localStorage.getItem('token');
+//         if (!token) {
+//             return { success: false, message: 'Token tidak ditemukan' };
+//         }
 
-        const response = await fetch(
-            'https://capstone-backend-local-1059248723043.asia-southeast2.run.app/api/faculty/sendResponDosWal',
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(responseData),
-            }
-        );
+//         const response = await fetch(
+//             'https://capstone-backend-local-1059248723043.asia-southeast2.run.app/api/faculty/sendResponDosWal',
+//             {
+//                 method: 'POST',
+//                 headers: {
+//                     Authorization: `Bearer ${token}`,
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify(responseData),
+//             }
+//         );
 
-        console.log('HTTP Status:', response.status, response.statusText);
+//         console.log('HTTP Status:', response.status, response.statusText);
 
-        if (!response.ok) {
-            return {
-                success: false,
-                message: `HTTP Error: ${response.status}`,
-            };
-        }
+//         if (!response.ok) {
+//             return {
+//                 success: false,
+//                 message: `HTTP Error: ${response.status}`,
+//             };
+//         }
 
-        const data = await response.json();
+//         const data = await response.json();
 
-        // Always return success if we got here and there's no explicit error
-        return {
-            success: true,
-            message: data.message || 'Tanggapan berhasil dikirim',
-            data: data.payload || {},
-        };
-    } catch (error) {
-        console.error('Network error:', error);
-        return {
-            success: false,
-            message: `Error: ${error.message || 'Unknown error'}`,
-        };
-    }
-};
+//         // Always return success if we got here and there's no explicit error
+//         return {
+//             success: true,
+//             message: data.message || 'Tanggapan berhasil dikirim',
+//             data: data.payload || {},
+//         };
+//     } catch (error) {
+//         console.error('Network error:', error);
+//         return {
+//             success: false,
+//             message: `Error: ${error.message || 'Unknown error'}`,
+//         };
+//     }
+// };
 
 const StudentDetailView = ({ student, onBack }) => {
     const [responseText, setResponseText] = useState('');

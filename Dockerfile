@@ -5,9 +5,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
 
-# ---
+# Set NODE_ENV untuk production build
+ENV NODE_ENV=production
+ENV VITE_MODE=production
+
+RUN npm run build
 
 # Stage 2: Serve the built application with Nginx
 FROM nginx:stable-alpine
