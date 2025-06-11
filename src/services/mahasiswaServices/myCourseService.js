@@ -85,6 +85,9 @@ export const getRecommendedCourse = async () => {
             message:
                 result.message || 'successfully fetch recommended course data',
             data: result.data || [],
+            groupedData: result.groupedData || {},
+            totalRecommendations: result.totalRecommendations || 0,
+            semesterCount: result.semesterCount || 0,
         };
     } catch (error) {
         console.error('Error fetching recommended courses: ', error);
