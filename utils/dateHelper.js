@@ -25,31 +25,41 @@ const formatDateFromMySQL = (mysqlDate) => {
 };
 
 /**
- * Get current datetime in MySQL format
- * @returns {string} - Current datetime for MySQL
+ * Get current datetime in MySQL format with Indonesia timezone (WIB)
+ * @returns {string} - Current datetime for MySQL in Indonesia timezone
  */
 const getCurrentMySQLDateTime = () => {
-    return formatDateForMySQL(new Date());
+    // MySQL server masih SYSTEM (UTC), jadi kita add 7 jam untuk WIB
+    const now = new Date();
+    const wibTime = new Date(now.getTime() + 7 * 60 * 60 * 1000); // Add 7 hours
+    return wibTime.toISOString().slice(0, 19).replace('T', ' ');
 };
 
 /**
- * Get MySQL date only (without time)
+ * Get MySQL date only (without time) in Indonesia timezone
  * @param {Date} date - Date object (defaults to current date)
  * @returns {string} - MySQL date string (YYYY-MM-DD)
  */
 const getCurrentMySQLDate = (date = new Date()) => {
-    return date.toISOString().slice(0, 10);
+    // Convert to Indonesia timezone first
+    const jakartaTime = new Date(
+        date.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })
+    );
+    return jakartaTime.toISOString().slice(0, 10);
 };
 
 /**
- * Add days to current date and return in MySQL format
+ * Add days to current date and return in MySQL format (Indonesia timezone)
  * @param {number} days - Number of days to add
  * @returns {string} - Future date in MySQL format
  */
 const addDaysToMySQLDate = (days) => {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + days);
-    return formatDateForMySQL(futureDate);
+    const now = new Date();
+    const jakartaTime = new Date(
+        now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })
+    );
+    jakartaTime.setDate(jakartaTime.getDate() + days);
+    return formatDateForMySQL(jakartaTime);
 };
 
 module.exports = {

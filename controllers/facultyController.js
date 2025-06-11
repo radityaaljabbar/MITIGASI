@@ -446,6 +446,7 @@ exports.getAvailableCourse = async (req, res) => {
  * @route POST /api/faculty/courseAdvisor/sendRekomendasiMK
  * @access Private (dosen_wali only)
  */
+
 exports.sendCourseRecommendation = async (req, res) => {
     let connection; // Declare connection variable for proper cleanup
 
@@ -460,7 +461,7 @@ exports.sendCourseRecommendation = async (req, res) => {
             });
         }
 
-        const { nim, courseCodes } = req.body;
+        const { nim, courseCodes, targetSemester } = req.body;
 
         // get kode dosen
         const kodeDosen = req.user.code;
@@ -469,11 +470,21 @@ exports.sendCourseRecommendation = async (req, res) => {
             !nim ||
             !courseCodes ||
             !Array.isArray(courseCodes) ||
-            courseCodes.length === 0
+            courseCodes.length === 0 ||
+            !targetSemester
         ) {
             return res.status(400).json({
                 success: false,
                 message: 'Data tidak lengkap atau format tidak valid',
+            });
+        }
+
+        // Validate targetSemester is a valid number between 1-14
+        const semesterNum = parseInt(targetSemester);
+        if (isNaN(semesterNum) || semesterNum < 1 || semesterNum > 14) {
+            return res.status(400).json({
+                success: false,
+                message: 'Semester tujuan harus berupa angka antara 1-14',
             });
         }
 
@@ -515,14 +526,21 @@ exports.sendCourseRecommendation = async (req, res) => {
             `Deleted ${deleteResult.affectedRows} old recommendations for NIM: ${nim}`
         );
 
-        // Masukan (insert) data ke tabel:
+        // Masukan (insert) data ke tabel dengan semester_mahasiswa:
         let insertedCount = 0;
         for (const courseCode of courseCodes) {
             await connection.execute(
                 `INSERT INTO mata_kuliah_rekomendasi 
-                (kode_mk, kode_dosen, nim_mahasiswa, tanggal_dibuat, total_sks) 
-                VALUES (?, ?, ?, ?, ?)`,
-                [courseCode, kodeDosen, nim, tanggalDibuat, totalSKS]
+                (kode_mk, kode_dosen, nim_mahasiswa, tanggal_dibuat, total_sks, semester_mahasiswa) 
+                VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    courseCode,
+                    kodeDosen,
+                    nim,
+                    tanggalDibuat,
+                    totalSKS,
+                    semesterNum,
+                ]
             );
             insertedCount++;
         }
@@ -531,7 +549,7 @@ exports.sendCourseRecommendation = async (req, res) => {
         await connection.commit();
 
         console.log(
-            `Successfully inserted ${insertedCount} new recommendations for NIM: ${nim}`
+            `Successfully inserted ${insertedCount} new recommendations for NIM: ${nim}, Semester: ${semesterNum}`
         );
 
         return res.status(200).json({
@@ -542,6 +560,7 @@ exports.sendCourseRecommendation = async (req, res) => {
                 count: courseCodes.length,
                 tanggal_dibuat: tanggalDibuat,
                 nim: nim,
+                targetSemester: semesterNum,
                 deletedOldRecommendations: deleteResult.affectedRows,
                 insertedNewRecommendations: insertedCount,
             },
