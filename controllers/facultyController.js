@@ -18,6 +18,7 @@ const {
     getKelasWaliDosen,
     getStudentInClass,
     getAvailCourses,
+    getLastSemesterIP,
 } = require('../models/dosenWaliQueries/myCourseAdvisor_Queries');
 const {
     fetchStudentTAK,
@@ -446,7 +447,6 @@ exports.getAvailableCourse = async (req, res) => {
  * @route POST /api/faculty/courseAdvisor/sendRekomendasiMK
  * @access Private (dosen_wali only)
  */
-
 exports.sendCourseRecommendation = async (req, res) => {
     let connection; // Declare connection variable for proper cleanup
 
@@ -600,6 +600,67 @@ exports.sendCourseRecommendation = async (req, res) => {
         if (connection) {
             connection.release();
         }
+    }
+};
+
+/**
+ * @desc Get IP Semester terakhir mahasiswa.
+ * @route GET /api/faculty/courseAdvisor/getLastIPSemester
+ * @access Private (dosen_wali only)
+ */
+exports.getLastIPSemester = async (req, res) => {
+    try {
+        const { nim } = req.query; // atau req.params tergantung mau gimana
+
+        // Validasi input
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM mahasiswa harus diisi',
+            });
+        }
+
+        // Call service untuk ambil data
+        const lastSemesterData = await getLastSemesterIP(nim);
+
+        if (!lastSemesterData) {
+            return res.status(404).json({
+                success: false,
+                message: 'Data IP semester tidak ditemukan untuk mahasiswa ini',
+            });
+        }
+
+        // Tentukan maksimal SKS berdasarkan IP
+        let maxSKS = 24; // default
+        const ipSemester = parseFloat(lastSemesterData.ip_semester);
+
+        if (ipSemester > 3.0) {
+            maxSKS = 24;
+        } else if (ipSemester <= 3.0) {
+            maxSKS = 20;
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Data IP semester berhasil diambil',
+            data: {
+                nim_mahasiswa: lastSemesterData.nim_mahasiswa,
+                ip_semester: lastSemesterData.ip_semester,
+                semester: lastSemesterData.semester,
+                maxSKS: maxSKS,
+                lastSemesterData: lastSemesterData,
+            },
+        });
+    } catch (error) {
+        console.error('Error in getLastIPSemester controller:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat mengambil data IP semester',
+            error:
+                process.env.NODE_ENV === 'development'
+                    ? error.message
+                    : undefined,
+        });
     }
 };
 

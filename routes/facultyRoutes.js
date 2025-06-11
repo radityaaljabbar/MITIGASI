@@ -56,6 +56,16 @@ router.post(
     facultyController.sendCourseRecommendation
 );
 
+// @desc    Endpoint backend untuk fitur MyCourseAdvisor
+// @fitur   \ MyCourseAdvisor
+// MyCourseAdvisorPage.jsx
+router.get(
+    '/courseAdvisor/getLastIPSemester',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getLastIPSemester
+);
+
 // @desc    Endpoint backend untuk fitur MyReport
 // @fitur   FR-03.1 - MyReport - Overview
 // /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx

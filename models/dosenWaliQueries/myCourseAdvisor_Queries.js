@@ -37,3 +37,29 @@ exports.getAvailCourses = async () => {
 
     return availableCourses;
 };
+
+// Fetch IP semester terakhir mahasiswa
+exports.getLastSemesterIP = async (nim) => {
+    const [result] = await pool.execute(
+        `SELECT 
+            nim_mahasiswa,
+            ip_semester,
+            semester,
+            tanggal_dibuat,
+            sks_semester,
+            tahun_ajaran,
+            jenis_semester
+         FROM persemester 
+         WHERE nim_mahasiswa = ? 
+         AND semester = (
+             SELECT MAX(semester) 
+             FROM persemester 
+             WHERE nim_mahasiswa = ?
+         )
+         ORDER BY tanggal_dibuat DESC 
+         LIMIT 1`,
+        [nim, nim]
+    );
+
+    return result.length > 0 ? result[0] : null;
+};
