@@ -57,7 +57,7 @@ const RecommendedCourses = () => {
                                 <td
                                     colSpan="6"
                                     className="py-4 px-4 text-center text-gray-500 italic">
-                                    Belum ada mata kuliah direkomendasikan
+                                    Sistem akan membuat rekomendasi setelah Anda memilih mahasiswa dan semester tujuan.
                                 </td>
                             </tr>
                         )}

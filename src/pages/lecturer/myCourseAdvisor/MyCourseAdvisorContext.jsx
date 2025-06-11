@@ -23,57 +23,45 @@ const MyCourseAdvisorContext = createContext();
 const DEFAULT_MAX_SKS = 24;
 
 export const MyCourseAdvisorProvider = ({ children }) => {
-    // State for API data
+    // ... (semua state tetap sama) ...
     const [classesList, setClassesList] = useState([]);
     const [studentsList, setStudentsList] = useState([]);
-    const [isLoading, setIsLoading] = useState(true); // General loading for initial data
-    const [isLoadingHistory, setIsLoadingHistory] = useState(false); // Specific loading for course history
-    const [isLoadingCourses, setIsLoadingCourses] = useState(false); // Loading state for available courses
-
-    // Selection state variables
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [isLoadingCourses, setIsLoadingCourses] = useState(false);
     const [selectedClass, setSelectedClass] = useState('');
-    const [selectedStudent, setSelectedStudent] = useState(''); // This will be the 'nim' for the service
+    const [selectedStudent, setSelectedStudent] = useState('');
     const [selectedSemester, setSelectedSemester] = useState('');
-    const [targetSemester, setTargetSemester] = useState(''); // For recommendation target semester
-
-    // Dynamic SKS limit based on student IP
+    const [targetSemester, setTargetSemester] = useState('');
     const [maxSKS, setMaxSKS] = useState(DEFAULT_MAX_SKS);
-
-    // Course data state
-    const [availableCourses, setAvailableCourses] = useState([]); // Initialize as empty array
+    const [availableCourses, setAvailableCourses] = useState([]);
     const [staticAvailableCoursesData, setStaticAvailableCoursesData] =
-        useState([]); // To store initial fetch
+        useState([]);
     const [recommendedCourses, setRecommendedCourses] = useState([]);
-    const [studentCourseHistory, setStudentCourseHistory] = useState([]); // This will store the result from your service
-    const [mergedCourseHistory, setMergedCourseHistory] = useState([]); // This is displayed in the table
+    const [studentCourseHistory, setStudentCourseHistory] = useState([]);
+    const [mergedCourseHistory, setMergedCourseHistory] = useState([]);
     const [sksLimitExceeded, setSksLimitExceeded] = useState(false);
 
-    // Calculate total SKS of recommended courses
     const totalRecommendedSKS = recommendedCourses.reduce(
         (total, course) => total + course.sks,
         0
     );
 
-    // Fetch classes and students data when component mounts
     useEffect(() => {
+        // ... (fungsi fetch data awal tetap sama) ...
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const result = await getClassAndStudentList();
-                if (result.success) {
-                    const formattedClasses = result.classesList.map(
-                        (className, index) => ({
-                            id: `class_${index}`,
-                            name: className,
-                        })
+                const classStudentResult = await getClassAndStudentList();
+                if (classStudentResult.success) {
+                    const formattedClasses = classStudentResult.classesList.map(
+                        (className, index) => ({ id: `class_${index}`, name: className })
                     );
                     const classNameToIdMap = {};
-                    formattedClasses.forEach((cls) => {
-                        classNameToIdMap[cls.name] = cls.id;
-                    });
-                    const formattedStudents = result.studentsList.map(
+                    formattedClasses.forEach((cls) => { classNameToIdMap[cls.name] = cls.id; });
+                    const formattedStudents = classStudentResult.studentsList.map(
                         (student) => ({
-                            id: student.id, // Assuming student.id is the NIM
+                            id: student.id,
                             name: student.name,
                             classId: classNameToIdMap[student.class] || null,
                         })
@@ -81,316 +69,338 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     setClassesList(formattedClasses);
                     setStudentsList(formattedStudents);
                 } else {
-                    toast.error(result.message || 'Failed to fetch data');
+                    toast.error(classStudentResult.message || 'Failed to fetch class/student data');
                 }
             } catch (error) {
-                console.error('Error fetching data:', error);
-                toast.error('An error occurred while fetching data');
+                console.error('Error fetching class/student data:', error);
+                toast.error('An error occurred while fetching class/student data');
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchData();
 
-        // Fetch available courses
         const fetchAvailableCourses = async () => {
             setIsLoadingCourses(true);
             try {
-                const result = await getAvailableCourse();
-                if (result.success) {
-                    setAvailableCourses(result.availableCourses);
-                    setStaticAvailableCoursesData(result.availableCourses);
+                const courseResult = await getAvailableCourse();
+                if (courseResult.success) {
+                    const coursesWithId = courseResult.availableCourses.map((c, i) => ({...c, id: c.id || `course_${i}`}));
+                    setAvailableCourses(coursesWithId);
+                    setStaticAvailableCoursesData(coursesWithId);
                 } else {
-                    toast.error(
-                        result.message || 'Failed to fetch available courses'
-                    );
+                    toast.error(courseResult.message || 'Failed to fetch available courses');
                 }
             } catch (error) {
                 console.error('Error fetching available courses:', error);
-                toast.error(
-                    'An error occurred while fetching available courses'
-                );
+                toast.error('An error occurred while fetching available courses');
             } finally {
                 setIsLoadingCourses(false);
             }
         };
+
+        fetchData();
         fetchAvailableCourses();
     }, []);
 
-    // Fetch student IP data and set max SKS when student is selected
+    // Fetch student-specific data (IP and Course History) when selection changes
     useEffect(() => {
         if (!selectedStudent) {
             setMaxSKS(DEFAULT_MAX_SKS);
+            setStudentCourseHistory([]);
             return;
         }
 
         const fetchStudentIP = async () => {
             try {
                 const result = await getLastIPSemester(selectedStudent);
-                if (result.success) {
-                    setMaxSKS(result.maxSKS);
-                } else {
-                    setMaxSKS(DEFAULT_MAX_SKS); // Fallback to default
-                    toast.warn(
-                        'Data IP tidak ditemukan, menggunakan batas SKS default (24)'
-                    );
+                setMaxSKS(result.success ? result.maxSKS : DEFAULT_MAX_SKS);
+                if(result.success && result.maxSKS < DEFAULT_MAX_SKS) {
+                    toast.info(`Batas SKS mahasiswa adalah ${result.maxSKS} karena IP semester lalu di bawah 3.00.`);
                 }
             } catch (error) {
-                console.error('Error fetching student IP:', error);
                 setMaxSKS(DEFAULT_MAX_SKS);
+                toast.warn('Data IP tidak ditemukan, menggunakan batas SKS default (24)');
             }
         };
+
+        // =========================================================================
+        // === PERUBAHAN DI SINI ===
+        // =========================================================================
+        const fetchCourseHistory = async () => {
+            setIsLoadingHistory(true);
+            try {
+                const result = await getStudentCourseHistory(selectedStudent);
+                
+                if (result.success) {
+                    setStudentCourseHistory(result.courseHistory || []);
+                    // Tampilkan pesan peringatan dari backend jika ada
+                    if (result.message) {
+                        toast.warn(result.message);
+                    }
+                } else {
+                    // Jika proses gagal total, tampilkan sebagai error
+                    setStudentCourseHistory([]);
+                    toast.error(result.message || 'Gagal memuat riwayat mata kuliah');
+                }
+
+            } catch (error) {
+                setStudentCourseHistory([]);
+                toast.error('Terjadi kesalahan saat memuat riwayat mata kuliah');
+            } finally {
+                setIsLoadingHistory(false);
+            }
+        };
+        // =========================================================================
 
         fetchStudentIP();
+        fetchCourseHistory();
     }, [selectedStudent]);
-
-    // Fetch student course history when both student and target semester are selected
+    
+    // ... (semua logika dan fungsi lain tetap sama) ...
     useEffect(() => {
-        if (!selectedStudent || !targetSemester) {
-            // Only fetch when both selectedStudent and targetSemester are selected
-            setStudentCourseHistory([]);
-            // mergedCourseHistory will be cleared by its own useEffect
+        // Guard clause: Do not run if essential data is not yet loaded/selected.
+        if (
+            !selectedStudent || !targetSemester || isLoadingHistory || isLoadingCourses ||
+            !staticAvailableCoursesData.length || !studentCourseHistory
+        ) {
+            if (!selectedStudent || !targetSemester) {
+                setRecommendedCourses([]);
+                setAvailableCourses([...staticAvailableCoursesData]);
+            }
             return;
         }
 
-        const fetchCourseHistory = async () => {
-            setIsLoadingHistory(true); // Start loading history
-            try {
-                // Call your service function with the selected student's ID (NIM)
-                const result = await getStudentCourseHistory(selectedStudent);
+        const generateRecommendations = () => {
+            let recommendations = [];
+            let currentSKS = 0;
+            let availableForPicking = [...staticAvailableCoursesData];
 
-                if (result.success) {
-                    // The service already transforms the data, so result.courseHistory should be an array
-                    setStudentCourseHistory(result.courseHistory || []);
-                } else {
-                    toast.error(
-                        result.message || 'Failed to fetch course history'
-                    );
-                    setStudentCourseHistory([]); // Clear history on failure
+            const targetSemesterInt = parseInt(targetSemester, 10);
+            if (isNaN(targetSemesterInt)) return; // Safety check
+
+            const isTargetSemesterOdd = targetSemesterInt % 2 !== 0;
+
+            const mapToRecommendedFormat = (course) => ({
+                id: course.id,
+                kodeMataKuliah: course.kode_mk,
+                namaMataKuliah: course.nama_mk,
+                sks: course.sks_mk,
+                jenis: course.jenis_mk,
+                semester_mk: course.semester_mk,
+            });
+
+            const addCourseToPlan = (course) => {
+                const recCourse = mapToRecommendedFormat(course);
+                if (recommendations.some(r => r.id === recCourse.id)) return false; 
+                if (currentSKS + recCourse.sks <= maxSKS) {
+                    recommendations.push(recCourse);
+                    currentSKS += recCourse.sks;
+                    availableForPicking = availableForPicking.filter(c => c.id !== course.id);
+                    return true;
                 }
-            } catch (error) {
-                console.error('Error fetching student course history:', error);
-                toast.error('An error occurred while fetching course history');
-                setStudentCourseHistory([]); // Clear history on error
-            } finally {
-                setIsLoadingHistory(false); // Stop loading history
+                return false; 
+            };
+            
+            // Logic to use course names as the key for matching
+            const courseAttemptsByName = new Map();
+            studentCourseHistory.forEach(h => {
+                const name = h.namaMataKuliah?.trim();
+                if (!name) return; 
+                if (!courseAttemptsByName.has(name)) courseAttemptsByName.set(name, []);
+                courseAttemptsByName.get(name).push(h);
+            });
+
+            const retakeCourseNames = new Set();
+            const passedCourseNames = new Set();
+            const allPassingGrades = ['A', 'B', 'C', 'D', 'AB', 'BC'];
+
+            courseAttemptsByName.forEach((attempts, name) => {
+                attempts.sort((a, b) => (parseInt(b.semester, 10) || 0) - (parseInt(a.semester, 10) || 0));
+                const lastAttempt = attempts[0];
+                const lastIndeks = lastAttempt?.indeks?.trim().toUpperCase();
+
+                if (['E', 'T'].includes(lastIndeks)) {
+                    retakeCourseNames.add(name);
+                } else if (allPassingGrades.includes(lastIndeks)) {
+                    passedCourseNames.add(name);
+                }
+            });
+
+            // PRIORITY 1: Add courses that must be retaken.
+            retakeCourseNames.forEach(name => {
+                const courseData = staticAvailableCoursesData.find(c => c.nama_mk?.trim() === name);
+                if (courseData) {
+                    const courseSemesterInt = parseInt(courseData.semester_mk, 10);
+                    if (isNaN(courseSemesterInt)) return;
+
+                    const isSemesterNotTooHigh = courseSemesterInt <= targetSemesterInt;
+                    const isSemesterTypeMatch = (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+
+                    if (isSemesterNotTooHigh && isSemesterTypeMatch) {
+                         addCourseToPlan(courseData);
+                    }
+                }
+            });
+            
+            // PRIORITY 2: Fill remaining SKS with new mandatory courses.
+            const allTakenNames = new Set([...passedCourseNames, ...retakeCourseNames]);
+
+            const newMandatoryCourses = staticAvailableCoursesData
+                .filter(course => {
+                    const courseName = course.nama_mk?.trim();
+                    if(!courseName) return false;
+                    
+                    const courseSemesterInt = parseInt(course.semester_mk, 10);
+                    if (isNaN(courseSemesterInt)) return false;
+
+                    const isMandatory = course.jenis_mk === 'WAJIB PRODI';
+                    const isNew = !allTakenNames.has(courseName);
+                    
+                    const isSemesterNotTooHigh = courseSemesterInt <= targetSemesterInt;
+                    const isSemesterTypeMatch = (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+
+                    return isMandatory && isNew && isSemesterTypeMatch && isSemesterNotTooHigh;
+                })
+                .sort((a, b) => parseInt(a.semester_mk, 10) - parseInt(b.semester_mk, 10));
+
+            newMandatoryCourses.forEach(course => {
+                addCourseToPlan(course);
+            });
+
+            setRecommendedCourses(recommendations);
+            setAvailableCourses(availableForPicking);
+
+            if(recommendations.length > 0) {
+                 toast.success('Rekomendasi mata kuliah otomatis telah dibuat.');
+            } else {
+                 toast.info('Tidak ada rekomendasi otomatis yang dapat dibuat sesuai aturan.');
             }
         };
 
-        fetchCourseHistory();
-    }, [selectedStudent, targetSemester]); // This effect runs whenever selectedStudent OR targetSemester changes
-
-    // Filter students based on selected class - memoized to avoid recalculation
-    const filteredStudents = useMemo(() => {
-        return selectedClass
-            ? studentsList.filter(
-                  (student) => student.classId === selectedClass
-              )
-            : [];
-    }, [selectedClass, studentsList]);
-
-    // Merge course history with available courses data to get complete information
-    useEffect(() => {
-        if (
-            !selectedStudent ||
-            !targetSemester ||
-            studentCourseHistory.length === 0
-        ) {
-            setMergedCourseHistory([]);
-            return;
-        }
-
-        const merged = studentCourseHistory.map((historyItem) => {
-            // Find additional/canonical course details from staticAvailableCoursesData
-            const courseDetails = staticAvailableCoursesData.find(
-                (course) => course.kodeMataKuliah === historyItem.kodeMataKuliah
-            );
-
-            if (courseDetails) {
-                // Merge, giving preference to courseDetails for some fields if needed
-                return {
-                    ...historyItem, // Base data from API
-                    id:
-                        historyItem.id ||
-                        `history_${courseDetails.kodeMataKuliah}`, // Ensure ID, prefer API's generated one
-                    namaMataKuliah:
-                        courseDetails.namaMataKuliah ||
-                        historyItem.namaMataKuliah, // Prefer static data's name if available
-                    sks: courseDetails.sks || historyItem.sks, // Prefer static data's SKS
-                    jenis: courseDetails.jenis || historyItem.jenis, // Prefer static data's type
-                    tingkat: courseDetails.semester || historyItem.tingkat, // Prefer static data's semester for tingkat
-                };
-            } else {
-                // If not found in static data, use the history item as is from the API
-                return historyItem;
-            }
-        });
-
-        setMergedCourseHistory(merged);
+        generateRecommendations();
     }, [
         selectedStudent,
         targetSemester,
-        studentCourseHistory,
-        staticAvailableCoursesData,
+        studentCourseHistory, 
+        maxSKS, 
+        isLoadingHistory,
+        isLoadingCourses
     ]);
+    
+    useEffect(() => {
+        if (!studentCourseHistory || studentCourseHistory.length === 0) {
+            setMergedCourseHistory([]);
+            return;
+        }
+        const merged = studentCourseHistory.map((historyItem) => {
+            const details = staticAvailableCoursesData.find(c => c.nama_mk === historyItem.namaMataKuliah);
+            return details ? {
+                ...historyItem,
+                id: historyItem.id || `hist_${details.id}`,
+                kodeMataKuliah: historyItem.kodeMataKuliah,
+                namaMataKuliah: details.nama_mk,
+                sks: details.sks_mk,
+                jenis: details.jenis_mk,
+            } : historyItem;
+        });
+        setMergedCourseHistory(merged);
+    }, [studentCourseHistory, staticAvailableCoursesData]);
 
-    // Handler functions
+    const filteredStudents = useMemo(() => {
+        return selectedClass ? studentsList.filter(s => s.classId === selectedClass) : [];
+    }, [selectedClass, studentsList]);
+
+    const resetFormStates = () => {
+        setSelectedStudent('');
+        setTargetSemester('');
+        setRecommendedCourses([]);
+        setAvailableCourses([...staticAvailableCoursesData]);
+        setMaxSKS(DEFAULT_MAX_SKS);
+        setSksLimitExceeded(false);
+    }
     const handleClassChange = (e) => {
         setSelectedClass(e.target.value);
-        setSelectedStudent('');
-        setTargetSemester(''); // Reset target semester when class changes
-        setRecommendedCourses([]);
-        setMaxSKS(DEFAULT_MAX_SKS); // Reset to default
-        setSksLimitExceeded(false);
+        resetFormStates();
     };
-
     const handleStudentChange = (e) => {
-        setSelectedStudent(e.target.value); // This triggers the course history fetch AND IP fetch
-        setTargetSemester(''); // Reset target semester when student changes
+        setSelectedStudent(e.target.value);
+        setTargetSemester('');
         setRecommendedCourses([]);
+        setAvailableCourses([...staticAvailableCoursesData]);
         setSksLimitExceeded(false);
     };
-
-    const handleSemesterChange = (e) => {
-        setSelectedSemester(e.target.value);
-    };
-
-    // Handler for target semester
     const handleTargetSemesterChange = (e) => {
         setTargetSemester(e.target.value);
     };
+    const handleSemesterChange = (e) => setSelectedSemester(e.target.value);
 
     const addCourse = (course) => {
-        const newTotalSKS = totalRecommendedSKS + course.sks;
-        if (newTotalSKS > maxSKS) {
+        if (wouldExceedSKSLimit(course.sks)) {
             setSksLimitExceeded(true);
+            toast.error(`Tidak dapat menambahkan. Batas ${maxSKS} SKS akan terlampaui.`);
             return;
         }
-        setAvailableCourses((prevCourses) =>
-            prevCourses.filter((c) => c.id !== course.id)
-        );
-        setRecommendedCourses((prevCourses) => [...prevCourses, course]);
+        setAvailableCourses(prev => prev.filter(c => c.id !== course.id));
+        setRecommendedCourses(prev => [...prev, course]);
         setSksLimitExceeded(false);
     };
 
     const removeCourse = (course) => {
-        setRecommendedCourses((prevCourses) =>
-            prevCourses.filter((c) => c.id !== course.id)
-        );
-        setAvailableCourses((prevCourses) => [...prevCourses, course]);
+        setRecommendedCourses(prev => prev.filter(c => c.id !== course.id));
+        const courseToAddBack = staticAvailableCoursesData.find(c => c.id === course.id);
+        if (courseToAddBack && !availableCourses.some(c => c.id === courseToAddBack.id)) {
+            setAvailableCourses(prev => [...prev, courseToAddBack]);
+        }
         setSksLimitExceeded(false);
     };
 
     const resetAvailableCourses = () => {
-        setAvailableCourses([...staticAvailableCoursesData]);
+        toast.info("Perubahan manual di-reset. Pilih ulang semester tujuan untuk menjalankan ulang rekomendasi otomatis.");
         setRecommendedCourses([]);
+        setAvailableCourses([...staticAvailableCoursesData]);
         setSksLimitExceeded(false);
     };
 
-    // Kirim rekomendasi mata kuliah
     const sendRecommendations = async () => {
-        if (!selectedStudent) {
-            toast.warn('Pilih mahasiswa terlebih dahulu!');
+        if (!selectedStudent || !targetSemester || recommendedCourses.length === 0) {
+            toast.warn('Pastikan mahasiswa, semester tujuan, dan rekomendasi sudah terisi.');
             return;
         }
-        if (recommendedCourses.length === 0) {
-            toast.warn('Tambahkan mata kuliah rekomendasi terlebih dahulu');
+        if (totalRecommendedSKS > maxSKS) {
+            toast.error(`Total SKS (${totalRecommendedSKS}) melebihi batas (${maxSKS}).`);
             return;
         }
-        if (!targetSemester) {
-            toast.warn('Pilih semester tujuan rekomendasi terlebih dahulu!');
-            return;
-        }
-
+        const toastId = toast.loading('Mengirim rekomendasi...');
         try {
-            // Show toast loading:
-            const toastId = toast.loading(
-                'Mengirim rekomendasi mata kuliah. . .'
-            );
-
-            // Panggil fungsi dari file service untuk nerusin data ke backend
-            const result = await sendRecommendedCourses(
-                selectedStudent,
-                recommendedCourses,
-                targetSemester
-            );
-
-            // Update toast berdasarkan hasil
+            const result = await sendRecommendedCourses(selectedStudent, recommendedCourses, targetSemester);
+            console.log(recommendedCourses)
             if (result.success) {
-                toast.update(toastId, {
-                    render: 'Rekomendasi mata kuliah berhasil dikirim!',
-                    type: 'success',
-                    isLoading: false,
-                    autoClose: 3000,
-                });
-                // Reset form setelah sukses submit
-                resetAvailableCourses();
+                toast.update(toastId, { render: 'Rekomendasi berhasil dikirim!', type: 'success', isLoading: false, autoClose: 3000 });
+                setSelectedClass('');
+                resetFormStates();
             } else {
-                toast.update(toastId, {
-                    render: result.message || 'Gagal mengirim rekomendasi',
-                    type: 'error',
-                    isLoading: false,
-                    autoClose: 5000,
-                });
+                toast.update(toastId, { render: result.message || 'Gagal mengirim rekomendasi', type: 'error', isLoading: false, autoClose: 5000 });
             }
         } catch (error) {
-            console.error('Error in sendRecommendations:', error);
+            toast.dismiss(toastId);
             toast.error('Terjadi kesalahan saat mengirim rekomendasi');
         }
     };
 
-    const wouldExceedSKSLimit = (courseSKS) => {
-        return totalRecommendedSKS + courseSKS > maxSKS;
-    };
+    const wouldExceedSKSLimit = (courseSKS) => totalRecommendedSKS + courseSKS > maxSKS;
 
     const filteredAvailableCourses = useMemo(() => {
-        if (!selectedSemester) {
-            return availableCourses;
-        }
-        return availableCourses.filter((course) => {
-            // Check semester field names
-            const courseSemester = course.semester_mk;
-            // Convert both to strings for consistent comparison
-            return String(courseSemester) === String(selectedSemester);
-        });
+        if (!selectedSemester) return availableCourses;
+        return availableCourses.filter(c => String(c.semester_mk) === String(selectedSemester));
     }, [availableCourses, selectedSemester]);
 
-    // Values to provide in context
     const contextValue = {
-        // States
-        classesList,
-        studentsList,
-        isLoading,
-        isLoadingHistory,
-        isLoadingCourses,
-        selectedClass,
-        selectedStudent,
-        selectedSemester,
-        targetSemester,
-        maxSKS,
-        availableCourses,
-        staticAvailableCoursesData,
-        recommendedCourses,
-        studentCourseHistory,
-        mergedCourseHistory,
-        sksLimitExceeded,
-        totalRecommendedSKS,
-        filteredStudents,
-        filteredAvailableCourses,
-
-        // Functions
-        setSelectedClass,
-        setSelectedStudent,
-        setSelectedSemester,
-        setTargetSemester,
-        handleClassChange,
-        handleStudentChange,
-        handleSemesterChange,
-        handleTargetSemesterChange,
-        addCourse,
-        removeCourse,
-        resetAvailableCourses,
-        sendRecommendations,
+        classesList, studentsList, isLoading, isLoadingHistory, isLoadingCourses,
+        selectedClass, selectedStudent, selectedSemester, targetSemester, maxSKS,
+        availableCourses, recommendedCourses, studentCourseHistory, mergedCourseHistory,
+        sksLimitExceeded, totalRecommendedSKS, filteredStudents, filteredAvailableCourses,
+        handleClassChange, handleStudentChange, handleSemesterChange, handleTargetSemesterChange,
+        addCourse, removeCourse, resetAvailableCourses, sendRecommendations,
         wouldExceedSKSLimit,
     };
 
@@ -401,15 +411,10 @@ export const MyCourseAdvisorProvider = ({ children }) => {
     );
 };
 
-// Custom hook to use the context
-function useMyCourseAdvisorHook() {
+export function useMyCourseAdvisor() {
     const context = useContext(MyCourseAdvisorContext);
     if (!context) {
-        throw new Error(
-            'useMyCourseAdvisor must be used within a MyCourseAdvisorProvider'
-        );
+        throw new Error('useMyCourseAdvisor must be used within a MyCourseAdvisorProvider');
     }
     return context;
 }
-
-export const useMyCourseAdvisor = useMyCourseAdvisorHook;

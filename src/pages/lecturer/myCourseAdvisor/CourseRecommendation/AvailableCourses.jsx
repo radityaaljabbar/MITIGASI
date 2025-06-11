@@ -41,8 +41,8 @@ const AvailableCourses = () => {
             {sksLimitExceeded && (
                 <div className="mb-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700">
                     <p>
-                        Tidak dapat menambahkan mata kuliah. Batas maksimum{' '}
-                        {MAX_SKS} SKS terlampaui.
+                        Tidak dapat menambahkan mata kuliah. Batas maksimum SKS
+                        terlampaui.
                     </p>
                 </div>
             )}
@@ -64,7 +64,6 @@ const AvailableCourses = () => {
                         {filteredAvailableCourses.length > 0 ? (
                             filteredAvailableCourses
                                 .sort((a, b) => {
-                                    // Safely access the properties with fallbacks
                                     const aName = a.nama_mk || '';
                                     const bName = b.nama_mk || '';
                                     return aName.localeCompare(bName);
@@ -99,7 +98,7 @@ const AvailableCourses = () => {
                                             key={course.id}
                                             className={`border-b hover:bg-gray-50 ${failedCourseHighlight} ${
                                                 exceedsSKSLimit
-                                                    ? 'bg-red-50'
+                                                    ? 'bg-red-50 opacity-60'
                                                     : ''
                                             }`}>
                                             <td className="py-2 px-4 border-r">
@@ -121,15 +120,12 @@ const AvailableCourses = () => {
                                                 <button
                                                     onClick={() =>
                                                         addCourse({
-                                                            ...course,
-                                                            kodeMataKuliah:
-                                                                course.kode_mk,
-                                                            namaMataKuliah:
-                                                                course.nama_mk,
+                                                            id: course.id,
+                                                            kodeMataKuliah: course.kode_mk,
+                                                            namaMataKuliah: course.nama_mk,
                                                             sks: course.sks_mk,
                                                             jenis: course.jenis_mk,
-                                                            semester:
-                                                                course.semester,
+                                                            semester_mk: course.semester_mk,
                                                         })
                                                     }
                                                     disabled={exceedsSKSLimit}

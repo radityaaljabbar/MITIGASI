@@ -190,8 +190,11 @@ export const sendRecommendedCourses = async (
                 message: 'No token found',
             };
         }
-
-        const courseCodes = recommendedCourses.map((course) => course.kode_mk);
+        
+        // Mengambil 'kodeMataKuliah' dari setiap objek di array 'recommendedCourses'
+        const courseCodes = recommendedCourses.map(
+            (course) => course.kodeMataKuliah
+        );
 
         const requestData = {
             nim: nim,
