@@ -23,7 +23,7 @@ const {
     fetchStudentSKSTotal,
     fetchStudentIPK,
     fetchStudentIPS,
-    fetchStudentStatus
+    fetchStudentStatus,
 } = require('../models/mahasiswaQueries/MyProgress');
 
 const {
@@ -67,7 +67,7 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
             rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
         const ipkValue = rowsIPK.length > 0 ? rowsIPK[0].ipk_lulus : 0;
         const ipsValue = [];
-        const statusValue = rowsStatus[0].hasil_klasifikasi
+        const statusValue = rowsStatus[0].hasil_klasifikasi;
 
         rowsIPS.forEach((row) => {
             if (row.semester && row.ip_semester !== null) {
@@ -83,7 +83,7 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
         console.log('tak: ', takValue);
         console.log('sks total: ', sksTotalValue);
         console.log('ips: ', ipsValue);
-        console.log('klasifikasi akademik: ', statusValue)
+        console.log('klasifikasi akademik: ', statusValue);
 
         const ipkSksTakIps = {
             ipk: ipkValue,
@@ -276,30 +276,59 @@ exports.getCourseRecommendation = async (req, res) => {
             });
         }
 
-        // get data dari query:
+        // get data dari query dengan semester_mahasiswa:
         const [mataKuliahRekomendasi] = await pool.execute(
             `SELECT mkr.kode_mk,
-                    mkb.nama_mk, mkb.kode_mk AS kode_mk_baru, mkb.sks_mk, mkb.jenis_mk
+                    mkb.nama_mk, 
+                    mkb.kode_mk AS kode_mk_baru, 
+                    mkb.sks_mk, 
+                    mkb.jenis_mk,
+                    mkr.semester_mahasiswa,
+                    mkr.tanggal_dibuat,
+                    mkr.total_sks
             FROM mata_kuliah_rekomendasi mkr
             JOIN mata_kuliah_baru mkb ON mkr.kode_mk = mkb.kode_mk
             WHERE mkr.nim_mahasiswa = ?
-            ORDER BY mkb.nama_mk`,
+            ORDER BY mkr.semester_mahasiswa ASC, mkb.nama_mk ASC`,
             [nim]
         );
 
         // Cek data ada atau tidak:
-        // console.log(mataKuliahRekomendasi);
         if (mataKuliahRekomendasi.length === 0) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
-                message: 'Belum ada rekomendasi mata kuliah',
+                message: 'Belum ada rekomendasi mata kuliah dari dosen wali',
             });
         }
+
+        // Group data by semester untuk frontend
+        const groupedBySemester = mataKuliahRekomendasi.reduce(
+            (acc, course) => {
+                const semester = course.semester_mahasiswa;
+                if (!acc[semester]) {
+                    acc[semester] = [];
+                }
+                acc[semester].push({
+                    kode_mk: course.kode_mk,
+                    nama_mk: course.nama_mk,
+                    sks_mk: course.sks_mk,
+                    jenis_mk: course.jenis_mk,
+                    semester_target: course.semester_mahasiswa,
+                    tanggal_dibuat: course.tanggal_dibuat,
+                    total_sks: course.total_sks,
+                });
+                return acc;
+            },
+            {}
+        );
 
         return res.status(200).json({
             success: true,
             data: mataKuliahRekomendasi,
+            groupedData: groupedBySemester,
             message: 'Berhasil mendapatkan data rekomendasi mata kuliah',
+            totalRecommendations: mataKuliahRekomendasi.length,
+            semesterCount: Object.keys(groupedBySemester).length,
         });
     } catch (error) {
         console.error('Error mendapatkan rekomendasi mata kuliah:', error);
