@@ -33,6 +33,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState(''); // This will be the 'nim' for the service
     const [selectedSemester, setSelectedSemester] = useState('');
+    const [targetSemester, setTargetSemester] = useState(''); // NEW: For recommendation target semester
 
     // Course data state
     const [availableCourses, setAvailableCourses] = useState([]); // Initialize as empty array
@@ -112,10 +113,10 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         fetchAvailableCourses();
     }, []);
 
-    // Fetch student course history when a student is selected
+    // Fetch student course history when both student and target semester are selected
     useEffect(() => {
-        if (!selectedStudent) {
-            // selectedStudent here is the student's ID (NIM)
+        if (!selectedStudent || !targetSemester) {
+            // Only fetch when both selectedStudent and targetSemester are selected
             setStudentCourseHistory([]);
             // mergedCourseHistory will be cleared by its own useEffect
             return;
@@ -146,7 +147,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         };
 
         fetchCourseHistory();
-    }, [selectedStudent]); // This effect runs whenever selectedStudent changes
+    }, [selectedStudent, targetSemester]); // This effect runs whenever selectedStudent OR targetSemester changes
 
     // Filter students based on selected class - memoized to avoid recalculation
     const filteredStudents = useMemo(() => {
@@ -159,7 +160,11 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
     // Merge course history with available courses data to get complete information
     useEffect(() => {
-        if (!selectedStudent || studentCourseHistory.length === 0) {
+        if (
+            !selectedStudent ||
+            !targetSemester ||
+            studentCourseHistory.length === 0
+        ) {
             setMergedCourseHistory([]);
             return;
         }
@@ -191,24 +196,36 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         });
 
         setMergedCourseHistory(merged);
-    }, [selectedStudent, studentCourseHistory, staticAvailableCoursesData]);
+    }, [
+        selectedStudent,
+        targetSemester,
+        studentCourseHistory,
+        staticAvailableCoursesData,
+    ]);
 
     // Handler functions
     const handleClassChange = (e) => {
         setSelectedClass(e.target.value);
         setSelectedStudent('');
+        setTargetSemester(''); // Reset target semester when class changes
         setRecommendedCourses([]);
         setSksLimitExceeded(false);
     };
 
     const handleStudentChange = (e) => {
         setSelectedStudent(e.target.value); // This triggers the course history fetch
+        setTargetSemester(''); // Reset target semester when student changes
         setRecommendedCourses([]);
         setSksLimitExceeded(false);
     };
 
     const handleSemesterChange = (e) => {
         setSelectedSemester(e.target.value);
+    };
+
+    // Handler for target semester
+    const handleTargetSemesterChange = (e) => {
+        setTargetSemester(e.target.value);
     };
 
     const addCourse = (course) => {
@@ -248,6 +265,10 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             toast.warn('Tambahkan mata kuliah rekomendasi terlebih dahulu');
             return;
         }
+        if (!targetSemester) {
+            toast.warn('Pilih semester tujuan rekomendasi terlebih dahulu!');
+            return;
+        }
 
         try {
             // Show toast loading:
@@ -258,7 +279,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             // Panggil fungsi dari file service untuk nerusin data ke backend
             const result = await sendRecommendedCourses(
                 selectedStudent,
-                recommendedCourses
+                recommendedCourses,
+                targetSemester
             );
 
             // Update toast berdasarkan hasil
@@ -312,6 +334,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         selectedClass,
         selectedStudent,
         selectedSemester,
+        targetSemester,
         availableCourses,
         staticAvailableCoursesData,
         recommendedCourses,
@@ -327,9 +350,11 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         setSelectedClass,
         setSelectedStudent,
         setSelectedSemester,
+        setTargetSemester,
         handleClassChange,
         handleStudentChange,
         handleSemesterChange,
+        handleTargetSemesterChange,
         addCourse,
         removeCourse,
         resetAvailableCourses,

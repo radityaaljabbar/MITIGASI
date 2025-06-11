@@ -3,7 +3,7 @@ import { getApiUrl, getAuthHeaders } from '../../../config/api';
 export const getClassAndStudentList = async () => {
     try {
         // Get dan validasi token:
-        const token = localStorage.getItem('token'); // Fixed from localStorage.localStorage
+        const token = localStorage.getItem('token');
         if (!token) {
             return {
                 success: false,
@@ -76,7 +76,6 @@ export const getStudentCourseHistory = async (nim) => {
         const data = await response.json();
 
         if (data.success) {
-
             // Transform the data to match the format expected by the component
             const studentCourseHistory = data.data.map((course, index) => {
                 // Create an object with all expected properties with proper defaults
@@ -177,7 +176,11 @@ export const getAvailableCourse = async () => {
     }
 };
 
-export const sendRecommendedCourses = async (nim, recommendedCourses) => {
+export const sendRecommendedCourses = async (
+    nim,
+    recommendedCourses,
+    targetSemester
+) => {
     try {
         // Get token dan validasi
         const token = localStorage.getItem('token');
@@ -193,6 +196,7 @@ export const sendRecommendedCourses = async (nim, recommendedCourses) => {
         const requestData = {
             nim: nim,
             courseCodes: courseCodes,
+            targetSemester: targetSemester,
         };
 
         const response = await fetch(

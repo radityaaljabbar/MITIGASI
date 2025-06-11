@@ -9,7 +9,7 @@ import CourseRecommendation from './CourseRecommendation';
 
 // This is the inner component that uses the context
 const MyCourseAdvisorContent = () => {
-    const { isLoading, selectedStudent } = useMyCourseAdvisor();
+    const { isLoading, selectedStudent, targetSemester } = useMyCourseAdvisor();
     const componentRef = useRef();
 
     return (
@@ -19,8 +19,8 @@ const MyCourseAdvisorContent = () => {
             {/* Selection Controls */}
             {!isLoading && <ClassStudentSelector />}
 
-            {/* Show content only if a student is selected AND initial data has loaded */}
-            {!isLoading && selectedStudent && (
+            {/* Show content only if ALL selections are complete AND initial data has loaded */}
+            {!isLoading && selectedStudent && targetSemester && (
                 <div ref={componentRef}>
                     {/* Course History */}
                     <CourseHistory />
@@ -30,12 +30,13 @@ const MyCourseAdvisorContent = () => {
                 </div>
             )}
 
-            {/* Show message if no student selected AND initial data has loaded */}
-            {!isLoading && !selectedStudent && (
+            {/* Show message if ANY selection is incomplete AND initial data has loaded */}
+            {!isLoading && (!selectedStudent || !targetSemester) && (
                 <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-gray-600">
-                        Silahkan pilih kelas dan mahasiswa terlebih dahulu untuk
-                        melihat riwayat dan membuat rekomendasi mata kuliah
+                        Silahkan pilih kelas, mahasiswa, dan semester tujuan
+                        terlebih dahulu untuk melihat riwayat dan membuat
+                        rekomendasi mata kuliah
                     </p>
                 </div>
             )}

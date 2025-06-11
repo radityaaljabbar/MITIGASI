@@ -9,6 +9,8 @@ const ClassStudentSelector = () => {
         filteredStudents,
         selectedStudent,
         handleStudentChange,
+        targetSemester,
+        handleTargetSemesterChange,
         isLoading,
     } = useMyCourseAdvisor();
 
@@ -57,6 +59,26 @@ const ClassStudentSelector = () => {
                                 {student.name}
                             </option>
                         ))}
+                    </select>
+                </div>
+
+                <div className="flex flex-col w-full md:w-1/3">
+                    <label className="mb-1 font-medium text-gray-700">
+                        Semester Tujuan
+                    </label>
+                    <select
+                        value={targetSemester}
+                        onChange={handleTargetSemesterChange}
+                        disabled={!selectedStudent || isLoading}
+                        className="p-2 border border-gray-300 rounded focus:ring-[#951A22] focus:border-[#951A22] disabled:bg-gray-100 disabled:text-gray-500">
+                        <option value="">Pilih Semester</option>
+                        {Array.from({ length: 14 }, (_, i) => i + 1).map(
+                            (semester) => (
+                                <option key={semester} value={semester}>
+                                    Semester {semester}
+                                </option>
+                            )
+                        )}
                     </select>
                 </div>
             </div>
