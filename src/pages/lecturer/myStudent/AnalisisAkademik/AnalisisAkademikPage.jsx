@@ -6,8 +6,47 @@ import { getStudentTAKIPKSKS } from '../../../../services/dosenWali/myStudent/ac
 import AnalisisTrendContent from '../../../../components/compDosenWali/compMyStudent/compAnalisisAkademik/AnalisisTrendContent';
 import DetailNilaiContent from '../../../../components/compDosenWali/compMyStudent/compAnalisisAkademik/DetailNilaiContent';
 
+const getStatusStyle = (status) => {
+    const normalizedStatus = status?.toLowerCase();
+    
+    switch (normalizedStatus) {
+        case 'aman':
+            return {
+                bgColor: 'bg-green-100',
+                textColor: 'text-green-800',
+                borderColor: 'border-green-200',
+                icon: '✓',
+                iconBg: 'bg-green-500'
+            };
+        case 'siaga':
+            return {
+                bgColor: 'bg-orange-100',
+                textColor: 'text-orange-800',
+                borderColor: 'border-orange-200',
+                icon: '⚠',
+                iconBg: 'bg-orange-500'
+            };
+        case 'bermasalah':
+            return {
+                bgColor: 'bg-red-100',
+                textColor: 'text-red-800',
+                borderColor: 'border-red-200',
+                icon: '!',
+                iconBg: 'bg-red-500'
+            };
+        default:
+            return {
+                bgColor: 'bg-gray-100',
+                textColor: 'text-gray-800',
+                borderColor: 'border-gray-200',
+                icon: '?',
+                iconBg: 'bg-gray-500'
+            };
+    }
+};
+
 const StudentInfoAkademik = ({ studentData }) => {
-    const mockStatusAkademik = 'Aman';
+    const statusStyle = getStatusStyle(studentData.klasifikasi);
 
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -28,9 +67,16 @@ const StudentInfoAkademik = ({ studentData }) => {
                     <p className="font-medium">{studentData.semester}</p>
                 </div>
             </div>
-            <div className="mt-2">
-                <p className="text-sm text-gray-600">Status Akademik</p>
-                <h4 className="font-medium">{studentData.klasifikasi}</h4>
+            <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-2">Status Akademik</p>
+                <div className={`inline-flex items-center px-3 py-1 rounded-full border-2 ${statusStyle.bgColor} ${statusStyle.borderColor} transition-all duration-200 hover:shadow-md`}>
+                    <div className={`w-3 h-3 rounded-full ${statusStyle.iconBg} mr-3 flex items-center justify-center`}>
+                        <span className="text-white text-xs font-bold">{statusStyle.icon}</span>
+                    </div>
+                    <h4 className={`font-semibold text-sm uppercase tracking-wide ${statusStyle.textColor}`}>
+                        {studentData.klasifikasi || 'Tidak Diketahui'}
+                    </h4>
+                </div>
             </div>
         </div>
     );

@@ -17,10 +17,6 @@ import {
     downloadAttachment,
 } from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/AnalisisFinansialDataLoader';
 
-// New component for displaying "no data" state
-const NoFinancialDataNotice = ({ studentName }) => (
-    <BelumMengisiFinansial studentName={studentName} />
-);
 
 const AnalisisFinansial = () => {
     const { nim } = useParams();
@@ -233,7 +229,7 @@ const AnalisisFinansial = () => {
                             />
                         </>
                     ) : (
-                        <NoFinancialDataNotice studentName={studentData?.name || 'Mahasiswa'} />
+                        <BelumMengisiFinansial studentName={studentData.nama} />
                     )}
                 </div>
             </div>

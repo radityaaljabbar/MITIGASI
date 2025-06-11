@@ -9,12 +9,8 @@ export default function StudentInfo({ student }) {
                 return 'bg-green-100 text-green-800 border-green-200';
             case 'perlu perhatian':
                 return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            case 'berisiko':
+            case 'bermasalah':
                 return 'bg-red-100 text-red-800 border-red-200';
-            case 'belum dianalisis':
-                return 'bg-gray-100 text-gray-800 border-gray-200';
-            case 'belum mengisi':
-                return 'bg-orange-100 text-orange-800 border-orange-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
@@ -39,13 +35,13 @@ export default function StudentInfo({ student }) {
             </div>
 
             <div className="mt-4 pt-4 border-t border-amber-200">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between ">
                     <div>
-                        <p className="text-sm text-gray-600 mb-1">
+                        <p className="text-sm text-gray-600 mb-1 font-medium">
                             Status Psikologi:
                         </p>
                         <span
-                            className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusBadgeColor(
+                            className={`inline-flex px-3 py-1 rounded-full font-medium border uppercase tracking-wide ${getStatusBadgeColor(
                                 student.statusPsikologi
                             )}`}>
                             {student.statusPsikologi}
@@ -64,7 +60,7 @@ export default function StudentInfo({ student }) {
                     )}
 
                     {student.statusKuesioner && (
-                        <div className="mt-2 sm:mt-0">
+                        <div className="mt-2 sm:mt-0 ">
                             <p className="text-sm text-gray-600 mb-1">
                                 Status Kuesioner:
                             </p>

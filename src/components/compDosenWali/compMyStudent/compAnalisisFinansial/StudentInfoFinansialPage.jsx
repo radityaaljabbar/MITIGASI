@@ -19,7 +19,7 @@ const StudentInfoFinansialPage = ({ studentData }) => {
     };
 
     return (
-        <div className="bg-orange-50 p-4 rounded-lg mb-6">
+        <div className="bg-orange-50 p-4 rounded-lg mb-6 border">
             <h3 className="text-lg font-medium mb-4">Informasi Mahasiswa</h3>
             
             {/* Basic Information Grid */}

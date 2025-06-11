@@ -302,9 +302,10 @@ export default function DaftarMahasiswaWali() {
                                 }
                                 className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-10 pr-4 w-full">
                                 <option value="all">Semua Status</option>
-                                <option value="Aman">Aman</option>
-                                <option value="Siaga">Siaga</option>
-                                <option value="Bermasalah">Bermasalah</option>
+                                <option value="aman">Aman</option>
+                                <option value="siaga">Siaga</option>
+                                <option value="bermasalah">Bermasalah</option>
+                                <option value="BLANK">Belum diprediksi</option>
                             </select>
                             <Filter className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
                         </div>
