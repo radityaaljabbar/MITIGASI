@@ -13,13 +13,14 @@ import {
     getStudentCourseHistory,
     getAvailableCourse,
     sendRecommendedCourses,
+    getLastIPSemester,
 } from '../../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService';
 
 // Create context
 const MyCourseAdvisorContext = createContext();
 
-// Maximum SKS allowed
-const MAX_SKS = 24;
+// Default maximum SKS (akan diupdate berdasarkan IP mahasiswa)
+const DEFAULT_MAX_SKS = 24;
 
 export const MyCourseAdvisorProvider = ({ children }) => {
     // State for API data
@@ -33,7 +34,10 @@ export const MyCourseAdvisorProvider = ({ children }) => {
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState(''); // This will be the 'nim' for the service
     const [selectedSemester, setSelectedSemester] = useState('');
-    const [targetSemester, setTargetSemester] = useState(''); // NEW: For recommendation target semester
+    const [targetSemester, setTargetSemester] = useState(''); // For recommendation target semester
+
+    // Dynamic SKS limit based on student IP
+    const [maxSKS, setMaxSKS] = useState(DEFAULT_MAX_SKS);
 
     // Course data state
     const [availableCourses, setAvailableCourses] = useState([]); // Initialize as empty array
@@ -112,6 +116,33 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         };
         fetchAvailableCourses();
     }, []);
+
+    // Fetch student IP data and set max SKS when student is selected
+    useEffect(() => {
+        if (!selectedStudent) {
+            setMaxSKS(DEFAULT_MAX_SKS);
+            return;
+        }
+
+        const fetchStudentIP = async () => {
+            try {
+                const result = await getLastIPSemester(selectedStudent);
+                if (result.success) {
+                    setMaxSKS(result.maxSKS);
+                } else {
+                    setMaxSKS(DEFAULT_MAX_SKS); // Fallback to default
+                    toast.warn(
+                        'Data IP tidak ditemukan, menggunakan batas SKS default (24)'
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching student IP:', error);
+                setMaxSKS(DEFAULT_MAX_SKS);
+            }
+        };
+
+        fetchStudentIP();
+    }, [selectedStudent]);
 
     // Fetch student course history when both student and target semester are selected
     useEffect(() => {
@@ -209,11 +240,12 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         setSelectedStudent('');
         setTargetSemester(''); // Reset target semester when class changes
         setRecommendedCourses([]);
+        setMaxSKS(DEFAULT_MAX_SKS); // Reset to default
         setSksLimitExceeded(false);
     };
 
     const handleStudentChange = (e) => {
-        setSelectedStudent(e.target.value); // This triggers the course history fetch
+        setSelectedStudent(e.target.value); // This triggers the course history fetch AND IP fetch
         setTargetSemester(''); // Reset target semester when student changes
         setRecommendedCourses([]);
         setSksLimitExceeded(false);
@@ -230,7 +262,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
     const addCourse = (course) => {
         const newTotalSKS = totalRecommendedSKS + course.sks;
-        if (newTotalSKS > MAX_SKS) {
+        if (newTotalSKS > maxSKS) {
             setSksLimitExceeded(true);
             return;
         }
@@ -308,7 +340,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
     };
 
     const wouldExceedSKSLimit = (courseSKS) => {
-        return totalRecommendedSKS + courseSKS > MAX_SKS;
+        return totalRecommendedSKS + courseSKS > maxSKS;
     };
 
     const filteredAvailableCourses = useMemo(() => {
@@ -335,6 +367,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         selectedStudent,
         selectedSemester,
         targetSemester,
+        maxSKS,
         availableCourses,
         staticAvailableCoursesData,
         recommendedCourses,
@@ -344,7 +377,6 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         totalRecommendedSKS,
         filteredStudents,
         filteredAvailableCourses,
-        MAX_SKS,
 
         // Functions
         setSelectedClass,

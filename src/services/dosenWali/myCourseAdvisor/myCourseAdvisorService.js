@@ -236,3 +236,48 @@ export const sendRecommendedCourses = async (
         };
     }
 };
+
+export const getLastIPSemester = async (nim) => {
+    try {
+        // Get and validate token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return {
+                success: false,
+                message: 'No Token Found',
+            };
+        }
+
+        const response = await fetch(
+            getApiUrl(`/faculty/courseAdvisor/getLastIPSemester?nim=${nim}`),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            return {
+                success: true,
+                maxSKS: data.data.maxSKS, // Cuma return maxSKS aja
+            };
+        } else {
+            return {
+                success: false,
+                message: data.message || 'Failed to fetch IP semester data',
+            };
+        }
+    } catch (error) {
+        console.error('Error fetching IP semester data:', error);
+        return {
+            success: false,
+            message: 'An error occurred while fetching IP semester data',
+            error: error.message,
+        };
+    }
+};
