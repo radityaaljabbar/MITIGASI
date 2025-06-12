@@ -190,7 +190,7 @@ export const sendRecommendedCourses = async (
                 message: 'No token found',
             };
         }
-        
+
         // Mengambil 'kodeMataKuliah' dari setiap objek di array 'recommendedCourses'
         const courseCodes = recommendedCourses.map(
             (course) => course.kodeMataKuliah
@@ -281,6 +281,79 @@ export const getLastIPSemester = async (nim) => {
             success: false,
             message: 'An error occurred while fetching IP semester data',
             error: error.message,
+        };
+    }
+};
+
+export const getRecommendedMK = async (nim, targetSemester) => {
+    try {
+        // Ambil dan validasi token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return {
+                success: false,
+                message: 'No Token Found',
+            };
+        }
+
+        const response = await fetch(
+            getApiUrl(`/faculty/courseAdvisor/getRecommendedMK?nim=${nim}`),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Filter berdasarkan targetSemester jika ada
+            let recommendations = data.data || [];
+
+            if (targetSemester) {
+                recommendations = recommendations.filter(
+                    (course) =>
+                        course.semester_mahasiswa === parseInt(targetSemester)
+                );
+            }
+
+            // Transform format data
+            const transformedRecommendations = recommendations.map(
+                (course) => ({
+                    id: `rec_${course.kode_mk}`,
+                    kodeMataKuliah: course.kode_mk,
+                    namaMataKuliah: course.nama_mk,
+                    sks: course.sks_mk,
+                    jenis: course.jenis_mk,
+                    semester_mk: course.semester_mahasiswa,
+                    tanggalDibuat: course.tanggal_dibuat,
+                    totalSKS: course.total_sks,
+                })
+            );
+
+            return {
+                success: true,
+                recommendations: transformedRecommendations,
+                totalRecommendations: transformedRecommendations.length,
+                message: data.message,
+            };
+        } else {
+            return {
+                success: false,
+                message: data.message || 'Failed to fetch recommendations',
+                recommendations: [],
+            };
+        }
+    } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        return {
+            success: false,
+            message: 'An error occurred while fetching recommendations',
+            error: error.message,
+            recommendations: [],
         };
     }
 };

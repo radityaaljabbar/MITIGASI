@@ -3,12 +3,26 @@ import { useMyCourseAdvisor } from '../MyCourseAdvisorContext';
 import RecommendationSummary from './RecommendationSummary';
 
 const RecommendedCourses = () => {
-    const { recommendedCourses, removeCourse } = useMyCourseAdvisor();
+    const {
+        recommendedCourses,
+        removeCourse,
+        hasExistingRecommendations,
+        isLoadingRecommendations,
+    } = useMyCourseAdvisor();
 
     return (
         <div>
-            <h3 className="text-lg font-medium mb-2">
-                Mata Kuliah Direkomendasikan
+            <h3 className="text-lg font-medium mb-2 flex items-center justify-between">
+                <span>Mata Kuliah Direkomendasikan</span>
+                {hasExistingRecommendations &&
+                    recommendedCourses.length > 0 && (
+                        <span className="text-xs text-gray-500">
+                            {recommendedCourses[0].tanggalDibuat &&
+                                `Dibuat: ${new Date(
+                                    recommendedCourses[0].tanggalDibuat
+                                ).toLocaleDateString('id-ID')}`}
+                        </span>
+                    )}
             </h3>
             <div className="overflow-x-auto border rounded-lg shadow-sm">
                 <table className="w-full border-collapse bg-white">
@@ -23,7 +37,15 @@ const RecommendedCourses = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {recommendedCourses.length > 0 ? (
+                        {isLoadingRecommendations ? (
+                            <tr>
+                                <td
+                                    colSpan="6"
+                                    className="py-4 px-4 text-center text-gray-500 italic">
+                                    Memuat rekomendasi...
+                                </td>
+                            </tr>
+                        ) : recommendedCourses.length > 0 ? (
                             recommendedCourses.map((course) => (
                                 <tr
                                     key={course.id}
@@ -57,7 +79,9 @@ const RecommendedCourses = () => {
                                 <td
                                     colSpan="6"
                                     className="py-4 px-4 text-center text-gray-500 italic">
-                                    Sistem akan membuat rekomendasi setelah Anda memilih mahasiswa dan semester tujuan.
+                                    {hasExistingRecommendations
+                                        ? 'Tidak ada rekomendasi existing untuk semester ini.'
+                                        : 'Sistem akan membuat rekomendasi setelah Anda memilih mahasiswa dan semester tujuan.'}
                                 </td>
                             </tr>
                         )}
