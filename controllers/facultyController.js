@@ -603,6 +603,73 @@ exports.sendCourseRecommendation = async (req, res) => {
     }
 };
 
+exports.getRecommendedCourses = async (req, res) => {
+    try {
+        const { nim } = req.query;
+
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM Mahasiswa tidak ditemukan',
+            });
+        }
+
+        // get data dari query dengan semester_mahasiswa:
+        const [mataKuliahRekomendasi] = await pool.execute(
+            `SELECT mkr.kode_mk,
+                    mkb.nama_mk, 
+                    mkb.kode_mk AS kode_mk_baru, 
+                    mkb.sks_mk, 
+                    mkb.jenis_mk,
+                    mkr.semester_mahasiswa,
+                    mkr.tanggal_dibuat,
+                    mkr.total_sks
+            FROM mata_kuliah_rekomendasi mkr
+            JOIN mata_kuliah_baru mkb ON mkr.kode_mk = mkb.kode_mk
+            WHERE mkr.nim_mahasiswa = ?
+            ORDER BY mkr.semester_mahasiswa ASC, mkb.nama_mk ASC`,
+            [nim]
+        );
+
+        // Group data by semester untuk frontend
+        const groupedBySemester = mataKuliahRekomendasi.reduce(
+            (acc, course) => {
+                const semester = course.semester_mahasiswa;
+                if (!acc[semester]) {
+                    acc[semester] = [];
+                }
+                acc[semester].push({
+                    kode_mk: course.kode_mk,
+                    nama_mk: course.nama_mk,
+                    sks_mk: course.sks_mk,
+                    jenis_mk: course.jenis_mk,
+                    semester_target: course.semester_mahasiswa,
+                    tanggal_dibuat: course.tanggal_dibuat,
+                    total_sks: course.total_sks,
+                });
+                return acc;
+            },
+            {}
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: mataKuliahRekomendasi,
+            groupedData: groupedBySemester,
+            message: 'Berhasil mendapatkan data rekomendasi mata kuliah',
+            totalRecommendations: mataKuliahRekomendasi.length,
+            semesterCount: Object.keys(groupedBySemester).length,
+        });
+    } catch (error) {
+        console.error('Error mendapatkan rekomendasi mata kuliah:', error);
+        return res.status(500).json({
+            success: false,
+            message:
+                'Terjadi kesalahan dalam mengambil data rekomendasi mata kuliah',
+        });
+    }
+};
+
 /**
  * @desc Get IP Semester terakhir mahasiswa.
  * @route GET /api/faculty/courseAdvisor/getLastIPSemester

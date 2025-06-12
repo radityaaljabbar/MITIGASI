@@ -56,6 +56,16 @@ router.post(
     facultyController.sendCourseRecommendation
 );
 
+// @desc    Endpoint backend untuk fitur MyCourseAdvisor untuk get mk yang sudah di rekomendasikan ke mahasiswany
+// @fitur   \ MyCourseAdvisor
+// MyCourseAdvisorPage.jsx
+router.get(
+    '/courseAdvisor/getRecommendedMK',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getRecommendedCourses
+);
+
 // @desc    Endpoint backend untuk fitur MyCourseAdvisor
 // @fitur   \ MyCourseAdvisor
 // MyCourseAdvisorPage.jsx
