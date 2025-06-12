@@ -7,7 +7,20 @@ const { pool } = require('../../config/database');
  */
 const getStudentGrades = async (studentId) => {
     const [nilaiRows] = await pool.execute(
-        'SELECT kode_mk, indeks_nilai, semester AS jenis_semester, tahun_ajaran FROM nilai WHERE nim_mahasiswa = ?',
+        `SELECT 
+            n.kode_mk, 
+            n.indeks_nilai, 
+            n.semester AS jenis_semester, 
+            n.tahun_ajaran,
+            k.tahun_angkatan AS angkatan
+        FROM 
+            nilai n
+        INNER JOIN 
+            mahasiswa m ON n.nim_mahasiswa = m.nim
+        INNER JOIN 
+            kelas k ON m.kelas = k.kode_kelas
+        WHERE 
+            n.nim_mahasiswa = ?`,
         [studentId]
     );
     return nilaiRows;
@@ -87,32 +100,47 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
 
     grades.forEach((grade) => {
         // UPDATED: Ganti nama variabel semester jadi jenis_semester
-        const { kode_mk, indeks_nilai, jenis_semester, tahun_ajaran } = grade;
+        const { kode_mk, indeks_nilai, jenis_semester, tahun_ajaran, angkatan } = grade;
         const courseDetails = coursesMap[kode_mk];
 
+        console.log(courseDetails)
+
         if (courseDetails) {
-            // Cek apakah ini matkul ekivalensi
-            const isEquivalent = courseDetails.is_equivalent === true;
+            const isSpecificSemester = 
+                jenis_semester === "GANJIL" && tahun_ajaran === "2024/2025";
 
-            // Tentukan kode dan nama matkul yang akan ditampilkan
             let kodeMataKuliah = kode_mk;
-            let namaMataKuliah =
-                courseDetails.nama_mk || courseDetails.nama_mk_lama;
+            let namaMataKuliah;
 
-            if (isEquivalent) {
-                // Untuk matkul yang sudah dipetakan ekivalen, gunakan kode lama dan nama lama
+            // BARIS BARU: Tambahkan blok if-else berdasarkan kondisi di atas
+            if (isSpecificSemester) {
+                // KASUS KHUSUS: Jika ini adalah semester Ganjil 2024/2025,
+                // maka nama mata kuliah HARUS menggunakan nama baru (nama_mk)
+                // dan kode mata kuliah tetap menggunakan kode_mk yang asli.
+                namaMataKuliah = courseDetails.nama_mk || "Nama Baru Tidak Tersedia";
                 kodeMataKuliah = kode_mk;
-                // Cari nama matkul lama jika tersedia
-                if (oldCoursesNamesMap[kode_mk]) {
-                    namaMataKuliah = oldCoursesNamesMap[kode_mk];
-                }
-            } else if (courseDetails.ekivalensi) {
-                // Untuk matkul baru yang punya nilai ekivalensi, gunakan nilai ekivalensi dan nama lamanya
-                kodeMataKuliah = courseDetails.ekivalensi;
-                // Cari nama matkul lama jika tersedia
-                if (oldCoursesNamesMap[courseDetails.ekivalensi]) {
-                    namaMataKuliah =
-                        oldCoursesNamesMap[courseDetails.ekivalensi];
+
+            } else {
+                // LOGIKA LAMA: Untuk semua semester lainnya, jalankan logika seperti semula.
+                const isEquivalent = courseDetails.is_equivalent === true;
+
+                // Tentukan kode dan nama matkul yang akan ditampilkan
+                namaMataKuliah =
+                    courseDetails.nama_mk || courseDetails.nama_mk_lama;
+
+                if (isEquivalent) {
+                    // Untuk matkul yang sudah dipetakan ekivalen, gunakan kode lama dan nama lama
+                    kodeMataKuliah = kode_mk;
+                    if (oldCoursesNamesMap[kode_mk]) {
+                        namaMataKuliah = oldCoursesNamesMap[kode_mk];
+                    }
+                } else if (courseDetails.ekivalensi) {
+                    // Untuk matkul baru yang punya nilai ekivalensi, gunakan nilai ekivalensi dan nama lamanya
+                    kodeMataKuliah = courseDetails.ekivalensi;
+                    if (oldCoursesNamesMap[courseDetails.ekivalensi]) {
+                        namaMataKuliah =
+                            oldCoursesNamesMap[courseDetails.ekivalensi];
+                    }
                 }
             }
 
@@ -127,6 +155,9 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 jenis_semester: jenis_semester,
                 nilai: indeks_nilai,
                 tahun_ajaran: tahun_ajaran,
+                ekivalensi: courseDetails.ekivalensi,
+                angkatan: angkatan
+
             });
         } else {
             // Kalau ga ketemu sama sekali di database
@@ -139,7 +170,7 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 semester: '-',
                 jenis_semester: jenis_semester,
                 nilai: indeks_nilai,
-                tahun_ajaran: tahun_ajaran,
+                tahun_ajaran: tahun_ajaran
             });
         }
     });
