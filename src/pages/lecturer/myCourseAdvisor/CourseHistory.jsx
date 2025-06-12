@@ -21,12 +21,10 @@ const CourseHistory = () => {
                                 <th className="py-3 px-4 text-left">Nama</th>
                                 <th className="py-3 px-4 text-left">Jenis</th>
                                 <th className="py-3 px-4 text-center">SKS</th>
-                                <th className="py-3 px-4 text-center">
-                                    Indeks
-                                </th>
-                                <th className="py-3 px-4 text-center">
-                                    Semester
-                                </th>
+                                <th className="py-3 px-4 text-center">Indeks</th>
+                                <th className="py-3 px-4 text-center">Semester</th>
+                                <th className="py-3 px-4 text-center">Tahun Ajaran</th>
+                                <th className="py-3 px-4 text-center">Semester Ideal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,6 +74,12 @@ const CourseHistory = () => {
                                         </td>
                                         <td className="py-2 px-4 text-center border-r font-medium">
                                             {course.indeks}
+                                        </td>
+                                        <td className="py-2 px-4 text-center">
+                                            {course.jenis_semester || '-'}
+                                        </td>
+                                        <td className="py-2 px-4 text-center">
+                                            {course.tahun_ajaran || '-'}
                                         </td>
                                         <td className="py-2 px-4 text-center">
                                             {course.semester || '-'}

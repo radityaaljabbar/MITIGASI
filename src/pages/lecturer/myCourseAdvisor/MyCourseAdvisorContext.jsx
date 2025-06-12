@@ -186,14 +186,9 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
     // ... (semua logika dan fungsi lain tetap sama) ...
     useEffect(() => {
-        // Guard clause
         if (
-            !selectedStudent ||
-            !targetSemester ||
-            isLoadingHistory ||
-            isLoadingCourses ||
-            !staticAvailableCoursesData.length ||
-            !studentCourseHistory
+            !selectedStudent || !targetSemester || isLoadingHistory || isLoadingCourses ||
+            !staticAvailableCoursesData.length || !studentCourseHistory
         ) {
             if (!selectedStudent || !targetSemester) {
                 setRecommendedCourses([]);
@@ -202,48 +197,54 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             }
             return;
         }
+        
+        // --- PRE-PROCESSING: Create efficient look-up maps ---
+        const courseMap = new Map(staticAvailableCoursesData.map(c => [c.kode_mk, c]));
+        const equivalenceMap = new Map();
+        staticAvailableCoursesData.forEach(c => {
+            if (c.ekivalensi) {
+                // Assuming ekivalensi is a single code, not an array
+                equivalenceMap.set(c.ekivalensi, c.kode_mk);
+            }
+        });
 
+        // Function to find the current course code from a history code
+        const getCurrentCode = (historyCode) => {
+            return equivalenceMap.get(historyCode) || historyCode;
+        };
+        
         const fetchAndProcessRecommendations = async () => {
             setIsLoadingRecommendations(true);
-
             try {
-                // Cek apakah sudah ada rekomendasi existing
-                const existingRec = await getRecommendedMK(
-                    selectedStudent,
-                    targetSemester
-                );
-
-                if (
-                    existingRec.success &&
-                    existingRec.recommendations.length > 0
-                ) {
-                    // Jika ada rekomendasi existing, gunakan itu
-                    setRecommendedCourses(existingRec.recommendations);
+                const existingRec = await getRecommendedMK(selectedStudent, targetSemester);
+                if (existingRec.success && existingRec.recommendations.length > 0) {
+                    const recsFromStaticData = existingRec.recommendations
+                        .map(rec => courseMap.get(rec.kodeMataKuliah))
+                        .filter(Boolean) // Filter out any courses that might no longer exist
+                        .map(course => ({
+                            id: course.id,
+                            kodeMataKuliah: course.kode_mk,
+                            namaMataKuliah: course.nama_mk,
+                            sks: course.sks_mk,
+                            jenis: course.jenis_mk,
+                            semester_mk: course.semester_mk,
+                        }));
+                    
+                    setRecommendedCourses(recsFromStaticData);
                     setHasExistingRecommendations(true);
 
-                    // Update availableCourses dengan menghilangkan yang sudah direkomendasikan
-                    const recommendedIds = existingRec.recommendations.map(
-                        (r) => r.kodeMataKuliah
-                    );
+                    const recommendedIds = new Set(recsFromStaticData.map(r => r.kodeMataKuliah));
                     const updatedAvailable = staticAvailableCoursesData.filter(
-                        (course) => !recommendedIds.includes(course.kode_mk)
+                        course => !recommendedIds.has(course.kode_mk)
                     );
                     setAvailableCourses(updatedAvailable);
-
-                    toast.info(
-                        `Menampilkan ${existingRec.recommendations.length} rekomendasi yang sudah ada untuk semester ${targetSemester}`
-                    );
+                    toast.info(`Menampilkan ${recsFromStaticData.length} rekomendasi yang sudah ada.`);
                 } else {
-                    // Jika tidak ada, generate rekomendasi otomatis
                     setHasExistingRecommendations(false);
                     generateAutoRecommendations();
                 }
             } catch (error) {
-                console.error(
-                    'Error fetching existing recommendations:',
-                    error
-                );
-                // Fallback ke auto-generation jika error
+                console.error('Error fetching existing recommendations:', error);
                 generateAutoRecommendations();
             } finally {
                 setIsLoadingRecommendations(false);
@@ -251,7 +252,6 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         };
 
         const generateAutoRecommendations = () => {
-            // Pindahkan semua logic generateRecommendations yang sudah ada ke sini
             let recommendations = [];
             let currentSKS = 0;
             let availableForPicking = [...staticAvailableCoursesData];
@@ -261,78 +261,65 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
             const isTargetSemesterOdd = targetSemesterInt % 2 !== 0;
 
-            // ... (rest of the auto-generation logic remains the same)
-
-            const mapToRecommendedFormat = (course) => ({
-                id: course.id,
-                kodeMataKuliah: course.kode_mk,
-                namaMataKuliah: course.nama_mk,
-                sks: course.sks_mk,
-                jenis: course.jenis_mk,
-                semester_mk: course.semester_mk,
-            });
-
             const addCourseToPlan = (course) => {
-                const recCourse = mapToRecommendedFormat(course);
-                if (recommendations.some((r) => r.id === recCourse.id))
-                    return false;
-                if (currentSKS + recCourse.sks <= maxSKS) {
-                    recommendations.push(recCourse);
-                    currentSKS += recCourse.sks;
-                    availableForPicking = availableForPicking.filter(
-                        (c) => c.id !== course.id
-                    );
+                if (recommendations.some((r) => r.id === course.id)) return false;
+                if (currentSKS + course.sks_mk <= maxSKS) {
+                    recommendations.push({
+                        id: course.id,
+                        kodeMataKuliah: course.kode_mk,
+                        namaMataKuliah: course.nama_mk,
+                        sks: course.sks_mk,
+                        jenis: course.jenis_mk,
+                        semester_mk: course.semester_mk,
+                        jenis_semester: course.jenis_semester,
+                        tahun_ajaran: course.tahun_ajaran
+                    });
+                    currentSKS += course.sks_mk;
+                    availableForPicking = availableForPicking.filter((c) => c.id !== course.id);
                     return true;
                 }
                 return false;
             };
 
-            // Logic to use course names as the key for matching
-            const courseAttemptsByName = new Map();
-            studentCourseHistory.forEach((h) => {
-                const name = h.namaMataKuliah?.trim();
-                if (!name) return;
-                if (!courseAttemptsByName.has(name))
-                    courseAttemptsByName.set(name, []);
-                courseAttemptsByName.get(name).push(h);
-            });
-
-            const retakeCourseNames = new Set();
-            const passedCourseNames = new Set();
+            // --- REVISED: Matching by Code and Equivalency ---
+            const passedCodes = new Set();
+            const failedCodes = new Set();
             const allPassingGrades = ['A', 'B', 'C', 'D', 'AB', 'BC'];
 
-            courseAttemptsByName.forEach((attempts, name) => {
-                attempts.sort(
-                    (a, b) =>
-                        (parseInt(b.semester, 10) || 0) -
-                        (parseInt(a.semester, 10) || 0)
-                );
-                const lastAttempt = attempts[0];
-                const lastIndeks = lastAttempt?.indeks?.trim().toUpperCase();
-
-                if (['E', 'T'].includes(lastIndeks)) {
-                    retakeCourseNames.add(name);
-                } else if (allPassingGrades.includes(lastIndeks)) {
-                    passedCourseNames.add(name);
+            // First pass: find all courses that have at least one passing grade
+            studentCourseHistory.forEach((h) => {
+                const currentCode = getCurrentCode(h.kodeMataKuliah);
+                const indeks = h.indeks?.trim().toUpperCase();
+                if (allPassingGrades.includes(indeks)) {
+                    passedCodes.add(currentCode);
                 }
             });
 
-            // PRIORITY 1: Add courses that must be retaken
-            retakeCourseNames.forEach((name) => {
-                const courseData = staticAvailableCoursesData.find(
-                    (c) => c.nama_mk?.trim() === name
-                );
-                if (courseData) {
-                    const courseSemesterInt = parseInt(
-                        courseData.semester_mk,
-                        10
-                    );
-                    if (isNaN(courseSemesterInt)) return;
+            // Second pass: find all failed courses, but only add them if they were never passed
+            studentCourseHistory.forEach((h) => {
+                const currentCode = getCurrentCode(h.kodeMataKuliah);
+                const indeks = h.indeks?.trim().toUpperCase();
+                if (['E', 'T'].includes(indeks)) {
+                    // Only consider it a "retake" if it's NOT in the passed set
+                    if (!passedCodes.has(currentCode)) {
+                        failedCodes.add(currentCode);
+                    }
+                }
+            });
 
-                    const isSemesterNotTooHigh =
-                        courseSemesterInt <= targetSemesterInt;
-                    const isSemesterTypeMatch =
-                        (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+            const retakeCodes = failedCodes; // Rename for clarity in the next steps
+
+            // =========================================================================
+
+            // PRIORITY 1: Add courses that must be retaken.
+            retakeCodes.forEach((code) => {
+                const courseData = courseMap.get(code);
+                if (courseData) {
+                    const courseSemesterInt = parseInt(courseData.semester_mk, 10);
+                    if (isNaN(courseSemesterInt)) return;
+                    
+                    const isSemesterNotTooHigh = courseSemesterInt <= targetSemesterInt;
+                    const isSemesterTypeMatch = (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
 
                     if (isSemesterNotTooHigh && isSemesterTypeMatch) {
                         addCourseToPlan(courseData);
@@ -340,40 +327,23 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 }
             });
 
-            // PRIORITY 2: Fill remaining SKS with new mandatory courses
-            const allTakenNames = new Set([
-                ...passedCourseNames,
-                ...retakeCourseNames,
-            ]);
+            // PRIORITY 2: Fill remaining SKS with new mandatory courses.
+            const allTakenCodes = new Set([...passedCodes, ...retakeCodes]);
 
             const newMandatoryCourses = staticAvailableCoursesData
                 .filter((course) => {
-                    const courseName = course.nama_mk?.trim();
-                    if (!courseName) return false;
-
                     const courseSemesterInt = parseInt(course.semester_mk, 10);
                     if (isNaN(courseSemesterInt)) return false;
 
                     const isMandatory = course.jenis_mk === 'WAJIB PRODI';
-                    const isNew = !allTakenNames.has(courseName);
+                    const isNew = !allTakenCodes.has(course.kode_mk);
+                    
+                    const isSemesterNotTooHigh = courseSemesterInt <= targetSemesterInt;
+                    const isSemesterTypeMatch = (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
 
-                    const isSemesterNotTooHigh =
-                        courseSemesterInt <= targetSemesterInt;
-                    const isSemesterTypeMatch =
-                        (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
-
-                    return (
-                        isMandatory &&
-                        isNew &&
-                        isSemesterTypeMatch &&
-                        isSemesterNotTooHigh
-                    );
+                    return isMandatory && isNew && isSemesterTypeMatch && isSemesterNotTooHigh;
                 })
-                .sort(
-                    (a, b) =>
-                        parseInt(a.semester_mk, 10) -
-                        parseInt(b.semester_mk, 10)
-                );
+                .sort((a, b) => parseInt(a.semester_mk, 10) - parseInt(b.semester_mk, 10));
 
             newMandatoryCourses.forEach((course) => {
                 addCourseToPlan(course);
@@ -385,9 +355,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             if (recommendations.length > 0) {
                 toast.success('Rekomendasi mata kuliah otomatis telah dibuat.');
             } else {
-                toast.info(
-                    'Tidak ada rekomendasi otomatis yang dapat dibuat sesuai aturan.'
-                );
+                toast.info('Tidak ada rekomendasi otomatis yang dapat dibuat sesuai aturan.');
             }
         };
 
@@ -399,6 +367,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         maxSKS,
         isLoadingHistory,
         isLoadingCourses,
+        staticAvailableCoursesData,
     ]);
 
     useEffect(() => {
@@ -418,9 +387,12 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                       namaMataKuliah: details.nama_mk,
                       sks: details.sks_mk,
                       jenis: details.jenis_mk,
+                      ekivalensi: details.ekivalensi
                   }
                 : historyItem;
         });
+
+        console.log(merged)
         setMergedCourseHistory(merged);
     }, [studentCourseHistory, staticAvailableCoursesData]);
 

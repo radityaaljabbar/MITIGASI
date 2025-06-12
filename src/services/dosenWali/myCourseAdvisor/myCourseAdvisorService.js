@@ -85,9 +85,13 @@ export const getStudentCourseHistory = async (nim) => {
                     namaMataKuliah:
                         course.nama_mata_kuliah || 'Data tidak tersedia',
                     jenis: course.jenis || 'Data tidak tersedia',
+                    jenis_semester: course.jenis_semester,
+                    tahun_ajaran: course.tahun_ajaran,
                     sks: course.sks || 0,
                     indeks: course.nilai || '-',
                     semester: course.semester || '-',
+                    ekivalensi: course.ekivalensi,
+                    angkatan: course.angkatan
                 };
 
                 return transformedCourse;
@@ -154,6 +158,9 @@ export const getAvailableCourse = async () => {
                 jenis_mk: course.jenis_mk,
                 sks_mk: course.sks_mk,
                 semester_mk: course.semester,
+                jenis_semester: course.jenis_semester,
+                tahun_ajaran: course.tahun_ajaran,
+                ekivalensi: course.ekivalensi
             }));
 
             return {
