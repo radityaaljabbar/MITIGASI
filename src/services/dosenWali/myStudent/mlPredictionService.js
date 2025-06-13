@@ -18,7 +18,12 @@ export const mlPredictionService = {
         try {
             const token = localStorage.getItem('token');
 
-            const response = await axios.post(getApiUrl(`/faculty/ml/predict/${nim}`),
+            if (!token) {
+                return { success: false, message: 'No token found' };
+            }
+
+            const response = await axios.post(
+                getApiUrl(`/faculty/ml/predict/${nim}`),
                 predictionData,
                 {
                     headers: {
