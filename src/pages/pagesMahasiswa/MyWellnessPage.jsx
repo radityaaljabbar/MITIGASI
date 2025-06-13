@@ -1,61 +1,59 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
-//Importing komponen2 MyWellness
-import MyWellness_Tested from '../../components/compMahasiswa/myWellnessComponents/MyWellness_Tested';
-import MyWellness_NotTested from '../../components/compMahasiswa/myWellnessComponents/MyWellness_NotTested';
-
-//Import fungsi service
-import { getPsiResult } from '../../services/mahasiswaServices/myWellnessService';
+import { Link } from 'react-router-dom';
 
 const MyWellnessPage = () => {
-    const [dataPsikologi, setDataPsikologi] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // get data from service
-    useEffect(() => {
-        const getDataPsikologi = async () => {
-            try {
-                setLoading(true);
-                const response = await getPsiResult();
-
-                if (response.success && response.data.length > 0) {
-                    // Get the first result from the data array
-                    setDataPsikologi(response.data[0]);
-                } else {
-                    // If response is successful but no data, or if response failed
-                    setDataPsikologi(null);
-                    if (!response.success) {
-                        setError(response.message);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching psychological data:', error);
-                setError('Failed to load data. Please try again later.');
-                setDataPsikologi(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getDataPsikologi();
-    }, []);
-
     return (
-        <div className="flex flex-col items-center justify-center h-screen p-5 gap-7 w-full">
-            {loading ? (
-                <div className="text-center">
-                    <p>Loading wellness data...</p>
+        <div className="min-h-screen bg-[#FAF0E6] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+            <div className="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 sm:p-8 lg:p-10 text-center space-y-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#951A22] border-b-2 border-gray-100 pb-4 w-full">
+                    Kesehatan Mental Saya
+                </h1>
+
+                <div className="space-y-5">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                        Evaluasi Kondisi Psikologis Anda
+                    </h2>
+
+                    <p className="text-sm sm:text-base text-gray-600 max-w-lg mx-auto leading-relaxed">
+                        Evaluasi kondisi psikologis Anda menggunakan instrumen
+                        DASS-21 (Depression, Anxiety, Stress Scales). Kami akan
+                        membantu Anda memahami kondisi mental Anda dan
+                        memberikan saran yang sesuai.
+                    </p>
+
+                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-left max-w-lg mx-auto">
+                        <p className="text-xs sm:text-sm text-blue-800">
+                            <strong>Penting:</strong> DASS-21 bukanlah alat
+                            diagnosis klinis dan tidak dapat mendiagnosis
+                            depresi, kecemasan, atau stres. Evaluasi ini hanya
+                            memberikan indikasi apakah masalah-masalah tersebut
+                            memiliki dampak signifikan terhadap kehidupan Anda
+                            saat ini.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
+                        <Link
+                            to="/student/my-wellness/psi-test"
+                            className="w-full sm:w-auto px-6 py-3 bg-[#951A22] text-white rounded-lg 
+                                     hover:bg-[#7a1118] transition-all duration-300 
+                                     transform hover:-translate-y-1 hover:shadow-lg
+                                     focus:outline-none focus:ring-2 focus:ring-[#951A22] focus:ring-opacity-50">
+                            Mulai Evaluasi
+                        </Link>
+
+                        <Link
+                            to="/student/my-wellness/history"
+                            className="w-full sm:w-auto px-6 py-3 border-2 border-[#951A22] text-[#951A22] 
+                                     rounded-lg hover:bg-[#951A22] hover:text-white 
+                                     transition-all duration-300 
+                                     transform hover:-translate-y-1 hover:shadow-lg
+                                     focus:outline-none focus:ring-2 focus:ring-[#951A22] focus:ring-opacity-50">
+                            Lihat Riwayat
+                        </Link>
+                    </div>
                 </div>
-            ) : error ? (
-                <div className="text-center text-red-500">
-                    <p>{error}</p>
-                </div>
-            ) : dataPsikologi ? (
-                <MyWellness_Tested dataPsikologi={dataPsikologi} />
-            ) : (
-                <MyWellness_NotTested />
-            )}
+            </div>
         </div>
     );
 };

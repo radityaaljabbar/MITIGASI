@@ -24,6 +24,8 @@ import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage.jsx';
 
 import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage.jsx';
 
+import MyWellnessHistory from './components/compMahasiswa/myWellnessComponents/MyWellnessHistory.jsx';
+
 import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test.jsx';
 
 import Login from './pages/Login/LoginPage.jsx';
@@ -76,6 +78,10 @@ const App = () => {
                     <Route
                         path="my-wellness/psi-test"
                         element={<MyWellness_Test />}
+                    />
+                    <Route
+                        path="my-wellness/history"
+                        element={<MyWellnessHistory />}
                     />
                 </Route>
 
