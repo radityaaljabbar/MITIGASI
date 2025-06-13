@@ -59,9 +59,7 @@ export default function PsychologyHistoryTimeline({
                         return (
                             <div
                                 key={item.id}
-                                className={`relative flex items-start cursor-pointer transition-all ${
-                                    isSelected ? 'scale-105' : 'hover:scale-102'
-                                }`}
+                                className={`relative flex items-start cursor-pointer transition-all`}
                                 onClick={() => onSelectTest(index)}>
                                 {/* Timeline dot */}
                                 <div
@@ -78,7 +76,7 @@ export default function PsychologyHistoryTimeline({
                                 {/* Content card */}
                                 <div
                                     className={`
-                                    ml-16 p-4 rounded-lg border transition-all
+                                    ml-16 p-4 rounded-lg border transition-all w-full
                                     ${
                                         isSelected
                                             ? 'border-[#951A22] shadow-md bg-red-50'
@@ -120,36 +118,36 @@ export default function PsychologyHistoryTimeline({
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-4 gap-2 text-xs">
-                                        <div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mt-2">
+                                        <div className="flex justify-between">
                                             <span className="text-gray-500">
                                                 Depression:
                                             </span>
-                                            <span className="font-medium ml-1">
+                                            <span className="font-medium">
                                                 {item.aspekPsikologi.depression}
                                             </span>
                                         </div>
-                                        <div>
+                                        <div className="flex justify-between">
                                             <span className="text-gray-500">
                                                 Anxiety:
                                             </span>
-                                            <span className="font-medium ml-1">
+                                            <span className="font-medium">
                                                 {item.aspekPsikologi.anxiety}
                                             </span>
                                         </div>
-                                        <div>
+                                        <div className="flex justify-between">
                                             <span className="text-gray-500">
                                                 Stress:
                                             </span>
-                                            <span className="font-medium ml-1">
+                                            <span className="font-medium">
                                                 {item.aspekPsikologi.stress}
                                             </span>
                                         </div>
-                                        <div>
+                                        <div className="flex justify-between">
                                             <span className="text-gray-500">
                                                 Total:
                                             </span>
-                                            <span className="font-medium ml-1">
+                                            <span className="font-medium">
                                                 {item.aspekPsikologi.totalSkor}
                                             </span>
                                         </div>
