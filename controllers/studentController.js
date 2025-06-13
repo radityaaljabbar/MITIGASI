@@ -426,15 +426,15 @@ exports.sendPsiResult = async (req, res) => {
         // FIXED: Use MySQL-compatible datetime format
         const tanggalTes = getCurrentMySQLDateTime();
 
-        // Step 1: Delete any existing records for this nim
-        const [deleteResult] = await pool.execute(
-            'DELETE FROM hasil_tes_psikologi WHERE nim = ?',
-            [nim]
-        );
+        //? Dicomment untuk memungkinkan mahasiswa bisa mengisi berulang kali tidak hanya sekali.
+        // const [deleteResult] = await pool.execute(
+        //     'DELETE FROM hasil_tes_psikologi WHERE nim = ?',
+        //     [nim]
+        // );
 
-        console.log(
-            `Deleted ${deleteResult.affectedRows} existing records for nim: ${nim}`
-        );
+        // console.log(
+        //     `Deleted ${deleteResult.affectedRows} existing records for nim: ${nim}`
+        // );
 
         // Step 2: Insert new data
         const [insertResult] = await pool.execute(
