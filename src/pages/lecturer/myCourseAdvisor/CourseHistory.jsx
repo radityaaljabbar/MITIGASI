@@ -11,9 +11,9 @@ const getGradeBadgeClass = (indeks, jenis) => {
     if (normalizedIndeks === 'A') return 'bg-green-100 text-green-800';
     if (normalizedIndeks === 'B') return 'bg-blue-100 text-blue-800';
     if (normalizedIndeks === 'C') return 'bg-yellow-100 text-yellow-800';
-    if (normalizedIndeks === 'D' && normalizedJenis.toLowerCase().includes('peminatan')) return 'bg-orange-100 text-orange-800';
+    if (normalizedIndeks === 'D' && normalizedJenis.toLowerCase().includes('pilihan')) return 'bg-orange-100 text-orange-800';
     if (normalizedIndeks === 'D') return 'bg-amber-100 text-amber-800';
-    if (normalizedIndeks === 'E') return 'bg-red-100 text-red-800';
+    if (normalizedIndeks === 'E' && 'T') return 'bg-red-100 text-red-800';
     return 'bg-gray-100 text-gray-800';
 };
 

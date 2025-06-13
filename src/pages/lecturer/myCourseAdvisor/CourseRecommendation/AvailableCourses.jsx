@@ -26,14 +26,14 @@ const AvailableCourses = () => {
                         onChange={handleSemesterChange}
                         className="text-sm p-1 border border-gray-300 rounded focus:ring-[#951A22] focus:border-[#951A22]">
                         <option value="">Semua</option>
-                        <option value="1">Semester 1</option>
-                        <option value="2">Semester 2</option>
-                        <option value="3">Semester 3</option>
-                        <option value="4">Semester 4</option>
-                        <option value="5">Semester 5</option>
-                        <option value="6">Semester 6</option>
-                        <option value="7">Semester 7</option>
-                        <option value="8">Semester 8</option>
+                        <option value="1">GANJIL - Tingkat 1</option>
+                        <option value="2">GENAP - Tingkat 1</option>
+                        <option value="3">GANJIL - Tingkat 2</option>
+                        <option value="4">GENAP - Tingkat 2</option>
+                        <option value="5">GANJIL - Tingkat 3</option>
+                        <option value="6">GENAP - Tingkat 3</option>
+                        <option value="7">GANJIL - Tingkat 4</option>
+                        <option value="8">GENAP - Tingkat 4</option>
                     </select>
                 </div>
             </div>
