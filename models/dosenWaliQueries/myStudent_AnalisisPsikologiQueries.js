@@ -14,7 +14,8 @@ exports.getWellnessResult = async (nim) => {
             ) as current_semester
         FROM hasil_tes_psikologi htp
         JOIN mahasiswa m ON htp.nim = m.nim
-        WHERE htp.nim = ?`,
+        WHERE htp.nim = ?
+        ORDER BY htp.tanggalTes DESC`, // Tambahkan ORDER BY untuk sorting newest first
         [nim]
     );
     return rows;
