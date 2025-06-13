@@ -1,8 +1,5 @@
 // src/services/cekAnalisisPsikologi.js
-
-/**
- * Service untuk mengambil data analisis psikologi mahasiswa dari backend
- */
+//? Service untuk mengambil data analisis psikologi mahasiswa dari backend
 
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
@@ -25,13 +22,16 @@ export const getAnalisisPsikologi = async (nim) => {
         }
 
         // Fetch ke API:
-        const response = await fetch(getApiUrl(`/faculty/analisisPsikologi/${nim}`), {
-            method: 'GET',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch(
+            getApiUrl(`/faculty/analisisPsikologi/${nim}`),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         // Check if response is ok
         if (!response.ok) {
@@ -168,4 +168,97 @@ export const analyzeDASS21Level = (score, aspect) => {
     const range = aspectRanges.find((r) => score >= r.min && score <= r.max);
 
     return range || { level: 'Unknown', color: 'gray' };
+};
+
+/**
+ * Transform all psychology data (for history view)
+ * @param {Object} backendData - Data dari backend
+ * @returns {Array} Array of transformed data
+ */
+export const transformAllPsychologyData = (backendData) => {
+    if (!backendData || !backendData.data || backendData.data.length === 0) {
+        return [];
+    }
+
+    return backendData.data.map((result, index) => ({
+        id: result.idHasil,
+        nim: result.nim,
+        nama: result.nama,
+        kelas: result.kelas,
+        currentSemester: result.current_semester,
+        hasData: true,
+        statusPsikologi: result.klasifikasi,
+        tanggalTes: new Date(result.tanggalTes).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        }),
+        tanggalTesRaw: result.tanggalTes, // For sorting
+        aspekPsikologi: {
+            depression: result.skor_depression,
+            anxiety: result.skor_anxiety,
+            stress: result.skor_stress,
+            totalSkor: result.total_skor,
+        },
+        kesimpulan: result.kesimpulan,
+        saran: result.saran,
+        klasifikasi: result.klasifikasi,
+        testNumber: backendData.data.length - index, // Test number (1 = oldest)
+    }));
+};
+
+/**
+ * Get comparison data between two test results
+ * @param {Object} current - Current test data
+ * @param {Object} previous - Previous test data
+ * @returns {Object} Comparison analysis
+ */
+export const compareTestResults = (current, previous) => {
+    if (!current || !previous) return null;
+
+    const aspects = ['depression', 'anxiety', 'stress'];
+    const comparison = {
+        changes: {},
+        improvements: [],
+        concerns: [],
+        overallTrend: 'stable',
+    };
+
+    aspects.forEach((aspect) => {
+        const currentScore = current.aspekPsikologi[aspect];
+        const previousScore = previous.aspekPsikologi[aspect];
+        const change = currentScore - previousScore;
+
+        comparison.changes[aspect] = {
+            current: currentScore,
+            previous: previousScore,
+            change: change,
+            percentage:
+                previousScore > 0
+                    ? Math.round((change / previousScore) * 100)
+                    : 0,
+            improved: change < 0, // Lower is better for DASS-21
+        };
+
+        if (change < -2) {
+            comparison.improvements.push(
+                `${aspect} menurun ${Math.abs(change)} poin (membaik)`
+            );
+        } else if (change > 2) {
+            comparison.concerns.push(
+                `${aspect} meningkat ${change} poin (perlu perhatian)`
+            );
+        }
+    });
+
+    // Overall trend
+    const totalChange =
+        current.aspekPsikologi.totalSkor - previous.aspekPsikologi.totalSkor;
+    if (totalChange < -5) {
+        comparison.overallTrend = 'improving';
+    } else if (totalChange > 5) {
+        comparison.overallTrend = 'worsening';
+    }
+
+    return comparison;
 };
