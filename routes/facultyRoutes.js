@@ -76,6 +76,13 @@ router.get(
     facultyController.getLastIPSemester
 );
 
+router.get(
+    '/getStudentNimSKS',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getStudentNIMSKS
+);
+
 // @desc    Endpoint backend untuk fitur MyReport
 // @fitur   FR-03.1 - MyReport - Overview
 // /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx

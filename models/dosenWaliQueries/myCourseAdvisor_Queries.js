@@ -63,3 +63,23 @@ exports.getLastSemesterIP = async (nim) => {
 
     return result.length > 0 ? result[0] : null;
 };
+
+exports.getNimSKSData = async (nim) => {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT sks_lulus FROM ipk_mahasiswa WHERE nim = ?',
+            [nim]
+        );
+
+        //Cek jika data mahasiswa tidak ditemukan
+        if (rows.length === 0) {
+            return null;
+        }
+
+        //Balikan object pertama dri array
+        return rows[0];
+    } catch (error) {
+        console.error('Error in getNimSKSData service:', error);
+        throw error;
+    }
+};

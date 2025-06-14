@@ -19,6 +19,7 @@ const {
     getStudentInClass,
     getAvailCourses,
     getLastSemesterIP,
+    getNimSKSData,
 } = require('../models/dosenWaliQueries/myCourseAdvisor_Queries');
 const {
     fetchStudentTAK,
@@ -729,6 +730,41 @@ exports.getLastIPSemester = async (req, res) => {
                     : undefined,
         });
     }
+};
+
+/**
+ * @desc Get IP Semester terakhir mahasiswa.
+ * @route GET /api/faculty/courseAdvisor/getLastIPSemester
+ * @access Private (dosen_wali only)
+ */
+exports.getStudentNIMSKS = async (req, res) => {
+    try {
+        const nim = req.query.nim;
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM is required as a query parameter.',
+            });
+        }
+
+        const studentData = await getNimSKSData(nim);
+
+        if (!studentData) {
+            return res.status(404).json({
+                success: false,
+                message: `Mahasiswa dengan NIM ${nim} tidak ditemukan.`,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Data SKS mahasiswa berhasil didapatkan',
+            data: {
+                sksLulus: studentData.sks_lulus,
+                nim: nim,
+            },
+        });
+    } catch (error) {}
 };
 
 exports.getStudentAcademicDetails = async (req, res) => {
