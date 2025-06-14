@@ -8,7 +8,7 @@ export default function StudentInfo({ student }) {
             case 'aman':
                 return 'bg-green-100 text-green-800 border-green-200';
             case 'siaga':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                return 'bg-orange-100 text-orange-800 border-orange-200';
             case 'bermasalah':
                 return 'bg-red-100 text-red-800 border-red-200';
             default:
