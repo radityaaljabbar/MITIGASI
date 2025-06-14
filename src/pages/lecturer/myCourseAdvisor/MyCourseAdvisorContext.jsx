@@ -15,6 +15,7 @@ import {
     sendRecommendedCourses,
     getLastIPSemester,
     getRecommendedMK,
+    getStudentNIMSKS,
 } from '../../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService';
 
 // Create context
@@ -46,6 +47,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         useState(false);
     const [isLoadingRecommendations, setIsLoadingRecommendations] =
         useState(false);
+    const [studentSKSData, setStudentSKSData] = useState(null);
 
     const totalRecommendedSKS = recommendedCourses.reduce(
         (total, course) => total + course.sks,
@@ -123,72 +125,79 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         fetchAvailableCourses();
     }, []);
 
-    // Fetch student-specific data (IP and Course History) when selection changes
     useEffect(() => {
         if (!selectedStudent) {
             setMaxSKS(DEFAULT_MAX_SKS);
             setStudentCourseHistory([]);
+            setStudentSKSData(null); // Reset SKS data
             return;
         }
 
-        const fetchStudentIP = async () => {
-            try {
-                const result = await getLastIPSemester(selectedStudent);
-                setMaxSKS(result.success ? result.maxSKS : DEFAULT_MAX_SKS);
-                if (result.success && result.maxSKS < DEFAULT_MAX_SKS) {
+        const fetchStudentData = async () => {
+            // Fetch all student data in parallel for better performance
+            const [ipResult, historyResult, sksResult] =
+                await Promise.allSettled([
+                    getLastIPSemester(selectedStudent),
+                    getStudentCourseHistory(selectedStudent),
+                    getStudentNIMSKS(selectedStudent), // Updated function call
+                ]);
+
+            // Handle IP result
+            if (ipResult.status === 'fulfilled' && ipResult.value.success) {
+                setMaxSKS(ipResult.value.maxSKS);
+                if (ipResult.value.maxSKS < DEFAULT_MAX_SKS) {
                     toast.info(
-                        `Batas SKS mahasiswa adalah ${result.maxSKS} karena IP semester lalu di bawah 3.00.`
+                        `Batas SKS mahasiswa adalah ${ipResult.value.maxSKS} karena IP semester lalu di bawah 3.00.`
                     );
                 }
-            } catch (error) {
+            } else {
                 setMaxSKS(DEFAULT_MAX_SKS);
                 toast.warn(
                     'Data IP tidak ditemukan, menggunakan batas SKS default (24)'
                 );
             }
-        };
 
-        // =========================================================================
-        // === PERUBAHAN DI SINI ===
-        // =========================================================================
-        const fetchCourseHistory = async () => {
+            // Handle Course History result
             setIsLoadingHistory(true);
-            try {
-                const result = await getStudentCourseHistory(selectedStudent);
-
-                if (result.success) {
-                    setStudentCourseHistory(result.courseHistory || []);
-                    // Tampilkan pesan peringatan dari backend jika ada
-                    if (result.message) {
-                        toast.warn(result.message);
-                    }
-                } else {
-                    // Jika proses gagal total, tampilkan sebagai error
-                    setStudentCourseHistory([]);
-                    toast.error(
-                        result.message || 'Gagal memuat riwayat mata kuliah'
-                    );
-                }
-            } catch (error) {
-                setStudentCourseHistory([]);
-                toast.error(
-                    'Terjadi kesalahan saat memuat riwayat mata kuliah'
+            if (
+                historyResult.status === 'fulfilled' &&
+                historyResult.value.success
+            ) {
+                setStudentCourseHistory(
+                    historyResult.value.courseHistory || []
                 );
-            } finally {
-                setIsLoadingHistory(false);
+                if (historyResult.value.message) {
+                    toast.warn(historyResult.value.message);
+                }
+            } else {
+                setStudentCourseHistory([]);
+                if (historyResult.status === 'rejected') {
+                    toast.error('Gagal memuat riwayat mata kuliah');
+                }
+            }
+            setIsLoadingHistory(false);
+
+            // Handle SKS Data result
+            if (sksResult.status === 'fulfilled' && sksResult.value.success) {
+                setStudentSKSData(sksResult.value.studentData);
+            } else {
+                setStudentSKSData(null);
+                // Don't show error toast as this is supplementary info
             }
         };
-        // =========================================================================
 
-        fetchStudentIP();
-        fetchCourseHistory();
+        fetchStudentData();
     }, [selectedStudent]);
 
     // ... (semua logika dan fungsi lain tetap sama) ...
     useEffect(() => {
         if (
-            !selectedStudent || !targetSemester || isLoadingHistory || isLoadingCourses ||
-            !staticAvailableCoursesData.length || !studentCourseHistory
+            !selectedStudent ||
+            !targetSemester ||
+            isLoadingHistory ||
+            isLoadingCourses ||
+            !staticAvailableCoursesData.length ||
+            !studentCourseHistory
         ) {
             if (!selectedStudent || !targetSemester) {
                 setRecommendedCourses([]);
@@ -197,11 +206,13 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             }
             return;
         }
-        
+
         // --- PRE-PROCESSING: Create efficient look-up maps ---
-        const courseMap = new Map(staticAvailableCoursesData.map(c => [c.kode_mk, c]));
+        const courseMap = new Map(
+            staticAvailableCoursesData.map((c) => [c.kode_mk, c])
+        );
         const equivalenceMap = new Map();
-        staticAvailableCoursesData.forEach(c => {
+        staticAvailableCoursesData.forEach((c) => {
             if (c.ekivalensi) {
                 // Assuming ekivalensi is a single code, not an array
                 equivalenceMap.set(c.ekivalensi, c.kode_mk);
@@ -212,16 +223,22 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         const getCurrentCode = (historyCode) => {
             return equivalenceMap.get(historyCode) || historyCode;
         };
-        
+
         const fetchAndProcessRecommendations = async () => {
             setIsLoadingRecommendations(true);
             try {
-                const existingRec = await getRecommendedMK(selectedStudent, targetSemester);
-                if (existingRec.success && existingRec.recommendations.length > 0) {
+                const existingRec = await getRecommendedMK(
+                    selectedStudent,
+                    targetSemester
+                );
+                if (
+                    existingRec.success &&
+                    existingRec.recommendations.length > 0
+                ) {
                     const recsFromStaticData = existingRec.recommendations
-                        .map(rec => courseMap.get(rec.kodeMataKuliah))
+                        .map((rec) => courseMap.get(rec.kodeMataKuliah))
                         .filter(Boolean) // Filter out any courses that might no longer exist
-                        .map(course => ({
+                        .map((course) => ({
                             id: course.id,
                             kodeMataKuliah: course.kode_mk,
                             namaMataKuliah: course.nama_mk,
@@ -229,22 +246,29 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                             jenis: course.jenis_mk,
                             semester_mk: course.semester_mk,
                         }));
-                    
+
                     setRecommendedCourses(recsFromStaticData);
                     setHasExistingRecommendations(true);
 
-                    const recommendedIds = new Set(recsFromStaticData.map(r => r.kodeMataKuliah));
+                    const recommendedIds = new Set(
+                        recsFromStaticData.map((r) => r.kodeMataKuliah)
+                    );
                     const updatedAvailable = staticAvailableCoursesData.filter(
-                        course => !recommendedIds.has(course.kode_mk)
+                        (course) => !recommendedIds.has(course.kode_mk)
                     );
                     setAvailableCourses(updatedAvailable);
-                    toast.info(`Menampilkan ${recsFromStaticData.length} rekomendasi yang sudah ada.`);
+                    toast.info(
+                        `Menampilkan ${recsFromStaticData.length} rekomendasi yang sudah ada.`
+                    );
                 } else {
                     setHasExistingRecommendations(false);
                     generateAutoRecommendations();
                 }
             } catch (error) {
-                console.error('Error fetching existing recommendations:', error);
+                console.error(
+                    'Error fetching existing recommendations:',
+                    error
+                );
                 generateAutoRecommendations();
             } finally {
                 setIsLoadingRecommendations(false);
@@ -262,7 +286,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             const isTargetSemesterOdd = targetSemesterInt % 2 !== 0;
 
             const addCourseToPlan = (course) => {
-                if (recommendations.some((r) => r.id === course.id)) return false;
+                if (recommendations.some((r) => r.id === course.id))
+                    return false;
                 if (currentSKS + course.sks_mk <= maxSKS) {
                     recommendations.push({
                         id: course.id,
@@ -272,10 +297,12 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         jenis: course.jenis_mk,
                         semester_mk: course.semester_mk,
                         jenis_semester: course.jenis_semester,
-                        tahun_ajaran: course.tahun_ajaran
+                        tahun_ajaran: course.tahun_ajaran,
                     });
                     currentSKS += course.sks_mk;
-                    availableForPicking = availableForPicking.filter((c) => c.id !== course.id);
+                    availableForPicking = availableForPicking.filter(
+                        (c) => c.id !== course.id
+                    );
                     return true;
                 }
                 return false;
@@ -294,9 +321,13 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 // A, B, C, AB, BC always count as a pass.
                 if (allPassingGrades.includes(indeks)) {
                     passedCodes.add(currentCode);
-                } 
+                }
                 // Grade 'D' is a pass ONLY if taken in semester 6 or below.
-                else if (indeks === 'D' && !isNaN(semesterTaken) && semesterTaken < 7) {
+                else if (
+                    indeks === 'D' &&
+                    !isNaN(semesterTaken) &&
+                    semesterTaken < 7
+                ) {
                     passedCodes.add(currentCode);
                 }
             });
@@ -312,9 +343,13 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 // E or T is always a failure.
                 if (['E', 'T'].includes(indeks)) {
                     isFailure = true;
-                } 
+                }
                 // Grade 'D' is a failure if taken in semester 7 or above.
-                else if (indeks === 'D' && !isNaN(semesterTaken) && semesterTaken >= 7) {
+                else if (
+                    indeks === 'D' &&
+                    !isNaN(semesterTaken) &&
+                    semesterTaken >= 7
+                ) {
                     isFailure = true;
                 }
 
@@ -334,11 +369,16 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             retakeCodes.forEach((code) => {
                 const courseData = courseMap.get(code);
                 if (courseData) {
-                    const courseSemesterInt = parseInt(courseData.semester_mk, 10);
+                    const courseSemesterInt = parseInt(
+                        courseData.semester_mk,
+                        10
+                    );
                     if (isNaN(courseSemesterInt)) return;
-                    
-                    const isSemesterNotTooHigh = courseSemesterInt <= targetSemesterInt;
-                    const isSemesterTypeMatch = (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+
+                    const isSemesterNotTooHigh =
+                        courseSemesterInt <= targetSemesterInt;
+                    const isSemesterTypeMatch =
+                        (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
 
                     if (isSemesterNotTooHigh && isSemesterTypeMatch) {
                         addCourseToPlan(courseData);
@@ -356,13 +396,24 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
                     const isMandatory = course.jenis_mk === 'WAJIB PRODI';
                     const isNew = !allTakenCodes.has(course.kode_mk);
-                    
-                    const isSemesterNotTooHigh = courseSemesterInt <= targetSemesterInt;
-                    const isSemesterTypeMatch = (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
 
-                    return isMandatory && isNew && isSemesterTypeMatch && isSemesterNotTooHigh;
+                    const isSemesterNotTooHigh =
+                        courseSemesterInt <= targetSemesterInt;
+                    const isSemesterTypeMatch =
+                        (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+
+                    return (
+                        isMandatory &&
+                        isNew &&
+                        isSemesterTypeMatch &&
+                        isSemesterNotTooHigh
+                    );
                 })
-                .sort((a, b) => parseInt(a.semester_mk, 10) - parseInt(b.semester_mk, 10));
+                .sort(
+                    (a, b) =>
+                        parseInt(a.semester_mk, 10) -
+                        parseInt(b.semester_mk, 10)
+                );
 
             newMandatoryCourses.forEach((course) => {
                 addCourseToPlan(course);
@@ -374,7 +425,9 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             if (recommendations.length > 0) {
                 toast.success('Rekomendasi mata kuliah otomatis telah dibuat.');
             } else {
-                toast.info('Tidak ada rekomendasi otomatis yang dapat dibuat sesuai aturan.');
+                toast.info(
+                    'Tidak ada rekomendasi otomatis yang dapat dibuat sesuai aturan.'
+                );
             }
         };
 
@@ -406,12 +459,12 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                       namaMataKuliah: details.nama_mk,
                       sks: details.sks_mk,
                       jenis: details.jenis_mk,
-                      ekivalensi: details.ekivalensi
+                      ekivalensi: details.ekivalensi,
                   }
                 : historyItem;
         });
 
-        console.log(merged)
+        console.log(merged);
         setMergedCourseHistory(merged);
     }, [studentCourseHistory, staticAvailableCoursesData]);
 
@@ -572,6 +625,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         wouldExceedSKSLimit,
         hasExistingRecommendations,
         isLoadingRecommendations,
+        studentSKSData,
     };
 
     return (

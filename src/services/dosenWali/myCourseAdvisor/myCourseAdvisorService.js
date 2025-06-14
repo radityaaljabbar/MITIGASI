@@ -91,7 +91,7 @@ export const getStudentCourseHistory = async (nim) => {
                     indeks: course.nilai || '-',
                     semester: course.semester || '-',
                     ekivalensi: course.ekivalensi,
-                    angkatan: course.angkatan
+                    angkatan: course.angkatan,
                 };
 
                 return transformedCourse;
@@ -160,7 +160,7 @@ export const getAvailableCourse = async () => {
                 semester_mk: course.semester,
                 jenis_semester: course.jenis_semester,
                 tahun_ajaran: course.tahun_ajaran,
-                ekivalensi: course.ekivalensi
+                ekivalensi: course.ekivalensi,
             }));
 
             return {
@@ -361,6 +361,54 @@ export const getRecommendedMK = async (nim, targetSemester) => {
             message: 'An error occurred while fetching recommendations',
             error: error.message,
             recommendations: [],
+        };
+    }
+};
+
+export const getStudentNIMSKS = async (nim) => {
+    try {
+        // Get and validate token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return {
+                success: false,
+                message: 'No Token Found',
+            };
+        }
+
+        const response = await fetch(
+            getApiUrl(`/faculty/getStudentNIMSKS?nim=${nim}`),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            return {
+                success: true,
+                studentData: {
+                    nim: data.data.nim,
+                    sksLulus: data.data.sksLulus,
+                },
+            };
+        } else {
+            return {
+                success: false,
+                message: data.message || 'Failed to fetch student SKS data',
+            };
+        }
+    } catch (error) {
+        console.error('Error fetching student SKS data:', error);
+        return {
+            success: false,
+            message: 'An error occurred while fetching student SKS data',
+            error: error.message,
         };
     }
 };
