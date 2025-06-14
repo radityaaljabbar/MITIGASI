@@ -93,7 +93,7 @@ const AkademikDashboard = ({ studentData }) => {
                     </h3>
                 </div>
                 <div className="mb-4">
-                    <p className="text-sm text-gray-600">SKS Total</p>
+                    <p className="text-sm text-gray-600">SKS Lulus</p>
                     <h3 className="text-2xl font-bold text-red-800">
                         {studentData.sksTotal || 0}
                     </h3>

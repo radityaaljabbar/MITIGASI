@@ -354,7 +354,7 @@ const AnalisisTrendContent = ({ studentData }) => {
                 <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-green-100 text-sm">Total SKS</p>
+                            <p className="text-green-100 text-sm">SKS Lulus</p>
                             <p className="text-2xl font-bold">{totalSKS}</p>
                         </div>
                         <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">

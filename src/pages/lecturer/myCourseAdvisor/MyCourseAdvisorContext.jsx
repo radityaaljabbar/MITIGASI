@@ -281,16 +281,22 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 return false;
             };
 
-            // --- REVISED: Matching by Code and Equivalency ---
             const passedCodes = new Set();
             const failedCodes = new Set();
-            const allPassingGrades = ['A', 'B', 'C', 'D', 'AB', 'BC'];
+            const allPassingGrades = ['A', 'B', 'C', 'AB', 'BC']; // Grade 'D' is now conditional
 
             // First pass: find all courses that have at least one passing grade
             studentCourseHistory.forEach((h) => {
                 const currentCode = getCurrentCode(h.kodeMataKuliah);
                 const indeks = h.indeks?.trim().toUpperCase();
+                const semesterTaken = parseInt(h.semester, 10);
+
+                // A, B, C, AB, BC always count as a pass.
                 if (allPassingGrades.includes(indeks)) {
+                    passedCodes.add(currentCode);
+                } 
+                // Grade 'D' is a pass ONLY if taken in semester 6 or below.
+                else if (indeks === 'D' && !isNaN(semesterTaken) && semesterTaken < 7) {
                     passedCodes.add(currentCode);
                 }
             });
@@ -299,7 +305,20 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             studentCourseHistory.forEach((h) => {
                 const currentCode = getCurrentCode(h.kodeMataKuliah);
                 const indeks = h.indeks?.trim().toUpperCase();
+                const semesterTaken = parseInt(h.semester, 10);
+
+                let isFailure = false;
+
+                // E or T is always a failure.
                 if (['E', 'T'].includes(indeks)) {
+                    isFailure = true;
+                } 
+                // Grade 'D' is a failure if taken in semester 7 or above.
+                else if (indeks === 'D' && !isNaN(semesterTaken) && semesterTaken >= 7) {
+                    isFailure = true;
+                }
+
+                if (isFailure) {
                     // Only consider it a "retake" if it's NOT in the passed set
                     if (!passedCodes.has(currentCode)) {
                         failedCodes.add(currentCode);
