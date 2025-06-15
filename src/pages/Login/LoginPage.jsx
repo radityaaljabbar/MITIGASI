@@ -5,7 +5,7 @@ import { loginUser } from '../../services/authService';
 import logoMitigasi from '/src/assets/images/FIX_LOGO.png';
 
 const Login = () => {
-    const [isStudentLogin, setIsStudentLogin] = useState(true);
+    const [selectedRole, setSelectedRole] = useState('mahasiswa'); // Changed from isStudentLogin
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -18,28 +18,41 @@ const Login = () => {
         setLoading(true);
         setError('');
 
-        // Determine the role based on login type
-        const role = isStudentLogin ? 'mahasiswa' : 'dosen_wali';
-
         try {
             // Call the API login endpoint
-            const response = await loginUser(id, password, role);
+            const response = await loginUser(id, password, selectedRole);
 
             if (response.success) {
+                // Determine user type for frontend routing
+                let userType;
+                if (selectedRole === 'mahasiswa') {
+                    userType = 'students';
+                } else if (selectedRole === 'dosen_wali') {
+                    userType = 'lecturers';
+                } else if (selectedRole === 'admin') {
+                    userType = 'admin';
+                }
+
                 // Store user info and token in localStorage
                 localStorage.setItem(
                     'user',
                     JSON.stringify({
                         id: response.user.id,
                         name: response.user.name,
-                        type: isStudentLogin ? 'students' : 'lecturers',
+                        type: userType,
                         token: response.token,
                         role: response.user.role,
                     })
                 );
 
                 // Navigate to appropriate dashboard
-                navigate(isStudentLogin ? '/student' : '/lecturer');
+                if (selectedRole === 'mahasiswa') {
+                    navigate('/student');
+                } else if (selectedRole === 'dosen_wali') {
+                    navigate('/lecturer');
+                } else if (selectedRole === 'admin') {
+                    navigate('/admin');
+                }
             } else {
                 setError(response.message || 'Login failed');
             }
@@ -51,12 +64,55 @@ const Login = () => {
         }
     };
 
-    const handleRoleSwitch = (isStudent) => {
-        setIsStudentLogin(isStudent);
+    const handleRoleSwitch = (role) => {
+        setSelectedRole(role);
         setId(''); // Clear form when switching
         setPassword('');
         setError('');
     };
+
+    // Get role configuration
+    const getRoleConfig = () => {
+        switch (selectedRole) {
+            case 'mahasiswa':
+                return {
+                    title: 'Mahasiswa',
+                    subtitle: 'Login dengan NIM',
+                    placeholder: 'Masukkan NIM',
+                    helpText: 'Gunakan NIM yang terdaftar di sistem akademik',
+                    color: 'blue',
+                    bgColor: 'bg-blue-50',
+                    borderColor: 'border-blue-200',
+                    buttonColor: 'bg-blue-500 hover:bg-blue-600',
+                };
+            case 'dosen_wali':
+                return {
+                    title: 'Dosen Wali',
+                    subtitle: 'Login dengan NIP',
+                    placeholder: 'Masukkan NIP',
+                    helpText: 'Gunakan NIP yang terdaftar sebagai dosen wali',
+                    color: 'red',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    buttonColor: 'bg-red-500 hover:bg-red-600',
+                };
+            case 'admin':
+                return {
+                    title: 'Administrator',
+                    subtitle: 'Login dengan Username',
+                    placeholder: 'Masukkan Username',
+                    helpText: 'Gunakan username administrator yang terdaftar',
+                    color: 'green',
+                    bgColor: 'bg-green-50',
+                    borderColor: 'border-green-200',
+                    buttonColor: 'bg-green-500 hover:bg-green-600',
+                };
+            default:
+                return {};
+        }
+    };
+
+    const roleConfig = getRoleConfig();
 
     return (
         <div className="min-h-screen bg-[#FAF0E6] flex items-center justify-center px-4">
@@ -90,10 +146,11 @@ const Login = () => {
                         </h2>
 
                         <div className="flex bg-gray-100 rounded-xl p-2 mb-6">
+                            {/* Mahasiswa Tab */}
                             <button
-                                onClick={() => handleRoleSwitch(true)}
+                                onClick={() => handleRoleSwitch('mahasiswa')}
                                 className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-all duration-300 ${
-                                    isStudentLogin
+                                    selectedRole === 'mahasiswa'
                                         ? 'bg-blue-500 text-white shadow-lg transform scale-105'
                                         : 'text-gray-600 hover:text-blue-500'
                                 }`}>
@@ -113,10 +170,11 @@ const Login = () => {
                                 </div>
                             </button>
 
+                            {/* Dosen Wali Tab */}
                             <button
-                                onClick={() => handleRoleSwitch(false)}
+                                onClick={() => handleRoleSwitch('dosen_wali')}
                                 className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-all duration-300 ${
-                                    !isStudentLogin
+                                    selectedRole === 'dosen_wali'
                                         ? 'bg-red-500 text-white shadow-lg transform scale-105'
                                         : 'text-gray-600 hover:text-red-500'
                                 }`}>
@@ -137,50 +195,74 @@ const Login = () => {
                                     </div>
                                 </div>
                             </button>
+
+                            {/* Admin Tab */}
+                            <button
+                                onClick={() => handleRoleSwitch('admin')}
+                                className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-all duration-300 ${
+                                    selectedRole === 'admin'
+                                        ? 'bg-green-500 text-white shadow-lg transform scale-105'
+                                        : 'text-gray-600 hover:text-green-500'
+                                }`}>
+                                <div className="flex items-center justify-center">
+                                    <svg
+                                        className="w-6 h-6 mr-2"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path d="M12,15C12.81,15 13.5,14.7 14.11,14.11C14.7,13.5 15,12.81 15,12C15,11.19 14.7,10.5 14.11,9.89C13.5,9.3 12.81,9 12,9C11.19,9 10.5,9.3 9.89,9.89C9.3,10.5 9,11.19 9,12C9,12.81 9.3,13.5 9.89,14.11C10.5,14.7 11.19,15 12,15M12,2C14.21,2 16.21,2.81 17.71,4.29C19.19,5.79 20,7.79 20,10C20,12.21 19.19,14.21 17.71,15.71C16.21,17.19 14.21,18 12,18C9.79,18 7.79,17.19 6.29,15.71C4.81,14.21 4,12.21 4,10C4,7.79 4.81,5.79 6.29,4.29C7.79,2.81 9.79,2 12,2M12,20A2,2 0 0,1 14,22H10A2,2 0 0,1 12,20Z" />
+                                    </svg>
+                                    <div>
+                                        <div className="text-lg">Admin</div>
+                                        <div className="text-sm opacity-75">
+                                            Administrator
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
                     {/* Login Form */}
                     <div className="max-w-md mx-auto">
                         <div
-                            className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
-                                isStudentLogin
-                                    ? 'border-blue-200 bg-blue-50'
-                                    : 'border-red-200 bg-red-50'
-                            }`}>
+                            className={`p-6 rounded-2xl border-2 transition-all duration-300 ${roleConfig.bgColor} ${roleConfig.borderColor}`}>
                             <div className="text-center mb-6">
                                 <div
                                     className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${
-                                        isStudentLogin
+                                        selectedRole === 'mahasiswa'
                                             ? 'bg-blue-500'
-                                            : 'bg-red-500'
+                                            : selectedRole === 'dosen_wali'
+                                            ? 'bg-red-500'
+                                            : 'bg-green-500'
                                     }`}>
-                                    {isStudentLogin ? (
+                                    {selectedRole === 'mahasiswa' ? (
                                         <svg
                                             className="w-8 h-8 text-white"
                                             fill="currentColor"
                                             viewBox="0 0 24 24">
                                             <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM12 7C14.8 7 17 9.2 17 12V15H19V17H5V15H7V12C7 9.2 9.2 7 12 7Z" />
                                         </svg>
-                                    ) : (
+                                    ) : selectedRole === 'dosen_wali' ? (
                                         <svg
                                             className="w-8 h-8 text-white"
                                             fill="currentColor"
                                             viewBox="0 0 24 24">
                                             <path d="M15 4L20 9V20C20 21.1 19.1 22 18 22H6C4.9 22 4 21.1 4 20V9L9 4H15Z" />
                                         </svg>
+                                    ) : (
+                                        <svg
+                                            className="w-8 h-8 text-white"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path d="M12,15C12.81,15 13.5,14.7 14.11,14.11C14.7,13.5 15,12.81 15,12C15,11.19 14.7,10.5 14.11,9.89C13.5,9.3 12.81,9 12,9C11.19,9 10.5,9.3 9.89,9.89C9.3,10.5 9,11.19 9,12C9,12.81 9.3,13.5 9.89,14.11C10.5,14.7 11.19,15 12,15M12,2C14.21,2 16.21,2.81 17.71,4.29C19.19,5.79 20,7.79 20,10C20,12.21 19.19,14.21 17.71,15.71C16.21,17.19 14.21,18 12,18C9.79,18 7.79,17.19 6.29,15.71C4.81,14.21 4,12.21 4,10C4,7.79 4.81,5.79 6.29,4.29C7.79,2.81 9.79,2 12,2M12,20A2,2 0 0,1 14,22H10A2,2 0 0,1 12,20Z" />
+                                        </svg>
                                     )}
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-800">
-                                    Login{' '}
-                                    {isStudentLogin
-                                        ? 'Mahasiswa'
-                                        : 'Dosen Wali'}
+                                    Login {roleConfig.title}
                                 </h3>
                                 <p className="text-gray-600 text-sm mt-1">
-                                    {isStudentLogin
-                                        ? 'Masukkan NIM dan password Anda'
-                                        : 'Masukkan NIP dan password Anda'}
+                                    {roleConfig.subtitle}
                                 </p>
                             </div>
 
@@ -210,11 +292,7 @@ const Login = () => {
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder={
-                                            isStudentLogin
-                                                ? 'Masukkan NIM'
-                                                : 'Masukkan NIP'
-                                        }
+                                        placeholder={roleConfig.placeholder}
                                         value={id}
                                         onChange={(e) => setId(e.target.value)}
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -249,9 +327,7 @@ const Login = () => {
                                     className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform ${
                                         loading
                                             ? 'bg-gray-400 cursor-not-allowed'
-                                            : isStudentLogin
-                                            ? 'bg-blue-500 hover:bg-blue-600 hover:scale-105 active:scale-95'
-                                            : 'bg-red-500 hover:bg-red-600 hover:scale-105 active:scale-95'
+                                            : `${roleConfig.buttonColor} hover:scale-105 active:scale-95`
                                     } shadow-lg`}>
                                     {loading ? (
                                         <div className="flex items-center justify-center">
@@ -296,11 +372,7 @@ const Login = () => {
                                 <p className="font-medium mb-2">
                                     Butuh bantuan?
                                 </p>
-                                <p>
-                                    {isStudentLogin
-                                        ? 'Gunakan NIM yang terdaftar di sistem akademik'
-                                        : 'Gunakan NIP yang terdaftar sebagai dosen wali'}
-                                </p>
+                                <p>{roleConfig.helpText}</p>
                             </div>
                         </div>
                     </div>

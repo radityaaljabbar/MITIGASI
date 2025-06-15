@@ -13,21 +13,14 @@ import MainLayout from './layout/MainLayout.jsx';
 import FeedbackList from './pages/pagesMahasiswa/Feedback/FeedbackList.jsx';
 import FeedbackDetail from './pages/pagesMahasiswa/Feedback/FeedbackDetail.jsx';
 import NewFeedback from './pages/pagesMahasiswa/Feedback/NewFeedback.jsx';
-
 import FinanceMain from './pages/pagesMahasiswa/Finance/Main.jsx';
 import FinanceApp from './pages/pagesMahasiswa/Finance/Application.jsx';
 import FinanceHistory from './pages/pagesMahasiswa/Finance/ApplicationHistory.jsx';
-
 import MyProgress from './pages/pagesMahasiswa/MyProgress.jsx';
-
 import MyCoursePage from './pages/pagesMahasiswa/MyCoursePage.jsx';
-
 import MyWellnessPage from './pages/pagesMahasiswa/MyWellnessPage.jsx';
-
 import MyWellnessHistory from './components/compMahasiswa/myWellnessComponents/MyWellnessHistory.jsx';
-
 import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test.jsx';
-
 import Login from './pages/Login/LoginPage.jsx';
 
 //  Lecturer Pages
@@ -36,8 +29,12 @@ import MyCourseAdvisorPage from './pages/lecturer/myCourseAdvisor/MyCourseAdviso
 import MyReportPage from './pages/lecturer/MyReport/MyReportPage.jsx';
 import MyStudentDetail from './pages/lecturer/myStudent/DetailMahasiswaPage.jsx';
 import MyStudentList from './pages/lecturer/myStudent/studentList.jsx';
+
 // Import your not found page
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
+
+// TODO: Import Admin Pages (will be created later)
+// import AdminDashboard from './pages/pagesAdmin/AdminDashboard.jsx';
 
 const App = () => {
     const router = createBrowserRouter(
@@ -111,6 +108,40 @@ const App = () => {
                     {/* The report route will be added later by your teammate */}
 
                     {/* Use your NotFoundPage for 404 routes within lecturer section */}
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
+
+                {/* Protected Admin Routes */}
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute requiredType="admin">
+                            <MainLayout />
+                        </ProtectedRoute>
+                    }>
+                    {/* TODO: Add admin routes here */}
+                    {/* For now, just show a placeholder dashboard */}
+                    <Route
+                        index
+                        element={
+                            <div className="p-8">
+                                <h1 className="text-2xl font-bold">
+                                    Admin Dashboard
+                                </h1>
+                                <p>
+                                    Admin functionality will be implemented
+                                    here.
+                                </p>
+                            </div>
+                        }
+                    />
+
+                    {/* Add more admin routes as needed */}
+                    {/* <Route path="dashboard" element={<AdminDashboard />} /> */}
+                    {/* <Route path="users" element={<UserManagement />} /> */}
+                    {/* <Route path="settings" element={<AdminSettings />} /> */}
+
+                    {/* 404 for admin routes */}
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
 

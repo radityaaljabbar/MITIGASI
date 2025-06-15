@@ -31,11 +31,17 @@ const ProtectedRoute = ({ children, requiredType }) => {
 
     // If wrong user type, redirect to appropriate dashboard
     if (user.type !== requiredType) {
-        return (
-            <Navigate
-                to={`/${user.type === 'students' ? 'student' : 'lecturer'}`}
-            />
-        );
+        // Redirect based on user type
+        let redirectPath = '/';
+        if (user.type === 'students') {
+            redirectPath = '/student';
+        } else if (user.type === 'lecturers') {
+            redirectPath = '/lecturer';
+        } else if (user.type === 'admin') {
+            redirectPath = '/admin';
+        }
+
+        return <Navigate to={redirectPath} />;
     }
 
     // Otherwise, render the protected content

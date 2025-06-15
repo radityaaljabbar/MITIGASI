@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarMahasiswa from '../components/compMahasiswa/SidebarMahasiswa';
 import SidebarDosenWali from '../components/compDosenWali/SidebarDosenWali';
+import SidebarAdmin from '../components/compAdmin/SidebarAdmin';
 
 const MainLayout = () => {
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -12,6 +13,7 @@ const MainLayout = () => {
     // Determine which sidebar to show based on the URL path
     const isLecturerPath = location.pathname.startsWith('/lecturer');
     const isStudentPath = location.pathname.startsWith('/student');
+    const isAdminPath = location.pathname.startsWith('/admin');
 
     return (
         <div className="flex h-screen overflow-hidden">
@@ -24,6 +26,13 @@ const MainLayout = () => {
 
             {isStudentPath && (
                 <SidebarMahasiswa
+                    expanded={sidebarExpanded}
+                    setExpanded={setSidebarExpanded}
+                />
+            )}
+
+            {isAdminPath && (
+                <SidebarAdmin
                     expanded={sidebarExpanded}
                     setExpanded={setSidebarExpanded}
                 />
