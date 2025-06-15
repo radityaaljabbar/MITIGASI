@@ -61,11 +61,15 @@ exports.login = async (req, res) => {
                 passwordMatch = password === user.password;
             }
         } else {
-            // Admin logic - adjust according to your needs
-            // For simplicity, using a hardcoded admin account for testing
-            if (id === 'admin' && password === 'admin123') {
-                user = { id: 'admin', nama: 'Administrator' };
-                passwordMatch = true;
+            // Query admin table
+            const [rows] = await pool.execute(
+                'SELECT username, name, password FROM atmin_mitigasi WHERE username = ?',
+                [id]
+            );
+
+            if (rows.length > 0) {
+                user = rows[0];
+                passwordMatch = password == user.password;
             }
         }
 
@@ -73,34 +77,47 @@ exports.login = async (req, res) => {
         if (!user || !passwordMatch) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid credentials',
+                message: 'Kredensial tidak valid',
             });
         }
 
         // Generate token
-        const idField =
-            role === 'mahasiswa' ? 'nim' : role === 'dosen_wali' ? 'nip' : 'id';
-        const token = generateToken(user[idField] || id, role);
+        let tokenIdentifier;
+        if (role === 'mahasiswa') tokenIdentifier = user.nim;
+        else if (role === 'dosen_wali') tokenIdentifier = user.nip;
+        else if (role === 'admin') tokenIdentifier = user.username;
 
-        // Send response
+        const token = generateToken(tokenIdentifier, role);
+
         if (role === 'dosen_wali') {
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 token,
                 user: {
-                    id: user[idField],
-                    name: user.nama,
+                    id: user.nip,
+                    name: user.nama, // kolom 'nama'
                     kodedosen: user.kode,
                     role,
                 },
             });
-        } else {
-            res.status(200).json({
+        } else if (role === 'mahasiswa') {
+            return res.status(200).json({
                 success: true,
                 token,
                 user: {
-                    id: user[idField] || id,
-                    name: user.nama,
+                    id: user.nim,
+                    name: user.nama, // kolom 'nama'
+                    role,
+                },
+            });
+        } else {
+            // role === 'admin'
+            return res.status(200).json({
+                success: true,
+                token,
+                user: {
+                    id: user.username, // Mengembalikan username sebagai ID yang ditampilkan
+                    name: user.name, // kolom 'name', bukan 'nama'
                     role,
                 },
             });
@@ -109,7 +126,7 @@ exports.login = async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error',
+            message: 'Terjadi kesalahan pada server',
         });
     }
 };

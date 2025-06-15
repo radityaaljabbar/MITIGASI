@@ -83,8 +83,22 @@ exports.protect = async (req, res, next) => {
                 role: 'dosen_wali',
             };
         } else if (role === 'admin') {
+            const [rows] = await pool.execute(
+                'SELECT id, name, username FROM atmin_mitigasi WHERE username = ?',
+                [id]
+            );
+
+            if (rows.length === 0) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'User not found',
+                });
+            }
+
             req.user = {
-                id,
+                id: rows[0].username, // menggunakan username sebagai id yang ditampilkan
+                name: rows[0].name,
+                username: rows[0].username,
                 role: 'admin',
             };
         }
