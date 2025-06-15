@@ -20,6 +20,13 @@ const {
     findAllKelas
 } = require('../models/adminQueries/kelolaPenggunaQueries')
 
+const {
+    findAllWithDosen,
+    createKelas,
+    updateDosenWaliforKelas,
+    deleteKelasById,
+} = require('../models/adminQueries/kelolaKelasQueries')
+
 // mengambil data akun semua admin
 exports.getAllAdmins = async (req, res) => {
     try {
@@ -355,5 +362,102 @@ exports.getAllKelas = async (req, res) => {
     } catch (error) {
         console.error('Error in getAllKelas:', error);
         res.status(500).json({ message: 'Terjadi kesalahan pada server saat mengambil data kelas.' });
+    }
+};
+
+
+// ------------------------- KELOLA KELAS ------------------------- \
+
+exports.getAllKelasforKelas = async (req, res) => {
+    try {
+        const kelas = await findAllWithDosen();
+        res.status(200).json(kelas);
+    } catch (error) {
+        console.error('Error in getAllKelas:', error);
+        res.status(500).json({ message: 'Failed to retrieve class data.' });
+    }
+};
+
+
+exports.getDosenList = async (req, res) => {
+    try {
+        const dosenList = await findAllDosen();
+        res.status(200).json(dosenList);
+    } catch (error) {
+        console.error('Error in getDosenList:', error);
+        res.status(500).json({ message: 'Failed to retrieve lecturer list.' });
+    }
+};
+
+
+exports.createKelas = async (req, res) => {
+    const { tahun_angkatan, kode_kelas, kode_dosen } = req.body;
+
+    // --- Input Validation ---
+    if (!tahun_angkatan || !kode_kelas) {
+        return res.status(400).json({ message: 'Tahun Angkatan and Kode Kelas are required.' });
+    }
+
+    try {
+        // Prepare data for the model. Ensure kode_dosen is null if it's an empty string.
+        const kelasData = {
+            tahun_angkatan,
+            kode_kelas,
+            kode_dosen: kode_dosen || null
+        };
+        
+        const newKelasId = await createKelas(kelasData);
+        res.status(201).json({ id_kelas: newKelasId, ...kelasData });
+    } catch (error) {
+        console.error('Error in createKelas:', error);
+        // --- Specific Error Handling ---
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: `The class code "${kode_kelas}" already exists.` });
+        }
+        res.status(500).json({ message: 'Failed to create a new class.' });
+    }
+};
+
+
+exports.updateKelas = async (req, res) => {
+    const { id } = req.params;
+    const { kode_kelas, kode_dosen } = req.body; // We only expect the lecturer code for updates
+
+    try {
+        const newKodeDosen = kode_dosen || null;
+        const success = await updateDosenWaliforKelas(id, newKodeDosen);
+
+        if (!success) {
+            return res.status(404).json({ message: `Class with code ${kode_kelas} not found.` });
+        }
+        
+        res.status(200).json({ message: `Dosewn wali untuk kelas ${kode_kelas} berhasil diupdate.` });
+    } catch (error) {
+        console.error('Error in updateKelas:', error);
+        res.status(500).json({ message: 'Failed to update the class.' });
+    }
+};
+
+
+exports.deleteKelas = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const success = await deleteKelasById(id);
+        
+        if (!success) {
+            return res.status(404).json({ message: `Class with ID ${id} not found.` });
+        }
+        
+        res.status(200).json({ message: `Class with ID ${id} has been successfully deleted.` });
+    } catch (error)
+    {
+        console.error('Error in deleteKelas:', error);
+        // Handle foreign key constraint error if a student is still in this class
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+             return res.status(409).json({ 
+                message: `Cannot delete. Students are still assigned to this class. Please reassign them first.` 
+            });
+        }
+        res.status(500).json({ message: 'Failed to delete the class.' });
     }
 };

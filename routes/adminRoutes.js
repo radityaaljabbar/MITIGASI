@@ -9,7 +9,7 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 // @desc    Endpoint backend untuk ...
 router.get('/contoh', protect, authorize('admin'), () => {});
 
-// Admin
+// Kelola Admin
 router.get(
     '/kelolaPengguna/getAdmin',
     protect,
@@ -38,7 +38,7 @@ router.put(
     adminController.updateAdmin
 )
 
-// Dosen Wali
+// Kelola Dosen Wali
 router.get(
     '/kelolaPengguna/getDosenWali',
     protect,
@@ -67,7 +67,7 @@ router.put(
     adminController.updateDosen
 )
 
-// Mahasiswa
+// Kelola Mahasiswa
 router.get(
     '/kelolaPengguna/getMahasiswa',
     protect,
@@ -101,6 +101,42 @@ router.get(
     protect,
     authorize('admin'),
     adminController.getAllKelas
+)
+
+// Kelas
+router.get(
+    '/kelolaKelas/getAllKelas',
+    protect,
+    authorize('admin'),
+    adminController.getAllKelasforKelas
+)
+
+router.get(
+    '/kelolaKelas/getDosentList',
+    protect,
+    authorize('admin'),
+    adminController.getDosenList
+)
+
+router.post(
+    '/kelolaKelas/createKelas',
+    protect,
+    authorize('admin'),
+    adminController.createKelas
+)
+
+router.put(
+    '/kelolaKelas/updateKelas/:id',
+    protect,
+    authorize('admin'),
+    adminController.updateKelas
+)
+
+router.delete(
+    '/kelolaKelas/deleteKelas/:id',
+    protect,
+    authorize('admin'),
+    adminController.deleteKelas
 )
 
 module.exports = router;
