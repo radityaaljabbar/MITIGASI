@@ -15,7 +15,7 @@ const {
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const facultyRoutes = require('./routes/facultyRoutes');
-// const adminRoutes = require('./routes/adminRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Import middlewares
 // const { errorHandler } = require('./middlewares/errorMiddleware');
@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
 app.use('/api/', authRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/faculty', facultyRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ADDED: 404 handler for unknown routes
 app.use('*', (req, res) => {
