@@ -100,14 +100,20 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
 
     grades.forEach((grade) => {
         // UPDATED: Ganti nama variabel semester jadi jenis_semester
-        const { kode_mk, indeks_nilai, jenis_semester, tahun_ajaran, angkatan } = grade;
+        const {
+            kode_mk,
+            indeks_nilai,
+            jenis_semester,
+            tahun_ajaran,
+            angkatan,
+        } = grade;
         const courseDetails = coursesMap[kode_mk];
 
-        console.log(courseDetails)
+        // console.log(courseDetails)
 
         if (courseDetails) {
-            const isSpecificSemester = 
-                jenis_semester === "GANJIL" && tahun_ajaran === "2024/2025";
+            const isSpecificSemester =
+                jenis_semester === 'GANJIL' && tahun_ajaran === '2024/2025';
 
             let kodeMataKuliah = kode_mk;
             let namaMataKuliah;
@@ -117,9 +123,9 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 // KASUS KHUSUS: Jika ini adalah semester Ganjil 2024/2025,
                 // maka nama mata kuliah HARUS menggunakan nama baru (nama_mk)
                 // dan kode mata kuliah tetap menggunakan kode_mk yang asli.
-                namaMataKuliah = courseDetails.nama_mk || "Nama Baru Tidak Tersedia";
+                namaMataKuliah =
+                    courseDetails.nama_mk || 'Nama Baru Tidak Tersedia';
                 kodeMataKuliah = kode_mk;
-
             } else {
                 // LOGIKA LAMA: Untuk semua semester lainnya, jalankan logika seperti semula.
                 const isEquivalent = courseDetails.is_equivalent === true;
@@ -156,8 +162,7 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 nilai: indeks_nilai,
                 tahun_ajaran: tahun_ajaran,
                 ekivalensi: courseDetails.ekivalensi,
-                angkatan: angkatan
-
+                angkatan: angkatan,
             });
         } else {
             // Kalau ga ketemu sama sekali di database
@@ -170,7 +175,7 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
                 semester: '-',
                 jenis_semester: jenis_semester,
                 nilai: indeks_nilai,
-                tahun_ajaran: tahun_ajaran
+                tahun_ajaran: tahun_ajaran,
             });
         }
     });

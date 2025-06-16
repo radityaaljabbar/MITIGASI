@@ -75,7 +75,7 @@ exports.getStudentList = async (req, res) => {
 
         // Get all class codes for this dosen
         const classCodesList = classes.map((cls) => cls.kode_kelas);
-        console.log(classCodesList);
+        // console.log(classCodesList);
 
         // Get students from all classes
         const studentList = await getStudentsByClassCodes(classCodesList);
@@ -266,7 +266,7 @@ exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
         const idQuery = req.query.nim;
 
         const id = idParam || idQuery;
-        console.log(id);
+        // console.log(id);
 
         // Cek nim nya ada atau tidak:
         if (!id) {
@@ -830,15 +830,15 @@ exports.getStudentAcademicDetails = async (req, res) => {
         perSemester.sort((a, b) => a.semester - b.semester);
 
         // Log untuk debugging
-        console.log('Academic Data Processing:');
-        console.log('- Nama:', namaMahasiswa);
-        console.log('- NIM:', nim);
-        console.log('- Kelas:', kelasMahasiswa);
-        console.log('- IPK:', ipk);
-        console.log('- SKS Total:', sksTotal);
-        console.log('- TAK:', tak);
-        console.log('- hasil klasifikasi', klas_akademik);
-        console.log('- Per Semester Data:', perSemester.length, 'records');
+        // console.log('Academic Data Processing:');
+        // console.log('- Nama:', namaMahasiswa);
+        // console.log('- NIM:', nim);
+        // console.log('- Kelas:', kelasMahasiswa);
+        // console.log('- IPK:', ipk);
+        // console.log('- SKS Total:', sksTotal);
+        // console.log('- TAK:', tak);
+        // console.log('- hasil klasifikasi', klas_akademik);
+        // console.log('- Per Semester Data:', perSemester.length, 'records');
 
         const responseData = {
             nama: namaMahasiswa,
