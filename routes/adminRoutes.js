@@ -139,4 +139,112 @@ router.delete(
     adminController.deleteKelas
 )
 
+
+// =============================================
+// ==            KELOLA AKADEMIK              ==
+// =============================================
+
+// ============= KELOLA DATA NILAI =============
+router.get(
+    '/kelolaAkademik/getAllMahasiswa',
+    protect,
+    authorize('admin'),
+    adminController.getAllMahasiswaForKelolaAkademik
+)
+
+router.get(
+    '/kelolaAkademik/getGradesMahasiswa/:nim',
+    protect,
+    authorize('admin'),
+    adminController.getGradesByNIM
+)
+
+router.get(
+    '/kelolaAkademik/getAllCourses',
+    protect,
+    authorize('admin'),
+    adminController.getAllCourses
+)
+
+router.post(
+    '/kelolaAkademik/createGrade',
+    protect,
+    authorize('admin'),
+    adminController.createNilai
+)
+
+router.put(
+    '/kelolaAkademik/updateGrade/:id',
+    protect,
+    authorize('admin'),
+    adminController.updateNilai
+)
+
+router.delete(
+    '/kelolaAkademik/deleteGrade/:id',
+    protect,
+    authorize('admin'),
+    adminController.deleteNilai
+)
+
+
+// ============= KELOLA DATA PRESTASI =============
+router.get(
+    '/kelolaAkademik/getPrestasiData/:nim',
+    protect,
+    authorize('admin'),
+    adminController.getPrestasiByNIM
+)
+
+router.post(
+    '/kelolaAkademik/createPrestasiData',
+    protect,
+    authorize('admin'),
+    adminController.createPrestasi
+)
+
+router.put(
+    '/kelolaAkademik/updatePrestasiData/:nim',
+    protect,
+    authorize('admin'),
+    adminController.updatePrestasi
+)
+
+router.delete(
+    '/kelolaAkademik/deletePrestasiData/:nim',
+    protect,
+    authorize('admin'),
+    adminController.deletePrestasi
+)
+
+
+// ============= KELOLA DATA SEMESTER =============
+router.get(
+    '/kelolaAkademik/getSemesterData/:nim',
+    protect,
+    authorize('admin'),
+    adminController.getSemesterByNIM
+)
+
+router.post(
+    '/kelolaAkademik/createSemesterData/:nim',
+    protect,
+    authorize('admin'),
+    adminController.createSemester
+)
+
+router.put(
+    '/kelolaAkademik/updateSemesterData/:id',
+    protect,
+    authorize('admin'),
+    adminController.updateSemester
+)
+
+router.delete(
+    '/kelolaAkademik/deleteSemesterData/:id',
+    protect,
+    authorize('admin'),
+    adminController.deleteSemester
+)
+
 module.exports = router;
