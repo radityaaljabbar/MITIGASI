@@ -48,88 +48,140 @@ export const MyCourseAdvisorProvider = ({ children }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] =
         useState(false);
     const [studentSKSData, setStudentSKSData] = useState(null);
+    // Add flag to track if initial data has been fetched
+    const [initialDataFetched, setInitialDataFetched] = useState(false);
+
+    // Add state to track if toast has been shown
+    const [toastShown, setToastShown] = useState(false);
 
     const totalRecommendedSKS = recommendedCourses.reduce(
         (total, course) => total + course.sks,
         0
     );
 
+    // Initial data fetch - only runs once on mount
     useEffect(() => {
-        // ... (fungsi fetch data awal tetap sama) ...
-        const fetchData = async () => {
+        // Prevent multiple executions
+        if (initialDataFetched) return;
+
+        const fetchInitialData = async () => {
             setIsLoading(true);
+
             try {
-                const classStudentResult = await getClassAndStudentList();
+                // Fetch both data sources in parallel
+                const [classStudentResult, courseResult] = await Promise.all([
+                    getClassAndStudentList(),
+                    getAvailableCourse(),
+                ]);
+
+                // Handle class and student data
                 if (classStudentResult.success) {
-                    const formattedClasses = classStudentResult.classesList.map(
+                    const classesList = classStudentResult.classesList || [];
+                    const studentsList = classStudentResult.studentsList || [];
+
+                    const formattedClasses = classesList.map(
                         (className, index) => ({
                             id: `class_${index}`,
                             name: className,
                         })
                     );
+
                     const classNameToIdMap = {};
                     formattedClasses.forEach((cls) => {
                         classNameToIdMap[cls.name] = cls.id;
                     });
-                    const formattedStudents =
-                        classStudentResult.studentsList.map((student) => ({
-                            id: student.id,
-                            name: student.name,
-                            classId: classNameToIdMap[student.class] || null,
-                        }));
+
+                    const formattedStudents = studentsList.map((student) => ({
+                        id: student.id,
+                        name: student.name,
+                        classId: classNameToIdMap[student.class] || null,
+                    }));
+
                     setClassesList(formattedClasses);
                     setStudentsList(formattedStudents);
+
+                    // REMOVED: Toast messages from here
                 } else {
+                    setClassesList([]);
+                    setStudentsList([]);
                     toast.error(
                         classStudentResult.message ||
                             'Failed to fetch class/student data'
                     );
                 }
-            } catch (error) {
-                console.error('Error fetching class/student data:', error);
-                toast.error(
-                    'An error occurred while fetching class/student data'
-                );
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        const fetchAvailableCourses = async () => {
-            setIsLoadingCourses(true);
-            try {
-                const courseResult = await getAvailableCourse();
+                // Handle course data
                 if (courseResult.success) {
-                    const coursesWithId = courseResult.availableCourses.map(
-                        (c, i) => ({ ...c, id: c.id || `course_${i}` })
-                    );
+                    const availableCourses =
+                        courseResult.availableCourses || [];
+                    const coursesWithId = availableCourses.map((c, i) => ({
+                        ...c,
+                        id: c.id || `course_${i}`,
+                    }));
                     setAvailableCourses(coursesWithId);
                     setStaticAvailableCoursesData(coursesWithId);
                 } else {
+                    setAvailableCourses([]);
+                    setStaticAvailableCoursesData([]);
                     toast.error(
                         courseResult.message ||
                             'Failed to fetch available courses'
                     );
                 }
             } catch (error) {
-                console.error('Error fetching available courses:', error);
-                toast.error(
-                    'An error occurred while fetching available courses'
-                );
+                console.error('Error fetching initial data:', error);
+                toast.error('An error occurred while fetching data');
+                setClassesList([]);
+                setStudentsList([]);
+                setAvailableCourses([]);
+                setStaticAvailableCoursesData([]);
             } finally {
-                setIsLoadingCourses(false);
+                setIsLoading(false);
+                setInitialDataFetched(true);
             }
         };
 
-        fetchData();
-        fetchAvailableCourses();
-    }, []);
+        fetchInitialData();
+    }, [initialDataFetched]); // Only depend on the flag
 
+    // Separate effect for showing toast after data is loaded
+    useEffect(() => {
+        // Only show toast when:
+        // 1. Initial data has been fetched
+        // 2. Not loading anymore
+        // 3. Toast hasn't been shown yet
+        if (!isLoading && initialDataFetched && !toastShown) {
+            if (classesList.length === 0 && studentsList.length === 0) {
+                toast.info(
+                    'Tidak ada data kelas dan mahasiswa yang ditemukan untuk dosen ini.'
+                );
+                setToastShown(true);
+            } else if (classesList.length === 0) {
+                toast.info(
+                    'Tidak ada data kelas yang ditemukan untuk dosen ini.'
+                );
+                setToastShown(true);
+            } else if (studentsList.length === 0) {
+                toast.info(
+                    'Tidak ada data mahasiswa yang ditemukan untuk dosen ini.'
+                );
+                setToastShown(true);
+            }
+        }
+    }, [
+        isLoading,
+        initialDataFetched,
+        classesList.length,
+        studentsList.length,
+        toastShown,
+    ]);
+
+    // Fetch student data when selected student changes
     useEffect(() => {
         if (!selectedStudent) {
             setMaxSKS(DEFAULT_MAX_SKS);
             setStudentCourseHistory([]);
-            setStudentSKSData(null); // Reset SKS data
+            setStudentSKSData(null);
             return;
         }
 
@@ -139,7 +191,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 await Promise.allSettled([
                     getLastIPSemester(selectedStudent),
                     getStudentCourseHistory(selectedStudent),
-                    getStudentNIMSKS(selectedStudent), // Updated function call
+                    getStudentNIMSKS(selectedStudent),
                 ]);
 
             // Handle IP result
@@ -189,32 +241,33 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         fetchStudentData();
     }, [selectedStudent]);
 
-    // ... (semua logika dan fungsi lain tetap sama) ...
+    // Main effect for processing recommendations
     useEffect(() => {
+        // Early return with comprehensive checks
         if (
             !selectedStudent ||
             !targetSemester ||
             isLoadingHistory ||
             isLoadingCourses ||
-            !staticAvailableCoursesData.length ||
-            !studentCourseHistory
+            !staticAvailableCoursesData ||
+            staticAvailableCoursesData.length === 0 ||
+            !Array.isArray(studentCourseHistory)
         ) {
             if (!selectedStudent || !targetSemester) {
                 setRecommendedCourses([]);
-                setAvailableCourses([...staticAvailableCoursesData]);
+                setAvailableCourses([...(staticAvailableCoursesData || [])]);
                 setHasExistingRecommendations(false);
             }
             return;
         }
 
-        // --- PRE-PROCESSING: Create efficient look-up maps ---
+        // PRE-PROCESSING: Create efficient look-up maps
         const courseMap = new Map(
             staticAvailableCoursesData.map((c) => [c.kode_mk, c])
         );
         const equivalenceMap = new Map();
         staticAvailableCoursesData.forEach((c) => {
             if (c.ekivalensi) {
-                // Assuming ekivalensi is a single code, not an array
                 equivalenceMap.set(c.ekivalensi, c.kode_mk);
             }
         });
@@ -233,6 +286,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 );
                 if (
                     existingRec.success &&
+                    existingRec.recommendations &&
                     existingRec.recommendations.length > 0
                 ) {
                     const recsFromStaticData = existingRec.recommendations
@@ -310,60 +364,72 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
             const passedCodes = new Set();
             const failedCodes = new Set();
-            const allPassingGrades = ['A', 'B', 'C', 'AB', 'BC']; // Grade 'D' is now conditional
+            const allPassingGrades = ['A', 'B', 'C', 'AB', 'BC'];
 
             // First pass: find all courses that have at least one passing grade
-            studentCourseHistory.forEach((h) => {
-                const currentCode = getCurrentCode(h.kodeMataKuliah);
-                const indeks = h.indeks?.trim().toUpperCase();
-                const semesterTaken = parseInt(h.semester, 10);
+            if (
+                Array.isArray(studentCourseHistory) &&
+                studentCourseHistory.length > 0
+            ) {
+                studentCourseHistory.forEach((h) => {
+                    if (!h || !h.kodeMataKuliah) return; // Skip invalid entries
 
-                // A, B, C, AB, BC always count as a pass.
-                if (allPassingGrades.includes(indeks)) {
-                    passedCodes.add(currentCode);
-                }
-                // Grade 'D' is a pass ONLY if taken in semester 6 or below.
-                else if (
-                    indeks === 'D' &&
-                    !isNaN(semesterTaken) &&
-                    semesterTaken < 7
-                ) {
-                    passedCodes.add(currentCode);
-                }
-            });
+                    const currentCode = getCurrentCode(h.kodeMataKuliah);
+                    const indeks = h.indeks?.trim().toUpperCase();
+                    const semesterTaken = parseInt(h.semester, 10);
+
+                    // A, B, C, AB, BC always count as a pass.
+                    if (allPassingGrades.includes(indeks)) {
+                        passedCodes.add(currentCode);
+                    }
+                    // Grade 'D' is a pass ONLY if taken in semester 6 or below.
+                    else if (
+                        indeks === 'D' &&
+                        !isNaN(semesterTaken) &&
+                        semesterTaken < 7
+                    ) {
+                        passedCodes.add(currentCode);
+                    }
+                });
+            }
 
             // Second pass: find all failed courses, but only add them if they were never passed
-            studentCourseHistory.forEach((h) => {
-                const currentCode = getCurrentCode(h.kodeMataKuliah);
-                const indeks = h.indeks?.trim().toUpperCase();
-                const semesterTaken = parseInt(h.semester, 10);
+            if (
+                Array.isArray(studentCourseHistory) &&
+                studentCourseHistory.length > 0
+            ) {
+                studentCourseHistory.forEach((h) => {
+                    if (!h || !h.kodeMataKuliah) return; // Skip invalid entries
 
-                let isFailure = false;
+                    const currentCode = getCurrentCode(h.kodeMataKuliah);
+                    const indeks = h.indeks?.trim().toUpperCase();
+                    const semesterTaken = parseInt(h.semester, 10);
 
-                // E or T is always a failure.
-                if (['E', 'T'].includes(indeks)) {
-                    isFailure = true;
-                }
-                // Grade 'D' is a failure if taken in semester 7 or above.
-                else if (
-                    indeks === 'D' &&
-                    !isNaN(semesterTaken) &&
-                    semesterTaken >= 7
-                ) {
-                    isFailure = true;
-                }
+                    let isFailure = false;
 
-                if (isFailure) {
-                    // Only consider it a "retake" if it's NOT in the passed set
-                    if (!passedCodes.has(currentCode)) {
-                        failedCodes.add(currentCode);
+                    // E or T is always a failure.
+                    if (['E', 'T'].includes(indeks)) {
+                        isFailure = true;
                     }
-                }
-            });
+                    // Grade 'D' is a failure if taken in semester 7 or above.
+                    else if (
+                        indeks === 'D' &&
+                        !isNaN(semesterTaken) &&
+                        semesterTaken >= 7
+                    ) {
+                        isFailure = true;
+                    }
 
-            const retakeCodes = failedCodes; // Rename for clarity in the next steps
+                    if (isFailure) {
+                        // Only consider it a "retake" if it's NOT in the passed set
+                        if (!passedCodes.has(currentCode)) {
+                            failedCodes.add(currentCode);
+                        }
+                    }
+                });
+            }
 
-            // =========================================================================
+            const retakeCodes = failedCodes;
 
             // PRIORITY 1: Add courses that must be retaken.
             retakeCodes.forEach((code) => {
@@ -442,60 +508,90 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         staticAvailableCoursesData,
     ]);
 
+    // Merge course history with static data
     useEffect(() => {
-        if (!studentCourseHistory || studentCourseHistory.length === 0) {
+        if (
+            !Array.isArray(studentCourseHistory) ||
+            studentCourseHistory.length === 0
+        ) {
             setMergedCourseHistory([]);
             return;
         }
-        const merged = studentCourseHistory.map((historyItem) => {
-            const details = staticAvailableCoursesData.find(
-                (c) => c.nama_mk === historyItem.namaMataKuliah
-            );
-            return details
-                ? {
-                      ...historyItem,
-                      id: historyItem.id || `hist_${details.id}`,
-                      kodeMataKuliah: historyItem.kodeMataKuliah,
-                      namaMataKuliah: details.nama_mk,
-                      sks: details.sks_mk,
-                      jenis: details.jenis_mk,
-                      ekivalensi: details.ekivalensi,
-                  }
-                : historyItem;
-        });
 
-        console.log(merged);
+        if (
+            !Array.isArray(staticAvailableCoursesData) ||
+            staticAvailableCoursesData.length === 0
+        ) {
+            setMergedCourseHistory([]);
+            return;
+        }
+
+        const merged = studentCourseHistory
+            .map((historyItem) => {
+                if (!historyItem) return historyItem; // Skip null/undefined items
+
+                const details = staticAvailableCoursesData.find(
+                    (c) => c && c.nama_mk === historyItem.namaMataKuliah
+                );
+                return details
+                    ? {
+                          ...historyItem,
+                          id: historyItem.id || `hist_${details.id}`,
+                          kodeMataKuliah: historyItem.kodeMataKuliah,
+                          namaMataKuliah: details.nama_mk,
+                          sks: details.sks_mk,
+                          jenis: details.jenis_mk,
+                          ekivalensi: details.ekivalensi,
+                      }
+                    : historyItem;
+            })
+            .filter(Boolean); // Remove any null/undefined items
+
         setMergedCourseHistory(merged);
     }, [studentCourseHistory, staticAvailableCoursesData]);
 
+    // Memoized filtered students
     const filteredStudents = useMemo(() => {
-        return selectedClass
-            ? studentsList.filter((s) => s.classId === selectedClass)
-            : [];
+        if (!selectedClass || !Array.isArray(studentsList)) return [];
+        return studentsList.filter((s) => s && s.classId === selectedClass);
     }, [selectedClass, studentsList]);
 
+    // Memoized filtered available courses
+    const filteredAvailableCourses = useMemo(() => {
+        if (!Array.isArray(availableCourses)) return [];
+        if (!selectedSemester) return availableCourses;
+        return availableCourses.filter(
+            (c) => c && String(c.semester_mk) === String(selectedSemester)
+        );
+    }, [availableCourses, selectedSemester]);
+
+    // Helper functions
     const resetFormStates = () => {
         setSelectedStudent('');
         setTargetSemester('');
         setRecommendedCourses([]);
-        setAvailableCourses([...staticAvailableCoursesData]);
+        setAvailableCourses([...(staticAvailableCoursesData || [])]);
         setMaxSKS(DEFAULT_MAX_SKS);
         setSksLimitExceeded(false);
     };
+
     const handleClassChange = (e) => {
         setSelectedClass(e.target.value);
         resetFormStates();
     };
+
     const handleStudentChange = (e) => {
         setSelectedStudent(e.target.value);
         setTargetSemester('');
         setRecommendedCourses([]);
-        setAvailableCourses([...staticAvailableCoursesData]);
+        setAvailableCourses([...(staticAvailableCoursesData || [])]);
         setSksLimitExceeded(false);
     };
+
     const handleTargetSemesterChange = (e) => {
         setTargetSemester(e.target.value);
     };
+
     const handleSemesterChange = (e) => setSelectedSemester(e.target.value);
 
     const addCourse = (course) => {
@@ -513,12 +609,13 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
     const removeCourse = (course) => {
         setRecommendedCourses((prev) => prev.filter((c) => c.id !== course.id));
-        const courseToAddBack = staticAvailableCoursesData.find(
-            (c) => c.id === course.id
-        );
+        const courseToAddBack = Array.isArray(staticAvailableCoursesData)
+            ? staticAvailableCoursesData.find((c) => c && c.id === course.id)
+            : null;
         if (
             courseToAddBack &&
-            !availableCourses.some((c) => c.id === courseToAddBack.id)
+            Array.isArray(availableCourses) &&
+            !availableCourses.some((c) => c && c.id === courseToAddBack.id)
         ) {
             setAvailableCourses((prev) => [...prev, courseToAddBack]);
         }
@@ -530,7 +627,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             'Perubahan manual di-reset. Pilih ulang semester tujuan untuk menjalankan ulang rekomendasi otomatis.'
         );
         setRecommendedCourses([]);
-        setAvailableCourses([...staticAvailableCoursesData]);
+        setAvailableCourses([...(staticAvailableCoursesData || [])]);
         setSksLimitExceeded(false);
     };
 
@@ -587,13 +684,6 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
     const wouldExceedSKSLimit = (courseSKS) =>
         totalRecommendedSKS + courseSKS > maxSKS;
-
-    const filteredAvailableCourses = useMemo(() => {
-        if (!selectedSemester) return availableCourses;
-        return availableCourses.filter(
-            (c) => String(c.semester_mk) === String(selectedSemester)
-        );
-    }, [availableCourses, selectedSemester]);
 
     const contextValue = {
         classesList,
