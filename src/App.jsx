@@ -33,8 +33,8 @@ import MyStudentList from './pages/lecturer/myStudent/studentList.jsx';
 // Import your not found page
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
 
-// TODO: Import Admin Pages (will be created later)
-// import AdminDashboard from './pages/pagesAdmin/AdminDashboard.jsx';
+// Admin Pages
+import KelolaPenggunaPage from './pages/pagesAdmin/KelolaPenggunaPage.jsx';
 
 const App = () => {
     const router = createBrowserRouter(
@@ -119,27 +119,20 @@ const App = () => {
                             <MainLayout />
                         </ProtectedRoute>
                     }>
-                    {/* TODO: Add admin routes here */}
-                    {/* For now, just show a placeholder dashboard */}
+                    {/* Admin routes */}
                     <Route
                         index
-                        element={
-                            <div className="p-8">
-                                <h1 className="text-2xl font-bold">
-                                    Admin Dashboard
-                                </h1>
-                                <p>
-                                    Admin functionality will be implemented
-                                    here.
-                                </p>
-                            </div>
-                        }
+                        element={<Navigate to="/admin/kelolaPengguna" />}
+                    />
+                    <Route
+                        path="kelolaPengguna"
+                        element={<KelolaPenggunaPage />}
                     />
 
-                    {/* Add more admin routes as needed */}
-                    {/* <Route path="dashboard" element={<AdminDashboard />} /> */}
-                    {/* <Route path="users" element={<UserManagement />} /> */}
-                    {/* <Route path="settings" element={<AdminSettings />} /> */}
+                    {/* TODO: Add more admin routes as needed */}
+                    {/* <Route path="kelolaKelasdanAngkatan" element={<KelolaKelasPage />} /> */}
+                    {/* <Route path="kelolaKurikulum" element={<KelolaKurikulumPage />} /> */}
+                    {/* <Route path="kelolaNilai" element={<KelolaNilaiPage />} /> */}
 
                     {/* 404 for admin routes */}
                     <Route path="*" element={<NotFoundPage />} />
