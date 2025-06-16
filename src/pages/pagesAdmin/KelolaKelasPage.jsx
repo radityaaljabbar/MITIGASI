@@ -3,15 +3,14 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Import komponen
-import KelolaPenggunaTabs from '../../components/compAdmin/kelolaPengguna/kelolaPenggunaTabs';
-import KelolaPenggunaTable from '../../components/compAdmin/kelolaPengguna/KelolaPenggunaTable';
-import KelolaPenggunaModal from '../../components/compAdmin/kelolaPengguna/KelolaPenggunaModal';
+import KelolaKelasTable from '../../components/compAdmin/kelolaKelas/KelolaKelasTable';
+import KelolaKelasPopUp from '../../components/compAdmin/kelolaKelas/KelolaKelasPopUp';
 import DeleteConfirmationModal from '../../components/compAdmin/kelolaPengguna/DeleteConfirmationModal';
 
 // Import custom hook
-import { useKelolaPengguna } from '../../components/compAdmin/kelolaPengguna/hooks/useKelolaPengguna';
+import { useKelolaKelas } from '../../components/compAdmin/kelolaKelas/hooks/useKelolaKelas';
 
-const KelolaPenggunaPage = () => {
+const KelolaKelasPage = () => {
     // State untuk modal
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState(''); // 'add' atau 'edit'
@@ -24,15 +23,14 @@ const KelolaPenggunaPage = () => {
     // Custom hook untuk logic
     const {
         // State
-        activeTab,
         loading,
         loadingAction,
         searchTerm,
         currentPage,
         itemsPerPage,
-        kelasList,
 
         // Data
+        dosenList,
         currentData,
         filteredData,
         totalPages,
@@ -40,14 +38,13 @@ const KelolaPenggunaPage = () => {
         endIndex,
 
         // Actions
-        handleTabChange,
         handleCreate,
         handleUpdate,
         handleDelete,
         setSearchTerm,
         setCurrentPage,
-        loadData,
-    } = useKelolaPengguna();
+        getDosenNameByCode,
+    } = useKelolaKelas();
 
     // Handle tambah data
     const handleAdd = () => {
@@ -87,8 +84,7 @@ const KelolaPenggunaPage = () => {
 
     // Handle confirm delete
     const handleConfirmDelete = async () => {
-        const id = deleteData?.id || deleteData?.nip || deleteData?.nim;
-        const success = await handleDelete(id);
+        const success = await handleDelete(deleteData.id_kelas);
 
         if (success) {
             setShowDeleteModal(false);
@@ -112,22 +108,15 @@ const KelolaPenggunaPage = () => {
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                    Kelola Pengguna
+                    Kelola Kelas
                 </h1>
                 <p className="text-gray-600">
-                    Kelola data admin, dosen wali, dan mahasiswa
+                    Kelola data kelas dan penugasan dosen wali
                 </p>
             </div>
 
-            {/* Tabs */}
-            <KelolaPenggunaTabs
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-            />
-
             {/* Table */}
-            <KelolaPenggunaTable
-                activeTab={activeTab}
+            <KelolaKelasTable
                 currentData={currentData}
                 filteredData={filteredData}
                 searchTerm={searchTerm}
@@ -142,17 +131,17 @@ const KelolaPenggunaPage = () => {
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
                 onAdd={handleAdd}
+                getDosenNameByCode={getDosenNameByCode}
             />
 
             {/* Modal Form */}
-            <KelolaPenggunaModal
+            <KelolaKelasPopUp
                 isOpen={showModal}
                 onClose={handleCloseModal}
                 onSubmit={handleModalSubmit}
-                activeTab={activeTab}
                 modalType={modalType}
                 initialData={currentEditData}
-                kelasList={kelasList}
+                dosenList={dosenList}
                 loading={loadingAction}
             />
 
@@ -168,4 +157,4 @@ const KelolaPenggunaPage = () => {
     );
 };
 
-export default KelolaPenggunaPage;
+export default KelolaKelasPage;
