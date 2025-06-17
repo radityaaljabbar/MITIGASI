@@ -6,6 +6,7 @@ import {
     updatePrestasiData,
     deletePrestasiData,
 } from '../../../services/adminServices/kelolaAkademikServices';
+import DeleteConfirmationModal from '../kelolaPengguna/DeleteConfirmationModal';
 
 const DataPrestasiTab = ({ mahasiswaData }) => {
     // State untuk data
@@ -16,12 +17,30 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
     // State untuk mode edit
     const [isEditing, setIsEditing] = useState(false);
 
+    // 🔧 TAMBAHAN: State untuk delete confirmation modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteData, setDeleteData] = useState(null);
+
     // State untuk form
     const [formData, setFormData] = useState({
         tak: '',
         sks_lulus: '',
         ipk_lulus: '',
     });
+
+    // 🚀 HELPER FUNCTION: Cek apakah data prestasi benar-benar ada (bukan hanya null values)
+    const hasValidPrestasiData = (data) => {
+        if (!data) return false;
+
+        // Cek apakah minimal ada satu field yang tidak null/undefined/0
+        return (
+            (data.tak !== null && data.tak !== undefined && data.tak !== 0) ||
+            (data.ipk !== null && data.ipk !== undefined && data.ipk !== 0) ||
+            (data.totalSks !== null &&
+                data.totalSks !== undefined &&
+                data.totalSks !== 0)
+        );
+    };
 
     // Load data saat component mount
     useEffect(() => {
@@ -37,12 +56,19 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
             const response = await getPrestasiData(mahasiswaData.nim);
             if (response.success) {
                 setPrestasiData(response.data);
-                // Set form data jika ada data
-                if (response.data) {
+                // Set form data jika ada data VALID
+                if (hasValidPrestasiData(response.data)) {
                     setFormData({
                         tak: response.data.tak?.toString() || '',
                         sks_lulus: response.data.totalSks?.toString() || '',
                         ipk_lulus: response.data.ipk?.toString() || '',
+                    });
+                } else {
+                    // Reset form jika data semua null
+                    setFormData({
+                        tak: '',
+                        sks_lulus: '',
+                        ipk_lulus: '',
                     });
                 }
             } else {
@@ -85,7 +111,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                 ipk_lulus: formData.ipk_lulus,
             };
 
-            if (prestasiData) {
+            // 🔧 FIXED LOGIC: Gunakan hasValidPrestasiData untuk menentukan CREATE vs UPDATE
+            if (hasValidPrestasiData(prestasiData)) {
                 // Update existing data
                 response = await updatePrestasiData(
                     mahasiswaData.nim,
@@ -110,16 +137,19 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle delete
-    const handleDelete = async () => {
-        if (
-            !window.confirm(
-                'Apakah Anda yakin ingin menghapus data prestasi ini?'
-            )
-        ) {
-            return;
-        }
+    // 🔧 FIXED: Handle delete click - gunakan modal
+    const handleDeleteClick = () => {
+        // Set data untuk modal (bisa menggunakan prestasiData atau mahasiswaData)
+        setDeleteData({
+            id: mahasiswaData.nim, // Menggunakan NIM sebagai identifier
+            name: `Data Prestasi - ${mahasiswaData.name}`,
+            nim: mahasiswaData.nim,
+        });
+        setShowDeleteModal(true);
+    };
 
+    // 🔧 FIXED: Confirm delete - fungsi yang dipanggil oleh modal
+    const confirmDelete = async () => {
         setLoadingAction(true);
         try {
             const response = await deletePrestasiData(mahasiswaData.nim);
@@ -132,6 +162,7 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                     ipk_lulus: '',
                 });
                 setIsEditing(false);
+                setShowDeleteModal(false); // Tutup modal
             } else {
                 toast.error(response.message || 'Gagal menghapus data');
             }
@@ -145,7 +176,7 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
     // Handle edit mode
     const handleEdit = () => {
         setIsEditing(true);
-        if (prestasiData) {
+        if (hasValidPrestasiData(prestasiData)) {
             setFormData({
                 tak: prestasiData.tak?.toString() || '',
                 sks_lulus: prestasiData.totalSks?.toString() || '',
@@ -157,7 +188,7 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
     // Handle cancel edit
     const handleCancel = () => {
         setIsEditing(false);
-        if (prestasiData) {
+        if (hasValidPrestasiData(prestasiData)) {
             setFormData({
                 tak: prestasiData.tak?.toString() || '',
                 sks_lulus: prestasiData.totalSks?.toString() || '',
@@ -188,8 +219,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                     </div>
                 ) : (
                     <div className="bg-white border rounded-lg p-6">
-                        {/* Display Mode */}
-                        {!isEditing && prestasiData ? (
+                        {/* 🔧 FIXED: Display Mode - Hanya tampil jika ada data VALID */}
+                        {!isEditing && hasValidPrestasiData(prestasiData) ? (
                             <div className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {/* TAK */}
@@ -300,8 +331,9 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                         </svg>
                                         <span>Edit Data</span>
                                     </button>
+                                    {/* 🔧 FIXED: Ganti handler ke handleDeleteClick */}
                                     <button
-                                        onClick={handleDelete}
+                                        onClick={handleDeleteClick}
                                         disabled={loadingAction}
                                         className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
                                         <svg
@@ -321,127 +353,140 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                 </div>
                             </div>
                         ) : (
-                            /* Form Mode */
+                            /* Form Mode - Tampil saat edit atau belum ada data valid */
                             <div>
-                                <div className="mb-4">
-                                    <h4 className="text-md font-medium text-gray-800">
-                                        {prestasiData
-                                            ? 'Edit Data Prestasi'
-                                            : 'Tambah Data Prestasi'}
-                                    </h4>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        {prestasiData
-                                            ? 'Perbarui informasi prestasi akademik mahasiswa'
-                                            : 'Masukkan data prestasi akademik mahasiswa'}
-                                    </p>
-                                </div>
+                                {/* 🔧 FIXED: Tampil form jika isEditing ATAU belum ada data valid */}
+                                {isEditing ||
+                                !hasValidPrestasiData(prestasiData) ? (
+                                    <>
+                                        <div className="mb-4">
+                                            <h4 className="text-md font-medium text-gray-800">
+                                                {hasValidPrestasiData(
+                                                    prestasiData
+                                                )
+                                                    ? 'Edit Data Prestasi'
+                                                    : 'Tambah Data Prestasi'}
+                                            </h4>
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                {hasValidPrestasiData(
+                                                    prestasiData
+                                                )
+                                                    ? 'Perbarui informasi prestasi akademik mahasiswa'
+                                                    : 'Masukkan data prestasi akademik mahasiswa'}
+                                            </p>
+                                        </div>
 
-                                <form
-                                    onSubmit={handleSubmit}
-                                    className="space-y-4">
-                                    {/* TAK */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            TAK (Test of Academic Knowledge){' '}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="tak"
-                                            value={formData.tak}
-                                            onChange={handleInputChange}
-                                            required
-                                            min="0"
-                                            max="150"
-                                            step="0.01"
-                                            placeholder="Masukkan nilai TAK"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <small className="text-gray-500">
-                                            Nilai TAK biasanya antara 0-150
-                                        </small>
-                                    </div>
+                                        <form
+                                            onSubmit={handleSubmit}
+                                            className="space-y-4">
+                                            {/* TAK */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    TAK (Test of Academic
+                                                    Knowledge){' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="tak"
+                                                    value={formData.tak}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    min="0"
+                                                    max="150"
+                                                    step="0.01"
+                                                    placeholder="Masukkan nilai TAK"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <small className="text-gray-500">
+                                                    Nilai TAK biasanya antara
+                                                    0-150
+                                                </small>
+                                            </div>
 
-                                    {/* IPK Lulus */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            IPK Lulus{' '}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="ipk_lulus"
-                                            value={formData.ipk_lulus}
-                                            onChange={handleInputChange}
-                                            required
-                                            min="0"
-                                            max="4"
-                                            step="0.01"
-                                            placeholder="Masukkan IPK lulus"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <small className="text-gray-500">
-                                            IPK dalam skala 0.00 - 4.00
-                                        </small>
-                                    </div>
+                                            {/* IPK Lulus */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    IPK Lulus{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="ipk_lulus"
+                                                    value={formData.ipk_lulus}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    min="0"
+                                                    max="4"
+                                                    step="0.01"
+                                                    placeholder="Masukkan IPK lulus"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <small className="text-gray-500">
+                                                    IPK dalam skala 0.00 - 4.00
+                                                </small>
+                                            </div>
 
-                                    {/* SKS Lulus */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Total SKS Lulus{' '}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="sks_lulus"
-                                            value={formData.sks_lulus}
-                                            onChange={handleInputChange}
-                                            required
-                                            min="0"
-                                            max="200"
-                                            placeholder="Masukkan total SKS lulus"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <small className="text-gray-500">
-                                            Total SKS yang sudah diselesaikan
-                                        </small>
-                                    </div>
+                                            {/* SKS Lulus */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Total SKS Lulus{' '}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="sks_lulus"
+                                                    value={formData.sks_lulus}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    min="0"
+                                                    max="200"
+                                                    placeholder="Masukkan total SKS lulus"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <small className="text-gray-500">
+                                                    Total SKS yang sudah
+                                                    diselesaikan
+                                                </small>
+                                            </div>
 
-                                    {/* Buttons */}
-                                    <div className="flex space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={handleCancel}
-                                            disabled={loadingAction}
-                                            className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                                            Batal
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={loadingAction}
-                                            className="flex-1 px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50">
-                                            {loadingAction ? (
-                                                <div className="flex items-center justify-center">
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                                                    Menyimpan...
-                                                </div>
-                                            ) : (
-                                                'Simpan Data'
-                                            )}
-                                        </button>
-                                    </div>
-                                </form>
+                                            {/* Buttons */}
+                                            <div className="flex space-x-3 pt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCancel}
+                                                    disabled={loadingAction}
+                                                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                                                    Batal
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    disabled={loadingAction}
+                                                    className="flex-1 px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50">
+                                                    {loadingAction ? (
+                                                        <div className="flex items-center justify-center">
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                                                            Menyimpan...
+                                                        </div>
+                                                    ) : (
+                                                        'Simpan Data'
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </>
+                                ) : null}
                             </div>
                         )}
 
-                        {/* Empty State */}
-                        {!isEditing && !prestasiData && (
+                        {/* 🔧 FIXED: Empty State - Hanya tampil jika tidak editing DAN tidak ada data valid */}
+                        {!isEditing && !hasValidPrestasiData(prestasiData) && (
                             <div className="text-center py-12">
                                 <svg
                                     className="mx-auto h-12 w-12 text-gray-400"
@@ -486,6 +531,15 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                     </div>
                 )}
             </div>
+
+            {/* 🔧 TAMBAHAN: Delete Confirmation Modal */}
+            <DeleteConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                data={deleteData}
+                loading={loadingAction}
+            />
         </div>
     );
 };
