@@ -30,22 +30,22 @@ const {
     getAllCourse,
     createNilaiMahasiswa,
     updateNilaiMahasiswa,
-    removeNilaiMahasiswa
-} = require('../models/adminQueries/kelolaAkademikNilaiQueries')
+    removeNilaiMahasiswa,
+} = require('../models/adminQueries/kelolaAkademikNilaiQueries');
 
 const {
     getDataPrestasi,
     createDataPrestasi,
     updateDataPrestasi,
-    deleteDataPrestasi
-} = require('../models/adminQueries/kelolaAkademikPrestasiQueries')
+    deleteDataPrestasi,
+} = require('../models/adminQueries/kelolaAkademikPrestasiQueries');
 
 const {
     findSemesterMahasiswaByNIM,
     createSemesterMahasiswaByNIM,
     updateSemesterMahasiswaById,
-    deleteSemesterMahasiswaById
-} = require('../models/adminQueries/kelolaAkademikSemesterQueries')
+    deleteSemesterMahasiswaById,
+} = require('../models/adminQueries/kelolaAkademikSemesterQueries');
 
 // =============================================
 // ==           ADMIN CONTROLLER FUNCTIONS    ==
@@ -660,7 +660,6 @@ exports.deleteKelas = async (req, res) => {
     }
 };
 
-
 // =============================================
 // ==            KELOLA AKADEMIK              ==
 // =============================================
@@ -693,7 +692,7 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
     } catch (error) {
         // Tangkap error yang di-throw dari model
         console.error('Error in getAllMahasiswa controller:', error);
-        
+
         // Kirim respons 500 Internal Server Error
         res.status(500).json({
             success: false,
@@ -702,7 +701,6 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
         });
     }
 };
-
 
 // ngambil data nilai mahasiswa berdasarkan nim
 exports.getGradesByNIM = async (req, res) => {
@@ -714,26 +712,46 @@ exports.getGradesByNIM = async (req, res) => {
         const result = await findGradesMahasiswaByNIM(nim);
 
         // 3. Handle kasus di mana model mengembalikan 'null' (data tidak ditemukan)
-        //    Ini adalah error handling yang sangat penting dan spesifik.
         if (result === null) {
-            return res.status(404).json({
-                success: false,
-                message: `Data nilai tidak ditemukan untuk mahasiswa dengan NIM: ${nim}`,
-                data: null,
+            return res.status(200).json({
+                success: true,
+                message: `Belum ada data nilai untuk mahasiswa dengan NIM: ${nim}`,
+                data: {
+                    nim: nim,
+                    name: null,
+                    kelas: null,
+                    grades: [], // Return array kosong untuk grades
+                },
             });
         }
 
         // 4. Handle kasus sukses (model mengembalikan data)
-        //    Kita destructure [data] karena model mengembalikan array: [{ status: 'success', ... }]
         const [data] = result;
         if (data.status === 'success') {
+            const gradeData = data.payload;
+
+            // 🔧 PERBAIKAN: Cek apakah array grades kosong
+            if (gradeData.grades && Array.isArray(gradeData.grades)) {
+                if (gradeData.grades.length === 0) {
+                    return res.status(200).json({
+                        success: true,
+                        message: `Belum ada data nilai untuk mahasiswa dengan NIM: ${nim}`,
+                        data: {
+                            nim: nim,
+                            name: gradeData.name,
+                            kelas: gradeData.kelas,
+                            grades: [],
+                        },
+                    });
+                }
+            }
+
             res.status(200).json({
                 success: true,
                 message: 'Data nilai berhasil diambil',
-                data: data.payload, // payload berisi objek { nim, name, kelas, grades: [...] }
+                data: gradeData, // payload berisi objek { nim, name, kelas, grades: [...] }
             });
         }
-        
     } catch (error) {
         // 5. Handle error tak terduga dari server atau database
         console.error('Error in getGradesByNIM controller:', error);
@@ -762,16 +780,16 @@ exports.getAllCourses = async (req, res) => {
                 data: result.payload,
             });
         }
-        
     } catch (error) {
         // 4. Jika terjadi error (misalnya, database down) yang dilempar oleh model,
         //    tangkap di sini.
         console.error('Error in getAllCourses controller:', error);
-        
+
         // Kirim respons HTTP 500 (Internal Server Error).
         res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan pada server saat mengambil data mata kuliah',
+            message:
+                'Terjadi kesalahan pada server saat mengambil data mata kuliah',
             error: error.message,
         });
     }
@@ -781,11 +799,19 @@ exports.getAllCourses = async (req, res) => {
 exports.createNilai = async (req, res) => {
     try {
         // 1. Validasi input dasar (memastikan field yang wajib ada tidak kosong)
-        const { nimMahasiswa, kodeMK, indeksNilai, semester, tahunAjaran } = req.body;
-        if (!nimMahasiswa || !kodeMK || !indeksNilai || !semester || !tahunAjaran) {
+        const { nimMahasiswa, kodeMK, indeksNilai, semester, tahunAjaran } =
+            req.body;
+        if (
+            !nimMahasiswa ||
+            !kodeMK ||
+            !indeksNilai ||
+            !semester ||
+            !tahunAjaran
+        ) {
             return res.status(400).json({
                 success: false,
-                message: 'Permintaan tidak valid. Semua field wajib diisi: nim_mahasiswa, kode_mk, indeks_nilai, semester, tahun_ajaran.',
+                message:
+                    'Permintaan tidak valid. Semua field wajib diisi: nim_mahasiswa, kode_mk, indeks_nilai, semester, tahun_ajaran.',
             });
         }
 
@@ -795,7 +821,7 @@ exports.createNilai = async (req, res) => {
             kode_mk: kodeMK,
             indeks_nilai: indeksNilai,
             semester: semester,
-            tahun_ajaran: tahunAjaran // Menambahkan data default
+            tahun_ajaran: tahunAjaran, // Menambahkan data default
         };
 
         // 2. Panggil fungsi model dengan data dari body request.
@@ -810,7 +836,6 @@ exports.createNilai = async (req, res) => {
                 data: result.payload, // payload berisi data yang baru dibuat, termasuk id_nilai
             });
         }
-
     } catch (error) {
         // 4. Penanganan Error yang Spesifik dan Umum
 
@@ -846,7 +871,8 @@ exports.updateNilai = async (req, res) => {
         if (!kodeMK || !indeksNilai || !semester || !tahunAjaran) {
             return res.status(400).json({
                 success: false,
-                message: 'Permintaan tidak valid. Pastikan semua field (kode_mk, indeks_nilai, semester, tahun_ajaran) telah diisi.',
+                message:
+                    'Permintaan tidak valid. Pastikan semua field (kode_mk, indeks_nilai, semester, tahun_ajaran) telah diisi.',
             });
         }
 
@@ -855,7 +881,7 @@ exports.updateNilai = async (req, res) => {
             kode_mk: kodeMK,
             indeks_nilai: indeksNilai,
             semester: semester,
-            tahun_ajaran: tahunAjaran // Menambahkan data default
+            tahun_ajaran: tahunAjaran, // Menambahkan data default
         };
         const [updateResult] = await updateNilaiMahasiswa(id, dataForModel);
 
@@ -870,7 +896,7 @@ exports.updateNilai = async (req, res) => {
         // 5. Jika berhasil, siapkan data konfirmasi untuk dikirim kembali
         const confirmedData = {
             id_nilai: parseInt(id, 10), // Pastikan ID adalah angka
-            ...dataToUpdate
+            ...dataToUpdate,
         };
 
         res.status(200).json({
@@ -878,7 +904,6 @@ exports.updateNilai = async (req, res) => {
             message: 'Data nilai berhasil diupdate',
             data: confirmedData, // Kirim kembali data yang diupdate sebagai konfirmasi
         });
-        
     } catch (error) {
         // 6. Tangani error yang mungkin terjadi
 
@@ -899,7 +924,6 @@ exports.updateNilai = async (req, res) => {
     }
 };
 
-
 // delete data nilai
 exports.deleteNilai = async (req, res) => {
     try {
@@ -916,13 +940,12 @@ exports.deleteNilai = async (req, res) => {
                 message: `Data nilai dengan ID ${id} tidak ditemukan. Tidak ada data yang dihapus.`,
             });
         }
-        
+
         // 4. Jika berhasil, kirim respons yang menandakan sukses.
         res.status(200).json({
             success: true,
             message: `Data nilai berhasil dihapus`,
         });
-
     } catch (error) {
         // 5. Tangani semua error tak terduga dari server
         console.error('Error in deleteNilai controller:', error);
@@ -932,7 +955,6 @@ exports.deleteNilai = async (req, res) => {
         });
     }
 };
-
 
 // ============= KELOLA DATA PRESTASI =============
 // ambil data sks, ipk dan tak
@@ -946,27 +968,44 @@ exports.getPrestasiByNIM = async (req, res) => {
 
         // 3. Handle kasus "Not Found" (model mengembalikan null)
         if (result === null) {
-            // ---> BEST PRACTICE RESPONSE #1: NOT FOUND (404)
-            return res.status(404).json({
-                success: false,
-                message: `Data prestasi untuk mahasiswa dengan NIM ${nim} tidak ditemukan.`,
+            return res.status(200).json({
+                success: true,
+                message: `Belum ada data prestasi untuk mahasiswa dengan NIM ${nim}.`,
+                data: null, // Return null murni, bukan object dengan field null
             });
         }
 
         // 4. Handle kasus sukses (model mengembalikan data)
         const [data] = result;
         if (data.status === 'success') {
-            // ---> BEST PRACTICE RESPONSE #2: SUCCESS (200)
+            const prestasiData = data.payload;
+
+            // 🔧 PERBAIKAN: Cek apakah semua field penting null
+            const isEmptyData =
+                (prestasiData.tak === null || prestasiData.tak === undefined) &&
+                (prestasiData.ipk === null || prestasiData.ipk === undefined) &&
+                (prestasiData.totalSks === null ||
+                    prestasiData.totalSks === undefined);
+
+            if (isEmptyData) {
+                // Jika semua field null, return null murni
+                return res.status(200).json({
+                    success: true,
+                    message: `Belum ada data prestasi untuk mahasiswa dengan NIM ${nim}.`,
+                    data: null,
+                });
+            }
+
+            // Jika ada data valid, return data normal
             res.status(200).json({
                 success: true,
                 message: 'Data prestasi berhasil diambil',
-                data: data.payload,
+                data: prestasiData,
             });
         }
     } catch (error) {
         // 5. Handle error tak terduga dari server
         console.error('Error in getPrestasiByNIM controller:', error);
-        // ---> BEST PRACTICE RESPONSE #3: INTERNAL SERVER ERROR (500)
         res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan pada server.',
@@ -974,16 +1013,21 @@ exports.getPrestasiByNIM = async (req, res) => {
     }
 };
 
-
 // membuat Data Prestasi Baru
 exports.createPrestasi = async (req, res) => {
     try {
         // 1. Validasi input dari klien (tanpa 'tanggal_dibuat')
         const { nim, tak, sks_lulus, ipk_lulus } = req.body;
-        if (!nim || tak === undefined || sks_lulus === undefined || ipk_lulus === undefined) {
-            return res.status(400).json({ 
+        if (
+            !nim ||
+            tak === undefined ||
+            sks_lulus === undefined ||
+            ipk_lulus === undefined
+        ) {
+            return res.status(400).json({
                 success: false,
-                message: 'Permintaan tidak valid. Field nim, tak, sks_lulus, dan ipk_lulus wajib diisi.' 
+                message:
+                    'Permintaan tidak valid. Field nim, tak, sks_lulus, dan ipk_lulus wajib diisi.',
             });
         }
 
@@ -992,7 +1036,7 @@ exports.createPrestasi = async (req, res) => {
         //    dengan timestamp yang dibuat di sini.
         const dataForModel = {
             ...req.body,
-            tanggal_dibuat: new Date() // Membuat timestamp saat ini
+            tanggal_dibuat: new Date(), // Membuat timestamp saat ini
         };
 
         // 3. Panggil model dengan objek data yang sudah lengkap
@@ -1014,13 +1058,15 @@ exports.createPrestasi = async (req, res) => {
                 message: `Gagal menambahkan prestasi. NIM '${req.body.nim}' tidak terdaftar.`,
             });
         }
-        
+
         // Handle error umum
         console.error('Error from Prestasi Controller:', error);
-        res.status(500).json({ status: 'error', message: 'Terjadi kesalahan pada server.' });
+        res.status(500).json({
+            status: 'error',
+            message: 'Terjadi kesalahan pada server.',
+        });
     }
 };
-
 
 // mengedit data prestasi yang sudah ada
 exports.updatePrestasi = async (req, res) => {
@@ -1030,13 +1076,18 @@ exports.updatePrestasi = async (req, res) => {
         const data = req.body;
 
         // Validasi input
-        if (data.tak === undefined || data.sks_lulus === undefined || data.ipk_lulus === undefined) {
-            return res.status(400).json({ 
+        if (
+            data.tak === undefined ||
+            data.sks_lulus === undefined ||
+            data.ipk_lulus === undefined
+        ) {
+            return res.status(400).json({
                 success: false,
-                message: 'Permintaan tidak valid. Field tak, sks_lulus, dan ipk_lulus wajib diisi.' 
+                message:
+                    'Permintaan tidak valid. Field tak, sks_lulus, dan ipk_lulus wajib diisi.',
             });
         }
-        
+
         const dataForModel = {
             tak: data.tak,
             sks_lulus: data.sks_lulus,
@@ -1063,17 +1114,18 @@ exports.updatePrestasi = async (req, res) => {
             // Opsional: kirim kembali data yang diupdate sebagai konfirmasi
             data: {
                 nim: nim,
-                ...data
-            }
+                ...data,
+            },
         });
-
     } catch (error) {
         // Handle error umum dari server
         console.error('Error from Prestasi Controller (Update):', error);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server.',
+        });
     }
 };
-
 
 // menghapus data IPK TAK SKS mahasiswa
 exports.deletePrestasi = async (req, res) => {
@@ -1099,14 +1151,15 @@ exports.deletePrestasi = async (req, res) => {
             success: true,
             message: `Data TAK SKS dan IPK berhasil dihapus`,
         });
-
     } catch (error) {
         // Handle error umum dari server
         console.error('Error from Prestasi Controller (Delete):', error);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server.',
+        });
     }
 };
-
 
 // ============= KELOLA DATA PERSEMESTER =============
 // mengambil data ip dan sks persemester
@@ -1120,19 +1173,36 @@ exports.getSemesterByNIM = async (req, res) => {
 
         // 3. Handle kasus "Not Found" (model mengembalikan null)
         if (result === null) {
-            return res.status(404).json({
-                success: false,
-                message: `Riwayat semester untuk mahasiswa dengan NIM ${nim} tidak ditemukan.`,
+            return res.status(200).json({
+                success: true,
+                message: `Belum ada riwayat semester untuk mahasiswa dengan NIM ${nim}.`,
+                data: {
+                    nim: nim,
+                    riwayat_semester: [], // Return array kosong untuk semester
+                },
             });
         }
 
         // 4. Handle kasus "Success" (model mengembalikan objek data)
+        // 🔧 PERBAIKAN: Cek apakah array semester kosong
+        if (result.riwayat_semester && Array.isArray(result.riwayat_semester)) {
+            if (result.riwayat_semester.length === 0) {
+                return res.status(200).json({
+                    success: true,
+                    message: `Belum ada riwayat semester untuk mahasiswa dengan NIM ${nim}.`,
+                    data: {
+                        nim: nim,
+                        riwayat_semester: [],
+                    },
+                });
+            }
+        }
+
         res.status(200).json({
             success: true,
             message: 'Riwayat semester berhasil diambil.',
             data: result, // 'result' adalah objek yang sudah diformat
         });
-
     } catch (error) {
         // 5. Handle error tak terduga dari server
         console.error('Error in getSemesterByNIM controller:', error);
@@ -1143,26 +1213,38 @@ exports.getSemesterByNIM = async (req, res) => {
     }
 };
 
-
 exports.createSemester = async (req, res) => {
     try {
         // 1. Ambil input dari params dan body
         const { nim } = req.params;
-        const { ip_semester, semester, sks_semester, tahun_ajaran, jenis_semester } = req.body;
+        const {
+            ip_semester,
+            semester,
+            sks_semester,
+            tahun_ajaran,
+            jenis_semester,
+        } = req.body;
 
         // 2. Validasi input dari body (lebih ringkas)
-        if (ip_semester === undefined || semester === undefined || sks_semester === undefined || !tahun_ajaran || !jenis_semester) {
-            return res.status(400).json({ 
+        if (
+            ip_semester === undefined ||
+            semester === undefined ||
+            sks_semester === undefined ||
+            !tahun_ajaran ||
+            !jenis_semester
+        ) {
+            return res.status(400).json({
                 success: false, // Menggunakan 'status' agar konsisten
-                message: 'Permintaan tidak valid. Semua field dalam body wajib diisi.' 
+                message:
+                    'Permintaan tidak valid. Semua field dalam body wajib diisi.',
             });
         }
 
         // 3. Siapkan data untuk model (INI YANG PALING PENTING DIPERBAIKI)
         const dataForModel = {
             nim_mahasiswa: nim, // <-- Tambahkan NIM dari params
-            ...req.body,   
-            tanggal_dibuat: new Date()
+            ...req.body,
+            tanggal_dibuat: new Date(),
         };
 
         // 4. Panggil model dengan SATU objek data yang lengkap
@@ -1174,7 +1256,6 @@ exports.createSemester = async (req, res) => {
             message: 'Data semester berhasil ditambahkan.',
             data: newSemester,
         });
-
     } catch (error) {
         // 6. Handle error yang konsisten
 
@@ -1185,15 +1266,14 @@ exports.createSemester = async (req, res) => {
                 message: `Gagal menambahkan data. Mahasiswa dengan NIM '${nim_mahasiswa}' tidak ditemukan.`,
             });
         }
-        
+
         console.error('Error in createSemester controller:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan pada server.' 
+            message: 'Terjadi kesalahan pada server.',
         });
     }
 };
-
 
 // mengedit data persemester
 exports.updateSemester = async (req, res) => {
@@ -1202,13 +1282,21 @@ exports.updateSemester = async (req, res) => {
         const dataToUpdate = req.body;
 
         // Validasi input
-        if (dataToUpdate.ip_semester === undefined || dataToUpdate.semester === undefined || dataToUpdate.sks_semester === undefined || !dataToUpdate.tahun_ajaran || !dataToUpdate.jenis_semester) {
-            return res.status(400).json({ success: false, message: 'Semua field wajib diisi.' });
+        if (
+            dataToUpdate.ip_semester === undefined ||
+            dataToUpdate.semester === undefined ||
+            dataToUpdate.sks_semester === undefined ||
+            !dataToUpdate.tahun_ajaran ||
+            !dataToUpdate.jenis_semester
+        ) {
+            return res
+                .status(400)
+                .json({ success: false, message: 'Semua field wajib diisi.' });
         }
 
         const dataForModel = {
-            ...req.body,   
-            tanggal_dibuat: new Date()               // <-- Ambil sisa data dari body
+            ...req.body,
+            tanggal_dibuat: new Date(), // <-- Ambil sisa data dari body
         };
 
         const result = await updateSemesterMahasiswaById(id, dataForModel);
@@ -1230,13 +1318,14 @@ exports.updateSemester = async (req, res) => {
                 dataForModel,
             },
         });
-
     } catch (error) {
         console.error('Error in updateSemester controller:', error);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server.',
+        });
     }
 };
-
 
 // menghapus data persemester
 exports.deleteSemester = async (req, res) => {
@@ -1258,10 +1347,11 @@ exports.deleteSemester = async (req, res) => {
             success: true,
             message: `Data IP dan SKS semester berhasil dihapus`,
         });
-
     } catch (error) {
         console.error('Error in deleteSemester controller:', error);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server.',
+        });
     }
 };
-
