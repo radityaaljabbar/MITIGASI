@@ -37,31 +37,51 @@ exports.login = async (req, res) => {
 
         // Check which table to query based on role
         if (role === 'mahasiswa') {
-            // Query mahasiswa table
+            // Query mahasiswa table dengan kolom status
             const [rows] = await pool.execute(
-                'SELECT nim, nama, kelas, password FROM mahasiswa WHERE nim = ?',
+                'SELECT nim, nama, kelas, password, status FROM mahasiswa WHERE nim = ?',
                 [id]
             );
 
             if (rows.length > 0) {
                 user = rows[0];
+
+                // Check if user is active
+                if (user.status !== 'aktif') {
+                    return res.status(401).json({
+                        success: false,
+                        message:
+                            'Anda bukan mahasiswa aktif, silahkan hubungi Layanan Akademik dan Administrasi jika terdapat kesalahan.',
+                    });
+                }
+
                 // For plain text passwords, simply compare the strings
                 passwordMatch = password === user.password;
             }
         } else if (role === 'dosen_wali') {
-            // Query dosen_wali table
+            // Query dosen_wali table dengan kolom status
             const [rows] = await pool.execute(
-                'SELECT nip, nama, kode, password FROM dosen_wali WHERE nip = ?',
+                'SELECT nip, nama, kode, password, status FROM dosen_wali WHERE nip = ?',
                 [id]
             );
 
             if (rows.length > 0) {
                 user = rows[0];
+
+                // Check if user is active
+                if (user.status !== 'aktif') {
+                    return res.status(401).json({
+                        success: false,
+                        message:
+                            'Akun Anda tidak aktif. Silakan hubungi administrator.',
+                    });
+                }
+
                 // For plain text passwords, simply compare the strings
                 passwordMatch = password === user.password;
             }
         } else {
-            // Query admin table
+            // Query admin table (tidak ada perubahan untuk admin)
             const [rows] = await pool.execute(
                 'SELECT username, name, password FROM atmin_mitigasi WHERE username = ?',
                 [id]
