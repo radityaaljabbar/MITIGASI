@@ -55,6 +55,7 @@ exports.findGradesMahasiswaByNIM = async (nim) => {
                 n.nim_mahasiswa,
                 m.nama,
                 m.kelas,
+                mk.nama_mk,
                 n.kode_mk,
                 n.indeks_nilai,
                 n.semester,
@@ -63,6 +64,8 @@ exports.findGradesMahasiswaByNIM = async (nim) => {
                 nilai AS n
             JOIN 
                 mahasiswa AS m ON n.nim_mahasiswa = m.nim
+            JOIN 
+                mata_kuliah_baru AS mk ON n.kode_mk = mk.kode_mk
             WHERE 
                 n.nim_mahasiswa = ?;
         `;
@@ -82,6 +85,7 @@ exports.findGradesMahasiswaByNIM = async (nim) => {
             grades: rows.map(grade => ({ // 'grades' adalah array nilai
                 id_nilai: grade.id_nilai,
                 kode_mk: grade.kode_mk,
+                nama_mk: grade.nama_mk,
                 indeks: grade.indeks_nilai,
                 semester: grade.semester,
                 tahun_ajaran: grade.tahun_ajaran,
