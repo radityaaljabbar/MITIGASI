@@ -10,6 +10,7 @@ exports.findSemesterMahasiswaByNIM = async (nim) => {
         // Query yang sudah diperbaiki (mjs -> mhs)
         const sql = `
             SELECT
+                ps.id,
                 ps.semester,    
                 ps.ip_semester,
                 ps.sks_semester,
@@ -39,6 +40,7 @@ exports.findSemesterMahasiswaByNIM = async (nim) => {
             
             // Gunakan .map() untuk membuat array dari setiap semester
             riwayat_semester: rows.map(row => ({
+                id: row.id,
                 semester: row.semester,
                 ip_semester: row.ip_semester,
                 sks_semester: row.sks_semester,
