@@ -1768,7 +1768,7 @@ exports.deleteMataKuliah = async (req, res) => {
 
 /**
  * Mengambil opsi mata kuliah untuk ekuivalensi
- * GET http://localhost:5000/api/mata-kuliah/ekuivalensi-options?kurikulum=2023
+ * GET http://localhost:5000/api/admin/kelolaKurikulum/getEkuivalensiOptions?kurikulum=2024
  */
 exports.getEkuivalensiOptions = async (req, res) => {
     try {
