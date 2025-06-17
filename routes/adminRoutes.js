@@ -252,4 +252,56 @@ router.delete(
 )
 
 
+// =============================================
+// ==           KELOLA KURIKULUM              ==
+// =============================================
+router.get(
+    '/kelolaKurikulum/getMataKuliahByKurikulum',
+    protect,
+    authorize('admin'),
+    adminController.getMataKuliahByKurikulum
+)
+
+router.get(
+    '/kelolaKurikulum/getAllKurikulum',
+    protect,
+    authorize('admin'),
+    adminController.getAllKurikulum
+)
+
+router.get(
+    '/kelolaKurikulum/getMataKuliahById/:id',
+    protect,
+    authorize('admin'),
+    adminController.getMataKuliahById
+)
+
+router.post(
+    '/kelolaKurikulum/createNewMataKuliah',
+    protect,
+    authorize('admin'),
+    adminController.createMataKuliah
+)
+
+router.put(
+    '/kelolaKurikulum/updateMataKuliah/:id',
+    protect,
+    authorize('admin'),
+    adminController.updateMataKuliah
+)
+
+router.delete(
+    '/kelolaKurikulum/deleteMataKuliah/:id',
+    protect,
+    authorize('admin'),
+    adminController.deleteMataKuliah
+)
+
+router.get(
+    '/kelolaKurikulum/getEkuivalensiOptions',
+    protect,
+    authorize('admin'),
+    adminController.getEkuivalensiOptions
+)
+
 module.exports = router;

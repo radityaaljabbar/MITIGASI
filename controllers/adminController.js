@@ -47,6 +47,17 @@ const {
     deleteSemesterMahasiswaById,
 } = require('../models/adminQueries/kelolaAkademikSemesterQueries');
 
+const {
+    findMataKuliahByKurikulum,
+    getAllKurikulum,
+    findMataKuliahById,
+    createMataKuliah,
+    updateMataKuliah,
+    deleteMataKuliah,
+    getEkuivalensiOptions,
+} = require('../models/adminQueries/kelolaKurikulumQueries')
+
+
 // =============================================
 // ==           ADMIN CONTROLLER FUNCTIONS    ==
 // =============================================
@@ -1352,6 +1363,441 @@ exports.deleteSemester = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan pada server.',
+        });
+    }
+};
+
+
+
+// =============================================
+// ==           KELOLA KURIKULUM              ==
+// =============================================
+
+/**
+ * Mengambil semua mata kuliah berdasarkan kurikulum
+ */
+exports.getMataKuliahByKurikulum = async (req, res) => {
+    try {
+        const { kurikulum } = req.query;
+        if (!kurikulum) {
+            return res.status(400).json({
+                success: false,
+                message: 'kurikulum is required as a query parameter.',
+            });
+        }
+
+        const mataKuliah = await findMataKuliahByKurikulum(kurikulum);
+
+        if (mataKuliah.length === 0) {
+            return res.status(200).json({
+                success: false,
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            count: mataKuliah.length,
+            message: `Data mata kuliah kurikulum ${kurikulum} berhasil diambil`,
+            data: mataKuliah,
+        });
+
+    } catch (error) {
+        console.error('Error in getMataKuliahByKurikulum controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam mengambil data mata kuliah',
+            error: error.message
+        });
+    }
+};
+
+
+/**
+ * Mengambil semua kurikulum yang tersedia
+ */
+exports.getAllKurikulum = async (req, res) => {
+    try {
+        const kurikulumList = await getAllKurikulum();
+
+        if (kurikulumList.length === 0) {
+            return res.status(200).json({
+                success: false,
+                count: 0,
+                data: [],
+            });
+        }
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Data kurikulum berhasil diambil',
+            data: kurikulumList
+        });
+
+    } catch (error) {
+        console.error('Error in getAllKurikulum controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam mengambil data kurikulum',
+            error: error.message
+        });
+    }
+};
+
+
+/**
+ * Mengambil mata kuliah berdasarkan ID
+ */
+exports.getMataKuliahById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id || isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID mata kuliah tidak valid'
+            });
+        }
+
+        const mataKuliah = await findMataKuliahById(parseInt(id));
+        
+        if (!mataKuliah) {
+            return res.status(200).json({
+                success: false,
+                message: 'Mata kuliah tidak ditemukan',
+                count: 0,
+                data: [],
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Data mata kuliah berhasil diambil',
+            data: mataKuliah
+        });
+    } catch (error) {
+        console.error('Error in getMataKuliahById controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam mengambil data mata kuliah',
+            error: error.message
+        });
+    }
+};
+
+
+/**
+ * Menambah mata kuliah baru
+ */
+exports.createMataKuliah = async (req, res) => {
+    try {
+        const {
+            kode_mk,
+            nama_mk,
+            sks_mk,
+            jenis_mk,
+            tingkat,
+            jenis_semester,
+            semester,
+            ekivalensi,
+            kurikulum
+        } = req.body;
+
+        // Validasi input required
+        if (!kode_mk || !nama_mk || !sks_mk || !jenis_mk || !kurikulum) {
+            return res.status(400).json({
+                success: false,
+                message: 'Field kode_mk, nama_mk, sks_mk, jenis_mk, dan kurikulum wajib diisi',
+                data: null
+            });
+        }
+
+        // Validasi tipe data
+        if (isNaN(sks_mk) || isNaN(semester) || isNaN(kurikulum)) {
+            return res.status(400).json({
+                success: false,
+                message: 'SKS, semester, dan kurikulum harus berupa angka'
+            });
+        }
+
+        // Validasi SKS
+        if (sks_mk < 1 || sks_mk > 10) {
+            return res.status(400).json({
+                success: false,
+                message: 'SKS harus antara 1-6',
+                data: null
+            });
+        }
+
+        // Validasi jenis mata kuliah
+        const jenisValid = ['WAJIB PRODI', 'PILIHAN'];
+        if (!jenisValid.includes(jenis_mk)) {
+            return res.status(400).json({
+                success: false,
+                message: `Jenis mata kuliah harus salah satu dari: ${jenisValid.join(', ')}`,
+                data: null
+            });
+        }
+
+        // Validasi jenis semester
+        const jenisSemesterValid = ['GANJIL', 'GENAP', 'ANTARA'];
+        if (jenis_semester && !jenisSemesterValid.includes(jenis_semester)) {
+            return res.status(400).json({
+                success: false,
+                message: `Jenis semester harus salah satu dari: ${jenisSemesterValid.join(', ')}`,
+                data: null
+            });
+        }
+
+        // Validasi semester
+        if (semester && (semester < 1 || semester > 8)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Semester harus antara 1-8',
+                data: null
+            });
+        }
+
+        // Validasi tingkat
+        if (tingkat && (tingkat < 1 || tingkat > 4)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tingkat harus antara 1-4',
+                data: null
+            });
+        }
+
+        // Prepare data
+        const mataKuliahData = {
+            kode_mk: kode_mk.toUpperCase(),
+            nama_mk: nama_mk.trim(),
+            sks_mk: parseInt(sks_mk),
+            jenis_mk,
+            tingkat: tingkat,
+            jenis_semester: jenis_semester,
+            semester: semester,
+            ekivalensi: ekivalensi ? ekivalensi.toUpperCase() : null,
+            kurikulum: parseInt(kurikulum)
+        };
+
+        // Panggil model untuk create mata kuliah
+        const result = await createMataKuliah(mataKuliahData);
+
+        return res.status(201).json({
+            success: true,
+            message: 'Mata kuliah berhasil ditambahkan',
+            data: result
+        });
+
+    } catch (error) {
+        console.error('Error in createMataKuliah controller:', error);
+
+        // Handle specific error messages
+        if (error.message.includes('sudah ada dalam kurikulum')) {
+            return res.status(409).json({
+                success: false,
+                message: error.message,
+                data: null
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan server',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+            data: null
+        });
+    }
+}
+
+
+/**
+ * Mengupdate mata kuliah berdasarkan ID
+ */
+exports.updateMataKuliah = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            kode_mk, 
+            nama_mk, 
+            sks_mk, 
+            jenis_mk, 
+            tingkat,
+            jenis_semester, 
+            semester, 
+            ekivalensi, 
+            kurikulum,
+        } = req.body;
+
+        if (!id || isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID mata kuliah tidak valid'
+            });
+        }
+
+        // Validasi input wajib
+        if (!kode_mk || !nama_mk || !sks_mk || !jenis_mk || !semester || !kurikulum) {
+            return res.status(400).json({
+                success: false,
+                message: 'Data wajib tidak lengkap. Pastikan kode_mk, nama_mk, sks_mk, jenis_mk, semester, dan kurikulum diisi'
+            });
+        }
+
+        // Validasi tipe data
+        if (isNaN(sks_mk) || isNaN(semester) || isNaN(kurikulum)) {
+            return res.status(400).json({
+                success: false,
+                message: 'SKS, semester, dan kurikulum harus berupa angka'
+            });
+        }
+
+        // Validasi rentang nilai
+        if (parseInt(sks_mk) < 1 || parseInt(sks_mk) > 10) {
+            return res.status(400).json({
+                success: false,
+                message: 'SKS harus dalam rentang 1-10'
+            });
+        }
+
+        if (parseInt(semester) < 1 || parseInt(semester) > 8) {
+            return res.status(400).json({
+                success: false,
+                message: 'Semester harus dalam rentang 1-8'
+            });
+        }
+
+        const mataKuliahData = {
+            kode_mk: kode_mk.trim().toUpperCase(),
+            nama_mk: nama_mk.trim(),
+            sks_mk: parseInt(sks_mk),
+            jenis_mk,
+            tingkat: tingkat ? parseInt(tingkat) : 1,
+            jenis_semester: jenis_semester || 'Ganjil',
+            semester: parseInt(semester),
+            ekivalensi: ekivalensi && ekivalensi.trim() !== '' ? ekivalensi.trim() : null,
+            kurikulum: parseInt(kurikulum)
+        };
+
+        const updatedMataKuliah = await updateMataKuliah(parseInt(id), mataKuliahData);
+        
+        if (!updatedMataKuliah) {
+            return res.status(404).json({
+                success: false,
+                message: 'Mata kuliah tidak ditemukan'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Mata kuliah berhasil diupdate',
+            data: updatedMataKuliah
+        });
+    } catch (error) {
+        console.error('Error in updateMataKuliah controller:', error);
+        
+        // Handle duplicate error
+        if (error.message.includes('sudah ada dalam kurikulum')) {
+            return res.status(409).json({
+                success: false,
+                message: error.message
+            });
+        }
+        
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam mengupdate mata kuliah',
+            error: error.message
+        });
+    }
+};
+
+
+/**
+ * Menghapus mata kuliah berdasarkan ID
+ */
+exports.deleteMataKuliah = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id || isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID mata kuliah tidak valid'
+            });
+        }
+
+        // Cek apakah mata kuliah ada
+        const existingMataKuliah = await findMataKuliahById(parseInt(id));
+        if (!existingMataKuliah) {
+            return res.status(404).json({
+                success: false,
+                message: 'Mata kuliah tidak ditemukan'
+            });
+        }
+
+        const isDeleted = await deleteMataKuliah(parseInt(id));
+        
+        if (!isDeleted) {
+            return res.status(500).json({
+                success: false,
+                message: 'Gagal menghapus mata kuliah'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Mata kuliah berhasil dihapus',
+            data: {
+                id: parseInt(id),
+                kode_mk: existingMataKuliah.kode_mk,
+                nama_mk: existingMataKuliah.nama_mk
+            }
+        });
+    } catch (error) {
+        console.error('Error in deleteMataKuliah controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam menghapus mata kuliah',
+            error: error.message
+        });
+    }
+};
+
+
+/**
+ * Mengambil opsi mata kuliah untuk ekuivalensi
+ * GET http://localhost:5000/api/mata-kuliah/ekuivalensi-options?kurikulum=2023
+ */
+exports.getEkuivalensiOptions = async (req, res) => {
+    try {
+        const { kurikulum } = req.query;
+        const currentKurikulum = kurikulum ? parseInt(kurikulum) : null;
+        
+        const options = await getEkuivalensiOptions(currentKurikulum);
+        
+        if (!options) {
+            return res.status(200).json({
+                success: false,
+                message: 'Opsi ekuivalensi tidak ditemukan',
+                count: 0,
+                data: [],
+            });
+        }
+        console.log(options)
+
+        res.status(200).json({
+            success: true,
+            message: 'Data opsi ekuivalensi berhasil diambil',
+            data: options
+        });
+    } catch (error) {
+        console.error('Error in getEkuivalensiOptions controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam mengambil opsi ekuivalensi',
+            error: error.message
         });
     }
 };
