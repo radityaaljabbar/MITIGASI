@@ -29,10 +29,10 @@ exports.getStudentInClass = async (listKodeKelas) => {
     return listMahasiswa;
 };
 
-// Fetch all courses available:
+// Fetch all courses available with kurikulum 2024:
 exports.getAvailCourses = async () => {
     const [availableCourses] = await pool.execute(
-        'SELECT kode_mk, nama_mk, sks_mk, jenis_mk, tingkat, jenis_semester, semester, ekivalensi FROM mata_kuliah_baru'
+        'SELECT kode_mk, nama_mk, sks_mk, jenis_mk, tingkat, jenis_semester, semester, ekivalensi FROM mata_kuliah_baru WHERE kurikulum = 2024'
     );
 
     return availableCourses;
