@@ -96,8 +96,8 @@ const SidebarAdmin = ({ expanded, setExpanded }) => {
             icon: kelolaKurikulum,
         },
         {
-            path: '/admin/kelolaNilai',
-            name: 'Kelola Nilai',
+            path: '/admin/kelolaAkademik',
+            name: 'Kelola Akademik',
             icon: kelolaNilai,
         },
     ];

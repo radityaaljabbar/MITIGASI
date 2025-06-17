@@ -36,6 +36,8 @@ import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this 
 // Admin Pages
 import KelolaPenggunaPage from './pages/pagesAdmin/KelolaPenggunaPage.jsx';
 import KelolaKelasPage from './pages/pagesAdmin/KelolaKelasPage.jsx';
+import KelolaAkademikPage from './pages/pagesAdmin/KelolaAkademikPage.jsx';
+import DetailAkademikPage from './pages/pagesAdmin/DetailAkademikPage.jsx';
 
 const App = () => {
     const router = createBrowserRouter(
@@ -132,6 +134,14 @@ const App = () => {
                     <Route
                         path="kelolaKelasdanAngkatan"
                         element={<KelolaKelasPage />}
+                    />
+                    <Route
+                        path="kelolaAkademik"
+                        element={<KelolaAkademikPage />}
+                    />
+                    <Route
+                        path="kelolaAkademik/detail/:nim"
+                        element={<DetailAkademikPage />}
                     />
 
                     {/* 404 for admin routes */}
