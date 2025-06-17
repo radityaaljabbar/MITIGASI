@@ -27,6 +27,12 @@
                     └── scoreCategories.json
             └── 📁images
                 └── FIX_LOGO.png
+                └── 📁imageAdmin
+                    └── 📁sidebarImages
+                        └── kelolaAkun.png
+                        └── KelolaKelasDanAngkatan.png
+                        └── kelolaKurikulum.png
+                        └── kelolaNilai.png
                 └── 📁imageDosenWali
                     └── 📁sidebarImages
                         └── LogoutIcon.png
@@ -50,7 +56,31 @@
                         └── toggleSidebar.png
                 └── logoMITIGASI.png
         └── 📁components
+            └── 📁compAdmin
+                └── 📁kelolaAkademik
+                    └── DataPrestasiTab.jsx
+                    └── DetailAkademikTabs.jsx
+                    └── 📁hooks
+                        └── useKelolaAkademik.js
+                    └── IPSemesterTab.jsx
+                    └── MahasiswaTable.jsx
+                    └── NilaiMataKuliahTab.jsx
+                └── 📁kelolaKelas
+                    └── 📁hooks
+                        └── useKelolaKelas.js
+                    └── KelolaKelasPopUp.jsx
+                    └── KelolaKelasTable.jsx
+                └── 📁kelolaPengguna
+                    └── DeleteConfirmationModal.jsx
+                    └── 📁hooks
+                        └── useKelolaPengguna.js
+                    └── KelolaPenggunaModal.jsx
+                    └── KelolaPenggunaTable.jsx
+                    └── kelolaPenggunaTabs.jsx
+                └── SidebarAdmin.jsx
             └── 📁compDosenWali
+                └── 📁compMyCourseAdvisor
+                    └── StudentInfoBox.jsx
                 └── 📁compMyStudent
                     └── 📁compAnalisisAkademik
                         └── AnalisisTrendContent.jsx
@@ -67,6 +97,7 @@
                         └── ChartPsikologi.jsx
                         └── DetailPsikologi.jsx
                         └── PengolahanData.js
+                        └── PsychologyHistoryTimeline.jsx
                         └── StrengthArea.jsx
                         └── StudentInfoPsikologi.jsx
                     └── NavbarMyStudentDetail.jsx
@@ -83,6 +114,7 @@
                 └── 📁myWellnessComponents
                     └── MyWellness_NotTested.jsx
                     └── MyWellness_Tested.jsx
+                    └── MyWellnessHistory.jsx
                 └── SidebarMahasiswa.jsx
             └── handleBack.jsx
             └── ProtectedRoute.jsx
@@ -92,7 +124,6 @@
         └── index.css
         └── 📁layout
             └── MainLayout.jsx
-            └── MainLayoutMahasiswa.jsx
         └── main.jsx
         └── 📁pages
             └── 📁lecturer
@@ -125,6 +156,11 @@
                 └── NotFoundPage.jsx
             └── 📁Login
                 └── LoginPage.jsx
+            └── 📁pagesAdmin
+                └── DetailAkademikPage.jsx
+                └── KelolaAkademikPage.jsx
+                └── KelolaKelasPage.jsx
+                └── KelolaPenggunaPage.jsx
             └── 📁pagesMahasiswa
                 └── 📁Feedback
                     └── FeedbackDetail.jsx
@@ -141,6 +177,10 @@
                 └── MyWellnessPage.jsx
                 └── NotFoundPage.jsx
         └── 📁services
+            └── 📁adminServices
+                └── kelolaAkademikServices.js
+                └── kelolaKelasService.js
+                └── kelolaPenggunaService.js
             └── authService.js
             └── 📁dosenWali
                 └── 📁myCourseAdvisor

@@ -38,6 +38,7 @@ import KelolaPenggunaPage from './pages/pagesAdmin/KelolaPenggunaPage.jsx';
 import KelolaKelasPage from './pages/pagesAdmin/KelolaKelasPage.jsx';
 import KelolaAkademikPage from './pages/pagesAdmin/KelolaAkademikPage.jsx';
 import DetailAkademikPage from './pages/pagesAdmin/DetailAkademikPage.jsx';
+import KelolaKurikulumPage from './pages/pagesAdmin/KelolaKurikulumPage.jsx';
 
 const App = () => {
     const router = createBrowserRouter(
@@ -142,6 +143,10 @@ const App = () => {
                     <Route
                         path="kelolaAkademik/detail/:nim"
                         element={<DetailAkademikPage />}
+                    />
+                    <Route
+                        path="kelolaKurikulum"
+                        element={<KelolaKurikulumPage />}
                     />
 
                     {/* 404 for admin routes */}
