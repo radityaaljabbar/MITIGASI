@@ -369,9 +369,7 @@ const Login = () => {
                         {/* Help Text */}
                         <div className="mt-6 text-center">
                             <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
-                                <p className="font-medium mb-2">
-                                    Butuh bantuan?
-                                </p>
+
                                 <p>{roleConfig.helpText}</p>
                             </div>
                         </div>
