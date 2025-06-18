@@ -142,9 +142,6 @@ const KelolaKurikulumPage = () => {
                                 <option value="">Semua Jenis</option>
                                 <option value="WAJIB PRODI">Wajib Prodi</option>
                                 <option value="PILIHAN">Pilihan</option>
-                                <option value="WAJIB UNIVERSITAS">
-                                    Wajib Universitas
-                                </option>
                             </select>
                         </div>
                     </div>
