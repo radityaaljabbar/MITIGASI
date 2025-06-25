@@ -111,14 +111,9 @@ const MyFeedback = () => {
                                         </span>
                                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm mt-2 sm:mt-0">
                                             <span className="text-gray-500">
-                                                {new Date(
-                                                    feedback.tanggal_keluhan ||
-                                                        feedback.feedbackDate
-                                                ).toLocaleDateString('id-ID', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                })}
+                                                {/* ✅ FIXED: Langsung gunakan tanggal yang sudah diformat dari service */}
+                                                {feedback.tanggal_keluhan ||
+                                                    feedback.feedbackDate}
                                             </span>
                                             <span
                                                 className={`px-2 py-1 rounded-full text-xs font-medium inline-flex items-center ${getStatusColorClass(

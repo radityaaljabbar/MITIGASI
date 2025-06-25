@@ -13,6 +13,53 @@ const VALID_FILE_TYPES = [
 ];
 
 /**
+ * Format date to Indonesian format with time
+ * @param {Date} date - The date to format
+ * @returns {string} - Formatted date with time (e.g., "SENIN, 10 JANUARI 2023 14:30 WIB")
+ */
+export const formatDateTime = (date) => {
+    if (!date || isNaN(new Date(date).getTime())) {
+        return 'Invalid Date';
+    }
+
+    const dateObj = new Date(date);
+    const days = [
+        'MINGGU',
+        'SENIN',
+        'SELASA',
+        'RABU',
+        'KAMIS',
+        'JUMAT',
+        'SABTU',
+    ];
+    const months = [
+        'JANUARI',
+        'FEBRUARI',
+        'MARET',
+        'APRIL',
+        'MEI',
+        'JUNI',
+        'JULI',
+        'AGUSTUS',
+        'SEPTEMBER',
+        'OKTOBER',
+        'NOVEMBER',
+        'DESEMBER',
+    ];
+
+    const day = days[dateObj.getDay()];
+    const dateNum = dateObj.getDate();
+    const month = months[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+
+    // Format to 24-hour format
+    const hours = String(dateObj.getHours()).padStart(2, '0');
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+
+    return `${day}, ${dateNum} ${month} ${year} ${hours}:${minutes} WIB`;
+};
+
+/**
  * Validate if a file is of an allowed type
  * @param {File} file - File to validate
  * @returns {boolean} - Whether the file is valid
@@ -117,6 +164,16 @@ export const getFeedbackList = async () => {
             throw new Error(data.message || 'Failed to get feedback list');
         }
 
+        // Format the tanggal_keluhan in the response data
+        if (data.data && Array.isArray(data.data)) {
+            data.data = data.data.map((item) => ({
+                ...item,
+                tanggal_keluhan: item.tanggal_keluhan
+                    ? formatDateTime(new Date(item.tanggal_keluhan))
+                    : 'N/A',
+            }));
+        }
+
         return data;
     } catch (error) {
         console.error('Error in getFeedbackList:', error);
@@ -145,6 +202,13 @@ export const getFeedbackDetail = async (id) => {
 
         if (!response.ok) {
             throw new Error(data.message || 'Failed to get feedback details');
+        }
+
+        // Format the tanggal_keluhan in the response data
+        if (data.data && data.data.tanggal_keluhan) {
+            data.data.tanggal_keluhan = formatDateTime(
+                new Date(data.data.tanggal_keluhan)
+            );
         }
 
         return data;

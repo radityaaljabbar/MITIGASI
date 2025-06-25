@@ -138,7 +138,7 @@ export const getFeedbackList = async () => {
                 title: item.title_keluhan || '',
                 details: item.detail_keluhan || '',
                 feedbackDate: item.tanggal_keluhan
-                    ? formatDateOnly(new Date(item.tanggal_keluhan))
+                    ? formatDateTime(new Date(item.tanggal_keluhan)) // CHANGED: formatDateOnly -> formatDateTime
                     : 'N/A',
                 // FIXED: Use the new 'status' field from backend
                 status:
@@ -180,7 +180,7 @@ export const getFeedbackList = async () => {
                 title: item.title_keluhan || '',
                 details: item.detail_keluhan || '',
                 feedbackDate: item.tanggal_keluhan
-                    ? formatDateOnly(new Date(item.tanggal_keluhan))
+                    ? formatDateTime(new Date(item.tanggal_keluhan)) // CHANGED: formatDateOnly -> formatDateTime
                     : 'N/A',
                 // FIXED: Use the new 'status' field from backend
                 status:
@@ -278,7 +278,7 @@ export const getFeedbackDetail = async (id) => {
                     title: detailItem.title_keluhan || '',
                     details: detailItem.detail_keluhan || '',
                     feedbackDate: detailItem.tanggal_keluhan
-                        ? formatDateOnly(new Date(detailItem.tanggal_keluhan))
+                        ? formatDateTime(new Date(detailItem.tanggal_keluhan)) // CHANGED: formatDateOnly -> formatDateTime
                         : 'N/A',
                     lampiran: detailItem.lampiran || null,
                     // FIXED: Use the new 'status' field from backend, with fallback logic
@@ -390,8 +390,8 @@ export const getFeedbackResponse = async (id) => {
                     feedbackId: responseItem.id_keluhan,
                     dosenNip: responseItem.nip_dosen_wali,
                     responseText: responseItem.response_keluhan,
-                    responseDate: formatDateOnly(
-                        new Date(responseItem.tanggal_response)
+                    responseDate: formatDateTime(
+                        new Date(responseItem.tanggal_response) // CHANGED: formatDateOnly -> formatDateTime
                     ),
                     // FIXED: Use the new 'status' field from backend, with fallback logic
                     status:

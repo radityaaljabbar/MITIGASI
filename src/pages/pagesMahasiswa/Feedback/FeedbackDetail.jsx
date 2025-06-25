@@ -33,13 +33,8 @@ const MyFeedbackDetails = () => {
                         feedbackId: response.data.id_keluhan,
                         title: response.data.title_keluhan,
                         details: response.data.detail_keluhan,
-                        feedbackDate: new Date(
-                            response.data.tanggal_keluhan
-                        ).toLocaleDateString('id-ID', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                        }),
+                        // ✅ FIXED: Langsung gunakan tanggal yang sudah diformat dari service
+                        feedbackDate: response.data.tanggal_keluhan,
                         // Use the helper function to convert status codes
                         status: getStatusDisplay(response.data.status),
                         response: response.data.response
