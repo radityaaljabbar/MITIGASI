@@ -79,7 +79,7 @@ const TuitionReliefForm = () => {
       return false;
     }
 
-    if (formData.jenisKeringanan !== 'Pembebasan Biaya Penuh' && !formData.jumlahDiajukan) {
+    if (formData.jenisKeringanan === 'Potongan Biaya Sebagian' && !formData.jumlahDiajukan) {
       toast.error('Mohon masukkan jumlah keringanan yang diajukan!');
       return false;
     }
@@ -259,8 +259,13 @@ const TuitionReliefForm = () => {
                     value={formData.jenisKeringanan}
                     onChange={(e) => {
                       handleInputChange(e);
+                      if (e.target.value !== 'Potongan Biaya Sebagian') {
+                        setFormData(prev => ({ ...prev, jumlahDiajukan: '' }));
+                      }
                       if (e.target.value === 'Pembebasan Biaya Penuh') {
                         toast.info('Untuk pembebasan biaya penuh, Anda tidak perlu memasukkan jumlah keringanan.');
+                      } else if (e.target.value === 'Cicilan Pembayaran') {
+                        toast.info('Untuk cicilan, nominal akan disesuaikan oleh pihak kampus.');
                       }
                     }}
                     required
@@ -292,7 +297,7 @@ const TuitionReliefForm = () => {
                   </select>
                 </div>
                 
-                {formData.jenisKeringanan !== 'Pembebasan Biaya Penuh' && (
+                {formData.jenisKeringanan === 'Potongan Biaya Sebagian' && (
                   <div>
                     <label htmlFor="jumlahDiajukan" className="block text-sm font-medium text-gray-700">
                       Jumlah Keringanan yang Diajukan (Rp) <span className="text-red-500">*</span>
@@ -302,10 +307,8 @@ const TuitionReliefForm = () => {
                       id="jumlahDiajukan"
                       name="jumlahDiajukan"
                       value={formData.jumlahDiajukan}
-                      onChange={(e) => {
-                        handleInputChange(e);
-                      }}
-                      required={formData.jenisKeringanan !== 'Pembebasan Biaya Penuh'}
+                      onChange= {handleInputChange}
+                      required
                       min="0"
                       placeholder="0"
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#951A22] focus:border-[#951A22]"
