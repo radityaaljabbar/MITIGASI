@@ -2,13 +2,12 @@ const { pool } = require('../../config/database');
 
 const submitRelief = async (valueRelief) => {
     const connection = await pool.getConnection(); // Dapatkan connection dari pool
-    
+
     try {
         // Mulai transaction
         await connection.beginTransaction();
-        
-        const submitQuery = 
-        `   INSERT INTO response_finansial 
+
+        const submitQuery = `   INSERT INTO response_finansial 
             (nim,
             penghasilan_mahasiswa, 
             penghasilan_orangtua, 
@@ -20,15 +19,15 @@ const submitRelief = async (valueRelief) => {
             jumlah_diajukan,
             detail_alasan,
             tanggal_dibuat)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         // Eksekusi query insert response_finansial
         const [rowsRelief] = await connection.execute(submitQuery, valueRelief);
-        
+
         // Dapatkan ID dari insert result (bukan dari rowsRelief)
         const responseId = rowsRelief.insertId; // insertId adalah property dari insert result
         const nim = valueRelief[0]; // nim dari parameter valueRelief array
-        
+
         // Step 1: Delete any existing records for this nim
         const [deleteResult] = await pool.execute(
             'DELETE FROM klasifikasi_finansial WHERE nim = ?',
@@ -48,25 +47,23 @@ const submitRelief = async (valueRelief) => {
 
         // Commit transaction
         await connection.commit();
-        
+
         return {
             success: true,
             insertId: responseId,
             affectedRows: rowsRelief.affectedRows,
-            message: 'Data relief dan klasifikasi berhasil disimpan'
+            message: 'Data relief dan klasifikasi berhasil disimpan',
         };
-        
     } catch (error) {
         // Rollback jika ada error
         await connection.rollback();
-        console.error("Error submitting relief data:", error);
+        console.error('Error submitting relief data:', error);
         throw error;
     } finally {
         // Release connection kembali ke pool
         connection.release();
     }
 };
-
 
 const fetchRelief = async (nim) => {
     const SQLQuery = `
@@ -93,27 +90,27 @@ const fetchRelief = async (nim) => {
         WHERE rf.nim = ?
         ORDER BY rf.tanggal_dibuat DESC
     `;
-    
+
     try {
         // Eksekusi query dengan pool.execute
         // Destructuring [rows] akan mengambil array hasil query
         const [rowsRelief] = await pool.execute(SQLQuery, [nim]);
-        
+
         // Process the data to add final_status logic
-        const processedRows = rowsRelief.map(row => ({
+        const processedRows = rowsRelief.map((row) => ({
             ...row,
             // Determine final status: use status_pengajuan if exists, otherwise use 'Menunggu'
-            status_pengajuan: row.status_pengajuan || 'Menunggu'
+            status_pengajuan: row.status_pengajuan || 'Menunggu Review',
         }));
-        
+
         return processedRows;
     } catch (error) {
-        console.error("Error fetching student relief data:", error);
+        console.error('Error fetching student relief data:', error);
         throw error;
     }
-}
+};
 
 module.exports = {
     submitRelief,
-    fetchRelief
-}
+    fetchRelief,
+};

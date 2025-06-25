@@ -835,8 +835,8 @@ exports.getStudentsRelief = async (req, res) => {
         // Ambil data Relief dari query
         const rowsRelief = await fetchRelief(nim);
 
-        console.log('Data Mahasiswa Ditemukan (dari getStudentsRelief):');
-        console.log('Jawaban formulir keuangan: ', rowsRelief);
+        // console.log('Data Mahasiswa Ditemukan (dari getStudentsRelief):');
+        // console.log('Jawaban formulir keuangan: ', rowsRelief);
 
         return res.status(200).json({
             success: true,
