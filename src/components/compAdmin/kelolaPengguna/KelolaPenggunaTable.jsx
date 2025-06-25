@@ -64,8 +64,14 @@ const KelolaPenggunaTable = ({ activeTab, currentData, filteredData, searchTerm,
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.nim}</td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.nama}</td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.kelas}</td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${item.status === "aktif" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{item.status}</span>
+          <td className="px-6 py-4 text-sm">
+            <label className="inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={item.status === "aktif"} onChange={(e) => onStatusChange(item, e.target.checked ? "aktif" : "nonaktif")} className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-300 peer-checked:bg-green-500 rounded-full relative transition duration-300">
+                <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+              </div>
+              <span className="ml-2 text-sm">{item.status === "aktif" ? "Aktif" : "Nonaktif"}</span>
+            </label>
           </td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{commonActionButtons}</td>
         </tr>
