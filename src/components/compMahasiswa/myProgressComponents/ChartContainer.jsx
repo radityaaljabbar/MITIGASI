@@ -37,8 +37,7 @@ const ChartContainer = ({ id, data, type }) => {
                         maintainAspectRatio: true,
                         scales: {
                             y: {
-                                beginAtZero: false,
-                                min: 2.5,
+                                beginAtZero: true,
                                 max: 4.0,
                             },
                         },
