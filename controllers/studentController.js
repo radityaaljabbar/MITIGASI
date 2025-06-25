@@ -614,11 +614,6 @@ exports.getMyKeluhan = async (req, res) => {
             });
         }
 
-        // Import query function
-        const {
-            getMyFeedbackList,
-        } = require('../models/mahasiswaQueries/myFeedbackQueries');
-
         // Get the feedback list
         const feedbackList = await getMyFeedbackList(nim);
 
