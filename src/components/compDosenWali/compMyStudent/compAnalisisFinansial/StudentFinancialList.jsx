@@ -14,7 +14,7 @@ const StudentFinancialList = ({
             <h3 className="text-lg font-medium mb-3">{title}</h3>
 
             {requests.length > 0 ? (
-                <div className="bg-white border rounded-lg divide-y">
+                <div className="bg-white border rounded-lg divide-y text-left">
                     {requests.map((request) => (
                         <div key={request.id} className="p-4">
                             <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
@@ -32,7 +32,7 @@ const StudentFinancialList = ({
                                         {request.status === 'Disetujui' &&
                                             ` • Disetujui pada ${request.approvalDate}`}
                                         {request.status === 'Ditolak' &&
-                                            ` • Ditolak pada ${request.rejectionDate}`}
+                                            ` • Ditolak pada ${request.rejectionDate}`} WIB
                                     </p>
                                     <p className="text-sm mt-1 line-clamp-2">
                                         {request.reason}

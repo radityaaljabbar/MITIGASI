@@ -58,7 +58,7 @@ const DetailPengajuanFinansial = ({
                                 Tanggal Pengajuan
                             </p>
                             <p className="font-medium">
-                                {selectedRequest.requestDate}
+                                {selectedRequest.requestDate} WIB
                             </p>
                         </div>
 
@@ -96,7 +96,7 @@ const DetailPengajuanFinansial = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <p className="text-sm text-gray-600">
-                                Penghasilan Bulanan
+                                Penghasilan Bulanan Orang Tua
                             </p>
                             <p className="font-medium">
                                 Rp{' '}

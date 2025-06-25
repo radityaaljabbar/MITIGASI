@@ -59,6 +59,18 @@ const transformFinancialData = (backendData, nim) => {
     const latestEntry = backendData[0];
     
     // Transform each relief request
+
+    const formatDate = (dateString) => {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            day: 'numeric', 
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
     const transformedRequests = backendData.map(item => ({
         id: item.id,
         type: getReliefTypeLabel(item.jenis_keringanan),
@@ -68,7 +80,7 @@ const transformFinancialData = (backendData, nim) => {
         rejectionDate: item.status_pengajuan === 'Ditolak' ? formatDate(item.tanggal_response) : null,
         reason: item.alasan_keringan || 'Tidak ada alasan',
         requestAmount: parseFloat(item.jumlah_diajukan) || 0,
-        monthlyIncome: parseFloat(item.penghasilan_mahasiswa) + parseFloat(item.penghasilan_orangtua) || 0,
+        monthlyIncome: parseFloat(item.penghasilan_orangtua) || 0,
         monthlyExpenses: parseFloat(item.pengeluaran_perbulan) || 0,
         familyDependents: item.tanggungan_orangtua || 0,
         residenceType: item.tempat_tinggal || '-',

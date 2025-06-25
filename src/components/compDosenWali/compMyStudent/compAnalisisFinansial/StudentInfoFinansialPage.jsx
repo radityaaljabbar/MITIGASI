@@ -1,23 +1,6 @@
 import React from 'react';
 
 const StudentInfoFinansialPage = ({ studentData }) => {
-    // Get financial status with proper fallback
-    const financialStatus = studentData?.financialStatus || 'Tidak Diketahui';
-    
-    // Determine status color based on financial status
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Mendapat Bantuan':
-                return 'text-green-700 bg-green-100';
-            case 'Sedang Diproses':
-                return 'text-yellow-700 bg-yellow-100';
-            case 'Siaga':
-                return 'text-orange-700 bg-orange-100';
-            default:
-                return 'text-gray-700 bg-gray-100';
-        }
-    };
-
     return (
         <div className="bg-orange-50 p-4 rounded-lg mb-6 border">
             <h3 className="text-lg font-medium mb-4">Informasi Mahasiswa</h3>
@@ -40,18 +23,12 @@ const StudentInfoFinansialPage = ({ studentData }) => {
 
             {/* Financial Status Section */}
             <div className="border-t pt-4">
-                <div className="flex items-center gap-3">
-                    <p className="text-sm text-gray-600">Status Finansial:</p>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(financialStatus)}`}>
-                        {financialStatus}
-                    </span>
-                </div>
                 
                 {/* Additional financial info if available */}
                 {studentData?.lastUpdated && studentData.lastUpdated !== '-' && (
                     <div className="mt-2">
                         <p className="text-xs text-gray-500">
-                            Terakhir diperbarui: {studentData.lastUpdated}
+                            Terakhir diperbarui: {studentData.lastUpdated} WIB
                         </p>
                     </div>
                 )}
