@@ -98,8 +98,7 @@ const AnalisisTrendContent = ({ studentData }) => {
                             },
                         },
                         y: {
-                            beginAtZero: false,
-                            min: 2.0,
+                            beginAtZero: true,
                             max: 4.0,
                             grid: {
                                 color: 'rgba(107, 114, 128, 0.1)',
