@@ -107,6 +107,21 @@ const KelolaPenggunaPage = () => {
         setDeleteData(null);
     };
 
+    // Handle toggle status aktif/nonaktif langsung dari tabel
+    const handleStatusChange = async (user, newStatus) => {
+        const updatedUser = { ...user, status: newStatus };
+        const id = user.id || user.nip || user.nim;
+
+        const success = await handleUpdate(id, updatedUser);
+
+        if (success) {
+            toast.success('Status berhasil diperbarui.');
+        } else {
+        toast.error('Gagal memperbarui status.');
+        }
+    };
+
+
     return (
         <div className="p-6 bg-[#FAF0E6] min-h-screen">
             {/* Header */}
@@ -142,6 +157,7 @@ const KelolaPenggunaPage = () => {
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
                 onAdd={handleAdd}
+                onStatusChange={handleStatusChange}
             />
 
             {/* Modal Form */}
