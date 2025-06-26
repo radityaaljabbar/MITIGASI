@@ -95,6 +95,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         id: student.id,
                         name: student.name,
                         classId: classNameToIdMap[student.class] || null,
+                        peminatan: student.peminatan, // Store student's specialization
                     }));
 
                     setClassesList(formattedClasses);
@@ -125,7 +126,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     setStaticAvailableCoursesData([]);
                     toast.error(
                         courseResult.message ||
-                            'Failed to fetch available courses'
+                            'Matakuliah Tidak Tersedia'
                     );
                 }
             } catch (error) {
@@ -231,7 +232,18 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
             // Handle SKS Data result
             if (sksResult.status === 'fulfilled' && sksResult.value.success) {
-                setStudentSKSData(sksResult.value.studentData);
+                // Find student details from the main list to get their specialization
+                const studentInfo = studentsList.find(
+                    (s) => s.id === selectedStudent
+                );
+
+                // Combine the SKS data with the specialization info
+                const combinedData = {
+                    ...sksResult.value.studentData, // Contains nim and sksLulus
+                    peminatan: studentInfo ? studentInfo.peminatan : null,
+                };
+
+                setStudentSKSData(combinedData);
             } else {
                 setStudentSKSData(null);
                 // Don't show error toast as this is supplementary info
@@ -239,7 +251,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         };
 
         fetchStudentData();
-    }, [selectedStudent]);
+    }, [selectedStudent, studentsList]);
 
     // Main effect for processing recommendations
     useEffect(() => {
@@ -330,9 +342,18 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         };
 
         const generateAutoRecommendations = () => {
+            // Get student details to find their specialization
+            const studentDetails = studentsList.find(
+                (s) => s.id === selectedStudent
+            );
+            const studentPeminatan = studentDetails
+                ? studentDetails.peminatan
+                : null;
+
             let recommendations = [];
             let currentSKS = 0;
             let availableForPicking = [...staticAvailableCoursesData];
+            let electiveCourseCount = 0;
 
             const targetSemesterInt = parseInt(targetSemester, 10);
             if (isNaN(targetSemesterInt)) return;
@@ -340,8 +361,15 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             const isTargetSemesterOdd = targetSemesterInt % 2 !== 0;
 
             const addCourseToPlan = (course) => {
-                if (recommendations.some((r) => r.id === course.id))
-                    return false;
+                // Check by course code (kode_mk) to prevent duplicates
+                if (
+                    recommendations.some(
+                        (r) => r.kodeMataKuliah === course.kode_mk
+                    )
+                ) {
+                    return false; // Already in the list, drop this one
+                }
+
                 if (currentSKS + course.sks_mk <= maxSKS) {
                     recommendations.push({
                         id: course.id,
@@ -484,6 +512,101 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             newMandatoryCourses.forEach((course) => {
                 addCourseToPlan(course);
             });
+
+            // --- START: MODIFIED PRIORITY LOGIC FOR ELECTIVES ---
+
+            // PRIORITY 3: Add new elective courses based on specialization.
+            if (studentPeminatan) {
+                // If student HAS a specialization, ONLY add electives that match it.
+                const specializationCourses = staticAvailableCoursesData
+                    .filter((course) => {
+                        const courseSemesterInt = parseInt(
+                            course.semester_mk,
+                            10
+                        );
+                        if (isNaN(courseSemesterInt)) return false;
+
+                        const isSpecializationElective =
+                            course.jenis_mk === 'PILIHAN' &&
+                            course.kelompok_keahlian === studentPeminatan;
+                        const isNew = !allTakenCodes.has(course.kode_mk);
+                        const isSemesterNotTooHigh =
+                            courseSemesterInt <= targetSemesterInt;
+                        
+                        // MODIFIED: Semester Rule Logic
+                        const isSemesterTypeMatch =
+                            (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+                        // ADDED: Exception for elective courses in semester 8
+                        const semesterRuleSatisfied = isSemesterTypeMatch || (isSpecializationElective && targetSemesterInt === 8);
+
+                        return (
+                            isSpecializationElective &&
+                            isNew &&
+                            semesterRuleSatisfied &&
+                            isSemesterNotTooHigh
+                        );
+                    })
+                    .sort(
+                        (a, b) =>
+                            parseInt(a.semester_mk, 10) -
+                            parseInt(b.semester_mk, 10)
+                    );
+
+                specializationCourses.forEach((course) => {
+                    // Check the elective limit before adding
+                    if (electiveCourseCount < 5) {
+                        const wasAdded = addCourseToPlan(course);
+                        if (wasAdded) {
+                            electiveCourseCount++; // Increment only if added
+                        }
+                    }
+                });
+            } else {
+                // If student has NO specialization, add any available elective.
+                const allElectiveCourses = staticAvailableCoursesData
+                    .filter((course) => {
+                        const courseSemesterInt = parseInt(
+                            course.semester_mk,
+                            10
+                        );
+                        if (isNaN(courseSemesterInt)) return false;
+
+                        const isElective = course.jenis_mk === 'PILIHAN';
+                        const isNew = !allTakenCodes.has(course.kode_mk);
+                        const isSemesterNotTooHigh =
+                            courseSemesterInt <= targetSemesterInt;
+
+                        // MODIFIED: Semester Rule Logic
+                        const isSemesterTypeMatch =
+                            (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
+                        // ADDED: Exception for elective courses in semester 8
+                        const semesterRuleSatisfied = isSemesterTypeMatch || (isElective && targetSemesterInt === 8);
+
+                        return (
+                            isElective &&
+                            isNew &&
+                            semesterRuleSatisfied &&
+                            isSemesterNotTooHigh
+                        );
+                    })
+                    .sort(
+                        (a, b) =>
+                            parseInt(a.semester_mk, 10) -
+                            parseInt(b.semester_mk, 10)
+                    );
+
+                allElectiveCourses.forEach((course) => {
+                    // Check the elective limit before adding
+                    if (electiveCourseCount < 5) {
+                        const wasAdded = addCourseToPlan(course);
+                        if (wasAdded) {
+                            electiveCourseCount++; // Increment only if added
+                        }
+                    }
+                });
+            }
+
+            // --- END: MODIFIED PRIORITY LOGIC FOR ELECTIVES ---
 
             setRecommendedCourses(recommendations);
             setAvailableCourses(availableForPicking);

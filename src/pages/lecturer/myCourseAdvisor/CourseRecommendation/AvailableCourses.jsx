@@ -12,6 +12,15 @@ const AvailableCourses = () => {
         addCourse,
         MAX_SKS,
     } = useMyCourseAdvisor();
+    // 1. Buat array baru yang unik berdasarkan `kode_mk`
+    // Kita menggunakan Map untuk efisiensi. Map akan secara otomatis
+    // menimpa entri dengan kunci (kode_mk) yang sama, sehingga hanya
+    // entri terakhir yang unik yang tersisa.
+    const uniqueCoursesMap = new Map();
+    filteredAvailableCourses.forEach((course) => {
+        uniqueCoursesMap.set(course.kode_mk, course);
+    });
+    const uniqueFilteredCourses = Array.from(uniqueCoursesMap.values());
 
     return (
         <div>
@@ -56,13 +65,15 @@ const AvailableCourses = () => {
                             <th className="py-3 px-4 text-left">Nama</th>
                             <th className="py-3 px-4 text-center">SKS</th>
                             <th className="py-3 px-4 text-left">Jenis</th>
+                            <th className="py-3 px-4 text-left">Kelompok Keahlian</th>
                             <th className="py-3 px-4 text-center">Semester</th>
                             <th className="py-3 px-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredAvailableCourses.length > 0 ? (
-                            filteredAvailableCourses
+                        {/* 2. Gunakan array yang sudah unik ini untuk dirender */}
+                        {uniqueFilteredCourses.length > 0 ? (
+                            uniqueFilteredCourses
                                 .sort((a, b) => {
                                     const aName = a.nama_mk || '';
                                     const bName = b.nama_mk || '';
@@ -95,7 +106,7 @@ const AvailableCourses = () => {
 
                                     return (
                                         <tr
-                                            key={course.id}
+                                            key={course.id} // Kunci tetap bisa menggunakan `id` karena unik per baris data
                                             className={`border-b hover:bg-gray-50 ${failedCourseHighlight} ${
                                                 exceedsSKSLimit
                                                     ? 'bg-red-50 opacity-60'
@@ -113,6 +124,10 @@ const AvailableCourses = () => {
                                             <td className="py-2 px-4 border-r">
                                                 {course.jenis_mk}
                                             </td>
+                                            <td className="py-1 px-4 border-r">
+                                                {course.kelompok_keahlian || '-'}
+                                            
+                                            </td>
                                             <td className="py-2 px-4 text-center border-r">
                                                 {course.semester_mk}
                                             </td>
@@ -125,6 +140,7 @@ const AvailableCourses = () => {
                                                             namaMataKuliah: course.nama_mk,
                                                             sks: course.sks_mk,
                                                             jenis: course.jenis_mk,
+                                                            kelompokKeahlian: course.kelompok_keahlian,
                                                             semester_mk: course.semester_mk,
                                                         })
                                                     }
@@ -143,7 +159,7 @@ const AvailableCourses = () => {
                         ) : (
                             <tr>
                                 <td
-                                    colSpan="6"
+                                    colSpan="7"
                                     className="py-4 px-4 text-center text-gray-500 italic">
                                     Tidak ada mata kuliah tersedia
                                 </td>

@@ -8,7 +8,7 @@ const MyCoursePage = () => {
             {/* Page Header */}
             <div className="text-center mb-4">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    Mata Kuliah Saya
+                    MyCourse
                 </h1>
                 <p className="text-gray-600 max-w-2xl mx-auto">
                     Lihat riwayat mata kuliah yang telah Anda tempuh dan
