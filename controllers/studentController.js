@@ -40,6 +40,7 @@ const {
 const {
     submitRelief,
     fetchRelief,
+    saveLampiranFinance,
 } = require('../models/mahasiswaQueries/myFinanceQueries');
 
 // @desc Ambil tak dari mahasisw yang login
@@ -722,7 +723,7 @@ exports.getKeluhanDetail = async (req, res) => {
 exports.sendPeminatanMahasiswa = async (req, res) => {
     try {
         const id = req.user.id;
-        const {peminatan} = req.body;
+        const { peminatan } = req.body;
 
         if (!id) {
             return res.status(400).json({
@@ -735,12 +736,11 @@ exports.sendPeminatanMahasiswa = async (req, res) => {
         if (!peminatan) {
             return res.status(400).json({
                 success: false,
-                message:
-                    'Tidak ada data peminatan mahasiswa',
+                message: 'Tidak ada data peminatan mahasiswa',
             });
         }
 
-        const updatePeminatan = await sendPeminatan(id, peminatan) 
+        const updatePeminatan = await sendPeminatan(id, peminatan);
 
         // Periksa apakah ada baris yang diupdate
         if (updatePeminatan.payload === 0) {
@@ -758,21 +758,23 @@ exports.sendPeminatanMahasiswa = async (req, res) => {
                 peminatan: peminatan,
             },
         });
-
     } catch (error) {
-        console.error('Error from sendPeminatanMahasiswa Controller (Update).', error);
+        console.error(
+            'Error from sendPeminatanMahasiswa Controller (Update).',
+            error
+        );
         res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan ketika mengirim data peminatan mahasiswa',
+            message:
+                'Terjadi kesalahan ketika mengirim data peminatan mahasiswa',
         });
     }
-}
-
+};
 
 exports.getAllPeminatanList = async (req, res) => {
     try {
         const result = await getListPeminatan();
-        
+
         if (result.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -785,8 +787,7 @@ exports.getAllPeminatanList = async (req, res) => {
             message: 'List kelompok keahlian berhasil diambil.',
             count: result.length,
             data: result,
-        })
-
+        });
     } catch (error) {
         console.error('Error in getAllPeminatanList controller:', error);
         res.status(500).json({
@@ -794,7 +795,7 @@ exports.getAllPeminatanList = async (req, res) => {
             message: 'Terjadi kesalahan ketika mengambil data',
         });
     }
-}
+};
 
 //Ambil data peminatan mahasiswa yang sedang login
 exports.getStudentPeminatan = async (req, res) => {
@@ -818,10 +819,10 @@ exports.getStudentPeminatan = async (req, res) => {
             message: 'Data peminatan berhasil diambil.',
             data: {
                 // Handle kasus jika kolom peminatan bernilai null
-                peminatan: peminatanResult.peminatan || 'Belum memilih peminatan',
+                peminatan:
+                    peminatanResult.peminatan || 'Belum memilih peminatan',
             },
         });
-
     } catch (error) {
         console.error('Error in getStudentPeminatan controller:', error);
         res.status(500).json({
@@ -830,7 +831,6 @@ exports.getStudentPeminatan = async (req, res) => {
         });
     }
 };
-
 
 // myFinance
 exports.sendRelief = async (req, res) => {
@@ -901,6 +901,32 @@ exports.sendRelief = async (req, res) => {
         // Execute the insert query
         const insertRelief = await submitRelief(valueRelief);
 
+        // Handle file upload if there's a file
+        let fileData = null;
+        if (req.file) {
+            try {
+                console.log('Starting file upload to GCS for finance');
+
+                // Upload file to GCS in finance-lampiran folder
+                fileData = await uploadFile(req.file, 'finance-lampiran');
+                console.log('File uploaded successfully:', fileData.url);
+
+                // Save file metadata to lampiranfinance table
+                await saveLampiranFinance({
+                    id_keluhan: insertRelief.insertId,
+                    file_name: fileData.filename,
+                    original_name: fileData.originalName,
+                    file_url: fileData.url,
+                    file_type: fileData.mimetype,
+                    file_size: fileData.size,
+                });
+                console.log('File metadata saved to database');
+            } catch (uploadError) {
+                console.error('Error uploading file:', uploadError);
+                // Continue but note the error
+            }
+        }
+
         // Check if insert was successful
         if (insertRelief.affectedRows > 0) {
             return res.status(201).json({
@@ -910,6 +936,12 @@ exports.sendRelief = async (req, res) => {
                     id: insertRelief.insertId,
                     nim,
                     tanggal_pengajuan: currentDate,
+                    lampiran: fileData
+                        ? {
+                              url: fileData.url,
+                              originalName: fileData.originalName,
+                          }
+                        : null, // ← TAMBAHKAN ini
                 },
             });
         } else {
