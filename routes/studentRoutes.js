@@ -108,6 +108,7 @@ router.post(
     '/sendRelief',
     protect,
     authorize('mahasiswa'),
+    upload.single('file'),
     studentController.sendRelief
 );
 
@@ -121,6 +122,5 @@ router.get(
     authorize('mahasiswa'),
     studentController.getStudentsRelief
 );
-
 
 module.exports = router;

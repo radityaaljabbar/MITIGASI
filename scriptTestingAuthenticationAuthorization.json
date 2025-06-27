@@ -1,0 +1,767 @@
+{
+    "info": {
+        "name": "Authentication & Authorization - Whitebox Testing",
+        "description": "Comprehensive whitebox testing for authentication and authorization endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000/api",
+            "type": "string"
+        },
+        {
+            "key": "adminToken",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "dosenToken",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "mahasiswaToken",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Authentication Tests",
+            "item": [
+                {
+                    "name": "1. Valid Login - Admin",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has correct structure', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData).to.have.property('token');",
+                                    "    pm.expect(jsonData).to.have.property('user');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('User object has correct structure for admin', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const user = jsonData.user;",
+                                    "    pm.expect(user).to.have.property('id');",
+                                    "    pm.expect(user).to.have.property('name');",
+                                    "    pm.expect(user).to.have.property('role');",
+                                    "    pm.expect(user.role).to.eql('admin');",
+                                    "    pm.expect(user.id).to.eql('miftahfrdmaulana');",
+                                    "});",
+                                    "",
+                                    "pm.test('Token is valid JWT format', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const token = jsonData.token;",
+                                    "    pm.expect(token).to.match(/^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+$/);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('adminToken', jsonData.token);",
+                                    "}",
+                                    "",
+                                    "pm.test('Response time is less than 2000ms', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"miftahfrdmaulana\",\n  \"password\": \"periddd1902\",\n  \"role\": \"admin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Valid Login - Dosen Wali",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has correct structure for dosen_wali', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const user = jsonData.user;",
+                                    "    pm.expect(user).to.have.property('id');",
+                                    "    pm.expect(user).to.have.property('name');",
+                                    "    pm.expect(user).to.have.property('kodedosen');",
+                                    "    pm.expect(user).to.have.property('role');",
+                                    "    pm.expect(user.role).to.eql('dosen_wali');",
+                                    "    pm.expect(user.id).to.eql('02770066-1');",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('dosenToken', jsonData.token);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"02770066-1\",\n  \"password\": \"02770066-1\",\n  \"role\": \"dosen_wali\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Valid Login - Mahasiswa",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has correct structure for mahasiswa', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const user = jsonData.user;",
+                                    "    pm.expect(user).to.have.property('id');",
+                                    "    pm.expect(user).to.have.property('name');",
+                                    "    pm.expect(user).to.have.property('role');",
+                                    "    pm.expect(user.role).to.eql('mahasiswa');",
+                                    "    pm.expect(user.id).to.eql('1103210066');",
+                                    "    pm.expect(user).to.not.have.property('kodedosen');",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('mahasiswaToken', jsonData.token);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"1103210066\",\n  \"password\": \"1103210066\",\n  \"role\": \"mahasiswa\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Invalid Login - Wrong Password",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message is correct', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Kredensial tidak valid');",
+                                    "});",
+                                    "",
+                                    "pm.test('No token returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.not.have.property('token');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"miftahfrdmaulana\",\n  \"password\": \"wrongpassword\",\n  \"role\": \"admin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "5. Invalid Login - Missing Fields",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message is correct for missing fields', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Please provide ID, password and role');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"miftahfrdmaulana\",\n  \"password\": \"periddd1902\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "6. Invalid Login - Invalid Role",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message is correct for invalid role', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Invalid role');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"miftahfrdmaulana\",\n  \"password\": \"periddd1902\",\n  \"role\": \"invalid_role\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Get Current User Tests",
+            "item": [
+                {
+                    "name": "7. Get Me - Valid Admin Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response structure is correct', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData).to.have.property('data');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('User data is correct for admin', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const userData = jsonData.data;",
+                                    "    pm.expect(userData).to.have.property('id');",
+                                    "    pm.expect(userData).to.have.property('name');",
+                                    "    pm.expect(userData).to.have.property('role');",
+                                    "    pm.expect(userData.role).to.eql('admin');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/me",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["me"]
+                        }
+                    }
+                },
+                {
+                    "name": "8. Get Me - No Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message is correct', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Not authorized to access this route');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/me",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["me"]
+                        }
+                    }
+                },
+                {
+                    "name": "9. Get Me - Invalid Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message for invalid token', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Not authorized to access this route');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalidtoken123"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/me",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["me"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Logout Tests",
+            "item": [
+                {
+                    "name": "10. Logout - Valid Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Logout success message', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "    pm.expect(jsonData.message).to.eql('Logged out successfully');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/logout",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["logout"]
+                        }
+                    }
+                },
+                {
+                    "name": "11. Use Token After Logout (Should Fail)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401 (token blacklisted)', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test('Token invalidated message', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Token has been invalidated');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/me",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["me"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Authorization Tests",
+            "item": [
+                {
+                    "name": "12. Admin Access Student Endpoint (Should Fail)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Get fresh admin token since previous one was blacklisted",
+                                    "pm.sendRequest({",
+                                    "    url: pm.collectionVariables.get('baseUrl') + '/login',",
+                                    "    method: 'POST',",
+                                    "    header: {'Content-Type': 'application/json'},",
+                                    "    body: {",
+                                    "        mode: 'raw',",
+                                    "        raw: JSON.stringify({",
+                                    "            id: 'miftahfrdmaulana',",
+                                    "            password: 'periddd1902',",
+                                    "            role: 'admin'",
+                                    "        })",
+                                    "    }",
+                                    "}, function (err, res) {",
+                                    "    if (res.code === 200) {",
+                                    "        const jsonData = res.json();",
+                                    "        pm.collectionVariables.set('adminToken', jsonData.token);",
+                                    "    }",
+                                    "});"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 403 Forbidden or 404 Not Found', function () {",
+                                    "    pm.expect([403, 404]).to.include(pm.response.code);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 403) {",
+                                    "    pm.test('Authorization error message for 403', function () {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData.success).to.be.false;",
+                                    "        pm.expect(jsonData.message).to.include('not authorized to access this route');",
+                                    "    });",
+                                    "} else if (pm.response.code === 404) {",
+                                    "    pm.test('Endpoint not found (404 acceptable for this test)', function () {",
+                                    "        pm.expect(pm.response.code).to.eql(404);",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/takMahasiswa",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "takMahasiswa"]
+                        }
+                    }
+                },
+                {
+                    "name": "13. Mahasiswa Access Faculty Endpoint (Should Fail)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Get fresh mahasiswa token",
+                                    "pm.sendRequest({",
+                                    "    url: pm.collectionVariables.get('baseUrl') + '/login',",
+                                    "    method: 'POST',",
+                                    "    header: {'Content-Type': 'application/json'},",
+                                    "    body: {",
+                                    "        mode: 'raw',",
+                                    "        raw: JSON.stringify({",
+                                    "            id: '1103210066',",
+                                    "            password: '1103210066',",
+                                    "            role: 'mahasiswa'",
+                                    "        })",
+                                    "    }",
+                                    "}, function (err, res) {",
+                                    "    if (res.code === 200) {",
+                                    "        const jsonData = res.json();",
+                                    "        pm.collectionVariables.set('mahasiswaToken', jsonData.token);",
+                                    "    }",
+                                    "});"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 403 Forbidden or 404 Not Found', function () {",
+                                    "    pm.expect([403, 404]).to.include(pm.response.code);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 403) {",
+                                    "    pm.test('Authorization error message for 403', function () {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData.success).to.be.false;",
+                                    "        pm.expect(jsonData.message).to.include('not authorized to access this route');",
+                                    "    });",
+                                    "} else if (pm.response.code === 404) {",
+                                    "    pm.test('Endpoint not found (404 acceptable for this test)', function () {",
+                                    "        pm.expect(pm.response.code).to.eql(404);",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/faculty/listMahasiswa",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["faculty", "listMahasiswa"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Security Tests",
+            "item": [
+                {
+                    "name": "14. SQL Injection Attempt",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401 (SQL injection prevented)', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test('SQL injection is prevented', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.eql('Kredensial tidak valid');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"admin' OR '1'='1\",\n  \"password\": \"password' OR '1'='1\",\n  \"role\": \"admin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "15. XSS Payload Test",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401 (XSS payload rejected)', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test('XSS payload is safely handled', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    const responseText = pm.response.text();",
+                                    "    pm.expect(responseText).to.not.include('<script>');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"<script>alert('xss')</script>\",\n  \"password\": \"<script>alert('xss')</script>\",\n  \"role\": \"admin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "if (!pm.collectionVariables.get('baseUrl')) {",
+                    "    pm.collectionVariables.set('baseUrl', 'http://localhost:5000/api');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "pm.test('Response has valid JSON structure', function () {",
+                    "    try {",
+                    "        pm.response.json();",
+                    "    } catch (e) {",
+                    "        pm.expect.fail('Response is not valid JSON');",
+                    "    }",
+                    "});",
+                    "",
+                    "pm.test('Response includes Content-Type header', function () {",
+                    "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                    "});"
+                ]
+            }
+        }
+    ]
+}

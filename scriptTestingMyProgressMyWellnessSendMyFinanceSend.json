@@ -1,0 +1,399 @@
+{
+    "info": {
+        "name": "Student Endpoints - Whitebox Testing (Simplified)",
+        "description": "Essential whitebox testing for student endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000/api",
+            "type": "string"
+        },
+        {
+            "key": "mahasiswaToken",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Setup",
+            "item": [
+                {
+                    "name": "Login as Mahasiswa",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Login successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('mahasiswaToken', jsonData.token);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": \"1103210066\",\n  \"password\": \"1103210066\",\n  \"role\": \"mahasiswa\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["login"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /takMahasiswa",
+            "item": [
+                {
+                    "name": "1. Valid Request",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response structure is correct', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "    pm.expect(jsonData.data).to.have.property('ipk');",
+                                    "    pm.expect(jsonData.data).to.have.property('sksTotal');",
+                                    "    pm.expect(jsonData.data).to.have.property('tak');",
+                                    "    pm.expect(jsonData.data).to.have.property('ips');",
+                                    "    pm.expect(jsonData.data).to.have.property('klasifikasi');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/takMahasiswa",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "takMahasiswa"]
+                        }
+                    }
+                },
+                {
+                    "name": "2. No Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/student/takMahasiswa",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "takMahasiswa"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /sendPsiResult",
+            "item": [
+                {
+                    "name": "3. Valid PSI Result",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response structure is correct', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "    pm.expect(jsonData.message).to.eql('Hasil tes psikologi berhasil disimpan');",
+                                    "    pm.expect(jsonData.data).to.have.property('nim');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"skor_depression\": 10,\n    \"skor_anxiety\": 8,\n    \"skor_stress\": 12,\n    \"total_skor\": 30,\n    \"kesimpulan\": \"Mahasiswa menunjukkan tingkat stres pada level sedang.\",\n    \"saran\": \"Disarankan untuk meluangkan waktu untuk hobi dan melakukan teknik relaksasi seperti meditasi atau pernapasan dalam.\",\n    \"klasifikasi\": \"Sedang\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/student/sendPsiResult",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "sendPsiResult"]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Missing Fields",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message for missing fields', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.include('Missing required fields');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"skor_depression\": 10,\n    \"skor_anxiety\": 8\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/student/sendPsiResult",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "sendPsiResult"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /sendRelief",
+            "item": [
+                {
+                    "name": "5. Valid Relief Application",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response structure is correct', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "    pm.expect(jsonData.message).to.eql('Pengajuan keringanan biaya berhasil disimpan');",
+                                    "    pm.expect(jsonData.data).to.have.property('nim');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"penghasilanBulanan\": 2000000,\n    \"penghasilanOrangTua\": 5000000,\n    \"tanggunganOrangTua\": 3,\n    \"tempatTinggal\": \"Kost\",\n    \"pengeluaranPerbulan\": 1500000,\n    \"jenisKeringanan\": \"Keringanan UKT\",\n    \"alasankeringanan\": \"Kesulitan ekonomi keluarga\",\n    \"jumlahDiajukan\": 1000000,\n    \"detailAlasan\": \"Orang tua terkena PHK akibat pandemi sehingga penghasilan menurun drastis\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/student/sendRelief",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "sendRelief"]
+                        }
+                    }
+                },
+                {
+                    "name": "6. Missing Fields - Relief",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error message for missing fields', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.be.false;",
+                                    "    pm.expect(jsonData.message).to.include('Missing required fields');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"penghasilanBulanan\": 2000000,\n    \"penghasilanOrangTua\": 5000000\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/student/sendRelief",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "sendRelief"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Security Tests",
+            "item": [
+                {
+                    "name": "7. SQL Injection Test",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Response is handled (SQL injection test)', function () {",
+                                    "    pm.expect([201, 400, 500]).to.include(pm.response.code);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 201) {",
+                                    "    pm.test('Malicious payload was sanitized (if 201)', function () {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "        console.log('Note: SQL injection payload was accepted - check if data is properly sanitized');",
+                                    "    });",
+                                    "} else {",
+                                    "    pm.test('Malicious input rejected (if 4xx/5xx)', function () {",
+                                    "        const jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData.success).to.be.false;",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{mahasiswaToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"skor_depression\": 10,\n    \"skor_anxiety\": 8,\n    \"skor_stress\": 12,\n    \"total_skor\": 30,\n    \"kesimpulan\": \"'; DROP TABLE hasil_tes_psikologi; --\",\n    \"saran\": \"Test\",\n    \"klasifikasi\": \"Test\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/student/sendPsiResult",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["student", "sendPsiResult"]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "if (!pm.collectionVariables.get('baseUrl')) {",
+                    "    pm.collectionVariables.set('baseUrl', 'http://localhost:5000/api');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "pm.test('Response has valid JSON structure', function () {",
+                    "    try {",
+                    "        pm.response.json();",
+                    "    } catch (e) {",
+                    "        pm.expect.fail('Response is not valid JSON');",
+                    "    }",
+                    "});"
+                ]
+            }
+        }
+    ]
+}

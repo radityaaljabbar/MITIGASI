@@ -110,7 +110,32 @@ const fetchRelief = async (nim) => {
     }
 };
 
+const saveLampiranFinance = async (lampiranData) => {
+    try {
+        const query = `
+            INSERT INTO lampiranfinance 
+            (id_response_finansial, file_name, original_name, file_url, file_type, file_size)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        const [result] = await pool.execute(query, [
+            lampiranData.id_response_finansial,
+            lampiranData.file_name,
+            lampiranData.original_name,
+            lampiranData.file_url,
+            lampiranData.file_type,
+            lampiranData.file_size,
+        ]);
+
+        return result;
+    } catch (error) {
+        console.error('Error saving lampiran finance:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     submitRelief,
     fetchRelief,
+    saveLampiranFinance,
 };
