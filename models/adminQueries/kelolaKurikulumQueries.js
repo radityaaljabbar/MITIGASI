@@ -14,6 +14,7 @@ exports.findMataKuliahByKurikulum = async (kurikulum) => {
                 mb.semester,
                 mb.ekivalensi,
                 mb.kurikulum,
+                pk.kelompok_keahlian,
                 -- Ambil nama mata kuliah ekuivalen dari mata_kuliah_lama
                 ml.nama_mk_lama as nama_ekuivalen,
                 ml.kode_mk_lama as kode_ekuivalen,
@@ -21,6 +22,8 @@ exports.findMataKuliahByKurikulum = async (kurikulum) => {
                 mb2.kurikulum as kurikulum_ekuivalen
             FROM 
                 mata_kuliah_baru AS mb
+            LEFT JOIN
+                peminatan_keahlian AS pk ON mb.kode_mk = pk.kode_matakuliah
             LEFT JOIN 
                 mata_kuliah_lama AS ml ON mb.ekivalensi = ml.kode_mk_lama
             LEFT JOIN 
@@ -44,6 +47,7 @@ exports.findMataKuliahByKurikulum = async (kurikulum) => {
             jenis_semester: row.jenis_semester,
             semester: row.semester,
             kurikulum: row.kurikulum,
+            kelompok_keahlian: row.kelompok_keahlian || null,
             ekivalensi: row.ekivalensi,
             ekuivalensi_info: row.ekivalensi ? {
                 kode: row.ekivalensi,
@@ -79,6 +83,25 @@ exports.getAllKurikulum = async () => {
     }
 };
 
+/**
+ * Mengambil semua kelompok keahlian yang unik
+ */
+exports.getAllKelompokKeahlian = async () => {
+    try {
+        const sql = `
+            SELECT DISTINCT kelompok_keahlian 
+            FROM peminatan_keahlian 
+            ORDER BY kelompok_keahlian ASC
+        `;
+        
+        const [rows] = await pool.execute(sql);
+        return rows.map(row => row.kelompok_keahlian);
+    } catch (error) {
+        console.error('Error in getAllKelompokKeahlian query:', error);
+        throw error;
+    }
+};
+
 
 /**
  * Mengambil mata kuliah berdasarkan ID
@@ -87,18 +110,20 @@ exports.findMataKuliahById = async (id_mk) => {
     try {
         const sql = `
             SELECT 
-                id_mk, 
-                kode_mk, 
-                nama_mk, 
-                sks_mk, 
-                jenis_mk, 
-                tingkat, 
-                jenis_semester, 
-                semester, 
-                ekivalensi, 
-                kurikulum
-            FROM mata_kuliah_baru 
-            WHERE id_mk = ?
+                mb.id_mk, 
+                mb.kode_mk, 
+                mb.nama_mk, 
+                mb.sks_mk, 
+                mb.jenis_mk, 
+                mb.tingkat, 
+                mb.jenis_semester, 
+                mb.semester, 
+                mb.ekivalensi, 
+                mb.kurikulum,
+                pk.kelompok_keahlian
+            FROM mata_kuliah_baru as mb
+            LEFT JOIN peminatan_keahlian as pk ON mb.kode_mk = pk.kode_matakuliah
+            WHERE mb.id_mk = ?
         `;
         
         const [rows] = await pool.execute(sql, [id_mk]);
@@ -152,7 +177,8 @@ exports.createMataKuliah = async (mataKuliahData) => {
             jenis_semester = 'Ganjil', 
             semester, 
             ekivalensi, 
-            kurikulum
+            kurikulum,
+            kelompok_keahlian,
         } = mataKuliahData;
 
         // Cek duplikasi terlebih dahulu
@@ -230,6 +256,18 @@ exports.createMataKuliah = async (mataKuliahData) => {
             kurikulum
         ]);
 
+        // Jika ada kelompok keahlian, jalankan logika "hapus-lalu-tambah"
+        if (kelompok_keahlian) {
+            // LANGKAH 1: Hapus semua relasi lama untuk kode_mk ini.
+            // Ini untuk memastikan 'kode_mk' hanya terhubung ke satu 'kelompok_keahlian'.
+            const deleteSql = `DELETE FROM peminatan_keahlian WHERE kode_matakuliah = ?`;
+            await pool.execute(deleteSql, [kode_mk]);
+            
+            // LANGKAH 2: Tambahkan relasi yang baru.
+            const insertSql = `INSERT INTO peminatan_keahlian (kelompok_keahlian, kode_matakuliah) VALUES (?, ?)`;
+            await pool.execute(insertSql, [kelompok_keahlian, kode_mk]);
+        }
+
         return {
             id_mk: result.insertId,
             ...mataKuliahData,
@@ -251,7 +289,7 @@ exports.updateMataKuliah = async (id_mk, mataKuliahData) => {
     try {
         const {
             kode_mk, nama_mk, sks_mk, jenis_mk, tingkat = 1,
-            jenis_semester = 'Ganjil', semester, ekivalensi, kurikulum
+            jenis_semester = 'Ganjil', semester, ekivalensi, kurikulum, kelompok_keahlian
         } = mataKuliahData;
 
         // Cek duplikasi (kecuali untuk record yang sedang diupdate)
@@ -335,6 +373,18 @@ exports.updateMataKuliah = async (id_mk, mataKuliahData) => {
         if (result.affectedRows === 0) {
             return null; // Mata kuliah tidak ditemukan
         }
+
+        // Jika ada kelompok keahlian, jalankan logika "hapus-lalu-tambah"
+        if (kelompok_keahlian) {
+            // LANGKAH 1: Hapus semua relasi lama untuk kode_mk ini.
+            // Ini untuk memastikan 'kode_mk' hanya terhubung ke satu 'kelompok_keahlian'.
+            const deleteSql = `DELETE FROM peminatan_keahlian WHERE kode_matakuliah = ?`;
+            await pool.execute(deleteSql, [kode_mk]);
+            
+            // LANGKAH 2: Tambahkan relasi yang baru.
+            const insertSql = `INSERT INTO peminatan_keahlian (kelompok_keahlian, kode_matakuliah) VALUES (?, ?)`;
+            await pool.execute(insertSql, [kelompok_keahlian, kode_mk]);
+        }
         
         return await this.findMataKuliahById(id_mk);
     } catch (error) {
@@ -374,7 +424,7 @@ exports.getEkuivalensiOptions = async (currentKurikulum = null) => {
                 ml.id, 
                 ml.kode_mk_lama as kode, 
                 ml.nama_mk_lama as nama, 
-                '2020' as kurikulum_type
+                2020 as kurikulum_type
             FROM 
                 mata_kuliah_lama ml
             WHERE 

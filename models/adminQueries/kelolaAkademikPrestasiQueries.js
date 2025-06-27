@@ -163,6 +163,24 @@ exports.updateDataPrestasi = async (nim, data) => {
 };
 
 
+exports.upsertKlasifikasi = async (nim, hasilKlasifikasi) => {
+    try {
+        const sql = `
+            INSERT INTO klasifikasi_akademik (nim, hasil_klasifikasi, tanggal_dibuat)
+            VALUES (?, ?, NOW())
+            ON DUPLICATE KEY UPDATE
+                hasil_klasifikasi = VALUES(hasil_klasifikasi),
+                tanggal_diubah = NOW();
+        `;
+        const [result] = await pool.execute(sql, [nim, hasilKlasifikasi]);
+        return result;
+    } catch (error) {
+        console.error(`Error in upsertKlasifikasi query (nim: ${nim}):`, error);
+        // Lempar error agar bisa ditangkap oleh controller jika diperlukan
+        throw error;
+    }
+};
+
 /**
  * @desc    Delete student achievement records (TAK and IPK) in a single transaction.
  * @param   {string} nim The NIM of the student whose records should be deleted.

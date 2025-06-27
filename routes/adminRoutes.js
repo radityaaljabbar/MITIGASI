@@ -105,6 +105,8 @@ router.get(
     adminController.getAllKelas
 );
 
+
+
 // =======================================================
 //?==         KELOLA KELAS DAN ANGKATAN ROUTES          ==
 // =======================================================
@@ -298,10 +300,17 @@ router.delete(
 )
 
 router.get(
-    '/kelolaKurikulum/getEkuivalensiOptions',
+    '/kelolaKurikulum/getEkuivalensiOptions/:kurikulum',
     protect,
     authorize('admin'),
     adminController.getEkuivalensiOptions
 )
+
+router.get(
+    '/kelolaKurikulum/getAllKelompokKeahlian',
+    protect,
+    authorize('admin'),
+    adminController.getKelompokKeahlianList
+);
 
 module.exports = router;

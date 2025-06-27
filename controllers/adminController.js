@@ -38,6 +38,7 @@ const {
     createDataPrestasi,
     updateDataPrestasi,
     deleteDataPrestasi,
+    upsertKlasifikasi,
 } = require('../models/adminQueries/kelolaAkademikPrestasiQueries');
 
 const {
@@ -55,6 +56,7 @@ const {
     updateMataKuliah,
     deleteMataKuliah,
     getEkuivalensiOptions,
+    getAllKelompokKeahlian,
 } = require('../models/adminQueries/kelolaKurikulumQueries');
 
 // =============================================
@@ -1023,6 +1025,18 @@ exports.getPrestasiByNIM = async (req, res) => {
     }
 };
 
+// Helper function untuk menentukan klasifikasi berdasarkan IPK
+const tentukanKlasifikasi = (ipk) => {
+    const nilaiIpk = parseFloat(ipk);
+    if (nilaiIpk > 3.0) {
+        return 'aman';
+    } else if (nilaiIpk >= 2.5 && nilaiIpk <= 3.0) {
+        return 'siaga';
+    } else {
+        return 'bermasalah';
+    }
+};
+
 // membuat Data Prestasi Baru
 exports.createPrestasi = async (req, res) => {
     try {
@@ -1054,6 +1068,16 @@ exports.createPrestasi = async (req, res) => {
 
         // 4. Kirim respons sukses
         if (result.status === 'success') {
+            try {
+                const hasilKlasifikasi = tentukanKlasifikasi(ipk_lulus);
+                await upsertKlasifikasi(nim, hasilKlasifikasi);
+                console.log(`Klasifikasi untuk NIM ${nim} berhasil dibuat/diupdate menjadi: ${hasilKlasifikasi}`);
+            } catch (classificationError) {
+                // Jika klasifikasi gagal, cukup log error tanpa menghentikan proses utama.
+                // Respons sukses sudah akan dikirim ke user.
+                console.error(`Gagal melakukan klasifikasi untuk NIM ${nim}:`, classificationError);
+            }
+
             res.status(201).json({
                 success: true,
                 message: 'Data prestasi (TAK dan IPK) berhasil ditambahkan.',
@@ -1115,6 +1139,14 @@ exports.updatePrestasi = async (req, res) => {
                 success: false,
                 message: `Data prestasi untuk mahasiswa dengan NIM ${nim} tidak ditemukan.`,
             });
+        }
+
+        try {
+            const hasilKlasifikasi = tentukanKlasifikasi(data.ipk_lulus);
+            await upsertKlasifikasi(nim, hasilKlasifikasi);
+            console.log(`Klasifikasi untuk NIM ${nim} berhasil diupdate menjadi: ${hasilKlasifikasi}`);
+        } catch (classificationError) {
+            console.error(`Gagal melakukan klasifikasi untuk NIM ${nim} saat update:`, classificationError);
         }
 
         // Jika berhasil
@@ -1440,6 +1472,36 @@ exports.getAllKurikulum = async (req, res) => {
 };
 
 /**
+ * Mengambil list semua kelompok keahlian
+ */
+exports.getKelompokKeahlianList = async (req, res) => {
+    try {
+        const kelompokKeahlianList = await getAllKelompokKeahlian();
+
+         if (kelompokKeahlianList.length === 0) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Data kelompok keahlian berhasil diambil',
+            data: kelompokKeahlianList,
+        });
+    } catch (error) {
+        console.error('Error in getKelompokKeahlianList controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan dalam mengambil data kelompok keahlian',
+            error: error.message,
+        });
+    }
+};
+
+/**
  * Mengambil mata kuliah berdasarkan ID
  */
 exports.getMataKuliahById = async (req, res) => {
@@ -1494,6 +1556,7 @@ exports.createMataKuliah = async (req, res) => {
             semester,
             ekivalensi,
             kurikulum,
+            kelompok_keahlian,
         } = req.body;
 
         // Validasi input required
@@ -1576,6 +1639,7 @@ exports.createMataKuliah = async (req, res) => {
             semester: semester,
             ekivalensi: ekivalensi ? ekivalensi.toUpperCase() : null,
             kurikulum: parseInt(kurikulum),
+            kelompok_keahlian: kelompok_keahlian || null,
         };
 
         // Panggil model untuk create mata kuliah
@@ -1626,6 +1690,7 @@ exports.updateMataKuliah = async (req, res) => {
             semester,
             ekivalensi,
             kurikulum,
+            kelompok_keahlian,
         } = req.body;
 
         if (!id || isNaN(id)) {
@@ -1687,6 +1752,7 @@ exports.updateMataKuliah = async (req, res) => {
                     ? ekivalensi.trim()
                     : null,
             kurikulum: parseInt(kurikulum),
+            kelompok_keahlian: kelompok_keahlian || null,
         };
 
         const updatedMataKuliah = await updateMataKuliah(
@@ -1782,7 +1848,7 @@ exports.deleteMataKuliah = async (req, res) => {
  */
 exports.getEkuivalensiOptions = async (req, res) => {
     try {
-        const { kurikulum } = req.query;
+        const { kurikulum } = req.params;
         const currentKurikulum = kurikulum ? parseInt(kurikulum) : null;
 
         const options = await getEkuivalensiOptions(currentKurikulum);
@@ -1795,7 +1861,6 @@ exports.getEkuivalensiOptions = async (req, res) => {
                 data: [],
             });
         }
-        // console.log(options)
 
         res.status(200).json({
             success: true,
