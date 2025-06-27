@@ -8,7 +8,10 @@ const StudentInfoBox = () => {
     if (!selectedStudent || !studentSKSData) {
         return null;
     }
+    
+    console.log(studentSKSData)
 
+    // belum dapat menampilkan peminatannya
     return (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 shadow-sm">
             <div className="flex items-center justify-between">
@@ -65,6 +68,14 @@ const StudentInfoBox = () => {
                         </div>
                     </div>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Peminatan:</span>
+                    <span className="text-sm font-semibold text-gray-900">
+                        {studentSKSData.peminatan || '-'} 
+                    </span>
+                </div>
+                
             </div>
         </div>
     );

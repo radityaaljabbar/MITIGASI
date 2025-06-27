@@ -159,8 +159,9 @@ export const getAvailableCourse = async () => {
                 sks_mk: course.sks_mk,
                 semester_mk: course.semester,
                 jenis_semester: course.jenis_semester,
-                tahun_ajaran: course.tahun_ajaran,
                 ekivalensi: course.ekivalensi,
+                kurikulum: course.kurikulum,
+                kelompok_keahlian: course.kelompok_keahlian,
             }));
 
             return {
