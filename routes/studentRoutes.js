@@ -43,6 +43,28 @@ router.get(
     studentController.getCourseRecommendation
 );
 
+router.put(
+    '/sendPeminatanMahasiswa',
+    protect,
+    authorize('mahasiswa'),
+    studentController.sendPeminatanMahasiswa
+)
+
+router.get(
+    '/getAllListPeminatan',
+    protect,
+    authorize('mahasiswa'),
+    studentController.getAllPeminatanList
+);
+
+// Endpoint backend untuk fitur MyCourse - Ambil peminatan
+router.get(
+    '/getPeminatanMahasiswa',
+    protect,
+    authorize('mahasiswa'),
+    studentController.getStudentPeminatan
+);
+
 /**
  * @desc Endpoint backend untuk fitur MyWellness
  * @FR-05 - MyWellness - Fetching all nim list from result

@@ -16,6 +16,9 @@ const {
     getOldCourses,
     getOldCoursesNames,
     processCourseHistory,
+    sendPeminatan,
+    getListPeminatan,
+    getStudentPeminatan,
 } = require('../models/mahasiswaQueries/myCourseQueries');
 
 const {
@@ -295,8 +298,8 @@ exports.getCourseRecommendation = async (req, res) => {
 
         // Cek data ada atau tidak:
         if (mataKuliahRekomendasi.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: 'Belum ada rekomendasi mata kuliah dari dosen wali',
             });
         }
@@ -715,6 +718,119 @@ exports.getKeluhanDetail = async (req, res) => {
         });
     }
 };
+
+exports.sendPeminatanMahasiswa = async (req, res) => {
+    try {
+        const id = req.user.id;
+        const {peminatan} = req.body;
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'NIM tidak ditemukan, pastikan kamu sudah login dengan benar',
+            });
+        }
+
+        if (!peminatan) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Tidak ada data peminatan mahasiswa',
+            });
+        }
+
+        const updatePeminatan = await sendPeminatan(id, peminatan) 
+
+        // Periksa apakah ada baris yang diupdate
+        if (updatePeminatan.payload === 0) {
+            return res.status(404).json({
+                success: false,
+                message: `Data peminatan dengan NIM ${id} tidak ditemukan.`,
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Data peminatan mahasiswa dengan NIM ${id} berhasil diupdate`,
+            data: {
+                id: id,
+                peminatan: peminatan,
+            },
+        });
+
+    } catch (error) {
+        console.error('Error from sendPeminatanMahasiswa Controller (Update).', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan ketika mengirim data peminatan mahasiswa',
+        });
+    }
+}
+
+
+exports.getAllPeminatanList = async (req, res) => {
+    try {
+        const result = await getListPeminatan();
+        
+        if (result.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: `Data list kelompok keahlian tidak ditemukan.`,
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'List kelompok keahlian berhasil diambil.',
+            count: result.length,
+            data: result,
+        })
+
+    } catch (error) {
+        console.error('Error in getAllPeminatanList controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan ketika mengambil data',
+        });
+    }
+}
+
+//Ambil data peminatan mahasiswa yang sedang login
+exports.getStudentPeminatan = async (req, res) => {
+    try {
+        // Ambil nim mahasiswa dari session/token
+        const nim = req.user.id;
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'NIM tidak ditemukan, pastikan Anda sudah login dengan benar',
+            });
+        }
+
+        // Panggil query untuk mendapatkan peminatan
+        const peminatanResult = await getStudentPeminatan(nim);
+
+        // Berhasil mendapatkan data peminatan
+        res.status(200).json({
+            success: true,
+            message: 'Data peminatan berhasil diambil.',
+            data: {
+                // Handle kasus jika kolom peminatan bernilai null
+                peminatan: peminatanResult.peminatan || 'Belum memilih peminatan',
+            },
+        });
+
+    } catch (error) {
+        console.error('Error in getStudentPeminatan controller:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat mengambil data peminatan.',
+        });
+    }
+};
+
 
 // myFinance
 exports.sendRelief = async (req, res) => {

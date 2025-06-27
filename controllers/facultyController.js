@@ -421,9 +421,10 @@ exports.getAvailableCourse = async (req, res) => {
         const mataKuliahTersedia = await getAvailCourses();
 
         if (mataKuliahTersedia.length === 0) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 count: 0,
+                message: "Tidak ada Matakuliah Tersedia",
                 data: [],
             });
         }

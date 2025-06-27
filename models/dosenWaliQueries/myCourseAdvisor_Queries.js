@@ -15,7 +15,7 @@ exports.getStudentInClass = async (listKodeKelas) => {
     const listMahasiswa = [];
     for (const kelas of listKodeKelas) {
         const [students] = await pool.execute(
-            'SELECT nim, nama, kelas FROM mahasiswa WHERE kelas = ?',
+            'SELECT nim, nama, kelas, peminatan FROM mahasiswa WHERE kelas = ?',
             [kelas]
         );
 
@@ -23,6 +23,7 @@ exports.getStudentInClass = async (listKodeKelas) => {
             id: student.nim,
             name: student.nama,
             class: student.kelas,
+            peminatan:student.peminatan,
         }));
         listMahasiswa.push(...data);
     }
@@ -31,8 +32,23 @@ exports.getStudentInClass = async (listKodeKelas) => {
 
 // Fetch all courses available with kurikulum 2024:
 exports.getAvailCourses = async () => {
-    const [availableCourses] = await pool.execute(
-        'SELECT kode_mk, nama_mk, sks_mk, jenis_mk, tingkat, jenis_semester, semester, ekivalensi FROM mata_kuliah_baru WHERE kurikulum = 2024'
+    const [availableCourses] = await pool.execute(`
+        SELECT 
+            mkb.kode_mk, 
+            mkb.nama_mk, 
+            mkb.sks_mk, jenis_mk, 
+            mkb.tingkat, 
+            mkb.jenis_semester, 
+            mkb.semester, 
+            mkb.ekivalensi,
+            mkb.kurikulum,
+            pk.kelompok_keahlian
+        FROM 
+            mata_kuliah_baru mkb
+        LEFT JOIN
+            peminatan_keahlian pk ON pk.kode_matakuliah = mkb.kode_mk
+        WHERE 
+            kurikulum = (SELECT MAX(kurikulum) FROM mata_kuliah_baru)`
     );
 
     return availableCourses;

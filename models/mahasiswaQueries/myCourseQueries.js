@@ -183,6 +183,56 @@ const processCourseHistory = (grades, coursesMap, oldCoursesNamesMap = {}) => {
     return courseHistory;
 };
 
+const sendPeminatan = async (studentId, peminatan) => {
+    try {
+        const sql = `
+            UPDATE mahasiswa
+            SET peminatan = ?
+            WHERE nim = ?
+        `
+        const [resultpeminatan] = await pool.execute(sql,[peminatan, studentId])
+        return resultpeminatan
+    } catch (error) {
+        console.error(`Tidak dapat menambahkan peminatan ke database`, error);
+        throw error;       
+    }
+}
+
+
+
+
+const getListPeminatan = async () => {
+    try {
+        const sql = `
+            SELECT DISTINCT kelompok_keahlian 
+            FROM peminatan_keahlian
+            ORDER BY kelompok_keahlian DESC
+        `;
+
+        const [rows] = await pool.execute(sql);
+        return rows.map(row => row.kelompok_keahlian);
+    } catch (error) {
+        console.error('Eror mendapatkan list kelompok_keahlian query:', error);
+        throw error;
+    }
+}
+
+const getStudentPeminatan = async (studentId) => {
+    try {
+        const sql = `
+            SELECT peminatan 
+            FROM mahasiswa
+            WHERE nim = ?
+        `;
+        const [rows] = await pool.execute(sql, [studentId]);
+        // Return the first row if it exists, otherwise null
+        return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+        console.error(`Tidak dapat mengambil data peminatan dari database`, error);
+        throw error;
+    }
+};
+
 module.exports = {
     getStudentGrades,
     getNewCourses,
@@ -190,4 +240,7 @@ module.exports = {
     getOldCourses,
     getOldCoursesNames,
     processCourseHistory,
+    sendPeminatan,
+    getListPeminatan,
+    getStudentPeminatan,
 };
