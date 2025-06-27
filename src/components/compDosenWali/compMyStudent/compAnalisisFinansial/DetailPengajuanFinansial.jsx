@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import { FaFileDownload } from 'react-icons/fa';
+import { FileText, Download, ExternalLink, X } from 'lucide-react';
 import StatusAksiDosen from './StatusAksiDosen';
 
 const DetailPengajuanFinansial = ({
     selectedRequest,
     onClose,
     onApprove,
-    onReject
+    onReject,
 }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [processingAction, setProcessingAction] = useState('');
+    const [showPdfModal, setShowPdfModal] = useState(false);
+    const [activePdf, setActivePdf] = useState(null);
 
     if (!selectedRequest) return null;
 
     // Handle approve action
     const handleApprove = async () => {
         if (isProcessing) return;
-        
+
         setIsProcessing(true);
         setProcessingAction('approve');
-        
+
         try {
             await onApprove(selectedRequest.id);
             // Modal will be closed by parent component after successful operation
@@ -29,6 +32,27 @@ const DetailPengajuanFinansial = ({
             setIsProcessing(false);
             setProcessingAction('');
         }
+    };
+
+    // Handle PDF modal
+    const handleOpenPdf = (pdf) => {
+        setActivePdf(pdf);
+        setShowPdfModal(true);
+    };
+
+    const handleClosePdf = () => {
+        setShowPdfModal(false);
+        setActivePdf(null);
+    };
+
+    // Handle file download
+    const handleDownload = (url, filename) => {
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
     };
 
     return (
@@ -119,7 +143,6 @@ const DetailPengajuanFinansial = ({
                         </div>
                     </div>
 
-                
                     {selectedRequest.installmentPlan && (
                         <div className="mb-6">
                             <p className="text-sm text-gray-600 mb-1">
@@ -142,6 +165,44 @@ const DetailPengajuanFinansial = ({
                         </div>
                     )}
 
+                    {selectedRequest.lampiran && (
+                        <div className="mb-6">
+                            <p className="text-sm text-gray-600 mb-2">
+                                Lampiran Dokumen
+                            </p>
+                            <div className="flex items-center gap-2 p-2 bg-gray-50 border rounded-lg transition-colors hover:bg-gray-100">
+                                <FileText size={20} className="text-red-600" />
+                                <span className="text-sm text-gray-700 flex-grow">
+                                    {selectedRequest.lampiran.originalName}
+                                </span>
+                                <button
+                                    onClick={() =>
+                                        handleDownload(
+                                            selectedRequest.lampiran.url,
+                                            selectedRequest.lampiran
+                                                .originalName
+                                        )
+                                    }
+                                    className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200"
+                                    title="Unduh">
+                                    <Download size={16} />
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleOpenPdf({
+                                            name: selectedRequest.lampiran
+                                                .originalName,
+                                            url: selectedRequest.lampiran.url,
+                                        })
+                                    }
+                                    className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200"
+                                    title="Lihat">
+                                    <ExternalLink size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {selectedRequest.status === 'Menunggu Review' && (
                         <div className="flex justify-end space-x-3 mt-6">
                             <button
@@ -159,6 +220,58 @@ const DetailPengajuanFinansial = ({
                     )}
                 </div>
             </div>
+            {showPdfModal && activePdf && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full h-5/6 flex flex-col">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h3 className="font-semibold text-lg">
+                                {activePdf.name}
+                            </h3>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    className="p-2 hover:bg-gray-100 rounded-full"
+                                    title="Unduh"
+                                    onClick={() =>
+                                        handleDownload(
+                                            activePdf.url,
+                                            activePdf.name
+                                        )
+                                    }>
+                                    <Download size={20} />
+                                </button>
+                                <button
+                                    className="p-2 hover:bg-gray-100 rounded-full"
+                                    title="Buka di tab baru"
+                                    onClick={() =>
+                                        window.open(activePdf.url, '_blank')
+                                    }>
+                                    <ExternalLink size={20} />
+                                </button>
+                                <button
+                                    onClick={handleClosePdf}
+                                    className="p-2 hover:bg-gray-100 rounded-full"
+                                    title="Tutup">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* PDF Viewer */}
+                        <div className="flex-1 overflow-hidden p-4">
+                            <div className="w-full h-full">
+                                <iframe
+                                    src={`${activePdf.url}#toolbar=0&navpanes=0`}
+                                    title={activePdf.name}
+                                    className="w-full h-full border-0 rounded">
+                                    Your browser does not support PDFs. Please
+                                    download the PDF to view it.
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
