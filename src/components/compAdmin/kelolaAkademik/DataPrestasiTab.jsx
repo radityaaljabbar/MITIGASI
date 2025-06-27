@@ -382,8 +382,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                             {/* TAK */}
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    TAK (Test of Academic
-                                                    Knowledge){' '}
+                                                    TAK (Transkrip Aktivitas
+                                                    Kemahasiswaan){' '}
                                                     <span className="text-red-500">
                                                         *
                                                     </span>

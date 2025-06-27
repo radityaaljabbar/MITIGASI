@@ -457,6 +457,7 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="GANJIL">GANJIL</option>
                                     <option value="GENAP">GENAP</option>
+                                    <option value="ANTARA">ANTARA</option>
                                 </select>
                             </div>
 

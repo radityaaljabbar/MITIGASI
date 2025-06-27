@@ -46,6 +46,10 @@ const KelolaKurikulumTable = ({
                                 <i className="fas fa-calendar mr-1"></i>Semester
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i className="fas fa-layer-group mr-1"></i>
+                                Kelompok Keahlian
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 <i className="fas fa-exchange-alt mr-1"></i>
                                 Ekuivalensi
                             </th>
@@ -96,6 +100,20 @@ const KelolaKurikulumTable = ({
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                                             Semester {mk.semester}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {mk.kelompok_keahlian ? (
+                                            <span
+                                             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 max-w-xs truncate"
+                                             title={mk.kelompok_keahlian}
+                                            >
+                                                {mk.kelompok_keahlian}
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400 italic text-sm">
+                                                —
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-sm text-gray-900">

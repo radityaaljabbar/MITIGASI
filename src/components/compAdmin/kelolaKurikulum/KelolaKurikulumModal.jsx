@@ -8,7 +8,9 @@ const KelolaKurikulumModal = ({
     selectedMataKuliah,
     selectedKurikulum,
     ekuivalensiOptions,
+    kelompokKeahlianList,
     loading,
+    onKurikulumChange, // Fungsi callback untuk menangani perubahan kurikulum
 }) => {
     const [formData, setFormData] = useState({
         kurikulum: '',
@@ -18,6 +20,7 @@ const KelolaKurikulumModal = ({
         semester: '',
         jenis_mk: 'WAJIB PRODI',
         ekivalensi: '',
+        kelompok_keahlian: '',
     });
 
     // State ini sekarang hanya untuk opsi LAINNYA di dropdown
@@ -36,6 +39,7 @@ const KelolaKurikulumModal = ({
                     semester: selectedMataKuliah.semester || '',
                     jenis_mk: selectedMataKuliah.jenis_mk || 'WAJIB PRODI',
                     ekivalensi: selectedMataKuliah.ekivalensi || '',
+                    kelompok_keahlian: selectedMataKuliah.kelompok_keahlian || '',
                 });
 
                 // 2. Siapkan opsi dropdown LAINNYA
@@ -44,7 +48,7 @@ const KelolaKurikulumModal = ({
                         // Tampilkan hanya opsi yang BUKAN merupakan ekuivalensi yang sudah terpilih
                         option.kode !== selectedMataKuliah.ekivalensi &&
                         // Dan yang kurikulumnya lebih lama
-                        parseInt(option.kurikulum_type) <
+                        parseInt(option.kurikulum_type) <=
                             parseInt(selectedMataKuliah.kurikulum)
                 );
                 setOtherEkuivalensiOptions(filteredOptions);
@@ -59,12 +63,13 @@ const KelolaKurikulumModal = ({
                     semester: '',
                     jenis_mk: 'WAJIB PRODI',
                     ekivalensi: '',
+                    kelompok_keahlian: '',
                 });
 
                 // Tampilkan semua opsi yang valid
                 const filteredOptions = ekuivalensiOptions.filter(
                     (option) =>
-                        parseInt(option.kurikulum_type) <
+                        parseInt(option.kurikulum_type) <=
                         parseInt(selectedKurikulum)
                 );
                 setOtherEkuivalensiOptions(filteredOptions);
@@ -81,7 +86,13 @@ const KelolaKurikulumModal = ({
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        // Logika handle ganti kurikulum bisa ditambahkan di sini jika perlu
+        
+        // Jika kurikulum berubah, panggil callback untuk mengupdate ekuivalensi options
+        if (name === 'kurikulum' && onKurikulumChange) {
+            onKurikulumChange(value);
+            // Reset ekuivalensi karena options akan berubah
+            setFormData((prev) => ({ ...prev, ekivalensi: '' }));
+        }
     };
 
     const handleSubmit = (e) => {
@@ -101,6 +112,8 @@ const KelolaKurikulumModal = ({
 
     if (!isOpen) return null;
 
+    console.log(kelompokKeahlianList)
+
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -109,7 +122,7 @@ const KelolaKurikulumModal = ({
                     onClick={onClose}
                 />
                 <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                    {/* ... Header Modal ... */}
+                    {/* Header Modal */}
                     <div className="bg-white px-6 pt-6 pb-4">
                         <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -133,7 +146,6 @@ const KelolaKurikulumModal = ({
 
                     <form onSubmit={handleSubmit} className="px-6 pb-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* ... Input form lainnya (Kurikulum, Kode MK, Nama, dll) ... */}
                             {/* Kurikulum */}
                             <div className="space-y-1">
                                 <label
@@ -149,9 +161,13 @@ const KelolaKurikulumModal = ({
                                     value={formData.kurikulum}
                                     onChange={handleChange}
                                     required
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16a085] focus:border-[#16a085]"
+                                    readOnly={mode === 'edit'}
+                                    className={`block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16a085] focus:border-[#16a085] ${
+                                        mode === 'edit' ? 'bg-gray-100' : ''
+                                    }`}
                                 />
                             </div>
+                            
                             {/* Kode MK */}
                             <div className="space-y-1">
                                 <label
@@ -173,6 +189,7 @@ const KelolaKurikulumModal = ({
                                     }`}
                                 />
                             </div>
+                            
                             {/* Nama MK */}
                             <div className="md:col-span-2 space-y-1">
                                 <label
@@ -191,6 +208,7 @@ const KelolaKurikulumModal = ({
                                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16a085] focus:border-[#16a085]"
                                 />
                             </div>
+                            
                             {/* SKS */}
                             <div className="space-y-1">
                                 <label
@@ -210,6 +228,7 @@ const KelolaKurikulumModal = ({
                                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16a085] focus:border-[#16a085]"
                                 />
                             </div>
+                            
                             {/* Semester */}
                             <div className="space-y-1">
                                 <label
@@ -230,6 +249,7 @@ const KelolaKurikulumModal = ({
                                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16a085] focus:border-[#16a085]"
                                 />
                             </div>
+                            
                             {/* Jenis MK */}
                             <div className="md:col-span-2 space-y-1">
                                 <label
@@ -251,7 +271,7 @@ const KelolaKurikulumModal = ({
                                 </select>
                             </div>
 
-                            {/* --- BAGIAN DROPDOWN EKUIVALENSI YANG DIPERBAIKI --- */}
+                            {/* Dropdown Ekuivalensi */}
                             <div className="md:col-span-2 space-y-1">
                                 <label
                                     htmlFor="ekivalensi"
@@ -274,41 +294,64 @@ const KelolaKurikulumModal = ({
                                         selectedMataKuliah &&
                                         selectedMataKuliah.ekuivalensi_info && (
                                             <option
-                                                value={
-                                                    selectedMataKuliah
-                                                        .ekuivalensi_info.kode
-                                                }>
-                                                {
-                                                    selectedMataKuliah
-                                                        .ekuivalensi_info.nama
-                                                }{' '}
-                                                (
-                                                {
-                                                    selectedMataKuliah
-                                                        .ekuivalensi_info.kode
-                                                }
-                                                ) - Kurikulum{' '}
-                                                {
-                                                    selectedMataKuliah
-                                                        .ekuivalensi_info
-                                                        .kurikulum
-                                                }
+                                                key={`current-${selectedMataKuliah.ekuivalensi_info.kode}-${selectedMataKuliah.ekuivalensi_info.kurikulum}`}
+                                                value={selectedMataKuliah.ekuivalensi_info.kode}>
+                                                {selectedMataKuliah.ekuivalensi_info.nama}{' '}
+                                                ({selectedMataKuliah.ekuivalensi_info.kode}) - Kurikulum{' '}
+                                                {selectedMataKuliah.ekuivalensi_info.kurikulum}
                                             </option>
                                         )}
 
                                     {/* Tampilkan sisa opsi lain yang valid */}
-                                    {otherEkuivalensiOptions.map((option) => (
+                                    {otherEkuivalensiOptions.map((option, index) => (
                                         <option
-                                            key={option.id}
+                                            key={`ekuivalensi-${index}-${option.kode}-${option.kurikulum_type}`}
                                             value={option.kode}>
                                             {option.nama} ({option.kode}) -
                                             Kurikulum {option.kurikulum_type}
                                         </option>
                                     ))}
                                 </select>
+                                {loading && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        <i className="fas fa-spinner fa-spin mr-1"></i>
+                                        Memuat opsi ekuivalensi...
+                                    </p>
+                                )}
+                            </div>  
+                            
+                            {/* Input Kelompok Keahlian */}
+                            <div className="md:col-span-2 space-y-1">
+                                <label
+                                    htmlFor="kelompok_keahlian"
+                                    className="block text-sm font-medium text-gray-700">
+                                    <i className="fas fa-layer-group mr-1 text-gray-400"></i>{' '}
+                                    Kelompok Keahlian (Opsional)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="kelompok_keahlian"
+                                    name="kelompok_keahlian"
+                                    value={formData.kelompok_keahlian}
+                                    onChange={handleChange}
+                                    list="kelompok-keahlian-options"
+                                    placeholder="Pilih atau ketik baru..."
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16a085] focus:border-[#16a085]"
+                                />
+                                <datalist id="kelompok-keahlian-options">
+                                    {kelompokKeahlianList &&
+                                        kelompokKeahlianList.map((kk, index) => (
+                                            <option key={index} value={kk} />
+                                        ))}
+                                </datalist>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Anda bisa memilih dari daftar yang ada atau
+                                    mengetikkan kelompok keahlian baru.
+                                </p>
                             </div>
+
                         </div>
-                        {/* ... Tombol Simpan dan Batal ... */}
+                        {/* Tombol Simpan dan Batal */}
                         <div className="mt-8 flex justify-end space-x-3">
                             <button
                                 type="button"
@@ -322,15 +365,13 @@ const KelolaKurikulumModal = ({
                                 className="inline-flex items-center px-4 py-2 bg-[#16a085] hover:bg-[#16a085]/90 text-white font-medium rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#16a085] disabled:opacity-50 disabled:cursor-not-allowed">
                                 {loading ? (
                                     <>
-                                        {' '}
-                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>{' '}
-                                        Menyimpan...{' '}
+                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                                        Menyimpan...
                                     </>
                                 ) : (
                                     <>
-                                        {' '}
-                                        <i className="fas fa-save mr-2"></i>{' '}
-                                        Simpan{' '}
+                                        <i className="fas fa-save mr-2"></i>
+                                        Simpan
                                     </>
                                 )}
                             </button>

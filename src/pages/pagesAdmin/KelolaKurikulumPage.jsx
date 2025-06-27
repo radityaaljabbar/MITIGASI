@@ -17,6 +17,7 @@ const KelolaKurikulumPage = () => {
         mataKuliahList,
         filteredMataKuliah,
         ekuivalensiOptions,
+        kelompokKeahlianList,
 
         // Search dan Filter
         searchTerm,
@@ -190,6 +191,7 @@ const KelolaKurikulumPage = () => {
                 selectedKurikulum={selectedKurikulum}
                 ekuivalensiOptions={ekuivalensiOptions}
                 loading={loading.submit}
+                kelompokKeahlianList={kelompokKeahlianList}
             />
 
             {/* Delete Confirmation Modal */}

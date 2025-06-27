@@ -151,10 +151,10 @@ export const deleteMataKuliah = async (id) => {
 };
 
 // Get ekuivalensi options
-export const getEkuivalensiOptions = async () => {
+export const getEkuivalensiOptions = async (kurikulum) => {
     try {
         const response = await fetch(
-            getApiUrl('/admin/kelolaKurikulum/getEkuivalensiOptions'),
+            getApiUrl(`/admin/kelolaKurikulum/getEkuivalensiOptions/${kurikulum}`),
             {
                 method: 'GET',
                 headers: {
@@ -167,6 +167,30 @@ export const getEkuivalensiOptions = async () => {
         return data;
     } catch (error) {
         console.error('Error fetching ekuivalensi options:', error);
+        return {
+            success: false,
+            message: 'Network error. Please check your connection.',
+        };
+    }
+};
+
+// Get all Kelompok Keahlian
+export const getAllKelompokKeahlian = async () => {
+    try {
+        const response = await fetch(
+            getApiUrl('/admin/kelolaKurikulum/getAllKelompokKeahlian'),
+            {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders(),
+                },
+            }
+        );
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching kelompok keahlian:', error);
         return {
             success: false,
             message: 'Network error. Please check your connection.',

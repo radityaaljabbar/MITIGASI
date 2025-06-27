@@ -7,6 +7,7 @@ import {
     updateMataKuliah,
     deleteMataKuliah,
     getEkuivalensiOptions,
+    getAllKelompokKeahlian,
 } from '../../../../services/adminServices/kelolaKurikulumServices';
 import { toast } from 'react-toastify';
 
@@ -16,6 +17,7 @@ const useKelolaKurikulum = () => {
     const [selectedKurikulum, setSelectedKurikulum] = useState('');
     const [mataKuliahList, setMataKuliahList] = useState([]);
     const [ekuivalensiOptions, setEkuivalensiOptions] = useState([]);
+    const [kelompokKeahlianList, setKelompokKeahlianList] = useState([]);
 
     // State untuk search dan filter
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,24 +38,22 @@ const useKelolaKurikulum = () => {
         submit: false,
         delete: false,
         ekuivalensi: false,
+        kelompokKeahlian: false,
     });
 
     // Fetch daftar kurikulum saat component mount
     useEffect(() => {
         fetchKurikulumList();
+        fetchKelompokKeahlianList();
     }, []);
 
-    // Fetch mata kuliah ketika kurikulum dipilih
+    // Fetch mata kuliah dan ekuivalensi options ketika kurikulum dipilih
     useEffect(() => {
         if (selectedKurikulum) {
             fetchMataKuliahList(selectedKurikulum);
+            fetchEkuivalensiOptions(selectedKurikulum);
         }
     }, [selectedKurikulum]);
-
-    // Fetch ekuivalensi options saat component mount
-    useEffect(() => {
-        fetchEkuivalensiOptions();
-    }, []);
 
     // Fungsi fetch kurikulum
     const fetchKurikulumList = async () => {
@@ -97,11 +97,27 @@ const useKelolaKurikulum = () => {
         }
     };
 
-    // Fungsi fetch ekuivalensi options
-    const fetchEkuivalensiOptions = async () => {
+    // Fungsi fetch kelompok keahlian
+    const fetchKelompokKeahlianList = async () => {
+        setLoading((prev) => ({ ...prev, kelompokKeahlian: true }));
+        try {
+            const response = await getAllKelompokKeahlian();
+            if (response.success) {
+                setKelompokKeahlianList(response.data);
+            }
+            // Tidak perlu toast error jika gagal, karena ini data opsional
+        } catch (error) {
+            console.error('Gagal mengambil data kelompok keahlian', error);
+        } finally {
+            setLoading((prev) => ({ ...prev, kelompokKeahlian: false }));
+        }
+    };
+
+    // Fungsi fetch ekuivalensi options - sekarang menerima parameter kurikulum
+    const fetchEkuivalensiOptions = async (kurikulum) => {
         setLoading((prev) => ({ ...prev, ekuivalensi: true }));
         try {
-            const response = await getEkuivalensiOptions();
+            const response = await getEkuivalensiOptions(kurikulum);
             if (response.success) {
                 setEkuivalensiOptions(response.data);
             }
@@ -124,6 +140,10 @@ const useKelolaKurikulum = () => {
         setModalMode('edit');
         setSelectedMataKuliah(mataKuliah);
         setIsModalOpen(true);
+        // Fetch ekuivalensi options untuk kurikulum mata kuliah yang dipilih
+        if (mataKuliah.kurikulum) {
+            await fetchEkuivalensiOptions(mataKuliah.kurikulum);
+        }
     };
 
     // Fungsi tutup modal
@@ -132,17 +152,32 @@ const useKelolaKurikulum = () => {
         setSelectedMataKuliah(null);
     };
 
+    // Fungsi untuk menangani perubahan kurikulum
+    const handleKurikulumChange = (newKurikulum) => {
+        setSelectedKurikulum(newKurikulum);
+        // Reset filter saat ganti kurikulum
+        setSearchTerm('');
+        setFilterSemester('');
+        setFilterJenisMk('');
+    };
+
     // Fungsi submit form (tambah/edit)
     const handleSubmit = async (formData) => {
+        // Pastikan kelompok_keahlian dikirim sebagai null jika kosong
+        const payload = {
+            ...formData,
+            kelompok_keahlian: formData.kelompok_keahlian || null,
+        };
+
         setLoading((prev) => ({ ...prev, submit: true }));
         try {
             let response;
             if (modalMode === 'add') {
-                response = await createNewMataKuliah(formData);
+                response = await createNewMataKuliah(payload);
             } else {
                 response = await updateMataKuliah(
                     selectedMataKuliah.id_mk,
-                    formData
+                    payload
                 );
             }
 
@@ -162,6 +197,10 @@ const useKelolaKurikulum = () => {
                     !kurikulumList.includes(formData.kurikulum)
                 ) {
                     fetchKurikulumList();
+                }
+                // Refresh kelompok keahlian jika ada yang baru ditambahkan
+                if (!kelompokKeahlianList.includes(payload.kelompok_keahlian)) {
+                    fetchKelompokKeahlianList();
                 }
             } else {
                 toast.error(
@@ -235,16 +274,18 @@ const useKelolaKurikulum = () => {
             filterJenisMk === '' || mk.jenis_mk === filterJenisMk;
 
         return searchMatch && semesterMatch && jenisMkMatch;
+
     });
 
     return {
         // Data
         kurikulumList,
         selectedKurikulum,
-        setSelectedKurikulum,
+        setSelectedKurikulum: handleKurikulumChange,
         mataKuliahList,
         filteredMataKuliah,
         ekuivalensiOptions,
+        kelompokKeahlianList,
 
         // Search dan Filter
         searchTerm,
@@ -272,6 +313,7 @@ const useKelolaKurikulum = () => {
         handleOpenDeleteModal,
         handleCloseDeleteModal,
         handleDelete,
+        fetchEkuivalensiOptions, // Export fungsi ini untuk digunakan di komponen lain jika diperlukan
     };
 };
 
