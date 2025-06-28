@@ -39,6 +39,7 @@ import KelolaKelasPage from './pages/pagesAdmin/KelolaKelasPage.jsx';
 import KelolaAkademikPage from './pages/pagesAdmin/KelolaAkademikPage.jsx';
 import DetailAkademikPage from './pages/pagesAdmin/DetailAkademikPage.jsx';
 import KelolaKurikulumPage from './pages/pagesAdmin/KelolaKurikulumPage.jsx';
+import LogAktivitasPage from './pages/pagesAdmin/LogAktivitasPage.jsx';
 
 const App = () => {
     const router = createBrowserRouter(
@@ -148,6 +149,9 @@ const App = () => {
                         path="kelolaKurikulum"
                         element={<KelolaKurikulumPage />}
                     />
+                    <Route 
+                        path="/admin/logAktivitas" 
+                        element={<LogAktivitasPage />} />
 
                     {/* 404 for admin routes */}
                     <Route path="*" element={<NotFoundPage />} />

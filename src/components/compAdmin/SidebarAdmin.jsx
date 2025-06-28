@@ -7,6 +7,8 @@ import kelolaAkun from '../../assets/images/imageAdmin/sidebarImages/kelolaAkun.
 import kelolaKelasDanAngkatan from '../../assets/images/imageAdmin/sidebarImages/KelolaKelasDanAngkatan.png';
 import kelolaKurikulum from '../../assets/images/imageAdmin/sidebarImages/kelolaKurikulum.png';
 import kelolaNilai from '../../assets/images/imageAdmin/sidebarImages/kelolaNilai.png';
+import LogAktivitas from '../../assets/images/imageAdmin/sidebarImages/Log.png';
+// disinin tambah ikon untuk log
 
 // Import icon umum (menggunakan dari dosen wali karena sama)
 import toggleSidebarIcon from '../../assets/images/imageDosenWali/sidebarImages/toggleSidebar.png';
@@ -99,6 +101,11 @@ const SidebarAdmin = ({ expanded, setExpanded }) => {
             path: '/admin/kelolaAkademik',
             name: 'Kelola Akademik',
             icon: kelolaNilai,
+        },
+        {
+            path: '/admin/logAktivitas',
+            name: 'Log Aktivitas',
+            icon: LogAktivitas, 
         },
     ];
 
