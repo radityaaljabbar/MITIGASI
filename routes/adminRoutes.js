@@ -6,6 +6,8 @@ const adminController = require('../controllers/adminController');
 // Import middleware authentikasi
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
+const logController = require('../controllers/logController');
+
 // @desc    Endpoint backend untuk ...
 router.get('/contoh', protect, authorize('admin'), () => {});
 
@@ -162,7 +164,7 @@ router.get(
     '/kelolaAkademik/getGradesMahasiswa/:nim',
     protect,
     authorize('admin'),
-    adminController.getGradesByNIM
+    adminController.getCourseHistory
 )
 
 router.get(
@@ -312,5 +314,19 @@ router.get(
     authorize('admin'),
     adminController.getKelompokKeahlianList
 );
+
+// =============================================
+// ==                LOGGING                  ==
+// =============================================
+
+// @desc    Endpoint untuk mengambil semua log aktivitas admin
+// @access  Hanya Admin
+router.get(
+    '/logAktivitasAdmin',
+    protect,
+    authorize('admin'),
+    logController.getAllLogs
+);
+
 
 module.exports = router;
