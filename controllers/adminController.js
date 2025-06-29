@@ -905,124 +905,126 @@ exports.bulkCreateMahasiswa = async (req, res) => {
     }
 };
 
-// Bulk create dosen wali from CSV
-// exports.bulkCreateDosenWali = async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: 'File CSV wajib diupload',
-//             });
-//         }
+/*
+//? Bulk create dosen wali from CSV
+exports.bulkCreateDosenWali = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'File CSV wajib diupload',
+            });
+        }
 
-//         // Parse CSV file
-//         const csvData = req.file.buffer.toString('utf8');
-//         const parsed = Papa.parse(csvData, {
-//             header: true,
-//             skipEmptyLines: true,
-//             transformHeader: (header) => header.trim().toLowerCase(),
-//         });
+        // Parse CSV file
+        const csvData = req.file.buffer.toString('utf8');
+        const parsed = Papa.parse(csvData, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: (header) => header.trim().toLowerCase(),
+        });
 
-//         if (parsed.errors.length > 0) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: 'Format CSV tidak valid',
-//                 errors: parsed.errors,
-//             });
-//         }
+        if (parsed.errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Format CSV tidak valid',
+                errors: parsed.errors,
+            });
+        }
 
-//         const records = parsed.data;
-//         const results = {
-//             total: records.length,
-//             created: 0,
-//             failed: 0,
-//             errors: [],
-//         };
+        const records = parsed.data;
+        const results = {
+            total: records.length,
+            created: 0,
+            failed: 0,
+            errors: [],
+        };
 
-//         // Process each record
-//         for (let i = 0; i < records.length; i++) {
-//             const record = records[i];
-//             const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
+        // Process each record
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
 
-//             try {
-//                 // Validate required fields
-//                 if (!record.nip || !record.nama || !record.kode) {
-//                     throw new Error('NIP, nama, dan kode dosen wajib diisi');
-//                 }
+            try {
+                // Validate required fields
+                if (!record.nip || !record.nama || !record.kode) {
+                    throw new Error('NIP, nama, dan kode dosen wajib diisi');
+                }
 
-//                 // Validate kode length
-//                 if (record.kode.length > 3) {
-//                     throw new Error('Kode dosen maksimal 3 karakter');
-//                 }
+                // Validate kode length
+                if (record.kode.length > 3) {
+                    throw new Error('Kode dosen maksimal 3 karakter');
+                }
 
-//                 // Set default password if empty
-//                 const finalPassword = record.password || record.nip;
+                // Set default password if empty
+                const finalPassword = record.password || record.nip;
 
-//                 // Use existing createDosen logic
-//                 await createDosen({
-//                     nip: record.nip.trim(),
-//                     nama: record.nama.trim(),
-//                     kode: record.kode.trim(),
-//                     password: finalPassword,
-//                 });
+                // Use existing createDosen logic
+                await createDosen({
+                    nip: record.nip.trim(),
+                    nama: record.nama.trim(),
+                    kode: record.kode.trim(),
+                    password: finalPassword,
+                });
 
-//                 results.created++;
-//             } catch (error) {
-//                 results.failed++;
-//                 let errorMessage = 'Unknown error';
+                results.created++;
+            } catch (error) {
+                results.failed++;
+                let errorMessage = 'Unknown error';
 
-//                 if (error.code === 'ER_DUP_ENTRY') {
-//                     if (error.message.includes("'nip'")) {
-//                         errorMessage = `NIP "${record.nip}" sudah digunakan`;
-//                     } else {
-//                         errorMessage = `Kode dosen "${record.kode}" sudah digunakan`;
-//                     }
-//                 } else {
-//                     errorMessage = error.message;
-//                 }
+                if (error.code === 'ER_DUP_ENTRY') {
+                    if (error.message.includes("'nip'")) {
+                        errorMessage = `NIP "${record.nip}" sudah digunakan`;
+                    } else {
+                        errorMessage = `Kode dosen "${record.kode}" sudah digunakan`;
+                    }
+                } else {
+                    errorMessage = error.message;
+                }
 
-//                 results.errors.push({
-//                     row: rowNumber,
-//                     nip: record.nip || 'N/A',
-//                     nama: record.nama || 'N/A',
-//                     kode: record.kode || 'N/A',
-//                     error: errorMessage,
-//                 });
-//             }
-//         }
+                results.errors.push({
+                    row: rowNumber,
+                    nip: record.nip || 'N/A',
+                    nama: record.nama || 'N/A',
+                    kode: record.kode || 'N/A',
+                    error: errorMessage,
+                });
+            }
+        }
 
-//         // Log activity
-//         await logActivity({
-//             req,
-//             admin: req.user,
-//             action: `Bulk import Dosen Wali: ${results.created} berhasil, ${results.failed} gagal`,
-//             target_entity: `Total: ${results.total} records`,
-//             status: results.failed === 0 ? 'success' : 'fail',
-//         });
+        // Log activity
+        await logActivity({
+            req,
+            admin: req.user,
+            action: `Bulk import Dosen Wali: ${results.created} berhasil, ${results.failed} gagal`,
+            target_entity: `Total: ${results.total} records`,
+            status: results.failed === 0 ? 'success' : 'fail',
+        });
 
-//         res.status(200).json({
-//             success: true,
-//             message: `Bulk import selesai: ${results.created} berhasil, ${results.failed} gagal`,
-//             data: results,
-//         });
-//     } catch (error) {
-//         console.error('Error in bulkCreateDosenWali:', error);
+        res.status(200).json({
+            success: true,
+            message: `Bulk import selesai: ${results.created} berhasil, ${results.failed} gagal`,
+            data: results,
+        });
+    } catch (error) {
+        console.error('Error in bulkCreateDosenWali:', error);
 
-//         await logActivity({
-//             req,
-//             admin: req.user,
-//             action: 'Error bulk import Dosen Wali',
-//             target_entity: 'Bulk import failed',
-//             status: 'fail',
-//         });
+        await logActivity({
+            req,
+            admin: req.user,
+            action: 'Error bulk import Dosen Wali',
+            target_entity: 'Bulk import failed',
+            status: 'fail',
+        });
 
-//         res.status(500).json({
-//             success: false,
-//             message: 'Gagal memproses bulk import',
-//             error: error.message,
-//         });
-//     }
-// };
+        res.status(500).json({
+            success: false,
+            message: 'Gagal memproses bulk import',
+            error: error.message,
+        });
+    }
+};
+*/
 
 // =============================================
 // ==         KELOLA KELAS FUNCTIONS          ==
