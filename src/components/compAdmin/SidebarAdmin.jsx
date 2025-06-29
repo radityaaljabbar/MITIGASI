@@ -94,7 +94,7 @@ const SidebarAdmin = ({ expanded, setExpanded }) => {
         },
         {
             path: '/admin/kelolaKurikulum',
-            name: 'Kelola Kurikulum',
+            name: 'Kelola Mata Kuliah',
             icon: kelolaKurikulum,
         },
         {
@@ -105,7 +105,7 @@ const SidebarAdmin = ({ expanded, setExpanded }) => {
         {
             path: '/admin/logAktivitas',
             name: 'Log Aktivitas',
-            icon: LogAktivitas, 
+            icon: LogAktivitas,
         },
     ];
 

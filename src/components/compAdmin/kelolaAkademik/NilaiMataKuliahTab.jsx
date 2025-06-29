@@ -209,12 +209,14 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
     const getGradeBadge = (indeks) => {
         const grade = indeks?.trim();
         if (['A', 'A-'].includes(grade)) return 'bg-green-100 text-green-800';
+        if (['AB'].includes(grade)) return 'bg-emerald-100 text-emerald-800';
         if (['B+', 'B', 'B-'].includes(grade))
             return 'bg-blue-100 text-blue-800';
+        if (['BC'].includes(grade)) return 'bg-cyan-100 text-cyan-800';
         if (['C+', 'C', 'C-'].includes(grade))
             return 'bg-yellow-100 text-yellow-800';
         if (['D+', 'D'].includes(grade)) return 'bg-orange-100 text-orange-800';
-        if (['E'].includes(grade)) return 'bg-red-100 text-red-800';
+        if (['E', 'T'].includes(grade)) return 'bg-red-100 text-red-800';
         return 'bg-gray-100 text-gray-800';
     };
 
@@ -470,15 +472,18 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                                     <option value="">Pilih Nilai</option>
                                     <option value="A">A</option>
                                     <option value="A-">A-</option>
+                                    <option value="AB">AB</option>
                                     <option value="B+">B+</option>
                                     <option value="B">B</option>
                                     <option value="B-">B-</option>
+                                    <option value="BC">BC</option>
                                     <option value="C+">C+</option>
                                     <option value="C">C</option>
                                     <option value="C-">C-</option>
                                     <option value="D+">D+</option>
                                     <option value="D">D</option>
                                     <option value="E">E</option>
+                                    <option value="T">T</option>
                                 </select>
                             </div>
 

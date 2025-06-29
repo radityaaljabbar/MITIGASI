@@ -103,8 +103,8 @@ const BulkImportGradesPopup = ({
                                 </li>
                                 <li>• Semester: GANJIL/GENAP/ANTARA</li>
                                 <li>
-                                    • Indeks nilai: A, A-, B+, B, B-, C+, C, C-,
-                                    D+, D, E
+                                    • Indeks nilai: A, A-, AB, B+, B, B-, BC,
+                                    C+, C, C-, D+, D, E, T
                                 </li>
                                 <li>• Tahun ajaran format: 2024/2025</li>
                             </ul>
