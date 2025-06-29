@@ -1,5 +1,5 @@
-// STANDARDIZED Admin Controller with consistent response format
 // const bcrypt = require('bcryptjs'); // kalau mau menggunakan hashing
+const Papa = require('papaparse');
 
 const {
     findAllAdmins,
@@ -108,12 +108,12 @@ exports.createAdmin = async (req, res) => {
         });
 
         // LOG SUKSES
-        await logActivity({ 
-            req, 
-            admin: req.user, 
-            action: `Membuat Admin baru: ${name}`, 
-            target_entity: `Username: ${username}`, 
-            status: 'success' 
+        await logActivity({
+            req,
+            admin: req.user,
+            action: `Membuat Admin baru: ${name}`,
+            target_entity: `Username: ${username}`,
+            status: 'success',
         });
 
         res.status(201).json({
@@ -129,12 +129,12 @@ exports.createAdmin = async (req, res) => {
         console.error('Error in createAdmin:', error);
         if (error.code === 'ER_DUP_ENTRY') {
             // LOG GAGAL
-            await logActivity({ 
-                req, 
-                admin: req.user, 
-                action: `Gagal membuat Admin (username duplikat): ${name}`, 
-                target_entity: `Username: ${username}`, 
-                status: 'fail' 
+            await logActivity({
+                req,
+                admin: req.user,
+                action: `Gagal membuat Admin (username duplikat): ${name}`,
+                target_entity: `Username: ${username}`,
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -149,7 +149,7 @@ exports.createAdmin = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Admin: ${name}`,
             target_entity: `Username: ${username}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -184,7 +184,7 @@ exports.updateAdmin = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Admin (ID tidak ditemukan)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
             return res.status(404).json({
                 success: false,
@@ -197,7 +197,7 @@ exports.updateAdmin = async (req, res) => {
             admin: req.user,
             action: `Mengupdate data Admin: ${name}`,
             target_entity: `ID: ${id}`,
-            status: 'success'
+            status: 'success',
         });
         res.status(200).json({
             success: true,
@@ -216,7 +216,7 @@ exports.updateAdmin = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Admin (username duplikat)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
             return res.status(409).json({
                 success: false,
@@ -229,7 +229,7 @@ exports.updateAdmin = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Admin`,
             target_entity: `ID: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
         res.status(500).json({
             success: false,
@@ -250,7 +250,7 @@ exports.deleteAdmin = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Admin (ID tidak ditemukan)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -264,7 +264,7 @@ exports.deleteAdmin = async (req, res) => {
             admin: req.user,
             action: `Menghapus Admin`,
             target_entity: `ID: ${id}`,
-            status: 'success'
+            status: 'success',
         });
         res.status(200).json({
             success: true,
@@ -277,7 +277,7 @@ exports.deleteAdmin = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Admin`,
             target_entity: `ID: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
         res.status(500).json({
             success: false,
@@ -341,7 +341,7 @@ exports.createDosen = async (req, res) => {
             admin: req.user, // didapat dari middleware 'protect'
             action: `Membuat Dosen Wali baru: ${nama}`,
             target_entity: `NIP: ${nip}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(201).json({
@@ -359,16 +359,16 @@ exports.createDosen = async (req, res) => {
             const field = error.message.includes("'nip'")
                 ? 'NIP'
                 : 'Kode Dosen';
-            
+
             // <<< LOGGING GAGAL >>>
             await logActivity({
                 req,
                 admin: req.user,
                 action: `Gagal membuat Dosen Wali (duplikat): ${nama}`,
                 target_entity: `NIP: ${nip} / Kode: ${kode}`,
-                status: 'fail'
+                status: 'fail',
             });
-            
+
             return res.status(409).json({
                 success: false,
                 message: `${field} sudah digunakan`,
@@ -381,7 +381,7 @@ exports.createDosen = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Dosen Wali: ${nama}`,
             target_entity: `NIP: ${nip}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -423,7 +423,7 @@ exports.updateDosen = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Dosen Wali (NIP tidak ditemukan)`,
                 target_entity: `NIP: ${nip}`,
-                status: 'fail'
+                status: 'fail',
             });
             return res.status(404).json({
                 success: false,
@@ -436,7 +436,7 @@ exports.updateDosen = async (req, res) => {
             admin: req.user,
             action: `Mengupdate data Dosen Wali: ${nama}`,
             target_entity: `NIP: ${nip}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -457,7 +457,7 @@ exports.updateDosen = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Dosen Wali (kode duplikat)`,
                 target_entity: `NIP: ${nip}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -471,7 +471,7 @@ exports.updateDosen = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Dosen Wali`,
             target_entity: `NIP: ${nip}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -493,7 +493,7 @@ exports.deleteDosen = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Dosen Wali (NIP tidak ditemukan)`,
                 target_entity: `NIP: ${nip}`,
-                status: 'fail'
+                status: 'fail',
             });
             return res.status(404).json({
                 success: false,
@@ -506,7 +506,7 @@ exports.deleteDosen = async (req, res) => {
             admin: req.user,
             action: `Menghapus Dosen Wali`,
             target_entity: `NIP: ${nip}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -521,7 +521,7 @@ exports.deleteDosen = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Dosen Wali (masih menjadi wali kelas)`,
                 target_entity: `NIP: ${nip}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -536,7 +536,7 @@ exports.deleteDosen = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Dosen Wali`,
             target_entity: `NIP: ${nip}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -593,7 +593,7 @@ exports.createMahasiswa = async (req, res) => {
             admin: req.user,
             action: `Membuat Mahasiswa baru: ${nama}`,
             target_entity: `NIM: ${nim}`,
-            status: 'success'
+            status: 'success',
         });
         res.status(201).json({
             success: true,
@@ -612,7 +612,7 @@ exports.createMahasiswa = async (req, res) => {
                 admin: req.user,
                 action: `Gagal membuat Mahasiswa (NIM duplikat): ${nama}`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -626,7 +626,7 @@ exports.createMahasiswa = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Mahasiswa: ${nama}`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -661,7 +661,7 @@ exports.updateMahasiswaByNim = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Mahasiswa (NIM tidak ditemukan)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -675,7 +675,7 @@ exports.updateMahasiswaByNim = async (req, res) => {
             admin: req.user,
             action: `Mengupdate data Mahasiswa: ${nama}`,
             target_entity: `NIM: ${nim}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -695,7 +695,7 @@ exports.updateMahasiswaByNim = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Mahasiswa`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -717,7 +717,7 @@ exports.deleteMahasiswa = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Mahasiswa (NIM tidak ditemukan)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -731,7 +731,7 @@ exports.deleteMahasiswa = async (req, res) => {
             admin: req.user,
             action: `Menghapus Mahasiswa`,
             target_entity: `NIM: ${nim}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -746,7 +746,7 @@ exports.deleteMahasiswa = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Mahasiswa (data terkait masih ada)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -761,7 +761,7 @@ exports.deleteMahasiswa = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Mahasiswa`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -788,6 +788,241 @@ exports.getAllKelas = async (req, res) => {
         });
     }
 };
+
+// =============================================
+// ==         BULK IMPORT FUNCTIONS           ==
+// =============================================
+
+// Bulk create mahasiswa from CSV
+exports.bulkCreateMahasiswa = async (req, res) => {
+    try {
+        // Cek keberadaan file.
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'File CSV wajib diupload',
+            });
+        }
+
+        // Parse CSV file
+        const csvData = req.file.buffer.toString('utf8');
+        const parsed = Papa.parse(csvData, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: (header) => header.trim().toLowerCase(),
+        });
+
+        if (parsed.errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Format CSV tidak valid',
+                errors: parsed.errors,
+            });
+        }
+
+        const records = parsed.data;
+        const results = {
+            total: records.length,
+            created: 0,
+            failed: 0,
+            errors: [],
+        };
+
+        // Process each record
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
+
+            try {
+                // Validate required fields
+                if (!record.nim || !record.nama || !record.kelas) {
+                    throw new Error('NIM, nama, dan kelas wajib diisi');
+                }
+
+                // Set default password if empty
+                const finalPassword = record.password || record.nim;
+
+                // Use existing createMahasiswa logic
+                await createMahasiswa({
+                    nim: record.nim.trim(),
+                    nama: record.nama.trim(),
+                    kelas: record.kelas.trim(),
+                    password: finalPassword,
+                });
+
+                results.created++;
+            } catch (error) {
+                results.failed++;
+                let errorMessage = 'Unknown error';
+
+                if (error.code === 'ER_DUP_ENTRY') {
+                    errorMessage = `NIM "${record.nim}" sudah terdaftar`;
+                } else if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+                    errorMessage = `Kelas "${record.kelas}" tidak ditemukan`;
+                } else {
+                    errorMessage = error.message;
+                }
+
+                results.errors.push({
+                    row: rowNumber,
+                    nim: record.nim || 'N/A',
+                    nama: record.nama || 'N/A',
+                    error: errorMessage,
+                });
+            }
+        }
+
+        // Log activity
+        await logActivity({
+            req,
+            admin: req.user,
+            action: `Bulk import Mahasiswa: ${results.created} berhasil, ${results.failed} gagal`,
+            target_entity: `Total: ${results.total} records`,
+            status: results.failed === 0 ? 'success' : 'fail',
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Bulk import selesai: ${results.created} berhasil, ${results.failed} gagal`,
+            data: results,
+        });
+    } catch (error) {
+        console.error('Error in bulkCreateMahasiswa:', error);
+
+        await logActivity({
+            req,
+            admin: req.user,
+            action: `Bulk import Mahasiswa: ${results.created} berhasil, ${results.failed} gagal`,
+            target_entity: `Total: ${results.total} records`,
+            status: results.failed === 0 ? 'success' : 'fail',
+        });
+
+        res.status(500).json({
+            success: false,
+            message: 'Gagal memproses bulk import',
+            error: error.message,
+        });
+    }
+};
+
+// Bulk create dosen wali from CSV
+// exports.bulkCreateDosenWali = async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'File CSV wajib diupload',
+//             });
+//         }
+
+//         // Parse CSV file
+//         const csvData = req.file.buffer.toString('utf8');
+//         const parsed = Papa.parse(csvData, {
+//             header: true,
+//             skipEmptyLines: true,
+//             transformHeader: (header) => header.trim().toLowerCase(),
+//         });
+
+//         if (parsed.errors.length > 0) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Format CSV tidak valid',
+//                 errors: parsed.errors,
+//             });
+//         }
+
+//         const records = parsed.data;
+//         const results = {
+//             total: records.length,
+//             created: 0,
+//             failed: 0,
+//             errors: [],
+//         };
+
+//         // Process each record
+//         for (let i = 0; i < records.length; i++) {
+//             const record = records[i];
+//             const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
+
+//             try {
+//                 // Validate required fields
+//                 if (!record.nip || !record.nama || !record.kode) {
+//                     throw new Error('NIP, nama, dan kode dosen wajib diisi');
+//                 }
+
+//                 // Validate kode length
+//                 if (record.kode.length > 3) {
+//                     throw new Error('Kode dosen maksimal 3 karakter');
+//                 }
+
+//                 // Set default password if empty
+//                 const finalPassword = record.password || record.nip;
+
+//                 // Use existing createDosen logic
+//                 await createDosen({
+//                     nip: record.nip.trim(),
+//                     nama: record.nama.trim(),
+//                     kode: record.kode.trim(),
+//                     password: finalPassword,
+//                 });
+
+//                 results.created++;
+//             } catch (error) {
+//                 results.failed++;
+//                 let errorMessage = 'Unknown error';
+
+//                 if (error.code === 'ER_DUP_ENTRY') {
+//                     if (error.message.includes("'nip'")) {
+//                         errorMessage = `NIP "${record.nip}" sudah digunakan`;
+//                     } else {
+//                         errorMessage = `Kode dosen "${record.kode}" sudah digunakan`;
+//                     }
+//                 } else {
+//                     errorMessage = error.message;
+//                 }
+
+//                 results.errors.push({
+//                     row: rowNumber,
+//                     nip: record.nip || 'N/A',
+//                     nama: record.nama || 'N/A',
+//                     kode: record.kode || 'N/A',
+//                     error: errorMessage,
+//                 });
+//             }
+//         }
+
+//         // Log activity
+//         await logActivity({
+//             req,
+//             admin: req.user,
+//             action: `Bulk import Dosen Wali: ${results.created} berhasil, ${results.failed} gagal`,
+//             target_entity: `Total: ${results.total} records`,
+//             status: results.failed === 0 ? 'success' : 'fail',
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             message: `Bulk import selesai: ${results.created} berhasil, ${results.failed} gagal`,
+//             data: results,
+//         });
+//     } catch (error) {
+//         console.error('Error in bulkCreateDosenWali:', error);
+
+//         await logActivity({
+//             req,
+//             admin: req.user,
+//             action: 'Error bulk import Dosen Wali',
+//             target_entity: 'Bulk import failed',
+//             status: 'fail',
+//         });
+
+//         res.status(500).json({
+//             success: false,
+//             message: 'Gagal memproses bulk import',
+//             error: error.message,
+//         });
+//     }
+// };
 
 // =============================================
 // ==         KELOLA KELAS FUNCTIONS          ==
@@ -851,7 +1086,7 @@ exports.createKelas = async (req, res) => {
             admin: req.user,
             action: `Membuat Kelas baru: ${kode_kelas}`,
             target_entity: `ID: ${newKelasId}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(201).json({
@@ -865,13 +1100,12 @@ exports.createKelas = async (req, res) => {
     } catch (error) {
         console.error('Error in createKelas:', error);
         if (error.code === 'ER_DUP_ENTRY') {
-
             await logActivity({
                 req,
                 admin: req.user,
                 action: `Gagal membuat Kelas (kode duplikat): ${kode_kelas}`,
                 target_entity: `Kode: ${kode_kelas}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -885,7 +1119,7 @@ exports.createKelas = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Kelas: ${kode_kelas}`,
             target_entity: `Kode: ${kode_kelas}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -909,7 +1143,7 @@ exports.updateKelas = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Kelas (ID tidak ditemukan)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -923,7 +1157,7 @@ exports.updateKelas = async (req, res) => {
             admin: req.user,
             action: `Mengupdate Dosen Wali untuk Kelas ${kode_kelas}`,
             target_entity: `ID Kelas: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -942,7 +1176,7 @@ exports.updateKelas = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Kelas`,
             target_entity: `ID Kelas: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -963,7 +1197,7 @@ exports.deleteKelas = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Kelas (ID tidak ditemukan)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -977,7 +1211,7 @@ exports.deleteKelas = async (req, res) => {
             admin: req.user,
             action: `Menghapus Kelas`,
             target_entity: `ID: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -992,7 +1226,7 @@ exports.deleteKelas = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Kelas (masih ada mahasiswa terdaftar)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -1007,7 +1241,7 @@ exports.deleteKelas = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Kelas`,
             target_entity: `ID: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1120,7 +1354,6 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
 //     }
 // };
 
-
 exports.getCourseHistory = async (req, res) => {
     try {
         // Ambil nim mahasiswa dari session
@@ -1137,13 +1370,13 @@ exports.getCourseHistory = async (req, res) => {
 
         // 1. Ambil data nilai mahasiswa
         const nilaiRows = await getStudentGrades(nim);
-        console.log(nilaiRows)
+        console.log(nilaiRows);
         const dataMahasiswa = {
             nim: nim,
             name: nilaiRows[0].nama,
-            kelas: nilaiRows[0].kelas
-        }
-        console.log(dataMahasiswa)
+            kelas: nilaiRows[0].kelas,
+        };
+        console.log(dataMahasiswa);
 
         if (nilaiRows.length === 0) {
             return res.status(200).json({
@@ -1285,7 +1518,6 @@ exports.getCourseHistory = async (req, res) => {
     }
 };
 
-
 // ngambil daftar semua mata kuliah
 exports.getAllCourses = async (req, res) => {
     try {
@@ -1358,7 +1590,7 @@ exports.createNilai = async (req, res) => {
                 admin: req.user,
                 action: `Membuat data Nilai baru`,
                 target_entity: `NIM: ${nimMahasiswa}, MK: ${kodeMK}`,
-                status: 'success'
+                status: 'success',
             });
 
             res.status(201).json({
@@ -1379,7 +1611,7 @@ exports.createNilai = async (req, res) => {
                 admin: req.user,
                 action: `Gagal membuat Nilai (NIM/MK tidak ada)`,
                 target_entity: `NIM: ${nimMahasiswa}, MK: ${kodeMK}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(400).json({
@@ -1394,7 +1626,7 @@ exports.createNilai = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Nilai`,
             target_entity: `NIM: ${nimMahasiswa}, MK: ${kodeMK}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1438,7 +1670,7 @@ exports.updateNilai = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Nilai (ID tidak ditemukan)`,
                 target_entity: `ID Nilai: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -1458,7 +1690,7 @@ exports.updateNilai = async (req, res) => {
             admin: req.user,
             action: `Mengupdate data Nilai`,
             target_entity: `ID Nilai: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -1476,7 +1708,7 @@ exports.updateNilai = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Nilai (Kode MK tidak ada)`,
                 target_entity: `ID Nilai: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(400).json({
@@ -1492,7 +1724,7 @@ exports.updateNilai = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Nilai`,
             target_entity: `ID Nilai: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1518,7 +1750,7 @@ exports.deleteNilai = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Nilai (ID tidak ditemukan)`,
                 target_entity: `ID Nilai: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -1533,7 +1765,7 @@ exports.deleteNilai = async (req, res) => {
             admin: req.user,
             action: `Menghapus data Nilai`,
             target_entity: `ID Nilai: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -1548,7 +1780,7 @@ exports.deleteNilai = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Nilai`,
             target_entity: `ID Nilai: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1661,11 +1893,16 @@ exports.createPrestasi = async (req, res) => {
             try {
                 const hasilKlasifikasi = tentukanKlasifikasi(ipk_lulus);
                 await upsertKlasifikasi(nim, hasilKlasifikasi);
-                console.log(`Klasifikasi untuk NIM ${nim} berhasil dibuat/diupdate menjadi: ${hasilKlasifikasi}`);
+                console.log(
+                    `Klasifikasi untuk NIM ${nim} berhasil dibuat/diupdate menjadi: ${hasilKlasifikasi}`
+                );
             } catch (classificationError) {
                 // Jika klasifikasi gagal, cukup log error tanpa menghentikan proses utama.
                 // Respons sukses sudah akan dikirim ke user.
-                console.error(`Gagal melakukan klasifikasi untuk NIM ${nim}:`, classificationError);
+                console.error(
+                    `Gagal melakukan klasifikasi untuk NIM ${nim}:`,
+                    classificationError
+                );
             }
 
             await logActivity({
@@ -1673,7 +1910,7 @@ exports.createPrestasi = async (req, res) => {
                 admin: req.user,
                 action: `Membuat data Prestasi`,
                 target_entity: `NIM: ${nim}`,
-                status: 'success'
+                status: 'success',
             });
 
             res.status(201).json({
@@ -1690,7 +1927,7 @@ exports.createPrestasi = async (req, res) => {
                 admin: req.user,
                 action: `Gagal membuat Prestasi (NIM tidak ada)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(400).json({
@@ -1706,7 +1943,7 @@ exports.createPrestasi = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Prestasi`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1754,7 +1991,7 @@ exports.updatePrestasi = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Prestasi (NIM tidak ditemukan)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -1766,9 +2003,14 @@ exports.updatePrestasi = async (req, res) => {
         try {
             const hasilKlasifikasi = tentukanKlasifikasi(data.ipk_lulus);
             await upsertKlasifikasi(nim, hasilKlasifikasi);
-            console.log(`Klasifikasi untuk NIM ${nim} berhasil diupdate menjadi: ${hasilKlasifikasi}`);
+            console.log(
+                `Klasifikasi untuk NIM ${nim} berhasil diupdate menjadi: ${hasilKlasifikasi}`
+            );
         } catch (classificationError) {
-            console.error(`Gagal melakukan klasifikasi untuk NIM ${nim} saat update:`, classificationError);
+            console.error(
+                `Gagal melakukan klasifikasi untuk NIM ${nim} saat update:`,
+                classificationError
+            );
         }
 
         // Jika berhasil
@@ -1777,7 +2019,7 @@ exports.updatePrestasi = async (req, res) => {
             admin: req.user,
             action: `Mengupdate data Prestasi`,
             target_entity: `NIM: ${nim}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -1796,7 +2038,7 @@ exports.updatePrestasi = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Prestasi`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1825,7 +2067,7 @@ exports.deletePrestasi = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Prestasi (NIM tidak ditemukan)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -1839,7 +2081,7 @@ exports.deletePrestasi = async (req, res) => {
             admin: req.user,
             action: `Menghapus data Prestasi`,
             target_entity: `NIM: ${nim}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -1854,7 +2096,7 @@ exports.deletePrestasi = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Prestasi`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -1959,7 +2201,7 @@ exports.createSemester = async (req, res) => {
             admin: req.user,
             action: `Membuat data Semester`,
             target_entity: `NIM: ${nim}, Semester: ${semester}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(201).json({
@@ -1977,7 +2219,7 @@ exports.createSemester = async (req, res) => {
                 admin: req.user,
                 action: `Gagal membuat Semester (NIM tidak ada)`,
                 target_entity: `NIM: ${nim}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(400).json({
@@ -1992,7 +2234,7 @@ exports.createSemester = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat Semester`,
             target_entity: `NIM: ${nim}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -2035,7 +2277,7 @@ exports.updateSemester = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update Semester (ID tidak ditemukan)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -2050,7 +2292,7 @@ exports.updateSemester = async (req, res) => {
             admin: req.user,
             action: `Mengupdate data Semester`,
             target_entity: `ID: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -2068,7 +2310,7 @@ exports.updateSemester = async (req, res) => {
             admin: req.user,
             action: `Error server saat update Semester`,
             target_entity: `ID: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -2093,7 +2335,7 @@ exports.deleteSemester = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus Semester (ID tidak ditemukan)`,
                 target_entity: `ID: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -2107,7 +2349,7 @@ exports.deleteSemester = async (req, res) => {
             admin: req.user,
             action: `Menghapus data Semester`,
             target_entity: `ID: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -2121,7 +2363,7 @@ exports.deleteSemester = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus Semester`,
             target_entity: `ID: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -2211,7 +2453,7 @@ exports.getKelompokKeahlianList = async (req, res) => {
     try {
         const kelompokKeahlianList = await getAllKelompokKeahlian();
 
-         if (kelompokKeahlianList.length === 0) {
+        if (kelompokKeahlianList.length === 0) {
             return res.status(200).json({
                 success: true,
                 count: 0,
@@ -2381,7 +2623,7 @@ exports.createMataKuliah = async (req, res) => {
             admin: req.user,
             action: `Membuat Mata Kuliah baru: ${nama_mk}`,
             target_entity: `Kode: ${kode_mk}`,
-            status: 'success'
+            status: 'success',
         });
 
         return res.status(201).json({
@@ -2399,7 +2641,7 @@ exports.createMataKuliah = async (req, res) => {
                 admin: req.user,
                 action: `Gagal membuat MK (duplikat): ${nama_mk}`,
                 target_entity: `Kode: ${kode_mk}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -2414,7 +2656,7 @@ exports.createMataKuliah = async (req, res) => {
             admin: req.user,
             action: `Error server saat membuat MK: ${nama_mk}`,
             target_entity: `Kode: ${kode_mk}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         return res.status(500).json({
@@ -2521,7 +2763,7 @@ exports.updateMataKuliah = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update MK (ID tidak ditemukan)`,
                 target_entity: `ID MK: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -2535,7 +2777,7 @@ exports.updateMataKuliah = async (req, res) => {
             admin: req.user,
             action: `Mengupdate Mata Kuliah: ${nama_mk}`,
             target_entity: `ID MK: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -2553,7 +2795,7 @@ exports.updateMataKuliah = async (req, res) => {
                 admin: req.user,
                 action: `Gagal update MK (duplikat): ${nama_mk}`,
                 target_entity: `ID MK: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(409).json({
@@ -2567,7 +2809,7 @@ exports.updateMataKuliah = async (req, res) => {
             admin: req.user,
             action: `Error server saat update MK`,
             target_entity: `ID MK: ${id}`,
-            status: 'fail'
+            status: 'fail',
         });
 
         res.status(500).json({
@@ -2600,7 +2842,7 @@ exports.deleteMataKuliah = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus MK (ID tidak ditemukan)`,
                 target_entity: `ID MK: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(404).json({
@@ -2617,7 +2859,7 @@ exports.deleteMataKuliah = async (req, res) => {
                 admin: req.user,
                 action: `Gagal hapus MK setelah ditemukan`,
                 target_entity: `ID MK: ${id}`,
-                status: 'fail'
+                status: 'fail',
             });
 
             return res.status(500).json({
@@ -2631,7 +2873,7 @@ exports.deleteMataKuliah = async (req, res) => {
             admin: req.user,
             action: `Menghapus Mata Kuliah: ${existingMataKuliah.nama_mk}`,
             target_entity: `ID MK: ${id}`,
-            status: 'success'
+            status: 'success',
         });
 
         res.status(200).json({
@@ -2650,9 +2892,9 @@ exports.deleteMataKuliah = async (req, res) => {
             admin: req.user,
             action: `Error server saat hapus MK`,
             target_entity: target,
-            status: 'fail'
+            status: 'fail',
         });
-        
+
         res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan dalam menghapus mata kuliah',

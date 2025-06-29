@@ -8,6 +8,9 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 
 const logController = require('../controllers/logController');
 
+const upload = require('../middlewares/uploadMiddleware');
+const csvUpload = require('../middlewares/csvUploadMiddleware');
+
 // @desc    Endpoint backend untuk ...
 router.get('/contoh', protect, authorize('admin'), () => {});
 
@@ -107,7 +110,22 @@ router.get(
     adminController.getAllKelas
 );
 
+//?-- Endpoint tambahan untuk menambah data mahasiswa dan dosen wali menggunakan csv.
+router.post(
+    '/kelolaPengguna/bulkCreateMahasiswa',
+    protect,
+    authorize('admin'),
+    csvUpload.single('file'),
+    adminController.bulkCreateMahasiswa
+);
 
+// router.post(
+//     '/kelolaPengguna/bulkCreateDosenWali',
+//     protect,
+//     authorize('admin'),
+//     csvUpload.single('file'),
+//     adminController.bulkCreateDosenWali
+// );
 
 // =======================================================
 //?==         KELOLA KELAS DAN ANGKATAN ROUTES          ==
@@ -147,7 +165,6 @@ router.delete(
     adminController.deleteKelas
 );
 
-
 // =============================================
 // ==            KELOLA AKADEMIK              ==
 // =============================================
@@ -158,43 +175,42 @@ router.get(
     protect,
     authorize('admin'),
     adminController.getAllMahasiswaForKelolaAkademik
-)
+);
 
 router.get(
     '/kelolaAkademik/getGradesMahasiswa/:nim',
     protect,
     authorize('admin'),
     adminController.getCourseHistory
-)
+);
 
 router.get(
     '/kelolaAkademik/getAllCourses',
     protect,
     authorize('admin'),
     adminController.getAllCourses
-)
+);
 
 router.post(
     '/kelolaAkademik/createGrade',
     protect,
     authorize('admin'),
     adminController.createNilai
-)
+);
 
 router.put(
     '/kelolaAkademik/updateGrade/:id',
     protect,
     authorize('admin'),
     adminController.updateNilai
-)
+);
 
 router.delete(
     '/kelolaAkademik/deleteGrade/:id',
     protect,
     authorize('admin'),
     adminController.deleteNilai
-)
-
+);
 
 // ============= KELOLA DATA PRESTASI =============
 router.get(
@@ -202,29 +218,28 @@ router.get(
     protect,
     authorize('admin'),
     adminController.getPrestasiByNIM
-)
+);
 
 router.post(
     '/kelolaAkademik/createPrestasiData',
     protect,
     authorize('admin'),
     adminController.createPrestasi
-)
+);
 
 router.put(
     '/kelolaAkademik/updatePrestasiData/:nim',
     protect,
     authorize('admin'),
     adminController.updatePrestasi
-)
+);
 
 router.delete(
     '/kelolaAkademik/deletePrestasiData/:nim',
     protect,
     authorize('admin'),
     adminController.deletePrestasi
-)
-
+);
 
 // ============= KELOLA DATA SEMESTER =============
 router.get(
@@ -232,29 +247,28 @@ router.get(
     protect,
     authorize('admin'),
     adminController.getSemesterByNIM
-)
+);
 
 router.post(
     '/kelolaAkademik/createSemesterData/:nim',
     protect,
     authorize('admin'),
     adminController.createSemester
-)
+);
 
 router.put(
     '/kelolaAkademik/updateSemesterData/:id',
     protect,
     authorize('admin'),
     adminController.updateSemester
-)
+);
 
 router.delete(
     '/kelolaAkademik/deleteSemesterData/:id',
     protect,
     authorize('admin'),
     adminController.deleteSemester
-)
-
+);
 
 // =============================================
 // ==           KELOLA KURIKULUM              ==
@@ -264,49 +278,49 @@ router.get(
     protect,
     authorize('admin'),
     adminController.getMataKuliahByKurikulum
-)
+);
 
 router.get(
     '/kelolaKurikulum/getAllKurikulum',
     protect,
     authorize('admin'),
     adminController.getAllKurikulum
-)
+);
 
 router.get(
     '/kelolaKurikulum/getMataKuliahById/:id',
     protect,
     authorize('admin'),
     adminController.getMataKuliahById
-)
+);
 
 router.post(
     '/kelolaKurikulum/createNewMataKuliah',
     protect,
     authorize('admin'),
     adminController.createMataKuliah
-)
+);
 
 router.put(
     '/kelolaKurikulum/updateMataKuliah/:id',
     protect,
     authorize('admin'),
     adminController.updateMataKuliah
-)
+);
 
 router.delete(
     '/kelolaKurikulum/deleteMataKuliah/:id',
     protect,
     authorize('admin'),
     adminController.deleteMataKuliah
-)
+);
 
 router.get(
     '/kelolaKurikulum/getEkuivalensiOptions/:kurikulum',
     protect,
     authorize('admin'),
     adminController.getEkuivalensiOptions
-)
+);
 
 router.get(
     '/kelolaKurikulum/getAllKelompokKeahlian',
@@ -327,6 +341,5 @@ router.get(
     authorize('admin'),
     logController.getAllLogs
 );
-
 
 module.exports = router;
