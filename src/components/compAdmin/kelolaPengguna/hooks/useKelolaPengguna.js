@@ -14,6 +14,7 @@ import {
     updateMahasiswa,
     deleteMahasiswa,
     getAllKelas,
+    bulkCreateMahasiswa,
 } from '../../../../services/adminServices/kelolaPenggunaService';
 
 export const useKelolaPengguna = () => {
@@ -34,6 +35,9 @@ export const useKelolaPengguna = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+
+    // State untuk bulk import
+    const [bulkImporting, setBulkImporting] = useState(false);
 
     // Load data saat component mount
     useEffect(() => {
@@ -195,6 +199,28 @@ export const useKelolaPengguna = () => {
         }
     };
 
+    // Bulk import mahasiswa
+    const handleBulkImport = async (file) => {
+        setBulkImporting(true);
+        try {
+            const response = await bulkCreateMahasiswa(file);
+
+            if (response.success) {
+                toast.success(response.message);
+                loadData(); // Refresh data after bulk import
+                return response.data; // Return results for popup display
+            } else {
+                toast.error(response.message || 'Gagal import data');
+                return null;
+            }
+        } catch (error) {
+            toast.error('Terjadi kesalahan saat import data');
+            return null;
+        } finally {
+            setBulkImporting(false);
+        }
+    };
+
     // Filter data berdasarkan search
     const getFilteredData = () => {
         let data = [];
@@ -260,6 +286,7 @@ export const useKelolaPengguna = () => {
         activeTab,
         loading,
         loadingAction,
+        bulkImporting,
         searchTerm,
         currentPage,
         itemsPerPage,
@@ -277,6 +304,7 @@ export const useKelolaPengguna = () => {
         handleCreate,
         handleUpdate,
         handleDelete,
+        handleBulkImport,
         setSearchTerm,
         setCurrentPage,
         loadData,

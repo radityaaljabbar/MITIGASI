@@ -313,6 +313,35 @@ export const deleteMahasiswa = async (nim) => {
     }
 };
 
+// BULK - Import mahasiswa from CSV
+export const bulkCreateMahasiswa = async (file) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(
+            getApiUrl('/admin/kelolaPengguna/bulkCreateMahasiswa'),
+            {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeaders(),
+                    // Don't set Content-Type for FormData
+                },
+                body: formData,
+            }
+        );
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error bulk creating mahasiswa:', error);
+        return {
+            success: false,
+            message: 'Network error. Please check your connection.',
+        };
+    }
+};
+
 // =============================================
 // ==           HELPER SERVICES               ==
 // =============================================

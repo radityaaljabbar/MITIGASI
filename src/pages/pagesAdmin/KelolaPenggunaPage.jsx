@@ -7,6 +7,7 @@ import KelolaPenggunaTabs from '../../components/compAdmin/kelolaPengguna/kelola
 import KelolaPenggunaTable from '../../components/compAdmin/kelolaPengguna/KelolaPenggunaTable';
 import KelolaPenggunaModal from '../../components/compAdmin/kelolaPengguna/KelolaPenggunaModal';
 import DeleteConfirmationModal from '../../components/compAdmin/kelolaPengguna/DeleteConfirmationModal';
+import BulkImportPopup from '../../components/compAdmin/kelolaPengguna/BulkImportPopup';
 
 // Import custom hook
 import { useKelolaPengguna } from '../../components/compAdmin/kelolaPengguna/hooks/useKelolaPengguna';
@@ -21,12 +22,16 @@ const KelolaPenggunaPage = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteData, setDeleteData] = useState(null);
 
+    // State untuk bulk import popup
+    const [showBulkImportPopup, setShowBulkImportPopup] = useState(false);
+
     // Custom hook untuk logic
     const {
         // State
         activeTab,
         loading,
         loadingAction,
+        bulkImporting,
         searchTerm,
         currentPage,
         itemsPerPage,
@@ -44,6 +49,7 @@ const KelolaPenggunaPage = () => {
         handleCreate,
         handleUpdate,
         handleDelete,
+        handleBulkImport,
         setSearchTerm,
         setCurrentPage,
         loadData,
@@ -107,6 +113,15 @@ const KelolaPenggunaPage = () => {
         setDeleteData(null);
     };
 
+    // Handle bulk import
+    const handleBulkImportClick = () => {
+        setShowBulkImportPopup(true);
+    };
+
+    const handleCloseBulkImportPopup = () => {
+        setShowBulkImportPopup(false);
+    };
+
     // Handle toggle status aktif/nonaktif langsung dari tabel
     const handleStatusChange = async (user, newStatus) => {
         const updatedUser = { ...user, status: newStatus };
@@ -117,10 +132,9 @@ const KelolaPenggunaPage = () => {
         if (success) {
             toast.success('Status berhasil diperbarui.');
         } else {
-        toast.error('Gagal memperbarui status.');
+            toast.error('Gagal memperbarui status.');
         }
     };
-
 
     return (
         <div className="p-6 bg-[#FAF0E6] min-h-screen">
@@ -158,6 +172,7 @@ const KelolaPenggunaPage = () => {
                 onDelete={handleDeleteClick}
                 onAdd={handleAdd}
                 onStatusChange={handleStatusChange}
+                onBulkImport={handleBulkImportClick}
             />
 
             {/* Modal Form */}
@@ -179,6 +194,14 @@ const KelolaPenggunaPage = () => {
                 onConfirm={handleConfirmDelete}
                 data={deleteData}
                 loading={loadingAction}
+            />
+
+            {/* Bulk Import Popup */}
+            <BulkImportPopup
+                isOpen={showBulkImportPopup}
+                onClose={handleCloseBulkImportPopup}
+                onImport={handleBulkImport}
+                loading={bulkImporting}
             />
         </div>
     );
