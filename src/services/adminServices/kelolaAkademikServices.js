@@ -364,3 +364,31 @@ export const deleteSemesterData = async (id) => {
         };
     }
 };
+
+// BULK - Import data nilai from CSV
+export const bulkCreateGrades = async (nim, file) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(
+            getApiUrl(`/admin/kelolaAkademik/bulkCreateGrades/${nim}`),
+            {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeaders(),
+                },
+                body: formData,
+            }
+        );
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error bulk creating grades:', error);
+        return {
+            success: false,
+            message: 'Network error. Please check your connection.',
+        };
+    }
+};

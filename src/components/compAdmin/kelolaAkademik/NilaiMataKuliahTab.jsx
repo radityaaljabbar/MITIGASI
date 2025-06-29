@@ -6,7 +6,9 @@ import {
     createGrade,
     updateGrade,
     deleteGrade,
+    bulkCreateGrades,
 } from '../../../services/adminServices/kelolaAkademikServices';
+import BulkImportGradesPopup from './BulkImportGradesPopup';
 import DeleteConfirmationModal from '../kelolaPengguna/DeleteConfirmationModal';
 
 const NilaiMataKuliahTab = ({ mahasiswaData }) => {
@@ -24,6 +26,10 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
     // State untuk delete confirmation
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteData, setDeleteData] = useState(null);
+
+    // State untuk bulk import
+    const [showBulkImportPopup, setShowBulkImportPopup] = useState(false);
+    const [bulkImporting, setBulkImporting] = useState(false);
 
     // State untuk form
     const [formData, setFormData] = useState({
@@ -212,6 +218,28 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         return 'bg-gray-100 text-gray-800';
     };
 
+    // Handle bulk import
+    const handleBulkImport = async (file) => {
+        setBulkImporting(true);
+        try {
+            const response = await bulkCreateGrades(mahasiswaData.nim, file);
+
+            if (response.success) {
+                toast.success(response.message);
+                loadGrades(); // Refresh data after bulk import
+                return response.data; // Return results for popup display
+            } else {
+                toast.error(response.message || 'Gagal import data');
+                return null;
+            }
+        } catch (error) {
+            toast.error('Terjadi kesalahan saat import data');
+            return null;
+        } finally {
+            setBulkImporting(false);
+        }
+    };
+
     return (
         <div className="p-6">
             {/* Header Actions */}
@@ -245,23 +273,34 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                     </div>
                 </div>
 
-                <button
-                    onClick={handleAdd}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
-                    <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                    </svg>
-                    <span>Tambah Nilai</span>
-                </button>
+                <div className="flex space-x-3">
+                    {/* Import CSV Button */}
+                    <button
+                        onClick={() => setShowBulkImportPopup(true)}
+                        className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <span className="mr-2">📁</span>
+                        Import CSV
+                    </button>
+
+                    {/* Add Button */}
+                    <button
+                        onClick={handleAdd}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                        </svg>
+                        <span>Tambah Nilai</span>
+                    </button>
+                </div>
             </div>
 
             {/* Table */}
@@ -517,6 +556,15 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                 onConfirm={confirmDelete}
                 data={deleteData}
                 loading={loadingAction}
+            />
+
+            {/* Bulk Import Popup */}
+            <BulkImportGradesPopup
+                isOpen={showBulkImportPopup}
+                onClose={() => setShowBulkImportPopup(false)}
+                onImport={handleBulkImport}
+                loading={bulkImporting}
+                mahasiswaData={mahasiswaData}
             />
         </div>
     );

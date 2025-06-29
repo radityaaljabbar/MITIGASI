@@ -325,7 +325,6 @@ export const bulkCreateMahasiswa = async (file) => {
                 method: 'POST',
                 headers: {
                     ...getAuthHeaders(),
-                    // Don't set Content-Type for FormData
                 },
                 body: formData,
             }
