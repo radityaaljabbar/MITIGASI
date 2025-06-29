@@ -1254,6 +1254,139 @@ exports.deleteKelas = async (req, res) => {
 };
 
 // =============================================
+// ==         BULK IMPORT FUNCTIONS           ==
+// =============================================
+
+// Bulk create grades from CSV
+exports.bulkCreateGrades = async (req, res) => {
+    try {
+        const { nim } = req.params;
+
+        // Validate NIM parameter
+        if (!nim) {
+            return res.status(400).json({
+                success: false,
+                message: 'NIM mahasiswa tidak tersedia',
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'File CSV wajib diupload',
+            });
+        }
+
+        // Parse CSV file
+        const csvData = req.file.buffer.toString('utf8');
+        const parsed = Papa.parse(csvData, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: (header) => header.trim().toLowerCase(),
+        });
+
+        if (parsed.errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Format CSV tidak valid',
+                errors: parsed.errors,
+            });
+        }
+
+        const records = parsed.data;
+        const results = {
+            total: records.length,
+            created: 0,
+            failed: 0,
+            errors: [],
+        };
+
+        // Process each record
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
+
+            try {
+                // Validate required fields
+                if (
+                    !record.kode_mk ||
+                    !record.indeks_nilai ||
+                    !record.semester ||
+                    !record.tahun_ajaran
+                ) {
+                    throw new Error(
+                        'kode_mk, indeks_nilai, semester, dan tahun_ajaran wajib diisi'
+                    );
+                }
+
+                // Prepare data for existing createNilaiMahasiswa function
+                const gradeData = {
+                    nim_mahasiswa: nim,
+                    kode_mk: record.kode_mk.trim(),
+                    indeks_nilai: record.indeks_nilai.trim(),
+                    semester: record.semester.trim(),
+                    tahun_ajaran: record.tahun_ajaran.trim(),
+                };
+
+                // Use existing createNilaiMahasiswa logic
+                await createNilaiMahasiswa(gradeData);
+                results.created++;
+            } catch (error) {
+                results.failed++;
+                let errorMessage = 'Unknown error';
+
+                if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+                    errorMessage = `Kode MK "${record.kode_mk}" tidak ditemukan di sistem`;
+                } else if (error.code === 'ER_DUP_ENTRY') {
+                    errorMessage = `Nilai untuk MK "${record.kode_mk}" semester ${record.semester} ${record.tahun_ajaran} sudah ada`;
+                } else {
+                    errorMessage = error.message;
+                }
+
+                results.errors.push({
+                    row: rowNumber,
+                    kode_mk: record.kode_mk || 'N/A',
+                    semester: record.semester || 'N/A',
+                    tahun_ajaran: record.tahun_ajaran || 'N/A',
+                    error: errorMessage,
+                });
+            }
+        }
+
+        // Log activity
+        await logActivity({
+            req,
+            admin: req.user,
+            action: `Bulk import Nilai NIM ${nim}: ${results.created} berhasil, ${results.failed} gagal`,
+            target_entity: `NIM: ${nim}, Total: ${results.total} records`,
+            status: results.failed === 0 ? 'success' : 'fail',
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Bulk import selesai: ${results.created} berhasil, ${results.failed} gagal`,
+            data: results,
+        });
+    } catch (error) {
+        console.error('Error in bulkCreateGrades:', error);
+
+        await logActivity({
+            req,
+            admin: req.user,
+            action: `Error bulk import Nilai NIM ${req.params.nim}`,
+            target_entity: 'Bulk import failed',
+            status: 'fail',
+        });
+
+        res.status(500).json({
+            success: false,
+            message: 'Gagal memproses bulk import',
+            error: error.message,
+        });
+    }
+};
+
+// =============================================
 // ==            KELOLA AKADEMIK              ==
 // =============================================
 
@@ -1358,10 +1491,10 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
 
 exports.getCourseHistory = async (req, res) => {
     try {
-        // Ambil nim mahasiswa dari session
+        // Ambil nim mahasiswa dari params
         const { nim } = req.params;
 
-        // Cek dulu kalau id/nim nya ada
+        // Cek dulu kalau nim ada
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -1372,21 +1505,33 @@ exports.getCourseHistory = async (req, res) => {
 
         // 1. Ambil data nilai mahasiswa
         const nilaiRows = await getStudentGrades(nim);
-        console.log(nilaiRows);
+
+        // Debug log
+        console.log('NIM:', nim);
+        console.log('nilaiRows length:', nilaiRows.length);
+
+        // ✅ CEK DULU sebelum akses nilaiRows[0]
+        if (nilaiRows.length === 0) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                data: {
+                    nim: nim,
+                    name: null,
+                    kelas: null,
+                    grades: [],
+                },
+                message: 'Tidak ada data nilai untuk mahasiswa dengan NIM ini',
+            });
+        }
+
+        // ✅ BARU akses nilaiRows[0] setelah yakin ada data
         const dataMahasiswa = {
             nim: nim,
             name: nilaiRows[0].nama,
             kelas: nilaiRows[0].kelas,
         };
-        console.log(dataMahasiswa);
-
-        if (nilaiRows.length === 0) {
-            return res.status(200).json({
-                success: true,
-                count: 0,
-                data: [],
-            });
-        }
+        console.log('Data mahasiswa:', dataMahasiswa);
 
         // 2. Bikin array kode_mk dari nilai mahasiswa
         const kodeMkSet = new Set(nilaiRows.map((row) => row.kode_mk));
@@ -1397,7 +1542,13 @@ exports.getCourseHistory = async (req, res) => {
             return res.status(200).json({
                 success: true,
                 count: 0,
-                data: [],
+                data: {
+                    nim: nim,
+                    name: dataMahasiswa.name,
+                    kelas: dataMahasiswa.kelas,
+                    grades: [],
+                },
+                message: 'Data nilai mahasiswa kosong',
             });
         }
 
@@ -1499,8 +1650,8 @@ exports.getCourseHistory = async (req, res) => {
 
         const responseData = {
             nim: nim,
-            name: nilaiRows[0].nama,
-            kelas: nilaiRows[0].kelas,
+            name: dataMahasiswa.name,
+            kelas: dataMahasiswa.kelas,
             grades: courseHistory,
         };
 

@@ -110,7 +110,7 @@ router.get(
     adminController.getAllKelas
 );
 
-//?-- Endpoint tambahan untuk menambah data mahasiswa dan dosen wali menggunakan csv.
+// BULK - Menambah data mahasiswa dengan csv
 router.post(
     '/kelolaPengguna/bulkCreateMahasiswa',
     protect,
@@ -212,6 +212,14 @@ router.delete(
     adminController.deleteNilai
 );
 
+// BULK - Menambah data nilai mahasiswa dengan csv
+router.post(
+    '/kelolaAkademik/bulkCreateGrades/:nim',
+    protect,
+    authorize('admin'),
+    csvUpload.single('file'),
+    adminController.bulkCreateGrades
+);
 // ============= KELOLA DATA PRESTASI =============
 router.get(
     '/kelolaAkademik/getPrestasiData/:nim',
