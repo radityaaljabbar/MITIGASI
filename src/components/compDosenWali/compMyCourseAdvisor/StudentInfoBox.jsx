@@ -8,8 +8,8 @@ const StudentInfoBox = () => {
     if (!selectedStudent || !studentSKSData) {
         return null;
     }
-    
-    console.log(studentSKSData)
+
+    // console.log(studentSKSData)
 
     // belum dapat menampilkan peminatannya
     return (
@@ -72,10 +72,9 @@ const StudentInfoBox = () => {
                 <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">Peminatan:</span>
                     <span className="text-sm font-semibold text-gray-900">
-                        {studentSKSData.peminatan || '-'} 
+                        {studentSKSData.peminatan || '-'}
                     </span>
                 </div>
-                
             </div>
         </div>
     );
