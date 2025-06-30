@@ -174,6 +174,13 @@ export const getFeedbackList = async () => {
             }));
         }
 
+        // ADDED: Format the response date if it exists
+        if (data.data && data.data.response && data.data.response.date) {
+            data.data.response.date = formatDateTime(
+                new Date(data.data.response.date)
+            );
+        }
+
         return data;
     } catch (error) {
         console.error('Error in getFeedbackList:', error);

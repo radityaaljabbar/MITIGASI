@@ -72,11 +72,68 @@ const StudentDetailView = ({ student, onBack }) => {
     const [showPdfModal, setShowPdfModal] = useState(false);
     const [activePdf, setActivePdf] = useState(null);
     const [refreshKey, setRefreshKey] = useState(0); // For forcing refreshes
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileInputRef] = useState(React.createRef());
 
     // Function to refresh data
     const refreshData = useCallback(() => {
         setRefreshKey((prevKey) => prevKey + 1);
     }, []);
+
+    // File handling functions
+    const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Ukuran file maksimal 5MB');
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/jpeg',
+                'image/png',
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                toast.error(
+                    'Tipe file tidak didukung. Hanya PDF, DOC, DOCX, XLS, XLSX, JPG, dan PNG yang diizinkan.'
+                );
+                return;
+            }
+
+            setSelectedFile(file);
+            toast.success(`File "${file.name}" berhasil dipilih`);
+        }
+    };
+
+    const handleRemoveFile = () => {
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+        toast.info('File dihapus');
+    };
+
+    const handlePaperclipClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
 
     // Fetch detailed feedback data including attachments
     useEffect(() => {
@@ -89,11 +146,36 @@ const StudentDetailView = ({ student, onBack }) => {
                     );
 
                     if (detailResponse.success) {
+                        // console.log(
+                        //     '🔍 Feedback detail response:',
+                        //     detailResponse.data
+                        // );
+                        // console.log(
+                        //     '📎 Feedback lampiran:',
+                        //     detailResponse.data.lampiran
+                        // );
+
                         setStudentDetail((prev) => {
+                            // FIXED: Don't override existing data, only update what's needed
                             const updated = {
                                 ...prev,
-                                ...detailResponse.data,
+                                // Only update feedback-specific fields, don't spread everything
+                                name: detailResponse.data.name,
+                                nim: detailResponse.data.nim,
+                                kelas: detailResponse.data.kelas,
+                                title: detailResponse.data.title,
+                                details: detailResponse.data.details,
+                                feedbackDate: detailResponse.data.feedbackDate,
+                                feedbackId: detailResponse.data.feedbackId,
+                                lampiranMahasiswa: detailResponse.data.lampiran,
+                                // Keep existing status if already set
+                                status:
+                                    prev.status || detailResponse.data.status,
                             };
+                            // console.log(
+                            //     '✅ Updated studentDetail (selective):',
+                            //     updated
+                            // );
                             return updated;
                         });
                     } else {
@@ -122,23 +204,37 @@ const StudentDetailView = ({ student, onBack }) => {
                         student.feedbackId
                     );
 
-                    if (response.success && response.data) {
-                        setResponseData(response.data);
-                        setResponseText(response.data.responseText); // Pre-fill the response text for editing
+                    // console.log('🔍 Dosen response:', response.data);
+                    // console.log(
+                    //     '📎 Response lampiran:',
+                    //     response.data?.lampiran
+                    // );
 
-                        // Update student status based on response data
+                    if (response.success && response.data) {
+                        const newResponseData = {
+                            ...response.data,
+                            lampiranResponse: response.data.lampiran,
+                            lampiran: undefined,
+                        };
+                        // console.log(
+                        //     '✅ Setting responseData:',
+                        //     newResponseData
+                        // );
+                        setResponseData(newResponseData);
+                        setResponseText(response.data.responseText);
+
                         setStudentDetail((prev) => {
                             const updated = {
                                 ...prev,
                                 status:
-                                    response.data.status || 'Sudah Direspon', // Ensure we have a status
+                                    response.data.status || 'Sudah Direspon',
                             };
                             return updated;
                         });
                     } else {
-                        console.log(
-                            '🔍 No dosen response found or unsuccessful response'
-                        );
+                        // console.log(
+                        //     '🔍 No dosen response found or unsuccessful response'
+                        // );
                     }
                 } catch (error) {
                     console.error('❌ Error fetching dosen response:', error);
@@ -147,7 +243,7 @@ const StudentDetailView = ({ student, onBack }) => {
         };
 
         fetchDosenResponse();
-    }, [student.feedbackId, refreshKey, student.status]); // Added student.status as dependency
+    }, [student.feedbackId, refreshKey, student.status]);
 
     const handleSubmitResponse = async () => {
         if (!responseText.trim()) {
@@ -164,11 +260,10 @@ const StudentDetailView = ({ student, onBack }) => {
                 status_keluhan: 1, // 1 for "Sudah Direspon"
             };
 
-            // Using our inline implementation for guaranteed behavior
-            const result = await sendResponse(responsePayload);
+            // Call sendResponse with file parameter
+            const result = await sendResponse(responsePayload, selectedFile);
 
             // Always assume success if we don't get an explicit error message
-            // This is a workaround to avoid the "undefined" error
             if (result.success !== false) {
                 // Update the response data
                 const newResponseData = {
@@ -182,6 +277,17 @@ const StudentDetailView = ({ student, onBack }) => {
                     }),
                     status: 'Sudah Direspon',
                     statusCode: 1,
+                    // RENAMED: Add attachment info with clear naming
+                    lampiranResponse: selectedFile
+                        ? {
+                              original_name: selectedFile.name,
+                              file_size: selectedFile.size,
+                              file_type: selectedFile.type,
+                              file_url: result.data?.lampiran?.url || '#', // Use actual URL from response
+                          }
+                        : null,
+                    // Remove old lampiran field
+                    lampiran: undefined,
                 };
 
                 setResponseData(newResponseData);
@@ -195,8 +301,18 @@ const StudentDetailView = ({ student, onBack }) => {
                     return updated;
                 });
 
+                // Clear form
+                setResponseText('');
+                setSelectedFile(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+
                 // Show success message
-                toast.success('Tanggapan berhasil dikirim');
+                const successMessage = selectedFile
+                    ? 'Tanggapan dengan lampiran berhasil dikirim'
+                    : 'Tanggapan berhasil dikirim';
+                toast.success(successMessage);
 
                 // Refresh data after successful submission
                 setTimeout(() => refreshData(), 1000);
@@ -350,20 +466,22 @@ const StudentDetailView = ({ student, onBack }) => {
                     </div>
                 </div>
 
-                {/* Attachments - show actual attachments if available */}
-                {studentDetail.lampiran && (
+                {/* Attachments - show mahasiswa attachments if available */}
+                {studentDetail.lampiranMahasiswa && (
                     <div className="space-y-3">
-                        <p className="font-semibold text-sm">Lampiran:</p>
+                        <p className="font-semibold text-sm">
+                            Lampiran Mahasiswa:
+                        </p>
                         <div className="flex flex-wrap gap-3">
                             <div className="flex items-center gap-2 p-2 bg-gray-50 border rounded-lg transition-colors hover:bg-gray-100">
-                                {studentDetail.lampiran.file_type?.includes(
+                                {studentDetail.lampiranMahasiswa.file_type?.includes(
                                     'pdf'
                                 ) ? (
                                     <FileText
                                         size={20}
                                         className="text-red-600"
                                     />
-                                ) : studentDetail.lampiran.file_type?.includes(
+                                ) : studentDetail.lampiranMahasiswa.file_type?.includes(
                                       'word'
                                   ) ? (
                                     <FileText
@@ -377,33 +495,39 @@ const StudentDetailView = ({ student, onBack }) => {
                                     />
                                 )}
                                 <span className="text-sm">
-                                    {studentDetail.lampiran.original_name}
+                                    {
+                                        studentDetail.lampiranMahasiswa
+                                            .original_name
+                                    }
                                 </span>
                                 <button
                                     onClick={() =>
                                         handleDownload(
-                                            studentDetail.lampiran.file_url,
-                                            studentDetail.lampiran.original_name
+                                            studentDetail.lampiranMahasiswa
+                                                .file_url,
+                                            studentDetail.lampiranMahasiswa
+                                                .original_name
                                         )
                                     }
                                     className="ml-2 p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200"
-                                    title="Unduh">
+                                    title="Unduh lampiran mahasiswa">
                                     <Download size={16} />
                                 </button>
-                                {studentDetail.lampiran.file_type?.includes(
+                                {studentDetail.lampiranMahasiswa.file_type?.includes(
                                     'pdf'
                                 ) && (
                                     <button
                                         onClick={() =>
                                             handleOpenPdf({
-                                                name: studentDetail.lampiran
+                                                name: studentDetail
+                                                    .lampiranMahasiswa
                                                     .original_name,
-                                                url: studentDetail.lampiran
-                                                    .file_url,
+                                                url: studentDetail
+                                                    .lampiranMahasiswa.file_url,
                                             })
                                         }
                                         className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-200"
-                                        title="Lihat">
+                                        title="Lihat lampiran mahasiswa">
                                         <ExternalLink size={16} />
                                     </button>
                                 )}
@@ -428,9 +552,95 @@ const StudentDetailView = ({ student, onBack }) => {
                                     {responseData.responseDate}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-sm text-gray-700 mb-3">
                                 {responseData.responseText}
                             </p>
+
+                            {/* Response attachment display */}
+                            {responseData.lampiranResponse && (
+                                <div className="border-t border-green-200 pt-3">
+                                    <p className="font-medium text-sm text-green-800 mb-2">
+                                        Lampiran Tanggapan:
+                                    </p>
+                                    <div className="flex items-center gap-2 p-2 bg-green-100 border border-green-200 rounded-lg">
+                                        {responseData.lampiranResponse.file_type?.includes(
+                                            'pdf'
+                                        ) ? (
+                                            <FileText
+                                                size={20}
+                                                className="text-red-600"
+                                            />
+                                        ) : responseData.lampiranResponse.file_type?.includes(
+                                              'word'
+                                          ) ? (
+                                            <FileText
+                                                size={20}
+                                                className="text-blue-600"
+                                            />
+                                        ) : responseData.lampiranResponse.file_type?.includes(
+                                              'image'
+                                          ) ? (
+                                            <FileText
+                                                size={20}
+                                                className="text-green-600"
+                                            />
+                                        ) : (
+                                            <FileText
+                                                size={20}
+                                                className="text-gray-600"
+                                            />
+                                        )}
+                                        <span className="text-sm text-green-800">
+                                            {
+                                                responseData.lampiranResponse
+                                                    .original_name
+                                            }
+                                        </span>
+                                        <span className="text-xs text-green-600">
+                                            (
+                                            {formatFileSize(
+                                                responseData.lampiranResponse
+                                                    .file_size
+                                            )}
+                                            )
+                                        </span>
+                                        <button
+                                            onClick={() =>
+                                                handleDownload(
+                                                    responseData
+                                                        .lampiranResponse
+                                                        .file_url,
+                                                    responseData
+                                                        .lampiranResponse
+                                                        .original_name
+                                                )
+                                            }
+                                            className="ml-auto p-1 text-green-600 hover:text-green-800 rounded-full hover:bg-green-200"
+                                            title="Unduh lampiran tanggapan">
+                                            <Download size={16} />
+                                        </button>
+                                        {responseData.lampiranResponse.file_type?.includes(
+                                            'pdf'
+                                        ) && (
+                                            <button
+                                                onClick={() =>
+                                                    handleOpenPdf({
+                                                        name: responseData
+                                                            .lampiranResponse
+                                                            .original_name,
+                                                        url: responseData
+                                                            .lampiranResponse
+                                                            .file_url,
+                                                    })
+                                                }
+                                                className="p-1 text-green-600 hover:text-green-800 rounded-full hover:bg-green-200"
+                                                title="Lihat lampiran tanggapan">
+                                                <ExternalLink size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-lg mb-4 text-center">
@@ -442,6 +652,42 @@ const StudentDetailView = ({ student, onBack }) => {
 
                     {/* Response input */}
                     <div className="mt-4 space-y-2">
+                        {/* Hidden file input */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileSelect}
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                            className="hidden"
+                        />
+
+                        {/* File preview */}
+                        {selectedFile && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Paperclip
+                                            size={16}
+                                            className="text-blue-600"
+                                        />
+                                        <span className="text-sm font-medium text-blue-800">
+                                            {selectedFile.name}
+                                        </span>
+                                        <span className="text-xs text-blue-600">
+                                            ({formatFileSize(selectedFile.size)}
+                                            )
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={handleRemoveFile}
+                                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100"
+                                        title="Hapus file">
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex">
                             <textarea
                                 placeholder="Tulis tanggapan Anda disini..."
@@ -450,9 +696,13 @@ const StudentDetailView = ({ student, onBack }) => {
                                 value={responseText}
                                 onChange={(e) =>
                                     setResponseText(e.target.value)
-                                }></textarea>
+                                }
+                            />
                             <div className="flex flex-col border-t border-r border-b border-gray-300 rounded-r-xl">
-                                <button className="p-2 text-gray-500 hover:text-blue-600 transition-colors">
+                                <button
+                                    onClick={handlePaperclipClick}
+                                    className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                                    title="Lampirkan file">
                                     <Paperclip size={20} />
                                 </button>
                                 <button
@@ -464,7 +714,8 @@ const StudentDetailView = ({ student, onBack }) => {
                                         responseText.trim() && !isSubmitting
                                             ? 'text-blue-600 hover:text-blue-800'
                                             : 'text-gray-400'
-                                    } transition-colors`}>
+                                    } transition-colors`}
+                                    title="Kirim tanggapan">
                                     {isSubmitting ? (
                                         <div className="h-5 w-5 border-t-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
                                     ) : (

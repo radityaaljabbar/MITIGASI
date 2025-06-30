@@ -391,15 +391,16 @@ export const getFeedbackResponse = async (id) => {
                     dosenNip: responseItem.nip_dosen_wali,
                     responseText: responseItem.response_keluhan,
                     responseDate: formatDateTime(
-                        new Date(responseItem.tanggal_response) // CHANGED: formatDateOnly -> formatDateTime
+                        new Date(responseItem.tanggal_response)
                     ),
-                    // FIXED: Use the new 'status' field from backend, with fallback logic
                     status:
                         responseItem.status ||
                         (responseItem.status_keluhan === 1
                             ? 'Sudah Direspon'
                             : 'Menunggu Respon'),
                     statusCode: responseItem.status_keluhan,
+                    // FIXED: Include lampiran data
+                    lampiran: responseItem.lampiran || null,
                 },
             };
         }
@@ -418,24 +419,42 @@ export const getFeedbackResponse = async (id) => {
 };
 
 /**
- * Send or update response from dosen wali
+ * Send or update response from dosen wali with optional file attachment
  * @param {Object} responseData - Response data
+ * @param {File|null} file - Optional file attachment
  * @returns {Promise<Object>} - API response
  */
-export const sendResponse = async (responseData) => {
+export const sendResponse = async (responseData, file = null) => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
             return { success: false, message: 'Token tidak ditemukan' };
         }
 
+        let body;
+        let headers = {
+            ...getAuthHeaders(),
+        };
+
+        // If file is provided, use FormData, otherwise use JSON
+        if (file) {
+            const formData = new FormData();
+            formData.append('id_keluhan', responseData.id_keluhan);
+            formData.append('response_keluhan', responseData.response_keluhan);
+            formData.append('status_keluhan', responseData.status_keluhan);
+            formData.append('file', file);
+
+            body = formData;
+            // Don't set Content-Type when using FormData, let browser set it with boundary
+        } else {
+            headers['Content-Type'] = 'application/json';
+            body = JSON.stringify(responseData);
+        }
+
         const response = await fetch(getApiUrl('/faculty/sendResponDosWal'), {
             method: 'POST',
-            headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(responseData),
+            headers: headers,
+            body: body,
         });
 
         console.log('HTTP Status:', response.status, response.statusText);

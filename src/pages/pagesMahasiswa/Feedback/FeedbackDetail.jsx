@@ -43,31 +43,30 @@ const MyFeedbackDetails = () => {
                         responseDate:
                             response.data.response &&
                             response.data.response.date
-                                ? new Date(
-                                      response.data.response.date
-                                  ).toLocaleDateString('id-ID', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric',
-                                  })
+                                ? response.data.response.date // Sudah diformat di service
                                 : null,
-                        attachments: response.data.lampiran
-                            ? [
-                                  {
-                                      id: 1,
-                                      name: response.data.lampiran
-                                          .original_name,
-                                      type: response.data.lampiran.file_type
-                                          ? response.data.lampiran.file_type.split(
-                                                '/'
-                                            )[1]
-                                          : response.data.lampiran.original_name
-                                                .split('.')
-                                                .pop(),
-                                      url: response.data.lampiran.file_url,
-                                  },
-                              ]
-                            : [],
+                        // ADDED: Process response attachments
+                        responseAttachments:
+                            response.data.response &&
+                            response.data.response.lampiran
+                                ? [
+                                      {
+                                          id: 1,
+                                          name: response.data.response.lampiran
+                                              .original_name,
+                                          type: response.data.response.lampiran
+                                              .file_type
+                                              ? response.data.response.lampiran.file_type.split(
+                                                    '/'
+                                                )[1]
+                                              : response.data.response.lampiran.original_name
+                                                    .split('.')
+                                                    .pop(),
+                                          url: response.data.response.lampiran
+                                              .file_url,
+                                      },
+                                  ]
+                                : [],
                     };
 
                     setFeedbackData(feedback);
@@ -246,7 +245,7 @@ const MyFeedbackDetails = () => {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth={2}
-                                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
                                     />
                                 </svg>
                             </div>
@@ -277,9 +276,75 @@ const MyFeedbackDetails = () => {
                                 {feedbackData?.response}
                             </p>
                         </div>
+
+                        {/* ADDED: Response Attachments Section */}
+                        {feedbackData?.responseAttachments &&
+                            feedbackData.responseAttachments.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="font-semibold text-sm mb-2">
+                                        Lampiran Tanggapan:
+                                    </p>
+                                    <div className="flex flex-wrap gap-3">
+                                        {feedbackData.responseAttachments.map(
+                                            (attachment) => (
+                                                <div
+                                                    key={attachment.id}
+                                                    className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg transition-colors hover:bg-green-100">
+                                                    {attachment.type ===
+                                                    'pdf' ? (
+                                                        <FileText
+                                                            size={20}
+                                                            className="text-red-600"
+                                                        />
+                                                    ) : attachment.type ===
+                                                      'docx' ? (
+                                                        <FileText
+                                                            size={20}
+                                                            className="text-blue-600"
+                                                        />
+                                                    ) : (
+                                                        <FileText
+                                                            size={20}
+                                                            className="text-gray-600"
+                                                        />
+                                                    )}
+                                                    <span className="text-sm text-green-800">
+                                                        {attachment.name}
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDownload(
+                                                                attachment.url,
+                                                                attachment.name
+                                                            )
+                                                        }
+                                                        className="ml-2 p-1 text-green-600 hover:text-green-800 rounded-full hover:bg-green-200"
+                                                        title="Unduh lampiran tanggapan">
+                                                        <Download size={16} />
+                                                    </button>
+                                                    {attachment.type ===
+                                                        'pdf' && (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleOpenPdf(
+                                                                    attachment
+                                                                )
+                                                            }
+                                                            className="p-1 text-green-600 hover:text-green-800 rounded-full hover:bg-green-200"
+                                                            title="Lihat lampiran tanggapan">
+                                                            <ExternalLink
+                                                                size={16}
+                                                            />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                     </div>
                 )}
-
                 {/* Back Button with Animation */}
                 <button
                     onClick={handleBack}
