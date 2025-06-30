@@ -36,7 +36,7 @@ const getMyFeedbackList = async (nim) => {
 };
 
 /**
- * @desc Ambil detail feedback berdasarkan ID termasuk lampiran dan response
+ * @desc Ambil detail feedback berdasarkan ID termasuk lampiran dan response dengan lampiran response
  * @param {number} id_keluhan
  * @return {Promise<Object>}
  */
@@ -68,7 +68,7 @@ const getFeedbackDetail = async (id_keluhan) => {
         return null;
     }
 
-    // Get attachment if any
+    // Get attachment mahasiswa (keluhan attachment)
     const [attachments] = await pool.execute(
         `SELECT 
             lf.id_lampiran,
@@ -91,12 +91,31 @@ const getFeedbackDetail = async (id_keluhan) => {
 
     // Restructure the response information
     if (result.id_response) {
+        // ADDED: Get lampiran response dari dosen wali
+        const [responseAttachments] = await pool.execute(
+            `SELECT 
+                lmr.id_lampiran,
+                lmr.file_name,
+                lmr.original_name,
+                lmr.file_url,
+                lmr.file_type,
+                lmr.file_size
+            FROM 
+                lampiranmyreport lmr
+            WHERE 
+                lmr.id_response = ?`,
+            [result.id_response]
+        );
+
         result.response = {
             id: result.id_response,
             nip_dosen_wali: result.nip_dosen_wali,
             text: result.response_keluhan,
             date: result.tanggal_response,
             status: result.status_keluhan,
+            // ADDED: Include lampiran response
+            lampiran:
+                responseAttachments.length > 0 ? responseAttachments[0] : null,
         };
     } else {
         result.response = null;

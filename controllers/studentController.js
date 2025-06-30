@@ -696,12 +696,14 @@ exports.getKeluhanDetail = async (req, res) => {
             detail_keluhan: feedbackDetail.detail_keluhan,
             tanggal_keluhan: feedbackDetail.tanggal_keluhan,
             status: feedbackDetail.status_keluhan || 'Pending',
-            lampiran: feedbackDetail.lampiran,
+            lampiran: feedbackDetail.lampiran, // Lampiran mahasiswa
             response: feedbackDetail.response
                 ? {
                       text: feedbackDetail.response.text,
                       date: feedbackDetail.response.date,
                       nip_dosen_wali: feedbackDetail.response.nip_dosen_wali,
+                      // ADDED: Include lampiran response dari dosen wali
+                      lampiran: feedbackDetail.response.lampiran,
                   }
                 : null,
         };

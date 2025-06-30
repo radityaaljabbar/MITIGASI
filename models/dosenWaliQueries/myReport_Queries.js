@@ -115,10 +115,10 @@ const getKeluhanDetail = async (keluhanId) => {
 };
 
 /**
- * @desc Get response made by dosen wali for a specific feedback
+ * @desc Get response made by dosen wali for a specific feedback with attachment
  * @param {string} dosenNIP - NIP of the dosen wali
  * @param {string} feedbackId - ID of the feedback/keluhan
- * @returns {Promise<Array>} - Response details
+ * @returns {Promise<Array>} - Response details with attachment
  */
 const getResponse = async (dosenNIP, feedbackId) => {
     try {
@@ -151,6 +151,33 @@ const getResponse = async (dosenNIP, feedbackId) => {
         query += ` ORDER BY rdw.tanggal_response DESC`;
 
         const [rows] = await pool.execute(query, params);
+
+        // Get attachments for each response
+        for (let i = 0; i < rows.length; i++) {
+            // console.log(
+            //     `🔍 Fetching attachment for id_response: ${rows[i].id_response}`
+            // );
+            const [attachments] = await pool.execute(
+                `SELECT 
+                    lmr.id_lampiran,
+                    lmr.file_name,
+                    lmr.original_name,
+                    lmr.file_url,
+                    lmr.file_type,
+                    lmr.file_size
+                FROM 
+                    lampiranmyreport lmr
+                WHERE 
+                    lmr.id_response = ?`,
+                [rows[i].id_response]
+            );
+            // console.log(
+            //     `📎 Found ${attachments.length} attachments:`,
+            //     attachments
+            // );
+            rows[i].lampiran = attachments.length > 0 ? attachments[0] : null;
+        }
+
         return [{ status: 'success', payload: rows }];
     } catch (error) {
         console.error('Error in getResponse query:', error);

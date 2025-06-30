@@ -5,6 +5,8 @@ const router = express.Router();
 const facultyController = require('../controllers/facultyController');
 // Import middleware authentikasi
 const { protect, authorize } = require('../middlewares/authMiddleware');
+// Import middleware upload
+const upload = require('../middlewares/uploadMiddleware');
 
 // @desc    Endpoint backend untuk fitur MyStudent List Mahasiswa
 // @Fitur   FR-01.1 - MyStudents-Overview
@@ -113,6 +115,7 @@ router.post(
     '/sendResponDosWal',
     protect,
     authorize('dosen_wali'),
+    upload.single('file'),
     facultyController.sendResponDosWal
 );
 

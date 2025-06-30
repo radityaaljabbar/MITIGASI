@@ -36,6 +36,7 @@ const {
     processCourseHistory,
 } = require('../models/mahasiswaQueries/myCourseQueries');
 const myReportQueries = require('../models/dosenWaliQueries/myReport_Queries');
+const lampiranMyReportQueries = require('../models/dosenWaliQueries/lampiranMyReport_Queries');
 const {
     getWellnessResult,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisPsikologiQueries');
@@ -44,6 +45,8 @@ const {
     fetchStudentsRelief,
     financialResponse,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisFinansialQueries');
+
+const { uploadFile } = require('../utils/cloudStorage');
 
 // @desc    Get list of students for dosen wali
 // @route   GET /api/faculty/listMahasiswa
@@ -168,6 +171,12 @@ exports.getKeluhanDetail = async (req, res) => {
 
 exports.sendResponDosWal = async (req, res) => {
     try {
+        // Log request information for debugging
+        console.log('Send response request received:', {
+            body: req.body,
+            filePresent: !!req.file,
+        });
+
         const { id_keluhan, response_keluhan, status_keluhan } = req.body;
         const nip_dosen_wali = req.user.id;
 
@@ -182,13 +191,71 @@ exports.sendResponDosWal = async (req, res) => {
             status_keluhan,
         };
 
+        // Create or update response first
         const result = await myReportQueries.createOrUpdateResponse(
             responseData
         );
+        const id_response = result.payload.id;
 
+        // Handle file upload if there's a file
+        let fileData = null;
+        if (req.file) {
+            try {
+                console.log('Starting file upload to GCP for MyReport');
+
+                // Set timeout for upload operation
+                const uploadPromise = uploadFile(req.file, 'report-lampiran');
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(
+                        () => reject(new Error('File upload timeout')),
+                        30000
+                    )
+                );
+
+                // Race the upload against timeout
+                fileData = await Promise.race([uploadPromise, timeoutPromise]);
+                console.log('File uploaded successfully:', fileData.url);
+
+                // Save file data to database
+                await lampiranMyReportQueries.saveLampiranMyReport({
+                    id_response: id_response,
+                    file_name: fileData.filename,
+                    original_name: fileData.originalName,
+                    file_url: fileData.url,
+                    file_type: fileData.mimetype,
+                    file_size: fileData.size,
+                });
+                console.log('File metadata saved to database');
+            } catch (uploadError) {
+                console.error('Error uploading file:', uploadError);
+                // Continue but note the error
+                return response(
+                    201,
+                    {
+                        ...result,
+                        fileUploadError: uploadError.message,
+                        lampiran: null,
+                    },
+                    'Response berhasil dibuat/diperbarui tapi file upload gagal',
+                    res
+                );
+            }
+        } else {
+            console.log('No file to upload for MyReport');
+        }
+
+        // Return success response
         response(
             200,
-            result,
+            {
+                ...result,
+                lampiran: fileData
+                    ? {
+                          url: fileData.url,
+                          originalName: fileData.originalName,
+                      }
+                    : null,
+            },
             result.payload.operation === 'insert'
                 ? 'Response berhasil dibuat'
                 : 'Response berhasil diperbarui',
@@ -424,7 +491,7 @@ exports.getAvailableCourse = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 count: 0,
-                message: "Tidak ada Matakuliah Tersedia",
+                message: 'Tidak ada Matakuliah Tersedia',
                 data: [],
             });
         }
