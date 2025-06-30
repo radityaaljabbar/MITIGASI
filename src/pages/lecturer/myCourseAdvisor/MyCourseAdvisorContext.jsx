@@ -353,7 +353,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             let recommendations = [];
             let currentSKS = 0;
             let availableForPicking = [...staticAvailableCoursesData];
-            let electiveCourseCount = 0;
+            let newlyRecommendedElectiveCount = 0;
 
             const targetSemesterInt = parseInt(targetSemester, 10);
             if (isNaN(targetSemesterInt)) return;
@@ -457,6 +457,15 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 });
             }
 
+            // Calculate how many elective courses have already been passed.
+            let passedElectiveCount = 0;
+            passedCodes.forEach((kode_mk) => {
+                const courseDetails = courseMap.get(kode_mk);
+                if (courseDetails && courseDetails.jenis_mk === 'PILIHAN') {
+                    passedElectiveCount++;
+                }
+            });
+
             const retakeCodes = failedCodes;
 
             // PRIORITY 1: Add courses that must be retaken.
@@ -513,8 +522,6 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 addCourseToPlan(course);
             });
 
-            // --- START: MODIFIED PRIORITY LOGIC FOR ELECTIVES ---
-
             // PRIORITY 3: Add new elective courses based on specialization.
             if (studentPeminatan) {
                 // If student HAS a specialization, ONLY add electives that match it.
@@ -533,10 +540,10 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         const isSemesterNotTooHigh =
                             courseSemesterInt <= targetSemesterInt;
                         
-                        // MODIFIED: Semester Rule Logic
+                        // Semester Rule Logic
                         const isSemesterTypeMatch =
                             (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
-                        // ADDED: Exception for elective courses in semester 8
+                        // Exception for elective courses in semester 8
                         const semesterRuleSatisfied = isSemesterTypeMatch || (isSpecializationElective && targetSemesterInt === 8);
 
                         return (
@@ -553,11 +560,14 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     );
 
                 specializationCourses.forEach((course) => {
-                    // Check the elective limit before adding
-                    if (electiveCourseCount < 5) {
+                    // Check the CUMULATIVE elective limit
+                    if (
+                        passedElectiveCount + newlyRecommendedElectiveCount <
+                        5
+                    ) {
                         const wasAdded = addCourseToPlan(course);
                         if (wasAdded) {
-                            electiveCourseCount++; // Increment only if added
+                            newlyRecommendedElectiveCount++;
                         }
                     }
                 });
@@ -597,10 +607,13 @@ export const MyCourseAdvisorProvider = ({ children }) => {
 
                 allElectiveCourses.forEach((course) => {
                     // Check the elective limit before adding
-                    if (electiveCourseCount < 5) {
+                     if (
+                        passedElectiveCount + newlyRecommendedElectiveCount <
+                        5
+                    ) {
                         const wasAdded = addCourseToPlan(course);
                         if (wasAdded) {
-                            electiveCourseCount++; // Increment only if added
+                            newlyRecommendedElectiveCount++;
                         }
                     }
                 });
