@@ -1,8 +1,10 @@
-// config/database.js - Fixed MySQL2 configuration with Unix Socket support
+// config/database.js - Konfigurasi MySQL2 dengan dukungan Unix Socket
+// MySQL2 configuration with Unix Socket support
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 
-// Load appropriate environment file
+// Memuat file environment yang sesuai berdasarkan NODE_ENV
+// Load appropriate environment file based on NODE_ENV
 const envFile =
     process.env.NODE_ENV === 'production'
         ? '.env.production'
@@ -12,42 +14,50 @@ const envFile =
 
 dotenv.config({ path: envFile });
 
-// Create database configuration based on environment
+/**
+ * Membuat konfigurasi database berdasarkan environment
+ * Creates database configuration based on environment
+ * @returns {Object} Konfigurasi database / Database configuration
+ */
 const createDbConfig = () => {
+    // Konfigurasi dasar untuk koneksi database
+    // Base configuration for database connection
     const baseConfig = {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
 
-        // Pool configuration (VALID options)
+        // Konfigurasi pool koneksi untuk mengoptimalkan performa
+        // Connection pool configuration for performance optimization
         waitForConnections: true,
         connectionLimit: process.env.NODE_ENV === 'production' ? 5 : 10,
         queueLimit: 0,
 
-        // Connection timeout settings (CORRECT property names)
-        acquireTimeout: 60000, // ✅ Valid for pool
+        // Pengaturan timeout untuk koneksi
+        // Connection timeout settings
+        acquireTimeout: 60000, // Timeout untuk mendapatkan koneksi dari pool / Timeout to acquire connection from pool
+        connectTimeout: 30000, // Timeout untuk membuat koneksi baru / Timeout to establish new connection
 
-        // Individual connection settings
-        connectTimeout: 30000, // ✅ Connection establishment timeout
-
-        // Keep alive settings
+        // Pengaturan keep alive untuk menjaga koneksi tetap hidup
+        // Keep alive settings to maintain connection
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
 
+        // Pengaturan tambahan untuk pool
         // Additional pool settings
-        idleTimeout: 900000, // ✅ 15 minutes idle timeout
-        maxIdle: 10, // ✅ Max idle connections
+        idleTimeout: 900000, // 15 menit timeout untuk koneksi idle / 15 minutes idle timeout
+        maxIdle: 10, // Maksimal koneksi idle / Maximum idle connections
     };
 
+    // Menggunakan Unix socket untuk Cloud Run, fallback ke host untuk development lokal
     // Use Unix socket for Cloud Run, fallback to host for local development
     if (process.env.INSTANCE_UNIX_SOCKET) {
-        console.log('🔌 Using Unix socket connection for Cloud Run');
         baseConfig.socketPath = process.env.INSTANCE_UNIX_SOCKET;
-        // Remove SSL for Unix socket (not needed)
+        // Unix socket tidak memerlukan SSL / Unix socket doesn't need SSL
     } else {
-        console.log('🔌 Using TCP host connection for local development');
         baseConfig.host = process.env.DB_HOST;
 
+        // Konfigurasi SSL untuk Cloud SQL (hanya untuk koneksi TCP)
         // SSL configuration for Cloud SQL (only for TCP connections)
         baseConfig.ssl =
             process.env.DB_HOST !== 'localhost'
@@ -60,78 +70,69 @@ const createDbConfig = () => {
     return baseConfig;
 };
 
+// Membuat pool koneksi dengan konfigurasi dinamis
 // Create connection pool with dynamic configuration
 const pool = mysql.createPool(createDbConfig());
 
-// Enhanced connection test with retry logic
+/**
+ * Tes koneksi database dengan logika retry
+ * Enhanced connection test with retry logic
+ * @param {number} retries - Jumlah percobaan ulang / Number of retry attempts
+ * @param {number} delay - Delay antara percobaan (ms) / Delay between attempts (ms)
+ * @returns {boolean} Status koneksi berhasil atau gagal / Connection success status
+ */
 const testConnection = async (retries = 3, delay = 2000) => {
+    // Melakukan percobaan koneksi sesuai jumlah retry yang ditentukan
+    // Attempt connection based on specified retry count
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            console.log(`Database connection attempt ${attempt}/${retries}...`);
-
             const connection = await pool.getConnection();
 
-            // Test the connection with a simple query
+            // Menguji koneksi dengan query sederhana
+            // Test connection with simple query
             await connection.execute('SELECT 1 as test');
 
-            console.log(
-                `✅ Database connection established successfully (attempt ${attempt})`
-            );
-            console.log(
-                `   Connection method: ${
-                    process.env.INSTANCE_UNIX_SOCKET
-                        ? 'Unix Socket'
-                        : 'TCP Host'
-                }`
-            );
-            console.log(
-                `   ${process.env.INSTANCE_UNIX_SOCKET ? 'Socket' : 'Host'}: ${
-                    process.env.INSTANCE_UNIX_SOCKET || process.env.DB_HOST
-                }`
-            );
-            console.log(`   Database: ${process.env.DB_NAME}`);
-            console.log(`   User: ${process.env.DB_USER}`);
-
+            // Melepaskan koneksi kembali ke pool
+            // Release connection back to pool
             connection.release();
             return true;
         } catch (error) {
-            console.error(
-                `❌ Database connection attempt ${attempt} failed:`,
-                error.message
-            );
-
+            // Memberikan panduan error yang spesifik
             // Provide specific error guidance
             if (error.code === 'ETIMEDOUT') {
-                console.error(
-                    '   → Connection timeout - check network connectivity or Cloud SQL settings'
-                );
+                // Timeout koneksi - periksa konektivitas jaringan atau pengaturan Cloud SQL
+                // Connection timeout - check network connectivity or Cloud SQL settings
             } else if (error.code === 'ECONNREFUSED') {
-                console.error(
-                    '   → Connection refused - check if Cloud SQL instance is running'
-                );
+                // Koneksi ditolak - periksa apakah instance Cloud SQL berjalan
+                // Connection refused - check if Cloud SQL instance is running
             } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-                console.error('   → Access denied - check username/password');
+                // Akses ditolak - periksa username/password
+                // Access denied - check username/password
             } else if (error.code === 'ENOTFOUND') {
-                console.error('   → Host not found - check DB_HOST value');
+                // Host tidak ditemukan - periksa nilai DB_HOST
+                // Host not found - check DB_HOST value
             } else if (error.code === 'ENOENT') {
-                console.error(
-                    '   → Unix socket not found - check INSTANCE_UNIX_SOCKET path'
-                );
+                // Unix socket tidak ditemukan - periksa path INSTANCE_UNIX_SOCKET
+                // Unix socket not found - check INSTANCE_UNIX_SOCKET path
             }
 
+            // Retry jika masih ada percobaan tersisa
+            // Retry if attempts remaining
             if (attempt < retries) {
-                console.log(`   ⏳ Retrying in ${delay / 1000} seconds...`);
                 await new Promise((resolve) => setTimeout(resolve, delay));
                 delay *= 1.5; // Exponential backoff
             }
         }
     }
 
-    console.error('❌ All database connection attempts failed');
     return false;
 };
 
-// Simple connection test for services that need quick verification
+/**
+ * Tes koneksi cepat untuk layanan yang memerlukan verifikasi cepat
+ * Quick connection test for services that need quick verification
+ * @returns {boolean} Status koneksi / Connection status
+ */
 const quickConnectionTest = async () => {
     try {
         const connection = await pool.getConnection();
@@ -143,20 +144,26 @@ const quickConnectionTest = async () => {
     }
 };
 
-// Graceful pool shutdown
+/**
+ * Menutup pool koneksi dengan graceful shutdown
+ * Graceful pool shutdown
+ */
 const closePool = async () => {
     try {
         await pool.end();
-        console.log('Database pool closed successfully');
     } catch (error) {
-        console.error('Error closing database pool:', error.message);
+        // Error handling untuk penutupan pool
+        // Error handling for pool closure
     }
 };
 
-// Handle process termination
+// Menangani terminasi proses untuk menutup pool dengan baik
+// Handle process termination to close pool gracefully
 process.on('SIGINT', closePool);
 process.on('SIGTERM', closePool);
 
+// Mengeksport fungsi dan objek yang diperlukan untuk modul lain
+// Export functions and objects needed by other modules
 module.exports = {
     pool,
     testConnection,

@@ -1,65 +1,78 @@
 ```
 └── 📁backendCode
     └── 📁config
-        └── config.js
-        └── database.js
         └── 📁GCPKeys
             └── 📁CloudStorageAdmin
-                └── capstoneproject-460811-1e2c9b707d5c.json
-                └── elliptical-flow-459613-j8-c1617bebfac0.json
+                ├── capstoneproject-460811-1e2c9b707d5c.json
+                ├── elliptical-flow-459613-j8-c1617bebfac0.json
+        ├── config.js
+        ├── database.js
     └── 📁controllers
-        └── adminController.js
-        └── authController.js
-        └── facultyController.js
-        └── studentController.js
+        ├── adminController.js
+        ├── authController.js
+        ├── facultyController.js
+        ├── logController.js
+        ├── studentController.js
     └── 📁middlewares
-        └── authMiddleware.js
-        └── errorMiddleware.js
-        └── uploadMiddleware.js
-        └── validationMiddleware.js
+        ├── authMiddleware.js
+        ├── csvUploadMiddleware.js
+        ├── errorMiddleware.js
+        ├── uploadMiddleware.js
+        ├── validationMiddleware.js
     └── 📁ml_models
-        └── predict.py
+        ├── predict.py
     └── 📁models
+        └── 📁adminQueries
+            ├── kelolaAkademikNilaiQueries.js
+            ├── kelolaAkademikPrestasiQueries.js
+            ├── kelolaAkademikSemesterQueries.js
+            ├── kelolaKelasQueries.js
+            ├── kelolaKurikulumQueries.js
+            ├── kelolaPenggunaQueries.js
         └── 📁dosenWaliQueries
-            └── myCourseAdvisor_Queries.js
-            └── myReport_Queries.js
-            └── myStudent_AnalisisFinansialQueries.js
-            └── myStudent_AnalisisPsikologiQueries.js
-            └── myStudent_ListQueries.js
-            └── myStudentDetailAcademicQueries.js
-        └── dosenWaliTable.js
-        └── lampiranTable.js
+            ├── lampiranMyReport_Queries.js
+            ├── myCourseAdvisor_Queries.js
+            ├── myReport_Queries.js
+            ├── myStudent_AnalisisFinansialQueries.js
+            ├── myStudent_AnalisisPsikologiQueries.js
+            ├── myStudent_ListQueries.js
+            ├── myStudentDetailAcademicQueries.js
+        └── 📁logQueries
+            ├── logQueries.js
         └── 📁mahasiswaQueries
-            └── myCourseQueries.js
-            └── myFeedbackQueries.js
-            └── myFinanceQueries.js
-            └── MyProgress_takSksIpkQueries.js
-            └── MyProgress.js
-            └── myWellnessQueries.js
-        └── mahasiswaTable.js
-        └── responseDosenWali.js
+            ├── myCourseQueries.js
+            ├── myFeedbackQueries.js
+            ├── myFinanceQueries.js
+            ├── MyProgress_takSksIpkQueries.js
+            ├── MyProgress.js
+            ├── myWellnessQueries.js
+        ├── dosenWaliTable.js
+        ├── lampiranTable.js
+        ├── mahasiswaTable.js
+        ├── responseDosenWali.js
     └── 📁routes
-        └── adminRoutes.js
-        └── authRoutes.js
-        └── facultyRoutes.js
-        └── studentRoutes.js
+        ├── adminRoutes.js
+        ├── authRoutes.js
+        ├── facultyRoutes.js
+        ├── studentRoutes.js
+    └── 📁service
+        ├── logService.js
     └── 📁utils
-        └── cloudStorage.js
-        └── dateHelper.js
-        └── helpers.js
-        └── logger.js
-        └── response.js
-        └── tokenCleanup.js
-        └── validator.js
-    └── .env.development
-    └── .env.gcp_dev
-    └── .env.production
-    └── .gitignore
-    └── BackendStructure.md
-    └── DockerFile
-    └── healthCheck.js
-    └── package-lock.json
-    └── package.json
-    └── README.md
+        ├── cloudStorage.js
+        ├── dateHelper.js
+        ├── helpers.js
+        ├── logger.js
+        ├── response.js
+        ├── tokenCleanup.js
+        ├── validator.js
+    ├── .env.development
+    ├── .env.gcp_dev
+    ├── .gitignore
+    ├── BackendStructure.md
+    ├── Dockerfile
+    ├── healthCheck.js
+    ├── package-lock.json
+    ├── package.json
+    ├── README.md
     └── server.js
 ```

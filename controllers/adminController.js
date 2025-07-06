@@ -1,6 +1,10 @@
-// const bcrypt = require('bcryptjs'); // kalau mau menggunakan hashing
+// Admin Controller - Pengontrol utama untuk manajemen sistem akademik
+// Main controller for academic system management
+// const bcrypt = require('bcryptjs'); // Optional: untuk hashing password jika diperlukan / for password hashing if needed
 const Papa = require('papaparse');
 
+// Import queries untuk operasi database Admin
+// Import queries for Admin database operations
 const {
     findAllAdmins,
     createAdmin,
@@ -17,6 +21,8 @@ const {
     findAllKelas,
 } = require('../models/adminQueries/kelolaPenggunaQueries');
 
+// Import queries untuk manajemen kelas
+// Import queries for class management
 const {
     findAllWithDosen,
     createKelas,
@@ -24,6 +30,8 @@ const {
     deleteKelasById,
 } = require('../models/adminQueries/kelolaKelasQueries');
 
+// Import queries untuk manajemen akademik dan nilai
+// Import queries for academic and grade management
 const {
     getAllMahasiswa,
     // findGradesMahasiswaByNIM,
@@ -39,6 +47,8 @@ const {
     processCourseHistory,
 } = require('../models/adminQueries/kelolaAkademikNilaiQueries');
 
+// Import queries untuk manajemen prestasi akademik
+// Import queries for academic achievement management
 const {
     getDataPrestasi,
     createDataPrestasi,
@@ -47,6 +57,8 @@ const {
     upsertKlasifikasi,
 } = require('../models/adminQueries/kelolaAkademikPrestasiQueries');
 
+// Import queries untuk manajemen semester mahasiswa
+// Import queries for student semester management
 const {
     findSemesterMahasiswaByNIM,
     createSemesterMahasiswaByNIM,
@@ -54,6 +66,8 @@ const {
     deleteSemesterMahasiswaById,
 } = require('../models/adminQueries/kelolaAkademikSemesterQueries');
 
+// Import queries untuk manajemen kurikulum dan mata kuliah
+// Import queries for curriculum and course management
 const {
     findMataKuliahByKurikulum,
     getAllKurikulum,
@@ -65,13 +79,21 @@ const {
     getAllKelompokKeahlian,
 } = require('../models/adminQueries/kelolaKurikulumQueries');
 
+// Import service untuk logging aktivitas admin
+// Import service for admin activity logging
 const { logActivity } = require('../service/logService');
 
 // =============================================
 // ==           ADMIN CONTROLLER FUNCTIONS    ==
 // =============================================
 
-// GET - mengambil data akun semua admin
+/**
+ * Mengambil data semua akun admin
+ * Get all admin accounts data
+ * @desc    GET - mengambil data akun semua admin
+ * @route   GET /api/admin/admins
+ * @access  Private (Admin only)
+ */
 exports.getAllAdmins = async (req, res) => {
     try {
         const admins = await findAllAdmins();
@@ -89,10 +111,18 @@ exports.getAllAdmins = async (req, res) => {
     }
 };
 
-// POST - create admin baru
+/**
+ * Membuat akun admin baru
+ * Create new admin account
+ * @desc    POST - create admin baru
+ * @route   POST /api/admin/admins
+ * @access  Private (Admin only)
+ */
 exports.createAdmin = async (req, res) => {
     const { name, username, password } = req.body;
 
+    // Validasi input - semua field wajib diisi
+    // Input validation - all fields are required
     if (!name || !username || !password) {
         return res.status(400).json({
             success: false,
@@ -101,13 +131,16 @@ exports.createAdmin = async (req, res) => {
     }
 
     try {
+        // Membuat admin baru dengan password plain text
+        // Create new admin with plain text password
         const newAdminId = await createAdmin({
             name,
             username,
             password: password,
         });
 
-        // LOG SUKSES
+        // Log aktivitas berhasil untuk audit trail
+        // Log successful activity for audit trail
         await logActivity({
             req,
             admin: req.user,
@@ -127,8 +160,12 @@ exports.createAdmin = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in createAdmin:', error);
+
+        // Handle error duplicate entry untuk username
+        // Handle duplicate entry error for username
         if (error.code === 'ER_DUP_ENTRY') {
-            // LOG GAGAL
+            // Log aktivitas gagal karena username duplikat
+            // Log failed activity due to duplicate username
             await logActivity({
                 req,
                 admin: req.user,
@@ -143,7 +180,8 @@ exports.createAdmin = async (req, res) => {
             });
         }
 
-        // LOG GAGAL
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -159,11 +197,19 @@ exports.createAdmin = async (req, res) => {
     }
 };
 
-// PUT - update admin
+/**
+ * Memperbarui data admin berdasarkan ID
+ * Update admin data by ID
+ * @desc    PUT - update admin
+ * @route   PUT /api/admin/admins/:id
+ * @access  Private (Admin only)
+ */
 exports.updateAdmin = async (req, res) => {
     const { id } = req.params;
     const { name, username, password } = req.body;
 
+    // Validasi input - nama dan username wajib
+    // Input validation - name and username are required
     if (!name || !username) {
         return res.status(400).json({
             success: false,
@@ -172,12 +218,17 @@ exports.updateAdmin = async (req, res) => {
     }
 
     try {
+        // Siapkan data untuk update (password opsional)
+        // Prepare data for update (password optional)
         const adminData = { name, username };
         if (password) {
             adminData.password = password;
         }
 
         const success = await updateAdminById(id, adminData);
+
+        // Cek apakah admin ditemukan
+        // Check if admin was found
         if (!success) {
             await logActivity({
                 req,
@@ -192,6 +243,8 @@ exports.updateAdmin = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil
+        // Log successful activity
         await logActivity({
             req,
             admin: req.user,
@@ -199,6 +252,7 @@ exports.updateAdmin = async (req, res) => {
             target_entity: `ID: ${id}`,
             status: 'success',
         });
+
         res.status(200).json({
             success: true,
             message: `Admin ${name} berhasil diperbarui`,
@@ -210,6 +264,9 @@ exports.updateAdmin = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in updateAdmin:', error);
+
+        // Handle error duplicate entry
+        // Handle duplicate entry error
         if (error.code === 'ER_DUP_ENTRY') {
             await logActivity({
                 req,
@@ -224,6 +281,8 @@ exports.updateAdmin = async (req, res) => {
             });
         }
 
+        // Log error umum
+        // Log general error
         await logActivity({
             req,
             admin: req.user,
@@ -238,12 +297,21 @@ exports.updateAdmin = async (req, res) => {
     }
 };
 
-// DELETE - hapus admin
+/**
+ * Menghapus admin berdasarkan ID
+ * Delete admin by ID
+ * @desc    DELETE - hapus admin
+ * @route   DELETE /api/admin/admins/:id
+ * @access  Private (Admin only)
+ */
 exports.deleteAdmin = async (req, res) => {
     const { id } = req.params;
 
     try {
         const success = await deleteAdminById(id);
+
+        // Cek apakah admin ditemukan dan berhasil dihapus
+        // Check if admin was found and successfully deleted
         if (!success) {
             await logActivity({
                 req,
@@ -259,6 +327,8 @@ exports.deleteAdmin = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus
+        // Log successful deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -266,12 +336,16 @@ exports.deleteAdmin = async (req, res) => {
             target_entity: `ID: ${id}`,
             status: 'success',
         });
+
         res.status(200).json({
             success: true,
             message: `Admin dengan ID ${id} berhasil dihapus`,
         });
     } catch (error) {
         console.error('Error in deleteAdmin:', error);
+
+        // Log error untuk monitoring
+        // Log error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -290,7 +364,13 @@ exports.deleteAdmin = async (req, res) => {
 // ==      DOSEN WALI CONTROLLER FUNCTIONS    ==
 // =============================================
 
-// GET - ambil semua dosen wali
+/**
+ * Mengambil data semua dosen wali
+ * Get all lecturer supervisor data
+ * @desc    GET - ambil semua dosen wali
+ * @route   GET /api/admin/dosen
+ * @access  Private (Admin only)
+ */
 exports.getAllDosen = async (req, res) => {
     try {
         const dosen = await findAllDosen();
@@ -308,10 +388,18 @@ exports.getAllDosen = async (req, res) => {
     }
 };
 
-// POST - create dosen wali baru
+/**
+ * Membuat data dosen wali baru
+ * Create new lecturer supervisor
+ * @desc    POST - create dosen wali baru
+ * @route   POST /api/admin/dosen
+ * @access  Private (Admin only)
+ */
 exports.createDosen = async (req, res) => {
     const { nip, nama, kode, password } = req.body;
 
+    // Validasi input - field wajib
+    // Input validation - required fields
     if (!nip || !nama || !kode) {
         return res.status(400).json({
             success: false,
@@ -319,6 +407,8 @@ exports.createDosen = async (req, res) => {
         });
     }
 
+    // Validasi panjang kode dosen (maksimal 3 karakter)
+    // Validate lecturer code length (maximum 3 characters)
     if (kode.length > 3) {
         return res.status(400).json({
             success: false,
@@ -327,7 +417,10 @@ exports.createDosen = async (req, res) => {
     }
 
     try {
+        // Gunakan NIP sebagai password default jika tidak diisi
+        // Use NIP as default password if not provided
         const finalPassword = password || nip;
+
         const newDosenNip = await createDosen({
             nip,
             nama,
@@ -335,7 +428,8 @@ exports.createDosen = async (req, res) => {
             password: finalPassword,
         });
 
-        // <<< LOGGING SUKSES >>>
+        // Log aktivitas berhasil membuat dosen wali
+        // Log successful lecturer creation activity
         await logActivity({
             req,
             admin: req.user, // didapat dari middleware 'protect'
@@ -355,12 +449,16 @@ exports.createDosen = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in createDosen:', error);
+
+        // Handle duplicate entry error (NIP atau kode sudah ada)
+        // Handle duplicate entry error (NIP or code already exists)
         if (error.code === 'ER_DUP_ENTRY') {
             const field = error.message.includes("'nip'")
                 ? 'NIP'
                 : 'Kode Dosen';
 
-            // <<< LOGGING GAGAL >>>
+            // Log aktivitas gagal karena duplikat
+            // Log failed activity due to duplicate
             await logActivity({
                 req,
                 admin: req.user,
@@ -375,7 +473,8 @@ exports.createDosen = async (req, res) => {
             });
         }
 
-        // <<< LOGGING GAGAL (UMUM) >>>
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -391,11 +490,19 @@ exports.createDosen = async (req, res) => {
     }
 };
 
-// PUT - update dosen wali
+/**
+ * Memperbarui data dosen wali berdasarkan NIP
+ * Update lecturer supervisor data by NIP
+ * @desc    PUT - update dosen wali
+ * @route   PUT /api/admin/dosen/:nip
+ * @access  Private (Admin only)
+ */
 exports.updateDosen = async (req, res) => {
     const { nip } = req.params;
     const { nama, kode, password, status } = req.body;
 
+    // Validasi input - field wajib
+    // Input validation - required fields
     if (!nama || !kode || !status) {
         return res.status(400).json({
             success: false,
@@ -403,6 +510,8 @@ exports.updateDosen = async (req, res) => {
         });
     }
 
+    // Validasi panjang kode dosen
+    // Validate lecturer code length
     if (kode.length > 3) {
         return res.status(400).json({
             success: false,
@@ -411,12 +520,17 @@ exports.updateDosen = async (req, res) => {
     }
 
     try {
+        // Siapkan data untuk update (password opsional)
+        // Prepare data for update (password optional)
         const dosenData = { nama, kode, status };
         if (password) {
             dosenData.password = password;
         }
 
         const success = await updateDosenByNip(nip, dosenData);
+
+        // Cek apakah dosen ditemukan
+        // Check if lecturer was found
         if (!success) {
             await logActivity({
                 req,
@@ -431,6 +545,8 @@ exports.updateDosen = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil update
+        // Log successful update activity
         await logActivity({
             req,
             admin: req.user,
@@ -451,6 +567,9 @@ exports.updateDosen = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in updateDosen:', error);
+
+        // Handle duplicate entry error untuk kode dosen
+        // Handle duplicate entry error for lecturer code
         if (error.code === 'ER_DUP_ENTRY') {
             await logActivity({
                 req,
@@ -466,6 +585,8 @@ exports.updateDosen = async (req, res) => {
             });
         }
 
+        // Log error umum
+        // Log general error
         await logActivity({
             req,
             admin: req.user,
@@ -481,12 +602,21 @@ exports.updateDosen = async (req, res) => {
     }
 };
 
-// DELETE - hapus dosen wali
+/**
+ * Menghapus dosen wali berdasarkan NIP
+ * Delete lecturer supervisor by NIP
+ * @desc    DELETE - hapus dosen wali
+ * @route   DELETE /api/admin/dosen/:nip
+ * @access  Private (Admin only)
+ */
 exports.deleteDosen = async (req, res) => {
     const { nip } = req.params;
 
     try {
         const success = await deleteDosenByNip(nip);
+
+        // Cek apakah dosen ditemukan dan berhasil dihapus
+        // Check if lecturer was found and successfully deleted
         if (!success) {
             await logActivity({
                 req,
@@ -501,6 +631,8 @@ exports.deleteDosen = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus
+        // Log successful deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -515,6 +647,9 @@ exports.deleteDosen = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in deleteDosen:', error);
+
+        // Handle error referential integrity (dosen masih menjadi wali kelas)
+        // Handle referential integrity error (lecturer still supervising classes)
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
             await logActivity({
                 req,
@@ -531,6 +666,8 @@ exports.deleteDosen = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -545,12 +682,17 @@ exports.deleteDosen = async (req, res) => {
         });
     }
 };
-
 // =============================================
 // ==      MAHASISWA CONTROLLER FUNCTIONS     ==
 // =============================================
 
-// GET - ambil semua mahasiswa
+/**
+ * Mengambil data semua mahasiswa
+ * Get all student data
+ * @desc    GET - ambil semua mahasiswa
+ * @route   GET /api/admin/mahasiswa
+ * @access  Private (Admin only)
+ */
 exports.getAllMahasiswa = async (req, res) => {
     try {
         const mahasiswa = await findAllMahasiswa();
@@ -568,10 +710,18 @@ exports.getAllMahasiswa = async (req, res) => {
     }
 };
 
-// POST - create mahasiswa baru
+/**
+ * Membuat data mahasiswa baru
+ * Create new student data
+ * @desc    POST - create mahasiswa baru
+ * @route   POST /api/admin/mahasiswa
+ * @access  Private (Admin only)
+ */
 exports.createMahasiswa = async (req, res) => {
     const { nim, nama, kelas, password } = req.body;
 
+    // Validasi input - field wajib
+    // Input validation - required fields
     if (!nim || !nama || !kelas) {
         return res.status(400).json({
             success: false,
@@ -580,7 +730,10 @@ exports.createMahasiswa = async (req, res) => {
     }
 
     try {
+        // Gunakan NIM sebagai password default jika tidak diisi
+        // Use NIM as default password if not provided
         const finalPassword = password || nim;
+
         const newMahasiswaNim = await createMahasiswa({
             nim,
             nama,
@@ -588,6 +741,8 @@ exports.createMahasiswa = async (req, res) => {
             password: finalPassword,
         });
 
+        // Log aktivitas berhasil membuat mahasiswa
+        // Log successful student creation activity
         await logActivity({
             req,
             admin: req.user,
@@ -595,6 +750,7 @@ exports.createMahasiswa = async (req, res) => {
             target_entity: `NIM: ${nim}`,
             status: 'success',
         });
+
         res.status(201).json({
             success: true,
             message: 'Mahasiswa berhasil ditambahkan',
@@ -606,6 +762,9 @@ exports.createMahasiswa = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in createMahasiswa:', error);
+
+        // Handle duplicate entry error (NIM sudah terdaftar)
+        // Handle duplicate entry error (NIM already registered)
         if (error.code === 'ER_DUP_ENTRY') {
             await logActivity({
                 req,
@@ -621,6 +780,8 @@ exports.createMahasiswa = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -636,11 +797,19 @@ exports.createMahasiswa = async (req, res) => {
     }
 };
 
-// PUT - update mahasiswa
+/**
+ * Memperbarui data mahasiswa berdasarkan NIM
+ * Update student data by NIM
+ * @desc    PUT - update mahasiswa
+ * @route   PUT /api/admin/mahasiswa/:nim
+ * @access  Private (Admin only)
+ */
 exports.updateMahasiswaByNim = async (req, res) => {
     const { nim } = req.params;
     const { nama, kelas, password, status } = req.body;
 
+    // Validasi input - field wajib
+    // Input validation - required fields
     if (!nama || !kelas || !status) {
         return res.status(400).json({
             success: false,
@@ -649,12 +818,17 @@ exports.updateMahasiswaByNim = async (req, res) => {
     }
 
     try {
+        // Siapkan data untuk update (password opsional)
+        // Prepare data for update (password optional)
         const mhsData = { nama, kelas, status };
         if (password) {
             mhsData.password = password;
         }
 
         const success = await updateMahasiswaByNim(nim, mhsData);
+
+        // Cek apakah mahasiswa ditemukan
+        // Check if student was found
         if (!success) {
             await logActivity({
                 req,
@@ -670,6 +844,8 @@ exports.updateMahasiswaByNim = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil update
+        // Log successful update activity
         await logActivity({
             req,
             admin: req.user,
@@ -690,6 +866,9 @@ exports.updateMahasiswaByNim = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in updateMahasiswa:', error);
+
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -705,12 +884,21 @@ exports.updateMahasiswaByNim = async (req, res) => {
     }
 };
 
-// DELETE - hapus mahasiswa
+/**
+ * Menghapus mahasiswa berdasarkan NIM
+ * Delete student by NIM
+ * @desc    DELETE - hapus mahasiswa
+ * @route   DELETE /api/admin/mahasiswa/:nim
+ * @access  Private (Admin only)
+ */
 exports.deleteMahasiswa = async (req, res) => {
     const { nim } = req.params;
 
     try {
         const success = await deleteMahasiswaByNim(nim);
+
+        // Cek apakah mahasiswa ditemukan dan berhasil dihapus
+        // Check if student was found and successfully deleted
         if (!success) {
             await logActivity({
                 req,
@@ -726,6 +914,8 @@ exports.deleteMahasiswa = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus
+        // Log successful deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -740,6 +930,9 @@ exports.deleteMahasiswa = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in deleteMahasiswa:', error);
+
+        // Handle error referential integrity (mahasiswa masih memiliki data terkait)
+        // Handle referential integrity error (student still has related data)
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
             await logActivity({
                 req,
@@ -756,6 +949,8 @@ exports.deleteMahasiswa = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -771,7 +966,13 @@ exports.deleteMahasiswa = async (req, res) => {
     }
 };
 
-// GET - mendapatkan daftar kelas untuk dropdown
+/**
+ * Mengambil daftar semua kelas untuk dropdown/select options
+ * Get all class list for dropdown/select options
+ * @desc    GET - mendapatkan daftar kelas untuk dropdown
+ * @route   GET /api/admin/kelas
+ * @access  Private (Admin only)
+ */
 exports.getAllKelas = async (req, res) => {
     try {
         const allKelas = await findAllKelas();
@@ -793,10 +994,17 @@ exports.getAllKelas = async (req, res) => {
 // ==         BULK IMPORT FUNCTIONS           ==
 // =============================================
 
-// Bulk create mahasiswa from CSV
+/**
+ * Bulk import mahasiswa dari file CSV
+ * Bulk import students from CSV file
+ * @desc    POST - Bulk create mahasiswa from CSV
+ * @route   POST /api/admin/mahasiswa/bulk-import
+ * @access  Private (Admin only)
+ */
 exports.bulkCreateMahasiswa = async (req, res) => {
     try {
-        // Cek keberadaan file.
+        // Validasi keberadaan file CSV
+        // Validate CSV file existence
         if (!req.file) {
             return res.status(400).json({
                 success: false,
@@ -804,14 +1012,17 @@ exports.bulkCreateMahasiswa = async (req, res) => {
             });
         }
 
-        // Parse CSV file
+        // Parse file CSV menggunakan PapaParse
+        // Parse CSV file using PapaParse
         const csvData = req.file.buffer.toString('utf8');
         const parsed = Papa.parse(csvData, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: (header) => header.trim().toLowerCase(),
+            header: true, // Gunakan baris pertama sebagai header
+            skipEmptyLines: true, // Skip baris kosong
+            transformHeader: (header) => header.trim().toLowerCase(), // Normalize header
         });
 
+        // Validasi format CSV
+        // Validate CSV format
         if (parsed.errors.length > 0) {
             return res.status(400).json({
                 success: false,
@@ -828,21 +1039,25 @@ exports.bulkCreateMahasiswa = async (req, res) => {
             errors: [],
         };
 
-        // Process each record
+        // Proses setiap record dalam CSV
+        // Process each record in CSV
         for (let i = 0; i < records.length; i++) {
             const record = records[i];
-            const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
+            const rowNumber = i + 2; // +2 karena baris 1 adalah header, array dimulai dari 0
 
             try {
+                // Validasi field yang wajib diisi
                 // Validate required fields
                 if (!record.nim || !record.nama || !record.kelas) {
                     throw new Error('NIM, nama, dan kelas wajib diisi');
                 }
 
-                // Set default password if empty
+                // Set password default jika kosong (gunakan NIM)
+                // Set default password if empty (use NIM)
                 const finalPassword = record.password || record.nim;
 
-                // Use existing createMahasiswa logic
+                // Gunakan fungsi createMahasiswa yang sudah ada
+                // Use existing createMahasiswa function
                 await createMahasiswa({
                     nim: record.nim.trim(),
                     nama: record.nama.trim(),
@@ -855,6 +1070,8 @@ exports.bulkCreateMahasiswa = async (req, res) => {
                 results.failed++;
                 let errorMessage = 'Unknown error';
 
+                // Handle berbagai jenis error yang mungkin terjadi
+                // Handle various types of errors that might occur
                 if (error.code === 'ER_DUP_ENTRY') {
                     errorMessage = `NIM "${record.nim}" sudah terdaftar`;
                 } else if (error.code === 'ER_NO_REFERENCED_ROW_2') {
@@ -863,6 +1080,8 @@ exports.bulkCreateMahasiswa = async (req, res) => {
                     errorMessage = error.message;
                 }
 
+                // Simpan detail error untuk laporan
+                // Store error details for reporting
                 results.errors.push({
                     row: rowNumber,
                     nim: record.nim || 'N/A',
@@ -872,7 +1091,8 @@ exports.bulkCreateMahasiswa = async (req, res) => {
             }
         }
 
-        // Log activity
+        // Log aktivitas bulk import
+        // Log bulk import activity
         await logActivity({
             req,
             admin: req.user,
@@ -889,131 +1109,13 @@ exports.bulkCreateMahasiswa = async (req, res) => {
     } catch (error) {
         console.error('Error in bulkCreateMahasiswa:', error);
 
+        // Log error untuk bulk import yang gagal total
+        // Log error for completely failed bulk import
         await logActivity({
             req,
             admin: req.user,
-            action: `Bulk import Mahasiswa: ${results.created} berhasil, ${results.failed} gagal`,
-            target_entity: `Total: ${results.total} records`,
-            status: results.failed === 0 ? 'success' : 'fail',
-        });
-
-        res.status(500).json({
-            success: false,
-            message: 'Gagal memproses bulk import',
-            error: error.message,
-        });
-    }
-};
-
-/*
-//? Bulk create dosen wali from CSV
-exports.bulkCreateDosenWali = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'File CSV wajib diupload',
-            });
-        }
-
-        // Parse CSV file
-        const csvData = req.file.buffer.toString('utf8');
-        const parsed = Papa.parse(csvData, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: (header) => header.trim().toLowerCase(),
-        });
-
-        if (parsed.errors.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Format CSV tidak valid',
-                errors: parsed.errors,
-            });
-        }
-
-        const records = parsed.data;
-        const results = {
-            total: records.length,
-            created: 0,
-            failed: 0,
-            errors: [],
-        };
-
-        // Process each record
-        for (let i = 0; i < records.length; i++) {
-            const record = records[i];
-            const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
-
-            try {
-                // Validate required fields
-                if (!record.nip || !record.nama || !record.kode) {
-                    throw new Error('NIP, nama, dan kode dosen wajib diisi');
-                }
-
-                // Validate kode length
-                if (record.kode.length > 3) {
-                    throw new Error('Kode dosen maksimal 3 karakter');
-                }
-
-                // Set default password if empty
-                const finalPassword = record.password || record.nip;
-
-                // Use existing createDosen logic
-                await createDosen({
-                    nip: record.nip.trim(),
-                    nama: record.nama.trim(),
-                    kode: record.kode.trim(),
-                    password: finalPassword,
-                });
-
-                results.created++;
-            } catch (error) {
-                results.failed++;
-                let errorMessage = 'Unknown error';
-
-                if (error.code === 'ER_DUP_ENTRY') {
-                    if (error.message.includes("'nip'")) {
-                        errorMessage = `NIP "${record.nip}" sudah digunakan`;
-                    } else {
-                        errorMessage = `Kode dosen "${record.kode}" sudah digunakan`;
-                    }
-                } else {
-                    errorMessage = error.message;
-                }
-
-                results.errors.push({
-                    row: rowNumber,
-                    nip: record.nip || 'N/A',
-                    nama: record.nama || 'N/A',
-                    kode: record.kode || 'N/A',
-                    error: errorMessage,
-                });
-            }
-        }
-
-        // Log activity
-        await logActivity({
-            req,
-            admin: req.user,
-            action: `Bulk import Dosen Wali: ${results.created} berhasil, ${results.failed} gagal`,
-            target_entity: `Total: ${results.total} records`,
-            status: results.failed === 0 ? 'success' : 'fail',
-        });
-
-        res.status(200).json({
-            success: true,
-            message: `Bulk import selesai: ${results.created} berhasil, ${results.failed} gagal`,
-            data: results,
-        });
-    } catch (error) {
-        console.error('Error in bulkCreateDosenWali:', error);
-
-        await logActivity({
-            req,
-            admin: req.user,
-            action: 'Error bulk import Dosen Wali',
-            target_entity: 'Bulk import failed',
+            action: `Error saat bulk import Mahasiswa`,
+            target_entity: `Error: ${error.message}`,
             status: 'fail',
         });
 
@@ -1024,12 +1126,18 @@ exports.bulkCreateDosenWali = async (req, res) => {
         });
     }
 };
-*/
 
 // =============================================
 // ==         KELOLA KELAS FUNCTIONS          ==
 // =============================================
 
+/**
+ * Mengambil data semua kelas beserta informasi dosen wali
+ * Get all class data along with lecturer supervisor information
+ * @desc    GET - mengambil data kelas dengan dosen wali
+ * @route   GET /api/admin/kelas-management
+ * @access  Private (Admin only)
+ */
 exports.getAllKelasforKelas = async (req, res) => {
     try {
         const kelas = await findAllWithDosen();
@@ -1047,6 +1155,13 @@ exports.getAllKelasforKelas = async (req, res) => {
     }
 };
 
+/**
+ * Mengambil daftar semua dosen untuk dropdown/select options
+ * Get all lecturer list for dropdown/select options
+ * @desc    GET - mendapatkan daftar dosen untuk dropdown
+ * @route   GET /api/admin/dosen-list
+ * @access  Private (Admin only)
+ */
 exports.getDosenList = async (req, res) => {
     try {
         const dosenList = await findAllDosen();
@@ -1064,9 +1179,18 @@ exports.getDosenList = async (req, res) => {
     }
 };
 
+/**
+ * Membuat kelas baru dengan atau tanpa dosen wali
+ * Create new class with or without lecturer supervisor
+ * @desc    POST - create kelas baru
+ * @route   POST /api/admin/kelas
+ * @access  Private (Admin only)
+ */
 exports.createKelas = async (req, res) => {
     const { tahun_angkatan, kode_kelas, kode_dosen } = req.body;
 
+    // Validasi input - tahun angkatan dan kode kelas wajib
+    // Input validation - graduation year and class code are required
     if (!tahun_angkatan || !kode_kelas) {
         return res.status(400).json({
             success: false,
@@ -1075,14 +1199,18 @@ exports.createKelas = async (req, res) => {
     }
 
     try {
+        // Siapkan data kelas (kode dosen opsional)
+        // Prepare class data (lecturer code optional)
         const kelasData = {
             tahun_angkatan,
             kode_kelas,
-            kode_dosen: kode_dosen || null,
+            kode_dosen: kode_dosen || null, // Set null jika tidak ada dosen yang dipilih
         };
 
         const newKelasId = await createKelas(kelasData);
 
+        // Log aktivitas berhasil membuat kelas
+        // Log successful class creation activity
         await logActivity({
             req,
             admin: req.user,
@@ -1101,6 +1229,9 @@ exports.createKelas = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in createKelas:', error);
+
+        // Handle duplicate entry error (kode kelas sudah ada)
+        // Handle duplicate entry error (class code already exists)
         if (error.code === 'ER_DUP_ENTRY') {
             await logActivity({
                 req,
@@ -1116,6 +1247,8 @@ exports.createKelas = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -1131,14 +1264,25 @@ exports.createKelas = async (req, res) => {
     }
 };
 
+/**
+ * Memperbarui dosen wali untuk kelas tertentu
+ * Update lecturer supervisor for specific class
+ * @desc    PUT - update kelas (dosen wali)
+ * @route   PUT /api/admin/kelas/:id
+ * @access  Private (Admin only)
+ */
 exports.updateKelas = async (req, res) => {
     const { id } = req.params;
     const { kode_kelas, kode_dosen } = req.body;
 
     try {
+        // Set null jika kode dosen kosong (hapus assignment dosen wali)
+        // Set null if lecturer code is empty (remove lecturer supervisor assignment)
         const newKodeDosen = kode_dosen || null;
         const success = await updateDosenWaliforKelas(id, newKodeDosen);
 
+        // Cek apakah kelas ditemukan
+        // Check if class was found
         if (!success) {
             await logActivity({
                 req,
@@ -1154,6 +1298,8 @@ exports.updateKelas = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil update
+        // Log successful update activity
         await logActivity({
             req,
             admin: req.user,
@@ -1173,6 +1319,9 @@ exports.updateKelas = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in updateKelas:', error);
+
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -1188,11 +1337,21 @@ exports.updateKelas = async (req, res) => {
     }
 };
 
+/**
+ * Menghapus kelas berdasarkan ID
+ * Delete class by ID
+ * @desc    DELETE - hapus kelas
+ * @route   DELETE /api/admin/kelas/:id
+ * @access  Private (Admin only)
+ */
 exports.deleteKelas = async (req, res) => {
     const { id } = req.params;
 
     try {
         const success = await deleteKelasById(id);
+
+        // Cek apakah kelas ditemukan dan berhasil dihapus
+        // Check if class was found and successfully deleted
         if (!success) {
             await logActivity({
                 req,
@@ -1208,6 +1367,8 @@ exports.deleteKelas = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus
+        // Log successful deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -1222,6 +1383,9 @@ exports.deleteKelas = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in deleteKelas:', error);
+
+        // Handle error referential integrity (kelas masih memiliki mahasiswa terdaftar)
+        // Handle referential integrity error (class still has registered students)
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
             await logActivity({
                 req,
@@ -1238,6 +1402,8 @@ exports.deleteKelas = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -1256,12 +1422,18 @@ exports.deleteKelas = async (req, res) => {
 // =============================================
 // ==         BULK IMPORT FUNCTIONS           ==
 // =============================================
-
-// Bulk create grades from CSV
+/**
+ * Bulk import nilai mahasiswa dari file CSV
+ * Bulk import student grades from CSV file
+ * @desc    POST - Bulk create grades from CSV
+ * @route   POST /api/admin/mahasiswa/:nim/grades/bulk-import
+ * @access  Private (Admin only)
+ */
 exports.bulkCreateGrades = async (req, res) => {
     try {
         const { nim } = req.params;
 
+        // Validasi parameter NIM
         // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
@@ -1270,6 +1442,8 @@ exports.bulkCreateGrades = async (req, res) => {
             });
         }
 
+        // Validasi keberadaan file CSV
+        // Validate CSV file existence
         if (!req.file) {
             return res.status(400).json({
                 success: false,
@@ -1277,14 +1451,17 @@ exports.bulkCreateGrades = async (req, res) => {
             });
         }
 
-        // Parse CSV file
+        // Parse file CSV menggunakan PapaParse
+        // Parse CSV file using PapaParse
         const csvData = req.file.buffer.toString('utf8');
         const parsed = Papa.parse(csvData, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: (header) => header.trim().toLowerCase(),
+            header: true, // Gunakan baris pertama sebagai header
+            skipEmptyLines: true, // Skip baris kosong
+            transformHeader: (header) => header.trim().toLowerCase(), // Normalize header
         });
 
+        // Validasi format CSV
+        // Validate CSV format
         if (parsed.errors.length > 0) {
             return res.status(400).json({
                 success: false,
@@ -1301,13 +1478,15 @@ exports.bulkCreateGrades = async (req, res) => {
             errors: [],
         };
 
-        // Process each record
+        // Proses setiap record dalam CSV
+        // Process each record in CSV
         for (let i = 0; i < records.length; i++) {
             const record = records[i];
-            const rowNumber = i + 2; // +2 because row 1 is header, array starts at 0
+            const rowNumber = i + 2; // +2 karena baris 1 adalah header, array dimulai dari 0
 
             try {
-                // Validate required fields
+                // Validasi field yang wajib diisi untuk nilai
+                // Validate required fields for grades
                 if (
                     !record.kode_mk ||
                     !record.indeks_nilai ||
@@ -1319,6 +1498,7 @@ exports.bulkCreateGrades = async (req, res) => {
                     );
                 }
 
+                // Siapkan data untuk fungsi createNilaiMahasiswa yang sudah ada
                 // Prepare data for existing createNilaiMahasiswa function
                 const gradeData = {
                     nim_mahasiswa: nim,
@@ -1328,13 +1508,16 @@ exports.bulkCreateGrades = async (req, res) => {
                     tahun_ajaran: record.tahun_ajaran.trim(),
                 };
 
-                // Use existing createNilaiMahasiswa logic
+                // Gunakan fungsi createNilaiMahasiswa yang sudah ada
+                // Use existing createNilaiMahasiswa function
                 await createNilaiMahasiswa(gradeData);
                 results.created++;
             } catch (error) {
                 results.failed++;
                 let errorMessage = 'Unknown error';
 
+                // Handle berbagai jenis error yang mungkin terjadi saat import nilai
+                // Handle various types of errors that might occur during grade import
                 if (error.code === 'ER_NO_REFERENCED_ROW_2') {
                     errorMessage = `Kode MK "${record.kode_mk}" tidak ditemukan di sistem`;
                 } else if (error.code === 'ER_DUP_ENTRY') {
@@ -1343,6 +1526,8 @@ exports.bulkCreateGrades = async (req, res) => {
                     errorMessage = error.message;
                 }
 
+                // Simpan detail error untuk laporan
+                // Store error details for reporting
                 results.errors.push({
                     row: rowNumber,
                     kode_mk: record.kode_mk || 'N/A',
@@ -1353,7 +1538,8 @@ exports.bulkCreateGrades = async (req, res) => {
             }
         }
 
-        // Log activity
+        // Log aktivitas bulk import nilai
+        // Log bulk import grades activity
         await logActivity({
             req,
             admin: req.user,
@@ -1370,6 +1556,8 @@ exports.bulkCreateGrades = async (req, res) => {
     } catch (error) {
         console.error('Error in bulkCreateGrades:', error);
 
+        // Log error untuk bulk import yang gagal total
+        // Log error for completely failed bulk import
         await logActivity({
             req,
             admin: req.user,
@@ -1391,16 +1579,27 @@ exports.bulkCreateGrades = async (req, res) => {
 // =============================================
 
 // ============= KELOLA DATA NILAI =============
-// ngambil semua data mahasiswa
+
+/**
+ * Mengambil data semua mahasiswa untuk keperluan kelola akademik
+ * Get all student data for academic management purposes
+ * @desc    GET - mengambil semua data mahasiswa
+ * @route   GET /api/admin/akademik/mahasiswa
+ * @access  Private (Admin only)
+ */
 exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
     try {
         // Panggil fungsi model untuk mendapatkan data
         // Destructuring [result] karena model mengembalikan array: [{ status: '...', payload: ... }]
+        // Call model function to get data
+        // Destructuring [result] because model returns array: [{ status: '...', payload: ... }]
         const [result] = await getAllMahasiswa();
 
         // Cek apakah operasi di model berhasil
+        // Check if model operation was successful
         if (result.status === 'success') {
             // Kirim respons 200 OK dengan data mahasiswa
+            // Send 200 OK response with student data
             res.status(200).json({
                 success: true,
                 message: 'Data semua mahasiswa berhasil diambil',
@@ -1409,6 +1608,8 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
         } else {
             // Kasus ini seharusnya tidak terjadi jika model selalu throw error,
             // tapi baik untuk penanganan jika ada status 'fail' di masa depan.
+            // This case shouldn't happen if model always throws error,
+            // but good for handling if there's 'fail' status in the future.
             res.status(400).json({
                 success: false,
                 message: 'Gagal mengambil data mahasiswa',
@@ -1417,9 +1618,11 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
         }
     } catch (error) {
         // Tangkap error yang di-throw dari model
+        // Catch error thrown from model
         console.error('Error in getAllMahasiswa controller:', error);
 
         // Kirim respons 500 Internal Server Error
+        // Send 500 Internal Server Error response
         res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan pada server',
@@ -1428,73 +1631,21 @@ exports.getAllMahasiswaForKelolaAkademik = async (req, res) => {
     }
 };
 
-// ngambil data nilai mahasiswa berdasarkan nim
-// exports.getGradesByNIM = async (req, res) => {
-//     try {
-//         // 1. Ambil NIM dari parameter URL
-//         const { nim } = req.params;
-
-//         // 2. Panggil fungsi model untuk mencari data nilai berdasarkan NIM
-//         const result = await findGradesMahasiswaByNIM(nim);
-
-//         // 3. Handle kasus di mana model mengembalikan 'null' (data tidak ditemukan)
-//         if (result === null) {
-//             return res.status(200).json({
-//                 success: true,
-//                 message: `Belum ada data nilai untuk mahasiswa dengan NIM: ${nim}`,
-//                 data: {
-//                     nim: nim,
-//                     name: null,
-//                     kelas: null,
-//                     grades: [], // Return array kosong untuk grades
-//                 },
-//             });
-//         }
-
-//         // 4. Handle kasus sukses (model mengembalikan data)
-//         const [data] = result;
-//         if (data.status === 'success') {
-//             const gradeData = data.payload;
-
-//             // 🔧 PERBAIKAN: Cek apakah array grades kosong
-//             if (gradeData.grades && Array.isArray(gradeData.grades)) {
-//                 if (gradeData.grades.length === 0) {
-//                     return res.status(200).json({
-//                         success: true,
-//                         message: `Belum ada data nilai untuk mahasiswa dengan NIM: ${nim}`,
-//                         data: {
-//                             nim: nim,
-//                             name: gradeData.name,
-//                             kelas: gradeData.kelas,
-//                             grades: [],
-//                         },
-//                     });
-//                 }
-//             }
-
-//             res.status(200).json({
-//                 success: true,
-//                 message: 'Data nilai berhasil diambil',
-//                 data: gradeData, // payload berisi objek { nim, name, kelas, grades: [...] }
-//             });
-//         }
-//     } catch (error) {
-//         // 5. Handle error tak terduga dari server atau database
-//         console.error('Error in getGradesByNIM controller:', error);
-//         res.status(500).json({
-//             success: false,
-//             message: 'Terjadi kesalahan pada server saat mengambil data nilai',
-//             error: error.message,
-//         });
-//     }
-// };
-
+/**
+ * Mengambil riwayat mata kuliah dan nilai mahasiswa berdasarkan NIM
+ * Get course history and student grades by NIM
+ * @desc    GET - mengambil riwayat mata kuliah mahasiswa
+ * @route   GET /api/admin/akademik/mahasiswa/:nim/course-history
+ * @access  Private (Admin only)
+ */
 exports.getCourseHistory = async (req, res) => {
     try {
         // Ambil nim mahasiswa dari params
+        // Get student NIM from params
         const { nim } = req.params;
 
-        // Cek dulu kalau nim ada
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -1503,14 +1654,12 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // 1. Ambil data nilai mahasiswa
+        // 1. Ambil data nilai mahasiswa dari database
+        // 1. Get student grades data from database
         const nilaiRows = await getStudentGrades(nim);
 
-        // Debug log
-        console.log('NIM:', nim);
-        console.log('nilaiRows length:', nilaiRows.length);
-
-        // ✅ CEK DULU sebelum akses nilaiRows[0]
+        // Validasi apakah mahasiswa memiliki data nilai
+        // Validate if student has grade data
         if (nilaiRows.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -1525,19 +1674,21 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // ✅ BARU akses nilaiRows[0] setelah yakin ada data
+        // 2. Ekstrak data mahasiswa dari hasil query pertama
+        // 2. Extract student data from first query result
         const dataMahasiswa = {
             nim: nim,
             name: nilaiRows[0].nama,
             kelas: nilaiRows[0].kelas,
         };
-        console.log('Data mahasiswa:', dataMahasiswa);
 
-        // 2. Bikin array kode_mk dari nilai mahasiswa
+        // 3. Buat array unik kode mata kuliah dari nilai mahasiswa
+        // 3. Create unique array of course codes from student grades
         const kodeMkSet = new Set(nilaiRows.map((row) => row.kode_mk));
         const arrayKodeMk = [...kodeMkSet];
 
-        // Cek lagi untuk jaga-jaga kalau arraynya kosong
+        // Validasi tambahan untuk kode mata kuliah
+        // Additional validation for course codes
         if (arrayKodeMk.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -1552,39 +1703,48 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // 3. Cari detail matkul di tabel mata_kuliah_baru
+        // 4. Cari detail mata kuliah di tabel mata_kuliah_baru
+        // 4. Find course details in mata_kuliah_baru table
         const newCoursesRows = await getNewCourses(arrayKodeMk);
 
-        // 4. Bikin map untuk pencarian cepat matkul baru
+        // 5. Buat map untuk pencarian cepat mata kuliah baru
+        // 5. Create map for quick lookup of new courses
         const newCoursesMap = {};
         newCoursesRows.forEach((course) => {
             newCoursesMap[course.kode_mk] = course;
         });
 
-        // 5. Cari kode matkul yang nggak ketemu di tabel matkul baru
+        // 6. Cari kode mata kuliah yang tidak ditemukan di tabel mata kuliah baru
+        // 6. Find course codes not found in new courses table
         const notFoundKodeMk = arrayKodeMk.filter(
             (kode) => !newCoursesMap[kode]
         );
 
-        // 6. Cari ekivalensi dan matkul lama jika ada yang belum ketemu
+        // 7. Proses mata kuliah yang tidak ditemukan (cari ekuivalensi dan mata kuliah lama)
+        // 7. Process courses not found (search for equivalents and old courses)
         if (notFoundKodeMk.length > 0) {
-            // Cek apakah ada matkul lama yang punya ekivalensi di matkul baru
+            // Cek apakah ada mata kuliah lama yang punya ekuivalensi di mata kuliah baru
+            // Check if there are old courses that have equivalents in new courses
             const equivalentRows = await getEquivalentCourses(notFoundKodeMk);
 
-            // Bikin map buat nyari ekivalensi dengan cepat
+            // Buat map untuk pencarian ekuivalensi dengan cepat
+            // Create map for quick equivalence lookup
             const equivalentMap = {};
             equivalentRows.forEach((course) => {
                 equivalentMap[course.ekivalensi] = course;
             });
 
-            // Update daftar yang belum ketemu (yang bener-bener nggak ada ekivalensinya)
+            // Update daftar yang belum ditemukan (yang benar-benar tidak ada ekuivalensinya)
+            // Update list of not found courses (those without equivalents)
             const stillNotFound = notFoundKodeMk.filter(
                 (kode) => !equivalentMap[kode]
             );
 
-            // Tambahkan matkul ekivalensi ke map utama
+            // Tambahkan mata kuliah ekuivalensi ke map utama
+            // Add equivalent courses to main map
             equivalentRows.forEach((course) => {
-                // Map kode lama ke detail matkul baru
+                // Map kode lama ke detail mata kuliah baru
+                // Map old code to new course details
                 newCoursesMap[course.ekivalensi] = {
                     nama_mk: course.nama_mk,
                     sks_mk: course.sks_mk,
@@ -1594,54 +1754,64 @@ exports.getCourseHistory = async (req, res) => {
                 };
             });
 
-            // Kalau masih ada yang belum ketemu, cari di tabel mata_kuliah_lama
+            // Kalau masih ada yang belum ditemukan, cari di tabel mata_kuliah_lama
+            // If there are still not found courses, search in mata_kuliah_lama table
             if (stillNotFound.length > 0) {
                 const oldCoursesRows = await getOldCourses(stillNotFound);
 
-                // Tambahkan matkul lama ke map utama
+                // Tambahkan mata kuliah lama ke map utama
+                // Add old courses to main map
                 oldCoursesRows.forEach((course) => {
                     newCoursesMap[course.kode_mk_lama] = {
                         nama_mk_lama: course.nama_mk_lama,
                         sks_mk_lama: course.sks_mk_lama,
-                        // Matkul lama nggak punya jenis_mk
+                        // Mata kuliah lama tidak punya jenis_mk
+                        // Old courses don't have jenis_mk
                     };
                 });
             }
         }
 
-        // Kumpulkan semua kode ekivalensi yang perlu dicari namanya
+        // 8. Kumpulkan semua kode ekuivalensi yang perlu dicari namanya
+        // 8. Collect all equivalence codes that need their names searched
         const ekivalensiCodes = [];
 
-        // Tambahkan dari matkul yang punya nilai ekivalensi
+        // Tambahkan dari mata kuliah yang punya nilai ekuivalensi
+        // Add from courses that have equivalence values
         newCoursesRows.forEach((course) => {
             if (course.ekivalensi) {
                 ekivalensiCodes.push(course.ekivalensi);
             }
         });
 
-        // Tambahkan dari matkul yang sudah ekivalen (kode lama dari nilai)
+        // Tambahkan dari mata kuliah yang sudah ekivalen (kode lama dari nilai)
+        // Add from courses that are already equivalent (old codes from grades)
         arrayKodeMk.forEach((kode) => {
             if (newCoursesMap[kode] && newCoursesMap[kode].is_equivalent) {
                 ekivalensiCodes.push(kode);
             }
         });
 
-        // Map untuk menyimpan nama matkul lama berdasarkan kode
+        // Map untuk menyimpan nama mata kuliah lama berdasarkan kode
+        // Map to store old course names based on code
         const oldCoursesNamesMap = {};
 
-        // Cari nama matkul lama jika ada kode ekivalensi
+        // 9. Cari nama mata kuliah lama jika ada kode ekuivalensi
+        // 9. Search for old course names if there are equivalence codes
         if (ekivalensiCodes.length > 0) {
             const oldCoursesNamesRows = await getOldCoursesNames(
                 ekivalensiCodes
             );
 
-            // Buat map untuk nama matkul lama
+            // Buat map untuk nama mata kuliah lama
+            // Create map for old course names
             oldCoursesNamesRows.forEach((course) => {
                 oldCoursesNamesMap[course.kode_mk_lama] = course.nama_mk_lama;
             });
         }
 
-        // 7. Proses dan gabungkan data untuk respons
+        // 10. Proses dan gabungkan data untuk respons
+        // 10. Process and combine data for response
         const courseHistory = processCourseHistory(
             nilaiRows,
             newCoursesMap,
@@ -1671,16 +1841,26 @@ exports.getCourseHistory = async (req, res) => {
     }
 };
 
-// ngambil daftar semua mata kuliah
+/**
+ * Mengambil daftar semua mata kuliah
+ * Get list of all courses
+ * @desc    GET - mengambil daftar semua mata kuliah
+ * @route   GET /api/admin/akademik/courses
+ * @access  Private (Admin only)
+ */
 exports.getAllCourses = async (req, res) => {
     try {
         // 1. Panggil fungsi dari model untuk mengambil data dari database.
         //    Gunakan destructuring [result] karena model mengembalikan array: [{ status: '...', payload: ... }]
+        // 1. Call function from model to get data from database.
+        //    Use destructuring [result] because model returns array: [{ status: '...', payload: ... }]
         const [result] = await getAllCourse();
 
         // 2. Periksa status yang dikembalikan oleh model.
+        // 2. Check status returned by model.
         if (result.status === 'success') {
             // 3. Jika berhasil, kirim respons HTTP 200 (OK) dengan data.
+            // 3. If successful, send HTTP 200 (OK) response with data.
             res.status(200).json({
                 success: true,
                 message: 'Data semua mata kuliah berhasil diambil',
@@ -1691,9 +1871,12 @@ exports.getAllCourses = async (req, res) => {
     } catch (error) {
         // 4. Jika terjadi error (misalnya, database down) yang dilempar oleh model,
         //    tangkap di sini.
+        // 4. If error occurs (e.g., database down) thrown by model,
+        //    catch it here.
         console.error('Error in getAllCourses controller:', error);
 
         // Kirim respons HTTP 500 (Internal Server Error).
+        // Send HTTP 500 (Internal Server Error) response.
         res.status(500).json({
             success: false,
             message:
@@ -1703,10 +1886,17 @@ exports.getAllCourses = async (req, res) => {
     }
 };
 
-// memmbuat data nilai baru
+/**
+ * Membuat data nilai baru untuk mahasiswa
+ * Create new grade data for student
+ * @desc    POST - membuat data nilai baru
+ * @route   POST /api/admin/akademik/nilai
+ * @access  Private (Admin only)
+ */
 exports.createNilai = async (req, res) => {
     try {
         // 1. Validasi input dasar (memastikan field yang wajib ada tidak kosong)
+        // 1. Basic input validation (ensure required fields are not empty)
         const { nimMahasiswa, kodeMK, indeksNilai, semester, tahunAjaran } =
             req.body;
         if (
@@ -1724,20 +1914,26 @@ exports.createNilai = async (req, res) => {
         }
 
         // Buat objek baru dengan nama properti yang sesuai dengan kolom database
+        // Create new object with property names matching database columns
         const dataForModel = {
             nim_mahasiswa: nimMahasiswa,
             kode_mk: kodeMK,
             indeks_nilai: indeksNilai,
             semester: semester,
-            tahun_ajaran: tahunAjaran, // Menambahkan data default
+            tahun_ajaran: tahunAjaran,
         };
 
         // 2. Panggil fungsi model dengan data dari body request.
         //    Gunakan destructuring [result] karena model mengembalikan array.
+        // 2. Call model function with data from request body.
+        //    Use destructuring [result] because model returns array.
         const [result] = await createNilaiMahasiswa(dataForModel);
 
         // 3. Jika model berhasil, kirim respons HTTP 201 (Created).
+        // 3. If model succeeds, send HTTP 201 (Created) response.
         if (result.status === 'success') {
+            // Log aktivitas berhasil membuat nilai
+            // Log successful grade creation activity
             await logActivity({
                 req,
                 admin: req.user,
@@ -1754,31 +1950,36 @@ exports.createNilai = async (req, res) => {
         }
     } catch (error) {
         // 4. Penanganan Error yang Spesifik dan Umum
+        // 4. Specific and General Error Handling
 
         // Kasus: Foreign Key Constraint Fails. Artinya, NIM atau Kode MK yang diberikan
         // tidak ada di tabel referensinya (mahasiswa atau mata_kuliah).
-        // Ini adalah kesalahan dari sisi klien (Bad Request).
+        // Case: Foreign Key Constraint Fails. Means NIM or Course Code provided
+        // doesn't exist in reference tables (mahasiswa or mata_kuliah).
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
             await logActivity({
                 req,
                 admin: req.user,
                 action: `Gagal membuat Nilai (NIM/MK tidak ada)`,
-                target_entity: `NIM: ${nimMahasiswa}, MK: ${kodeMK}`,
+                target_entity: `NIM: ${req.body.nimMahasiswa}, MK: ${req.body.kodeMK}`,
                 status: 'fail',
             });
 
             return res.status(400).json({
                 success: false,
-                message: `Gagal menambahkan nilai. Pastikan NIM '${req.body.nim_mahasiswa}' dan Kode MK '${req.body.kode_mk}' sudah terdaftar di sistem.`,
+                message: `Gagal menambahkan nilai. Pastikan NIM '${req.body.nimMahasiswa}' dan Kode MK '${req.body.kodeMK}' sudah terdaftar di sistem.`,
             });
         }
 
         console.error('Error in createNilai controller:', error);
+
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat membuat Nilai`,
-            target_entity: `NIM: ${nimMahasiswa}, MK: ${kodeMK}`,
+            target_entity: `NIM: ${req.body.nimMahasiswa}, MK: ${req.body.kodeMK}`,
             status: 'fail',
         });
 
@@ -1790,14 +1991,22 @@ exports.createNilai = async (req, res) => {
     }
 };
 
-// edit data nilai
+/**
+ * Memperbarui data nilai berdasarkan ID
+ * Update grade data by ID
+ * @desc    PUT - edit data nilai
+ * @route   PUT /api/admin/akademik/nilai/:id
+ * @access  Private (Admin only)
+ */
 exports.updateNilai = async (req, res) => {
     try {
         // 1. Ambil input dari request
+        // 1. Get input from request
         const { id } = req.params;
         const dataToUpdate = req.body;
 
         // 2. Lakukan validasi input
+        // 2. Perform input validation
         const { kodeMK, indeksNilai, semester, tahunAjaran } = dataToUpdate;
         if (!kodeMK || !indeksNilai || !semester || !tahunAjaran) {
             return res.status(400).json({
@@ -1808,15 +2017,17 @@ exports.updateNilai = async (req, res) => {
         }
 
         // 3. Panggil model untuk melakukan update
+        // 3. Call model to perform update
         const dataForModel = {
             kode_mk: kodeMK,
             indeks_nilai: indeksNilai,
             semester: semester,
-            tahun_ajaran: tahunAjaran, // Menambahkan data default
+            tahun_ajaran: tahunAjaran,
         };
         const [updateResult] = await updateNilaiMahasiswa(id, dataForModel);
 
         // 4. Periksa apakah ada baris yang diupdate
+        // 4. Check if any rows were updated
         if (updateResult.payload.affectedRows === 0) {
             await logActivity({
                 req,
@@ -1833,11 +2044,14 @@ exports.updateNilai = async (req, res) => {
         }
 
         // 5. Jika berhasil, siapkan data konfirmasi untuk dikirim kembali
+        // 5. If successful, prepare confirmation data to send back
         const confirmedData = {
             id_nilai: parseInt(id, 10), // Pastikan ID adalah angka
             ...dataToUpdate,
         };
 
+        // Log aktivitas berhasil update
+        // Log successful update activity
         await logActivity({
             req,
             admin: req.user,
@@ -1853,30 +2067,33 @@ exports.updateNilai = async (req, res) => {
         });
     } catch (error) {
         // 6. Tangani error yang mungkin terjadi
+        // 6. Handle possible errors
 
         // Jika error karena foreign key (misal, kode_mk tidak ada)
+        // If error due to foreign key (e.g., kode_mk doesn't exist)
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
             await logActivity({
                 req,
                 admin: req.user,
                 action: `Gagal update Nilai (Kode MK tidak ada)`,
-                target_entity: `ID Nilai: ${id}`,
+                target_entity: `ID Nilai: ${req.params.id}`,
                 status: 'fail',
             });
 
             return res.status(400).json({
                 success: false,
-                message: `Gagal mengupdate nilai. Kode MK '${req.body.kode_mk}' tidak terdaftar atau tidak valid.`,
+                message: `Gagal mengupdate nilai. Kode MK '${req.body.kodeMK}' tidak terdaftar atau tidak valid.`,
             });
         }
 
         // Untuk semua error server lainnya
+        // For all other server errors
         console.error('Error in updateNilai controller:', error);
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat update Nilai`,
-            target_entity: `ID Nilai: ${id}`,
+            target_entity: `ID Nilai: ${req.params.id}`,
             status: 'fail',
         });
 
@@ -1887,16 +2104,25 @@ exports.updateNilai = async (req, res) => {
     }
 };
 
-// delete data nilai
+/**
+ * Menghapus data nilai berdasarkan ID
+ * Delete grade data by ID
+ * @desc    DELETE - delete data nilai
+ * @route   DELETE /api/admin/akademik/nilai/:id
+ * @access  Private (Admin only)
+ */
 exports.deleteNilai = async (req, res) => {
     try {
         // 1. Ambil ID dari parameter URL
+        // 1. Get ID from URL parameter
         const { id } = req.params;
 
         // 2. Panggil model untuk menjalankan query DELETE
+        // 2. Call model to execute DELETE query
         const [result] = await removeNilaiMahasiswa(id);
 
         // 3. Periksa apakah ada baris yang benar-benar dihapus.
+        // 3. Check if any rows were actually deleted.
         if (result.payload.affectedRows === 0) {
             await logActivity({
                 req,
@@ -1913,6 +2139,7 @@ exports.deleteNilai = async (req, res) => {
         }
 
         // 4. Jika berhasil, kirim respons yang menandakan sukses.
+        // 4. If successful, send response indicating success.
         await logActivity({
             req,
             admin: req.user,
@@ -1927,12 +2154,13 @@ exports.deleteNilai = async (req, res) => {
         });
     } catch (error) {
         // 5. Tangani semua error tak terduga dari server
+        // 5. Handle all unexpected server errors
         console.error('Error in deleteNilai controller:', error);
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat hapus Nilai`,
-            target_entity: `ID Nilai: ${id}`,
+            target_entity: `ID Nilai: ${req.params.id}`,
             status: 'fail',
         });
 
@@ -1944,16 +2172,26 @@ exports.deleteNilai = async (req, res) => {
 };
 
 // ============= KELOLA DATA PRESTASI =============
-// ambil data sks, ipk dan tak
+
+/**
+ * Mengambil data prestasi mahasiswa (SKS, IPK, TAK) berdasarkan NIM
+ * Get student achievement data (SKS, IPK, TAK) by NIM
+ * @desc    GET - ambil data sks, ipk dan tak
+ * @route   GET /api/admin/akademik/prestasi/:nim
+ * @access  Private (Admin only)
+ */
 exports.getPrestasiByNIM = async (req, res) => {
     try {
         // 1. Ambil NIM dari parameter URL
+        // 1. Get NIM from URL parameter
         const { nim } = req.params;
 
-        // 2. Panggil model untuk mengambil data
+        // 2. Panggil model untuk mengambil data prestasi
+        // 2. Call model to get achievement data
         const result = await getDataPrestasi(nim);
 
         // 3. Handle kasus "Not Found" (model mengembalikan null)
+        // 3. Handle "Not Found" case (model returns null)
         if (result === null) {
             return res.status(200).json({
                 success: true,
@@ -1963,11 +2201,13 @@ exports.getPrestasiByNIM = async (req, res) => {
         }
 
         // 4. Handle kasus sukses (model mengembalikan data)
+        // 4. Handle success case (model returns data)
         const [data] = result;
         if (data.status === 'success') {
             const prestasiData = data.payload;
 
-            // 🔧 PERBAIKAN: Cek apakah semua field penting null
+            // Validasi apakah semua field penting kosong/null
+            // Validate if all important fields are empty/null
             const isEmptyData =
                 (prestasiData.tak === null || prestasiData.tak === undefined) &&
                 (prestasiData.ipk === null || prestasiData.ipk === undefined) &&
@@ -1976,6 +2216,7 @@ exports.getPrestasiByNIM = async (req, res) => {
 
             if (isEmptyData) {
                 // Jika semua field null, return null murni
+                // If all fields are null, return pure null
                 return res.status(200).json({
                     success: true,
                     message: `Belum ada data prestasi untuk mahasiswa dengan NIM ${nim}.`,
@@ -1984,6 +2225,7 @@ exports.getPrestasiByNIM = async (req, res) => {
             }
 
             // Jika ada data valid, return data normal
+            // If there's valid data, return normal data
             res.status(200).json({
                 success: true,
                 message: 'Data prestasi berhasil diambil',
@@ -1992,6 +2234,7 @@ exports.getPrestasiByNIM = async (req, res) => {
         }
     } catch (error) {
         // 5. Handle error tak terduga dari server
+        // 5. Handle unexpected server errors
         console.error('Error in getPrestasiByNIM controller:', error);
         res.status(500).json({
             success: false,
@@ -2000,22 +2243,34 @@ exports.getPrestasiByNIM = async (req, res) => {
     }
 };
 
-// Helper function untuk menentukan klasifikasi berdasarkan IPK
+/**
+ * Helper function untuk menentukan klasifikasi mahasiswa berdasarkan IPK
+ * Helper function to determine student classification based on GPA
+ * @param {number} ipk - Indeks Prestasi Kumulatif mahasiswa / Student's Cumulative GPA
+ * @returns {string} Klasifikasi mahasiswa (aman/siaga/bermasalah) / Student classification
+ */
 const tentukanKlasifikasi = (ipk) => {
     const nilaiIpk = parseFloat(ipk);
     if (nilaiIpk > 3.0) {
-        return 'aman';
+        return 'aman'; // IPK > 3.0 = Status aman / Safe status
     } else if (nilaiIpk >= 2.5 && nilaiIpk <= 3.0) {
-        return 'siaga';
+        return 'siaga'; // IPK 2.5-3.0 = Status siaga / Alert status
     } else {
-        return 'bermasalah';
+        return 'bermasalah'; // IPK < 2.5 = Status bermasalah / Problematic status
     }
 };
 
-// membuat Data Prestasi Baru
+/**
+ * Membuat data prestasi baru untuk mahasiswa
+ * Create new achievement data for student
+ * @desc    POST - membuat Data Prestasi Baru
+ * @route   POST /api/admin/akademik/prestasi
+ * @access  Private (Admin only)
+ */
 exports.createPrestasi = async (req, res) => {
     try {
         // 1. Validasi input dari klien (tanpa 'tanggal_dibuat')
+        // 1. Validate input from client (without 'tanggal_dibuat')
         const { nim, tak, sks_lulus, ipk_lulus } = req.body;
         if (
             !nim ||
@@ -2033,31 +2288,37 @@ exports.createPrestasi = async (req, res) => {
         // 2. Buat objek data untuk dikirim ke model
         //    Gunakan spread operator (...) untuk menggabungkan data dari body
         //    dengan timestamp yang dibuat di sini.
+        // 2. Create data object to send to model
+        //    Use spread operator (...) to combine data from body
+        //    with timestamp created here.
         const dataForModel = {
             ...req.body,
-            tanggal_dibuat: new Date(), // Membuat timestamp saat ini
+            tanggal_dibuat: new Date(), // Membuat timestamp saat ini / Create current timestamp
         };
 
         // 3. Panggil model dengan objek data yang sudah lengkap
+        // 3. Call model with complete data object
         const [result] = await createDataPrestasi(dataForModel);
 
-        // 4. Kirim respons sukses
+        // 4. Kirim respons sukses dan update klasifikasi mahasiswa
+        // 4. Send success response and update student classification
         if (result.status === 'success') {
             try {
+                // Tentukan klasifikasi berdasarkan IPK dan update ke database
+                // Determine classification based on GPA and update to database
                 const hasilKlasifikasi = tentukanKlasifikasi(ipk_lulus);
                 await upsertKlasifikasi(nim, hasilKlasifikasi);
-                console.log(
-                    `Klasifikasi untuk NIM ${nim} berhasil dibuat/diupdate menjadi: ${hasilKlasifikasi}`
-                );
             } catch (classificationError) {
                 // Jika klasifikasi gagal, cukup log error tanpa menghentikan proses utama.
-                // Respons sukses sudah akan dikirim ke user.
+                // If classification fails, just log error without stopping main process.
                 console.error(
                     `Gagal melakukan klasifikasi untuk NIM ${nim}:`,
                     classificationError
                 );
             }
 
+            // Log aktivitas berhasil membuat prestasi
+            // Log successful achievement creation activity
             await logActivity({
                 req,
                 admin: req.user,
@@ -2073,13 +2334,14 @@ exports.createPrestasi = async (req, res) => {
             });
         }
     } catch (error) {
-        // Handle error foreign key
+        // Handle error foreign key constraint (NIM tidak ada)
+        // Handle foreign key constraint error (NIM doesn't exist)
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
             await logActivity({
                 req,
                 admin: req.user,
                 action: `Gagal membuat Prestasi (NIM tidak ada)`,
-                target_entity: `NIM: ${nim}`,
+                target_entity: `NIM: ${req.body.nim}`,
                 status: 'fail',
             });
 
@@ -2089,13 +2351,14 @@ exports.createPrestasi = async (req, res) => {
             });
         }
 
-        // Handle error umum
+        // Handle error umum untuk monitoring
+        // Handle general error for monitoring
         console.error('Error from Prestasi Controller:', error);
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat membuat Prestasi`,
-            target_entity: `NIM: ${nim}`,
+            target_entity: `NIM: ${req.body.nim}`,
             status: 'fail',
         });
 
@@ -2106,14 +2369,22 @@ exports.createPrestasi = async (req, res) => {
     }
 };
 
-// mengedit data prestasi yang sudah ada
+/**
+ * Memperbarui data prestasi mahasiswa berdasarkan NIM
+ * Update student achievement data by NIM
+ * @desc    PUT - mengedit data prestasi yang sudah ada
+ * @route   PUT /api/admin/akademik/prestasi/:nim
+ * @access  Private (Admin only)
+ */
 exports.updatePrestasi = async (req, res) => {
     try {
         // Ambil NIM dari URL dan data dari body
+        // Get NIM from URL and data from body
         const { nim } = req.params;
         const data = req.body;
 
-        // Validasi input
+        // Validasi input - field wajib untuk update prestasi
+        // Input validation - required fields for achievement update
         if (
             data.tak === undefined ||
             data.sks_lulus === undefined ||
@@ -2126,6 +2397,8 @@ exports.updatePrestasi = async (req, res) => {
             });
         }
 
+        // Siapkan data untuk model
+        // Prepare data for model
         const dataForModel = {
             tak: data.tak,
             sks_lulus: data.sks_lulus,
@@ -2135,6 +2408,8 @@ exports.updatePrestasi = async (req, res) => {
 
         // Periksa apakah ada baris yang terpengaruh.
         // Jika tidak ada sama sekali, berarti NIM tidak ditemukan.
+        // Check if any rows were affected.
+        // If none at all, it means NIM was not found.
         const takAffected = result.payload.takResult.affectedRows;
         const ipkAffected = result.payload.ipkResult.affectedRows;
 
@@ -2154,19 +2429,21 @@ exports.updatePrestasi = async (req, res) => {
         }
 
         try {
+            // Update klasifikasi mahasiswa berdasarkan IPK baru
+            // Update student classification based on new GPA
             const hasilKlasifikasi = tentukanKlasifikasi(data.ipk_lulus);
             await upsertKlasifikasi(nim, hasilKlasifikasi);
-            console.log(
-                `Klasifikasi untuk NIM ${nim} berhasil diupdate menjadi: ${hasilKlasifikasi}`
-            );
         } catch (classificationError) {
+            // Log error klasifikasi tanpa menghentikan proses utama
+            // Log classification error without stopping main process
             console.error(
                 `Gagal melakukan klasifikasi untuk NIM ${nim} saat update:`,
                 classificationError
             );
         }
 
-        // Jika berhasil
+        // Log aktivitas berhasil update prestasi
+        // Log successful achievement update activity
         await logActivity({
             req,
             admin: req.user,
@@ -2185,12 +2462,13 @@ exports.updatePrestasi = async (req, res) => {
         });
     } catch (error) {
         // Handle error umum dari server
+        // Handle general server errors
         console.error('Error from Prestasi Controller (Update):', error);
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat update Prestasi`,
-            target_entity: `NIM: ${nim}`,
+            target_entity: `NIM: ${req.params.nim}`,
             status: 'fail',
         });
 
@@ -2201,16 +2479,25 @@ exports.updatePrestasi = async (req, res) => {
     }
 };
 
-// menghapus data IPK TAK SKS mahasiswa
+/**
+ * Menghapus data prestasi mahasiswa berdasarkan NIM
+ * Delete student achievement data by NIM
+ * @desc    DELETE - menghapus data IPK TAK SKS mahasiswa
+ * @route   DELETE /api/admin/akademik/prestasi/:nim
+ * @access  Private (Admin only)
+ */
 exports.deletePrestasi = async (req, res) => {
     try {
         // Ambil NIM dari parameter URL
+        // Get NIM from URL parameter
         const { nim } = req.params;
 
         const [result] = await deleteDataPrestasi(nim);
 
         // Periksa apakah ada baris yang terpengaruh.
         // Jika tidak ada sama sekali di kedua tabel, berarti NIM tidak ditemukan.
+        // Check if any rows were affected.
+        // If none at all in both tables, it means NIM was not found.
         const takAffected = result.payload.takResult.affectedRows;
         const ipkAffected = result.payload.ipkResult.affectedRows;
 
@@ -2229,6 +2516,8 @@ exports.deletePrestasi = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus prestasi
+        // Log successful achievement deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -2243,12 +2532,13 @@ exports.deletePrestasi = async (req, res) => {
         });
     } catch (error) {
         // Handle error umum dari server
+        // Handle general server errors
         console.error('Error from Prestasi Controller (Delete):', error);
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat hapus Prestasi`,
-            target_entity: `NIM: ${nim}`,
+            target_entity: `NIM: ${req.params.nim}`,
             status: 'fail',
         });
 
@@ -2260,16 +2550,26 @@ exports.deletePrestasi = async (req, res) => {
 };
 
 // ============= KELOLA DATA PERSEMESTER =============
-// mengambil data ip dan sks persemester
+
+/**
+ * Mengambil data IP dan SKS per semester mahasiswa berdasarkan NIM
+ * Get student's IP and SKS data per semester by NIM
+ * @desc    GET - mengambil data ip dan sks persemester
+ * @route   GET /api/admin/akademik/semester/:nim
+ * @access  Private (Admin only)
+ */
 exports.getSemesterByNIM = async (req, res) => {
     try {
         // 1. Ambil NIM dari parameter URL
+        // 1. Get NIM from URL parameter
         const { nim } = req.params;
 
-        // 2. Panggil model untuk mencari data
+        // 2. Panggil model untuk mencari data semester mahasiswa
+        // 2. Call model to find student semester data
         const result = await findSemesterMahasiswaByNIM(nim);
 
         // 3. Handle kasus "Not Found" (model mengembalikan null)
+        // 3. Handle "Not Found" case (model returns null)
         if (result === null) {
             return res.status(200).json({
                 success: true,
@@ -2281,8 +2581,8 @@ exports.getSemesterByNIM = async (req, res) => {
             });
         }
 
-        // 4. Handle kasus "Success" (model mengembalikan objek data)
-        // 🔧 PERBAIKAN: Cek apakah array semester kosong
+        // 4. Handle kasus "Success" - validasi apakah array semester kosong
+        // 4. Handle "Success" case - validate if semester array is empty
         if (result.riwayat_semester && Array.isArray(result.riwayat_semester)) {
             if (result.riwayat_semester.length === 0) {
                 return res.status(200).json({
@@ -2296,13 +2596,16 @@ exports.getSemesterByNIM = async (req, res) => {
             }
         }
 
+        // Return data semester yang ditemukan
+        // Return found semester data
         res.status(200).json({
             success: true,
             message: 'Riwayat semester berhasil diambil.',
-            data: result, // 'result' adalah objek yang sudah diformat
+            data: result, // 'result' adalah objek yang sudah diformat dari model
         });
     } catch (error) {
         // 5. Handle error tak terduga dari server
+        // 5. Handle unexpected server errors
         console.error('Error in getSemesterByNIM controller:', error);
         res.status(500).json({
             success: false,
@@ -2311,9 +2614,17 @@ exports.getSemesterByNIM = async (req, res) => {
     }
 };
 
+/**
+ * Membuat data semester baru untuk mahasiswa
+ * Create new semester data for student
+ * @desc    POST - membuat data semester baru
+ * @route   POST /api/admin/akademik/semester/:nim
+ * @access  Private (Admin only)
+ */
 exports.createSemester = async (req, res) => {
     try {
         // 1. Ambil input dari params dan body
+        // 1. Get input from params and body
         const { nim } = req.params;
         const {
             ip_semester,
@@ -2323,7 +2634,8 @@ exports.createSemester = async (req, res) => {
             jenis_semester,
         } = req.body;
 
-        // 2. Validasi input dari body (lebih ringkas)
+        // 2. Validasi input dari body - semua field wajib diisi
+        // 2. Validate input from body - all fields are required
         if (
             ip_semester === undefined ||
             semester === undefined ||
@@ -2332,23 +2644,26 @@ exports.createSemester = async (req, res) => {
             !jenis_semester
         ) {
             return res.status(400).json({
-                success: false, // Menggunakan 'status' agar konsisten
+                success: false,
                 message:
                     'Permintaan tidak valid. Semua field dalam body wajib diisi.',
             });
         }
 
-        // 3. Siapkan data untuk model (INI YANG PALING PENTING DIPERBAIKI)
+        // 3. Siapkan data untuk model dengan menggabungkan NIM dari params
+        // 3. Prepare data for model by combining NIM from params
         const dataForModel = {
-            nim_mahasiswa: nim, // <-- Tambahkan NIM dari params
+            nim_mahasiswa: nim, // Tambahkan NIM dari params ke data model
             ...req.body,
-            tanggal_dibuat: new Date(),
+            tanggal_dibuat: new Date(), // Timestamp otomatis untuk audit trail
         };
 
-        // 4. Panggil model dengan SATU objek data yang lengkap
+        // 4. Panggil model dengan objek data yang lengkap
+        // 4. Call model with complete data object
         const newSemester = await createSemesterMahasiswaByNIM(dataForModel);
 
-        // 5. Kirim respons sukses yang konsisten
+        // 5. Log aktivitas berhasil dan kirim respons sukses
+        // 5. Log successful activity and send success response
         await logActivity({
             req,
             admin: req.user,
@@ -2364,8 +2679,10 @@ exports.createSemester = async (req, res) => {
         });
     } catch (error) {
         // 6. Handle error yang konsisten
+        // 6. Handle consistent errors
 
-        // Handle error jika NIM tidak ditemukan (foreign key)
+        // Handle error jika NIM tidak ditemukan (foreign key constraint)
+        // Handle error if NIM not found (foreign key constraint)
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
             await logActivity({
                 req,
@@ -2377,11 +2694,14 @@ exports.createSemester = async (req, res) => {
 
             return res.status(400).json({
                 success: false,
-                message: `Gagal menambahkan data. Mahasiswa dengan NIM '${nim_mahasiswa}' tidak ditemukan.`,
+                message: `Gagal menambahkan data. Mahasiswa dengan NIM '${nim}' tidak ditemukan.`,
             });
         }
 
         console.error('Error in createSemester controller:', error);
+
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
@@ -2397,13 +2717,20 @@ exports.createSemester = async (req, res) => {
     }
 };
 
-// mengedit data persemester
+/**
+ * Memperbarui data semester berdasarkan ID
+ * Update semester data by ID
+ * @desc    PUT - mengedit data persemester
+ * @route   PUT /api/admin/akademik/semester/:id
+ * @access  Private (Admin only)
+ */
 exports.updateSemester = async (req, res) => {
     try {
         const { id } = req.params;
         const dataToUpdate = req.body;
 
-        // Validasi input
+        // Validasi input - semua field wajib untuk update semester
+        // Input validation - all fields required for semester update
         if (
             dataToUpdate.ip_semester === undefined ||
             dataToUpdate.semester === undefined ||
@@ -2416,14 +2743,17 @@ exports.updateSemester = async (req, res) => {
                 .json({ success: false, message: 'Semua field wajib diisi.' });
         }
 
+        // Siapkan data untuk model dengan timestamp update
+        // Prepare data for model with update timestamp
         const dataForModel = {
             ...req.body,
-            tanggal_dibuat: new Date(), // <-- Ambil sisa data dari body
+            tanggal_dibuat: new Date(), // Update timestamp untuk audit trail
         };
 
         const result = await updateSemesterMahasiswaById(id, dataForModel);
 
-        // Periksa apakah ada baris yang diupdate
+        // Periksa apakah ada baris yang diupdate (affected rows)
+        // Check if any rows were updated (affected rows)
         if (result.affectedRows === 0) {
             await logActivity({
                 req,
@@ -2439,7 +2769,8 @@ exports.updateSemester = async (req, res) => {
             });
         }
 
-        // Jika berhasil, kirim respons sukses
+        // Log aktivitas berhasil update dan kirim respons sukses
+        // Log successful update activity and send success response
         await logActivity({
             req,
             admin: req.user,
@@ -2453,16 +2784,19 @@ exports.updateSemester = async (req, res) => {
             message: 'Data semester berhasil diupdate.',
             data: {
                 id: parseInt(id, 10),
-                dataForModel,
+                ...dataToUpdate, // Return data yang diupdate sebagai konfirmasi
             },
         });
     } catch (error) {
         console.error('Error in updateSemester controller:', error);
+
+        // Log error untuk monitoring
+        // Log error for monitoring
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat update Semester`,
-            target_entity: `ID: ${id}`,
+            target_entity: `ID: ${req.params.id}`,
             status: 'fail',
         });
 
@@ -2473,16 +2807,24 @@ exports.updateSemester = async (req, res) => {
     }
 };
 
-// menghapus data persemester
+/**
+ * Menghapus data semester berdasarkan ID
+ * Delete semester data by ID
+ * @desc    DELETE - menghapus data persemester
+ * @route   DELETE /api/admin/akademik/semester/:id
+ * @access  Private (Admin only)
+ */
 exports.deleteSemester = async (req, res) => {
     try {
         const { id } = req.params;
 
         const result = await deleteSemesterMahasiswaById(id);
 
-        // Periksa apakah ada baris yang terhapus
+        // Periksa apakah ada baris yang terhapus (affected rows)
+        // Check if any rows were deleted (affected rows)
         if (result.affectedRows === 0) {
             // Jika tidak ada, artinya data tidak ditemukan
+            // If none, it means data was not found
             await logActivity({
                 req,
                 admin: req.user,
@@ -2497,6 +2839,8 @@ exports.deleteSemester = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus
+        // Log successful deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -2511,11 +2855,14 @@ exports.deleteSemester = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in deleteSemester controller:', error);
+
+        // Log error untuk monitoring
+        // Log error for monitoring
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat hapus Semester`,
-            target_entity: `ID: ${id}`,
+            target_entity: `ID: ${req.params.id}`,
             status: 'fail',
         });
 
@@ -2525,17 +2872,23 @@ exports.deleteSemester = async (req, res) => {
         });
     }
 };
-
 // =============================================
 // ==           KELOLA KURIKULUM              ==
 // =============================================
 
 /**
- * Mengambil semua mata kuliah berdasarkan kurikulum
+ * Mengambil semua mata kuliah berdasarkan kurikulum tertentu
+ * Get all courses based on specific curriculum
+ * @desc    GET - mengambil mata kuliah berdasarkan kurikulum
+ * @route   GET /api/admin/kurikulum/mata-kuliah?kurikulum=2024
+ * @access  Private (Admin only)
  */
 exports.getMataKuliahByKurikulum = async (req, res) => {
     try {
         const { kurikulum } = req.query;
+
+        // Validasi parameter kurikulum wajib ada
+        // Validate required curriculum parameter
         if (!kurikulum) {
             return res.status(400).json({
                 success: false,
@@ -2545,6 +2898,8 @@ exports.getMataKuliahByKurikulum = async (req, res) => {
 
         const mataKuliah = await findMataKuliahByKurikulum(kurikulum);
 
+        // Handle jika tidak ada mata kuliah ditemukan
+        // Handle if no courses found
         if (mataKuliah.length === 0) {
             return res.status(200).json({
                 success: false,
@@ -2570,12 +2925,18 @@ exports.getMataKuliahByKurikulum = async (req, res) => {
 };
 
 /**
- * Mengambil semua kurikulum yang tersedia
+ * Mengambil daftar semua kurikulum yang tersedia dalam sistem
+ * Get list of all available curriculums in the system
+ * @desc    GET - mengambil semua kurikulum yang tersedia
+ * @route   GET /api/admin/kurikulum
+ * @access  Private (Admin only)
  */
 exports.getAllKurikulum = async (req, res) => {
     try {
         const kurikulumList = await getAllKurikulum();
 
+        // Handle jika tidak ada kurikulum ditemukan
+        // Handle if no curriculums found
         if (kurikulumList.length === 0) {
             return res.status(200).json({
                 success: false,
@@ -2600,12 +2961,18 @@ exports.getAllKurikulum = async (req, res) => {
 };
 
 /**
- * Mengambil list semua kelompok keahlian
+ * Mengambil daftar semua kelompok keahlian untuk dropdown/select options
+ * Get list of all expertise groups for dropdown/select options
+ * @desc    GET - mengambil list semua kelompok keahlian
+ * @route   GET /api/admin/kurikulum/kelompok-keahlian
+ * @access  Private (Admin only)
  */
 exports.getKelompokKeahlianList = async (req, res) => {
     try {
         const kelompokKeahlianList = await getAllKelompokKeahlian();
 
+        // Handle jika tidak ada kelompok keahlian ditemukan (tetap return success)
+        // Handle if no expertise groups found (still return success)
         if (kelompokKeahlianList.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -2630,12 +2997,18 @@ exports.getKelompokKeahlianList = async (req, res) => {
 };
 
 /**
- * Mengambil mata kuliah berdasarkan ID
+ * Mengambil detail mata kuliah berdasarkan ID untuk editing
+ * Get course details by ID for editing
+ * @desc    GET - mengambil mata kuliah berdasarkan ID
+ * @route   GET /api/admin/kurikulum/mata-kuliah/:id
+ * @access  Private (Admin only)
  */
 exports.getMataKuliahById = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Validasi ID parameter
+        // Validate ID parameter
         if (!id || isNaN(id)) {
             return res.status(400).json({
                 success: false,
@@ -2645,6 +3018,8 @@ exports.getMataKuliahById = async (req, res) => {
 
         const mataKuliah = await findMataKuliahById(parseInt(id));
 
+        // Handle jika mata kuliah tidak ditemukan
+        // Handle if course not found
         if (!mataKuliah) {
             return res.status(200).json({
                 success: false,
@@ -2669,7 +3044,13 @@ exports.getMataKuliahById = async (req, res) => {
     }
 };
 
-//Menambah mata kuliah baru
+/**
+ * Menambahkan mata kuliah baru ke dalam kurikulum
+ * Add new course to curriculum
+ * @desc    POST - menambah mata kuliah baru
+ * @route   POST /api/admin/kurikulum/mata-kuliah
+ * @access  Private (Admin only)
+ */
 exports.createMataKuliah = async (req, res) => {
     try {
         const {
@@ -2685,7 +3066,8 @@ exports.createMataKuliah = async (req, res) => {
             kelompok_keahlian,
         } = req.body;
 
-        // Validasi input required
+        // Validasi input field yang wajib diisi
+        // Validate required input fields
         if (!kode_mk || !nama_mk || !sks_mk || !jenis_mk || !kurikulum) {
             return res.status(400).json({
                 success: false,
@@ -2695,7 +3077,8 @@ exports.createMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi tipe data
+        // Validasi tipe data numerik
+        // Validate numeric data types
         if (isNaN(sks_mk) || isNaN(semester) || isNaN(kurikulum)) {
             return res.status(400).json({
                 success: false,
@@ -2703,16 +3086,18 @@ exports.createMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi SKS
+        // Validasi rentang SKS (1-10 SKS)
+        // Validate SKS range (1-10 credits)
         if (sks_mk < 1 || sks_mk > 10) {
             return res.status(400).json({
                 success: false,
-                message: 'SKS harus antara 1-6',
+                message: 'SKS harus antara 1-10',
                 data: null,
             });
         }
 
         // Validasi jenis mata kuliah
+        // Validate course type
         const jenisValid = ['WAJIB PRODI', 'PILIHAN'];
         if (!jenisValid.includes(jenis_mk)) {
             return res.status(400).json({
@@ -2725,6 +3110,7 @@ exports.createMataKuliah = async (req, res) => {
         }
 
         // Validasi jenis semester
+        // Validate semester type
         const jenisSemesterValid = ['GANJIL', 'GENAP', 'ANTARA'];
         if (jenis_semester && !jenisSemesterValid.includes(jenis_semester)) {
             return res.status(400).json({
@@ -2736,7 +3122,8 @@ exports.createMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi semester
+        // Validasi rentang semester (1-8)
+        // Validate semester range (1-8)
         if (semester && (semester < 1 || semester > 8)) {
             return res.status(400).json({
                 success: false,
@@ -2745,7 +3132,8 @@ exports.createMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi tingkat
+        // Validasi rentang tingkat (1-4)
+        // Validate level range (1-4)
         if (tingkat && (tingkat < 1 || tingkat > 4)) {
             return res.status(400).json({
                 success: false,
@@ -2754,10 +3142,11 @@ exports.createMataKuliah = async (req, res) => {
             });
         }
 
-        // Prepare data
+        // Siapkan data untuk disimpan ke database
+        // Prepare data to be saved to database
         const mataKuliahData = {
-            kode_mk: kode_mk.toUpperCase(),
-            nama_mk: nama_mk.trim(),
+            kode_mk: kode_mk.toUpperCase(), // Normalisasi ke uppercase
+            nama_mk: nama_mk.trim(), // Hapus spasi di awal/akhir
             sks_mk: parseInt(sks_mk),
             jenis_mk,
             tingkat: tingkat,
@@ -2769,8 +3158,11 @@ exports.createMataKuliah = async (req, res) => {
         };
 
         // Panggil model untuk create mata kuliah
+        // Call model to create course
         const result = await createMataKuliah(mataKuliahData);
 
+        // Log aktivitas berhasil membuat mata kuliah
+        // Log successful course creation activity
         await logActivity({
             req,
             admin: req.user,
@@ -2787,13 +3179,14 @@ exports.createMataKuliah = async (req, res) => {
     } catch (error) {
         console.error('Error in createMataKuliah controller:', error);
 
-        // Handle specific error messages
+        // Handle specific error untuk duplikat mata kuliah
+        // Handle specific error for duplicate course
         if (error.message.includes('sudah ada dalam kurikulum')) {
             await logActivity({
                 req,
                 admin: req.user,
-                action: `Gagal membuat MK (duplikat): ${nama_mk}`,
-                target_entity: `Kode: ${kode_mk}`,
+                action: `Gagal membuat MK (duplikat): ${req.body.nama_mk}`,
+                target_entity: `Kode: ${req.body.kode_mk}`,
                 status: 'fail',
             });
 
@@ -2804,11 +3197,13 @@ exports.createMataKuliah = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
-            action: `Error server saat membuat MK: ${nama_mk}`,
-            target_entity: `Kode: ${kode_mk}`,
+            action: `Error server saat membuat MK: ${req.body.nama_mk}`,
+            target_entity: `Kode: ${req.body.kode_mk}`,
             status: 'fail',
         });
 
@@ -2825,7 +3220,11 @@ exports.createMataKuliah = async (req, res) => {
 };
 
 /**
- * Mengupdate mata kuliah berdasarkan ID
+ * Memperbarui data mata kuliah berdasarkan ID
+ * Update course data by ID
+ * @desc    PUT - mengupdate mata kuliah berdasarkan ID
+ * @route   PUT /api/admin/kurikulum/mata-kuliah/:id
+ * @access  Private (Admin only)
  */
 exports.updateMataKuliah = async (req, res) => {
     try {
@@ -2843,6 +3242,8 @@ exports.updateMataKuliah = async (req, res) => {
             kelompok_keahlian,
         } = req.body;
 
+        // Validasi ID parameter
+        // Validate ID parameter
         if (!id || isNaN(id)) {
             return res.status(400).json({
                 success: false,
@@ -2850,7 +3251,8 @@ exports.updateMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi input wajib
+        // Validasi input field wajib untuk update
+        // Validate required input fields for update
         if (
             !kode_mk ||
             !nama_mk ||
@@ -2866,7 +3268,8 @@ exports.updateMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi tipe data
+        // Validasi tipe data numerik
+        // Validate numeric data types
         if (isNaN(sks_mk) || isNaN(semester) || isNaN(kurikulum)) {
             return res.status(400).json({
                 success: false,
@@ -2874,7 +3277,8 @@ exports.updateMataKuliah = async (req, res) => {
             });
         }
 
-        // Validasi rentang nilai
+        // Validasi rentang nilai SKS dan semester
+        // Validate SKS and semester value ranges
         if (parseInt(sks_mk) < 1 || parseInt(sks_mk) > 10) {
             return res.status(400).json({
                 success: false,
@@ -2889,13 +3293,15 @@ exports.updateMataKuliah = async (req, res) => {
             });
         }
 
+        // Siapkan data untuk update dengan normalisasi
+        // Prepare data for update with normalization
         const mataKuliahData = {
             kode_mk: kode_mk.trim().toUpperCase(),
             nama_mk: nama_mk.trim(),
             sks_mk: parseInt(sks_mk),
             jenis_mk,
             tingkat: tingkat ? parseInt(tingkat) : 1,
-            jenis_semester: jenis_semester || 'Ganjil',
+            jenis_semester: jenis_semester || 'GANJIL',
             semester: parseInt(semester),
             ekivalensi:
                 ekivalensi && ekivalensi.trim() !== ''
@@ -2910,6 +3316,8 @@ exports.updateMataKuliah = async (req, res) => {
             mataKuliahData
         );
 
+        // Handle jika mata kuliah tidak ditemukan
+        // Handle if course not found
         if (!updatedMataKuliah) {
             await logActivity({
                 req,
@@ -2925,6 +3333,8 @@ exports.updateMataKuliah = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil update mata kuliah
+        // Log successful course update activity
         await logActivity({
             req,
             admin: req.user,
@@ -2942,12 +3352,13 @@ exports.updateMataKuliah = async (req, res) => {
         console.error('Error in updateMataKuliah controller:', error);
 
         // Handle duplicate error
+        // Handle duplicate error
         if (error.message.includes('sudah ada dalam kurikulum')) {
             await logActivity({
                 req,
                 admin: req.user,
-                action: `Gagal update MK (duplikat): ${nama_mk}`,
-                target_entity: `ID MK: ${id}`,
+                action: `Gagal update MK (duplikat): ${req.body.nama_mk}`,
+                target_entity: `ID MK: ${req.params.id}`,
                 status: 'fail',
             });
 
@@ -2957,11 +3368,13 @@ exports.updateMataKuliah = async (req, res) => {
             });
         }
 
+        // Log error umum untuk monitoring
+        // Log general error for monitoring
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat update MK`,
-            target_entity: `ID MK: ${id}`,
+            target_entity: `ID MK: ${req.params.id}`,
             status: 'fail',
         });
 
@@ -2975,11 +3388,17 @@ exports.updateMataKuliah = async (req, res) => {
 
 /**
  * Menghapus mata kuliah berdasarkan ID
+ * Delete course by ID
+ * @desc    DELETE - menghapus mata kuliah berdasarkan ID
+ * @route   DELETE /api/admin/kurikulum/mata-kuliah/:id
+ * @access  Private (Admin only)
  */
 exports.deleteMataKuliah = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Validasi ID parameter
+        // Validate ID parameter
         if (!id || isNaN(id)) {
             return res.status(400).json({
                 success: false,
@@ -2987,7 +3406,8 @@ exports.deleteMataKuliah = async (req, res) => {
             });
         }
 
-        // Cek apakah mata kuliah ada
+        // Cek apakah mata kuliah ada sebelum menghapus
+        // Check if course exists before deleting
         const existingMataKuliah = await findMataKuliahById(parseInt(id));
         if (!existingMataKuliah) {
             await logActivity({
@@ -3004,6 +3424,8 @@ exports.deleteMataKuliah = async (req, res) => {
             });
         }
 
+        // Lakukan penghapusan mata kuliah
+        // Perform course deletion
         const isDeleted = await deleteMataKuliah(parseInt(id));
 
         if (!isDeleted) {
@@ -3021,6 +3443,8 @@ exports.deleteMataKuliah = async (req, res) => {
             });
         }
 
+        // Log aktivitas berhasil menghapus mata kuliah
+        // Log successful course deletion activity
         await logActivity({
             req,
             admin: req.user,
@@ -3040,11 +3464,14 @@ exports.deleteMataKuliah = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in deleteMataKuliah controller:', error);
+
+        // Log error untuk monitoring
+        // Log error for monitoring
         await logActivity({
             req,
             admin: req.user,
             action: `Error server saat hapus MK`,
-            target_entity: target,
+            target_entity: `ID MK: ${req.params.id}`,
             status: 'fail',
         });
 
@@ -3057,8 +3484,11 @@ exports.deleteMataKuliah = async (req, res) => {
 };
 
 /**
- * Mengambil opsi mata kuliah untuk ekuivalensi
- * GET http://localhost:5000/api/admin/kelolaKurikulum/getEkuivalensiOptions?kurikulum=2024
+ * Mengambil opsi mata kuliah untuk keperluan ekuivalensi
+ * Get course options for equivalence purposes
+ * @desc    GET - mengambil opsi mata kuliah untuk ekuivalensi
+ * @route   GET /api/admin/kurikulum/ekuivalensi-options/:kurikulum
+ * @access  Private (Admin only)
  */
 exports.getEkuivalensiOptions = async (req, res) => {
     try {
@@ -3067,6 +3497,8 @@ exports.getEkuivalensiOptions = async (req, res) => {
 
         const options = await getEkuivalensiOptions(currentKurikulum);
 
+        // Handle jika tidak ada opsi ekuivalensi
+        // Handle if no equivalence options found
         if (!options) {
             return res.status(200).json({
                 success: false,
