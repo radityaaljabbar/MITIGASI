@@ -1,14 +1,18 @@
+// Faculty Controller - Pengontrol untuk fitur dosen wali dalam sistem akademik
+// Faculty Controller for lecturer supervisor features in academic system
 const { pool } = require('../config/database');
 const response = require('../utils/response');
 const { validationResult } = require('express-validator');
-// const { PythonShell } = require('python-shell');
-const { spawn } = require('child_process'); // TAMBAH INI
+// const { PythonShell } = require('python-shell'); // Optional: untuk integrasi Python jika diperlukan
+const { spawn } = require('child_process'); // Untuk menjalankan proses eksternal / For running external processes
 const path = require('path');
 
-// ADDED: Import dateHelper for MySQL datetime formatting
+// Import helper untuk formatting tanggal MySQL
+// Import helper for MySQL date formatting
 const { getCurrentMySQLDateTime } = require('../utils/dateHelper');
 
-// Import queries
+// Import model queries untuk berbagai fitur dosen wali
+// Import model queries for various lecturer supervisor features
 const responseDosWalModel = require('../models/responseDosenWali');
 const {
     getKelasWali,
@@ -46,17 +50,25 @@ const {
     financialResponse,
 } = require('../models/dosenWaliQueries/myStudent_AnalisisFinansialQueries');
 
+// Import utility untuk upload file ke cloud storage
+// Import utility for cloud storage file upload
 const { uploadFile } = require('../utils/cloudStorage');
 
-// @desc    Get list of students for dosen wali
-// @route   GET /api/faculty/listMahasiswa
-// @access  Private (dosen_wali only)
+/**
+ * Mengambil daftar mahasiswa yang menjadi wali kelas dosen
+ * Get list of students under lecturer's supervision
+ * @desc    Get list of students for dosen wali
+ * @route   GET /api/faculty/listMahasiswa
+ * @access  Private (dosen_wali only)
+ */
 exports.getStudentList = async (req, res) => {
     try {
-        // Get dosen code from the authenticated user
+        // Ambil kode dosen dari user yang sudah terautentikasi
+        // Get lecturer code from authenticated user
         const dosenCode = req.user.code;
 
-        // If no dosen code, return error
+        // Validasi keberadaan kode dosen
+        // Validate lecturer code existence
         if (!dosenCode) {
             return res.status(400).json({
                 success: false,
@@ -64,10 +76,12 @@ exports.getStudentList = async (req, res) => {
             });
         }
 
-        // Get classes associated with this dosen
+        // Ambil kelas-kelas yang diampu oleh dosen wali ini
+        // Get classes supervised by this lecturer
         const classes = await getKelasWali(dosenCode);
-        // console.log(classes);
 
+        // Handle jika tidak ada kelas yang diampu
+        // Handle if no classes are supervised
         if (classes.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -76,11 +90,12 @@ exports.getStudentList = async (req, res) => {
             });
         }
 
-        // Get all class codes for this dosen
+        // Ekstrak semua kode kelas untuk query mahasiswa
+        // Extract all class codes for student query
         const classCodesList = classes.map((cls) => cls.kode_kelas);
-        // console.log(classCodesList);
 
-        // Get students from all classes
+        // Ambil semua mahasiswa dari kelas-kelas tersebut
+        // Get all students from those classes
         const studentList = await getStudentsByClassCodes(classCodesList);
 
         return res.status(200).json({
@@ -97,18 +112,26 @@ exports.getStudentList = async (req, res) => {
     }
 };
 
-// @desc    Get list and data of students report to lecturer
-// @route   GET /api/faculty/keluhanMahasiswa
-// @access  Private (dosen_wali only)
+/**
+ * Mengambil daftar keluhan mahasiswa yang ditujukan ke dosen wali
+ * Get list of student complaints directed to lecturer supervisor
+ * @desc    Get list and data of students report to lecturer
+ * @route   GET /api/faculty/keluhanMahasiswa
+ * @access  Private (dosen_wali only)
+ */
 exports.getKeluhanMahasiswa = async (req, res) => {
     const dosenNIP = req.user.id;
     const dosenCode = req.user.code;
 
+    // Validasi kode dosen untuk akses data
+    // Validate lecturer code for data access
     if (!dosenCode) {
         return response(400, null, 'Kode dosen tidak ditemukan', res);
     }
 
     try {
+        // Ambil semua keluhan mahasiswa untuk dosen wali ini
+        // Get all student complaints for this lecturer supervisor
         const data = await myReportQueries.getKeluhan(dosenNIP, dosenCode);
         response(200, data, 'dapat semua keluhan', res);
     } catch (err) {
@@ -122,14 +145,20 @@ exports.getKeluhanMahasiswa = async (req, res) => {
     }
 };
 
-// @desc    Get list and data of dosenwali response to students report to lecturer
-// @route   GET /api/faculty/responseDosenWali
-// @access  Private (dosen_wali only)
+/**
+ * Mengambil respons dosen wali terhadap keluhan mahasiswa
+ * Get lecturer supervisor responses to student complaints
+ * @desc    Get list and data of dosenwali response to students report to lecturer
+ * @route   GET /api/faculty/responseDosenWali
+ * @access  Private (dosen_wali only)
+ */
 exports.getResponDosWal = async (req, res) => {
     const dosenNIP = req.user.id;
     const feedbackId = req.query.feedbackId;
 
     try {
+        // Ambil respons dosen wali berdasarkan NIP dan feedback ID
+        // Get lecturer supervisor response based on NIP and feedback ID
         const data = await myReportQueries.getResponse(dosenNIP, feedbackId);
         response(200, data, 'dapat semua response', res);
     } catch (err) {
@@ -143,16 +172,29 @@ exports.getResponDosWal = async (req, res) => {
     }
 };
 
+/**
+ * Mengambil detail keluhan mahasiswa berdasarkan ID
+ * Get student complaint details by ID
+ * @desc    GET - mengambil detail keluhan mahasiswa
+ * @route   GET /api/faculty/keluhan/:id
+ * @access  Private (dosen_wali only)
+ */
 exports.getKeluhanDetail = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Validasi parameter ID keluhan
+        // Validate complaint ID parameter
         if (!id) {
             return response(400, null, 'ID keluhan diperlukan', res);
         }
 
+        // Ambil detail keluhan dari database
+        // Get complaint details from database
         const data = await myReportQueries.getKeluhanDetail(id);
 
+        // Handle jika keluhan tidak ditemukan
+        // Handle if complaint not found
         if (data.status === 'error') {
             return response(404, null, data.message, res);
         }
@@ -169,21 +211,26 @@ exports.getKeluhanDetail = async (req, res) => {
     }
 };
 
+/**
+ * Mengirim atau memperbarui respons dosen wali terhadap keluhan mahasiswa
+ * Send or update lecturer supervisor response to student complaints
+ * @desc    POST - mengirim respons dosen wali dengan lampiran file
+ * @route   POST /api/faculty/responseDosenWali
+ * @access  Private (dosen_wali only)
+ */
 exports.sendResponDosWal = async (req, res) => {
     try {
-        // Log request information for debugging
-        console.log('Send response request received:', {
-            body: req.body,
-            filePresent: !!req.file,
-        });
-
         const { id_keluhan, response_keluhan, status_keluhan } = req.body;
         const nip_dosen_wali = req.user.id;
 
+        // Validasi input yang diperlukan
+        // Validate required inputs
         if (!id_keluhan || !response_keluhan || !status_keluhan) {
             return response(400, null, 'Data tidak lengkap', res);
         }
 
+        // Siapkan data respons untuk disimpan
+        // Prepare response data for saving
         const responseData = {
             nip_dosen_wali,
             id_keluhan,
@@ -191,19 +238,20 @@ exports.sendResponDosWal = async (req, res) => {
             status_keluhan,
         };
 
+        // Buat atau update respons terlebih dahulu
         // Create or update response first
         const result = await myReportQueries.createOrUpdateResponse(
             responseData
         );
         const id_response = result.payload.id;
 
-        // Handle file upload if there's a file
+        // Handle upload file lampiran jika ada
+        // Handle attachment file upload if present
         let fileData = null;
         if (req.file) {
             try {
-                console.log('Starting file upload to GCP for MyReport');
-
-                // Set timeout for upload operation
+                // Set timeout untuk operasi upload (30 detik)
+                // Set timeout for upload operation (30 seconds)
                 const uploadPromise = uploadFile(req.file, 'report-lampiran');
                 const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(
@@ -212,11 +260,12 @@ exports.sendResponDosWal = async (req, res) => {
                     )
                 );
 
-                // Race the upload against timeout
+                // Race antara upload dan timeout
+                // Race between upload and timeout
                 fileData = await Promise.race([uploadPromise, timeoutPromise]);
-                console.log('File uploaded successfully:', fileData.url);
 
-                // Save file data to database
+                // Simpan metadata file ke database
+                // Save file metadata to database
                 await lampiranMyReportQueries.saveLampiranMyReport({
                     id_response: id_response,
                     file_name: fileData.filename,
@@ -225,10 +274,11 @@ exports.sendResponDosWal = async (req, res) => {
                     file_type: fileData.mimetype,
                     file_size: fileData.size,
                 });
-                console.log('File metadata saved to database');
             } catch (uploadError) {
                 console.error('Error uploading file:', uploadError);
-                // Continue but note the error
+
+                // Lanjutkan proses tapi beri tahu ada error upload file
+                // Continue process but notify about file upload error
                 return response(
                     201,
                     {
@@ -240,11 +290,10 @@ exports.sendResponDosWal = async (req, res) => {
                     res
                 );
             }
-        } else {
-            console.log('No file to upload for MyReport');
         }
 
-        // Return success response
+        // Return respons sukses dengan informasi file jika ada
+        // Return success response with file information if present
         response(
             200,
             {
@@ -268,16 +317,20 @@ exports.sendResponDosWal = async (req, res) => {
 };
 
 /**
+ * Mengambil semua kelas dan mahasiswa yang diampu oleh dosen wali
+ * Get all classes and students supervised by lecturer supervisor
  * @desc Get all classes assigned to the logged-in dosen wali
  * @route GET /api/faculty/courseAdvisor/classesAndStudents
  * @access Private (dosen_wali only)
  */
 exports.getClassesAndStudents = async (req, res) => {
     try {
-        // Get dosen id (nip) dari middleware:
+        // Ambil kode dosen dari middleware autentikasi
+        // Get lecturer code from authentication middleware
         const kodeDosen = req.user.code;
 
-        // Klo kode dosen tidak ada error
+        // Validasi keberadaan kode dosen
+        // Validate lecturer code existence
         if (!kodeDosen) {
             return res.status(400).json({
                 success: false,
@@ -285,10 +338,12 @@ exports.getClassesAndStudents = async (req, res) => {
             });
         }
 
-        // Get list kelas wali dari fungsi query:
+        // Ambil daftar kelas wali dari database
+        // Get list of supervised classes from database
         const classes = await getKelasWaliDosen(kodeDosen);
 
-        // Cek array classes ada atau tidak
+        // Handle jika tidak ada kelas yang diampu
+        // Handle if no classes are supervised
         if (classes.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -297,10 +352,12 @@ exports.getClassesAndStudents = async (req, res) => {
             });
         }
 
-        // Pisahin kode_kelas ke array baru
+        // Ekstrak kode kelas ke array terpisah
+        // Extract class codes to separate array
         const listKodeKelas = classes.map((cls) => cls.kode_kelas);
 
-        // Fetch list mahasiswa berdasarkan kelas:
+        // Ambil daftar mahasiswa berdasarkan kelas yang diampu
+        // Get student list based on supervised classes
         const listMahasiswa = await getStudentInClass(listKodeKelas);
 
         return res.status(200).json({
@@ -322,29 +379,35 @@ exports.getClassesAndStudents = async (req, res) => {
 };
 
 /**
- * @desc Get riwwayat mata kuliah according dengan nim yang dikirim dari query parameter frontend {. . .?nim}
- * @route GET /api/faculty/courseAdvisor/courseHistory
+ * Mengambil riwayat mata kuliah mahasiswa untuk keperluan bimbingan akademik
+ * Get student course history for academic guidance purposes
+ * @desc Get riwayat mata kuliah according dengan nim yang dikirim dari query parameter frontend
+ * @route GET /api/faculty/courseAdvisor/courseHistory/:nim
  * @access Private (dosen_wali only)
  */
 exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
     try {
-        // Ambil id (nim) dari query parameter atau param
+        // Ambil NIM dari parameter URL atau query parameter
+        // Get NIM from URL parameter or query parameter
         const idParam = req.params.nim;
         const idQuery = req.query.nim;
-
         const id = idParam || idQuery;
-        // console.log(id);
 
-        // Cek nim nya ada atau tidak:
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!id) {
             return res.status(400).json({
                 success: false,
                 message: 'NIM tidak dapat didapatkan, server error.',
             });
         }
-        // 1. Ambil data nilai mahasiswa
+
+        // 1. Ambil data nilai mahasiswa dari database
+        // 1. Get student grades data from database
         const nilaiRows = await getStudentGrades(id);
 
+        // Handle jika tidak ada data nilai
+        // Handle if no grade data found
         if (nilaiRows.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -353,11 +416,13 @@ exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
             });
         }
 
-        // 2. Bikin array kode_mk dari nilai mahasiswa
+        // 2. Buat array unik kode mata kuliah dari nilai mahasiswa
+        // 2. Create unique array of course codes from student grades
         const kodeMkSet = new Set(nilaiRows.map((row) => row.kode_mk));
         const arrayKodeMk = [...kodeMkSet];
 
-        // Cek lagi untuk jaga-jaga kalau arraynya kosong
+        // Validasi tambahan untuk array kode mata kuliah
+        // Additional validation for course code array
         if (arrayKodeMk.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -366,39 +431,48 @@ exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
             });
         }
 
-        // 3. Cari detail matkul di tabel mata_kuliah_baru
+        // 3. Cari detail mata kuliah di tabel mata_kuliah_baru
+        // 3. Find course details in mata_kuliah_baru table
         const newCoursesRows = await getNewCourses(arrayKodeMk);
 
-        // 4. Bikin map untuk pencarian cepat matkul baru
+        // 4. Buat map untuk pencarian cepat mata kuliah baru
+        // 4. Create map for quick lookup of new courses
         const newCoursesMap = {};
         newCoursesRows.forEach((course) => {
             newCoursesMap[course.kode_mk] = course;
         });
 
-        // 5. Cari kode matkul yang nggak ketemu di tabel matkul baru
+        // 5. Cari kode mata kuliah yang tidak ditemukan di tabel mata kuliah baru
+        // 5. Find course codes not found in new courses table
         const notFoundKodeMk = arrayKodeMk.filter(
             (kode) => !newCoursesMap[kode]
         );
 
-        // 6. Cari ekivalensi dan matkul lama jika ada yang belum ketemu
+        // 6. Proses mata kuliah yang tidak ditemukan (cari ekuivalensi dan mata kuliah lama)
+        // 6. Process courses not found (search for equivalents and old courses)
         if (notFoundKodeMk.length > 0) {
-            // Cek apakah ada matkul lama yang punya ekivalensi di matkul baru
+            // Cek apakah ada mata kuliah lama yang punya ekuivalensi di mata kuliah baru
+            // Check if there are old courses that have equivalents in new courses
             const equivalentRows = await getEquivalentCourses(notFoundKodeMk);
 
-            // Bikin map buat nyari ekivalensi dengan cepat
+            // Buat map untuk pencarian ekuivalensi dengan cepat
+            // Create map for quick equivalence lookup
             const equivalentMap = {};
             equivalentRows.forEach((course) => {
                 equivalentMap[course.ekivalensi] = course;
             });
 
-            // Update daftar yang belum ketemu (yang bener-bener nggak ada ekivalensinya)
+            // Update daftar yang belum ditemukan (yang benar-benar tidak ada ekuivalensinya)
+            // Update list of not found courses (those without equivalents)
             const stillNotFound = notFoundKodeMk.filter(
                 (kode) => !equivalentMap[kode]
             );
 
-            // Tambahkan matkul ekivalensi ke map utama
+            // Tambahkan mata kuliah ekuivalensi ke map utama
+            // Add equivalent courses to main map
             equivalentRows.forEach((course) => {
-                // Map kode lama ke detail matkul baru
+                // Map kode lama ke detail mata kuliah baru
+                // Map old code to new course details
                 newCoursesMap[course.ekivalensi] = {
                     nama_mk: course.nama_mk,
                     sks_mk: course.sks_mk,
@@ -408,54 +482,64 @@ exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
                 };
             });
 
-            // Kalau masih ada yang belum ketemu, cari di tabel mata_kuliah_lama
+            // Kalau masih ada yang belum ditemukan, cari di tabel mata_kuliah_lama
+            // If there are still not found courses, search in mata_kuliah_lama table
             if (stillNotFound.length > 0) {
                 const oldCoursesRows = await getOldCourses(stillNotFound);
 
-                // Tambahkan matkul lama ke map utama
+                // Tambahkan mata kuliah lama ke map utama
+                // Add old courses to main map
                 oldCoursesRows.forEach((course) => {
                     newCoursesMap[course.kode_mk_lama] = {
                         nama_mk_lama: course.nama_mk_lama,
                         sks_mk_lama: course.sks_mk_lama,
-                        // Matkul lama nggak punya jenis_mk
+                        // Mata kuliah lama tidak punya jenis_mk
+                        // Old courses don't have jenis_mk
                     };
                 });
             }
         }
 
-        // Kumpulkan semua kode ekivalensi yang perlu dicari namanya
+        // 7. Kumpulkan semua kode ekuivalensi yang perlu dicari namanya
+        // 7. Collect all equivalence codes that need their names searched
         const ekivalensiCodes = [];
 
-        // Tambahkan dari matkul yang punya nilai ekivalensi
+        // Tambahkan dari mata kuliah yang punya nilai ekuivalensi
+        // Add from courses that have equivalence values
         newCoursesRows.forEach((course) => {
             if (course.ekivalensi) {
                 ekivalensiCodes.push(course.ekivalensi);
             }
         });
 
-        // Tambahkan dari matkul yang sudah ekivalen (kode lama dari nilai)
+        // Tambahkan dari mata kuliah yang sudah ekivalen (kode lama dari nilai)
+        // Add from courses that are already equivalent (old codes from grades)
         arrayKodeMk.forEach((kode) => {
             if (newCoursesMap[kode] && newCoursesMap[kode].is_equivalent) {
                 ekivalensiCodes.push(kode);
             }
         });
 
-        // Map untuk menyimpan nama matkul lama berdasarkan kode
+        // Map untuk menyimpan nama mata kuliah lama berdasarkan kode
+        // Map to store old course names based on code
         const oldCoursesNamesMap = {};
 
-        // Cari nama matkul lama jika ada kode ekivalensi
+        // 8. Cari nama mata kuliah lama jika ada kode ekuivalensi
+        // 8. Search for old course names if there are equivalence codes
         if (ekivalensiCodes.length > 0) {
             const oldCoursesNamesRows = await getOldCoursesNames(
                 ekivalensiCodes
             );
 
-            // Buat map untuk nama matkul lama
+            // Buat map untuk nama mata kuliah lama
+            // Create map for old course names
             oldCoursesNamesRows.forEach((course) => {
                 oldCoursesNamesMap[course.kode_mk_lama] = course.nama_mk_lama;
             });
         }
 
-        // 7. Proses dan gabungkan data untuk respons
+        // 9. Proses dan gabungkan data untuk respons
+        // 9. Process and combine data for response
         const courseHistory = processCourseHistory(
             nilaiRows,
             newCoursesMap,
@@ -479,14 +563,20 @@ exports.getHistoryMKMyCourseAdvisor = async (req, res) => {
 };
 
 /**
- * @desc Get riwwayat mata kuliah according dengan nim yang dikirim dari query parameter frontend {. . .?nim}
- * @route GET /api/faculty/courseAdvisor/courseHistory
+ * Mengambil daftar mata kuliah yang tersedia untuk registrasi
+ * Get list of available courses for registration
+ * @desc Get mata kuliah yang tersedia untuk pendaftaran
+ * @route GET /api/faculty/courseAdvisor/availableCourses
  * @access Private (dosen_wali only)
  */
 exports.getAvailableCourse = async (req, res) => {
     try {
+        // Ambil semua mata kuliah yang tersedia dari database
+        // Get all available courses from database
         const mataKuliahTersedia = await getAvailCourses();
 
+        // Handle jika tidak ada mata kuliah tersedia
+        // Handle if no courses available
         if (mataKuliahTersedia.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -512,15 +602,18 @@ exports.getAvailableCourse = async (req, res) => {
 };
 
 /**
+ * Mengirim rekomendasi mata kuliah untuk mahasiswa bimbingan
+ * Send course recommendations for supervised students
  * @desc Get detail mata kuliah untuk rekomendasi mata kuliah
  * @route POST /api/faculty/courseAdvisor/sendRekomendasiMK
  * @access Private (dosen_wali only)
  */
 exports.sendCourseRecommendation = async (req, res) => {
-    let connection; // Declare connection variable for proper cleanup
+    let connection; // Deklarasi variabel connection untuk cleanup yang proper
 
     try {
-        // Validate request:
+        // Validasi request menggunakan express-validator
+        // Validate request using express-validator
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({
@@ -532,9 +625,12 @@ exports.sendCourseRecommendation = async (req, res) => {
 
         const { nim, courseCodes, targetSemester } = req.body;
 
-        // get kode dosen
+        // Ambil kode dosen dari user yang terautentikasi
+        // Get lecturer code from authenticated user
         const kodeDosen = req.user.code;
 
+        // Validasi input yang diperlukan
+        // Validate required inputs
         if (
             !nim ||
             !courseCodes ||
@@ -548,6 +644,7 @@ exports.sendCourseRecommendation = async (req, res) => {
             });
         }
 
+        // Validasi targetSemester adalah angka valid antara 1-14
         // Validate targetSemester is a valid number between 1-14
         const semesterNum = parseInt(targetSemester);
         if (isNaN(semesterNum) || semesterNum < 1 || semesterNum > 14) {
@@ -557,45 +654,47 @@ exports.sendCourseRecommendation = async (req, res) => {
             });
         }
 
-        // Get a connection from the pool for transaction
+        // Ambil connection dari pool untuk transaksi database
+        // Get connection from pool for database transaction
         connection = await pool.getConnection();
 
-        // Start transaction
+        // Mulai transaksi untuk memastikan data consistency
+        // Start transaction to ensure data consistency
         await connection.beginTransaction();
 
-        // Kalkulasi total sks:
-        // get value sks pada tiap rekomendasi mk:
+        // Kalkulasi total SKS dari mata kuliah yang direkomendasikan
+        // Calculate total SKS from recommended courses
         const courseCodePlaceholders = courseCodes.map(() => '?').join(',');
         const [coursesData] = await connection.query(
             `SELECT kode_mk, sks_mk FROM mata_kuliah_baru WHERE kode_mk IN (${courseCodePlaceholders})`,
             courseCodes
         );
 
-        // Validate that all course codes exist
+        // Validasi bahwa semua kode mata kuliah valid dan ditemukan
+        // Validate that all course codes are valid and found
         if (coursesData.length !== courseCodes.length) {
             throw new Error('Some course codes are invalid or not found');
         }
 
-        // Hitung total sksnya:
+        // Hitung total SKS dari semua mata kuliah yang direkomendasikan
+        // Calculate total SKS from all recommended courses
         const totalSKS = coursesData.reduce((total, course) => {
             return total + (parseInt(course.sks_mk) || 0);
         }, 0);
 
-        // FIXED: Use MySQL-compatible datetime format
+        // Gunakan format datetime yang kompatibel dengan MySQL
+        // Use MySQL-compatible datetime format
         const tanggalDibuat = getCurrentMySQLDateTime();
 
-        // IMPORTANT: Hapus data yang sudah ada agar tidak ada konflik
-        // This ensures old recommendations are replaced with new ones
+        // Hapus rekomendasi lama untuk menghindari konflik data
+        // Delete old recommendations to avoid data conflicts
         const [deleteResult] = await connection.execute(
             'DELETE FROM mata_kuliah_rekomendasi WHERE nim_mahasiswa = ? AND kode_dosen = ?',
             [nim, kodeDosen]
         );
 
-        console.log(
-            `Deleted ${deleteResult.affectedRows} old recommendations for NIM: ${nim}`
-        );
-
-        // Masukan (insert) data ke tabel dengan semester_mahasiswa:
+        // Insert data rekomendasi baru ke database
+        // Insert new recommendation data to database
         let insertedCount = 0;
         for (const courseCode of courseCodes) {
             await connection.execute(
@@ -614,12 +713,9 @@ exports.sendCourseRecommendation = async (req, res) => {
             insertedCount++;
         }
 
-        // Commit the transaction
+        // Commit transaksi jika semua operasi berhasil
+        // Commit transaction if all operations successful
         await connection.commit();
-
-        console.log(
-            `Successfully inserted ${insertedCount} new recommendations for NIM: ${nim}, Semester: ${semesterNum}`
-        );
 
         return res.status(200).json({
             success: true,
@@ -635,11 +731,11 @@ exports.sendCourseRecommendation = async (req, res) => {
             },
         });
     } catch (error) {
-        // Rollback transaction if there's an error
+        // Rollback transaksi jika terjadi error
+        // Rollback transaction if error occurs
         if (connection) {
             try {
                 await connection.rollback();
-                console.log('Transaction rolled back due to error');
             } catch (rollbackError) {
                 console.error('Error during rollback:', rollbackError.message);
             }
@@ -647,7 +743,8 @@ exports.sendCourseRecommendation = async (req, res) => {
 
         console.error('Error in sendCourseRecommendation controller:', error);
 
-        // Return appropriate error message
+        // Return pesan error yang sesuai berdasarkan jenis error
+        // Return appropriate error message based on error type
         let errorMessage = 'Terjadi kesalahan saat menyimpan rekomendasi';
 
         if (error.message.includes('course codes are invalid')) {
@@ -665,17 +762,27 @@ exports.sendCourseRecommendation = async (req, res) => {
                     : undefined,
         });
     } finally {
-        // Always release the connection back to the pool
+        // Selalu release connection kembali ke pool
+        // Always release connection back to pool
         if (connection) {
             connection.release();
         }
     }
 };
 
+/**
+ * Mengambil daftar mata kuliah yang direkomendasikan untuk mahasiswa
+ * Get list of recommended courses for students
+ * @desc GET - mengambil rekomendasi mata kuliah mahasiswa
+ * @route GET /api/faculty/courseAdvisor/recommendedCourses?nim=123456
+ * @access Private (dosen_wali only)
+ */
 exports.getRecommendedCourses = async (req, res) => {
     try {
         const { nim } = req.query;
 
+        // Validasi parameter NIM
+        // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -683,7 +790,8 @@ exports.getRecommendedCourses = async (req, res) => {
             });
         }
 
-        // get data dari query dengan semester_mahasiswa:
+        // Ambil data rekomendasi mata kuliah dengan join ke tabel mata_kuliah_baru
+        // Get course recommendation data with join to mata_kuliah_baru table
         const [mataKuliahRekomendasi] = await pool.execute(
             `SELECT mkr.kode_mk,
                     mkb.nama_mk, 
@@ -700,7 +808,8 @@ exports.getRecommendedCourses = async (req, res) => {
             [nim]
         );
 
-        // Group data by semester untuk frontend
+        // Kelompokkan data berdasarkan semester untuk frontend
+        // Group data by semester for frontend
         const groupedBySemester = mataKuliahRekomendasi.reduce(
             (acc, course) => {
                 const semester = course.semester_mahasiswa;
@@ -740,15 +849,18 @@ exports.getRecommendedCourses = async (req, res) => {
 };
 
 /**
+ * Mengambil IP Semester terakhir mahasiswa untuk menentukan maksimal SKS
+ * Get student's last semester IP to determine maximum SKS allowed
  * @desc Get IP Semester terakhir mahasiswa.
- * @route GET /api/faculty/courseAdvisor/getLastIPSemester
+ * @route GET /api/faculty/courseAdvisor/getLastIPSemester?nim=123456
  * @access Private (dosen_wali only)
  */
 exports.getLastIPSemester = async (req, res) => {
     try {
-        const { nim } = req.query; // atau req.params tergantung mau gimana
+        const { nim } = req.query;
 
-        // Validasi input
+        // Validasi input NIM
+        // Validate NIM input
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -756,9 +868,12 @@ exports.getLastIPSemester = async (req, res) => {
             });
         }
 
-        // Call service untuk ambil data
+        // Panggil service untuk mengambil data IP semester terakhir
+        // Call service to get last semester IP data
         const lastSemesterData = await getLastSemesterIP(nim);
 
+        // Handle jika data tidak ditemukan
+        // Handle if data not found
         if (!lastSemesterData) {
             return res.status(404).json({
                 success: false,
@@ -766,14 +881,15 @@ exports.getLastIPSemester = async (req, res) => {
             });
         }
 
-        // Tentukan maksimal SKS berdasarkan IP
-        let maxSKS = 24; // default
+        // Tentukan maksimal SKS berdasarkan IP semester terakhir
+        // Determine maximum SKS based on last semester IP
+        let maxSKS = 24; // default maximum SKS
         const ipSemester = parseFloat(lastSemesterData.ip_semester);
 
         if (ipSemester > 3.0) {
-            maxSKS = 24;
+            maxSKS = 24; // IP tinggi dapat mengambil 24 SKS
         } else if (ipSemester <= 3.0) {
-            maxSKS = 20;
+            maxSKS = 20; // IP rendah dibatasi 20 SKS
         }
 
         return res.status(200).json({
@@ -801,13 +917,18 @@ exports.getLastIPSemester = async (req, res) => {
 };
 
 /**
- * @desc Get IP Semester terakhir mahasiswa.
- * @route GET /api/faculty/courseAdvisor/getLastIPSemester
+ * Mengambil data SKS mahasiswa berdasarkan NIM
+ * Get student SKS data by NIM
+ * @desc Get total SKS yang sudah lulus mahasiswa
+ * @route GET /api/faculty/courseAdvisor/getStudentSKS?nim=123456
  * @access Private (dosen_wali only)
  */
 exports.getStudentNIMSKS = async (req, res) => {
     try {
         const nim = req.query.nim;
+
+        // Validasi parameter NIM
+        // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -815,8 +936,12 @@ exports.getStudentNIMSKS = async (req, res) => {
             });
         }
 
+        // Ambil data SKS mahasiswa dari database
+        // Get student SKS data from database
         const studentData = await getNimSKSData(nim);
 
+        // Handle jika mahasiswa tidak ditemukan
+        // Handle if student not found
         if (!studentData) {
             return res.status(404).json({
                 success: false,
@@ -832,13 +957,29 @@ exports.getStudentNIMSKS = async (req, res) => {
                 nim: nim,
             },
         });
-    } catch (error) {}
+    } catch (error) {
+        console.error('Error in getStudentNIMSKS:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan saat mengambil data SKS mahasiswa',
+            error: error.message,
+        });
+    }
 };
 
+/**
+ * Mengambil detail akademik lengkap mahasiswa untuk keperluan bimbingan
+ * Get complete student academic details for guidance purposes
+ * @desc GET - mengambil detail akademik mahasiswa lengkap
+ * @route GET /api/faculty/courseAdvisor/studentAcademicDetails?nim=123456
+ * @access Private (dosen_wali only)
+ */
 exports.getStudentAcademicDetails = async (req, res) => {
     try {
         const nim = req.query.nim;
 
+        // Validasi parameter NIM
+        // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -846,10 +987,12 @@ exports.getStudentAcademicDetails = async (req, res) => {
             });
         }
 
-        // Panggil getStudentAcademicData
+        // Panggil fungsi untuk mengambil data akademik mahasiswa
+        // Call function to get student academic data
         const academicDataArray = await getStudentAcademicData(nim);
 
         // Periksa apakah data mahasiswa ditemukan
+        // Check if student data is found
         if (!academicDataArray || academicDataArray.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -857,10 +1000,12 @@ exports.getStudentAcademicDetails = async (req, res) => {
             });
         }
 
-        // Ambil data pertama untuk info dasar mahasiswa
+        // Ambil data pertama untuk informasi dasar mahasiswa
+        // Get first data for basic student information
         const studentData = academicDataArray[0];
 
-        // Ekstrak nilai dengan default fallbacks
+        // Ekstrak nilai dengan default fallbacks untuk handling null values
+        // Extract values with default fallbacks for null value handling
         const namaMahasiswa = studentData.nama || '-';
         const kelasMahasiswa = studentData.kelas || '-';
         const ipk =
@@ -872,12 +1017,14 @@ exports.getStudentAcademicDetails = async (req, res) => {
         const tak = studentData.tak != null ? parseInt(studentData.tak) : 0;
         const klas_akademik = studentData.hasil_klasifikasi;
 
-        // Process semester data dengan handling untuk data kosong
+        // Proses data semester dengan handling untuk data kosong
+        // Process semester data with handling for empty data
         const perSemester = [];
-        const semesterMap = new Map(); // Untuk avoid duplicate semester
+        const semesterMap = new Map(); // Untuk menghindari duplikat semester
 
         academicDataArray.forEach((row) => {
             // Hanya tambahkan jika ada data semester yang valid
+            // Only add if there's valid semester data
             if (row.semester != null && !semesterMap.has(row.semester)) {
                 perSemester.push({
                     semester: parseInt(row.semester) || 0,
@@ -894,20 +1041,12 @@ exports.getStudentAcademicDetails = async (req, res) => {
             }
         });
 
-        // Sort semester data
+        // Urutkan data semester secara ascending
+        // Sort semester data in ascending order
         perSemester.sort((a, b) => a.semester - b.semester);
 
-        // Log untuk debugging
-        // console.log('Academic Data Processing:');
-        // console.log('- Nama:', namaMahasiswa);
-        // console.log('- NIM:', nim);
-        // console.log('- Kelas:', kelasMahasiswa);
-        // console.log('- IPK:', ipk);
-        // console.log('- SKS Total:', sksTotal);
-        // console.log('- TAK:', tak);
-        // console.log('- hasil klasifikasi', klas_akademik);
-        // console.log('- Per Semester Data:', perSemester.length, 'records');
-
+        // Siapkan data respons yang terstruktur
+        // Prepare structured response data
         const responseData = {
             nama: namaMahasiswa,
             nim: nim,
@@ -928,6 +1067,7 @@ exports.getStudentAcademicDetails = async (req, res) => {
         console.error('Error in getStudentAcademicDetails:', error);
 
         // Return structured error response
+        // Return respons error yang terstruktur
         return res.status(500).json({
             success: false,
             message: 'Server error while fetching student academic details.',
@@ -938,14 +1078,19 @@ exports.getStudentAcademicDetails = async (req, res) => {
         });
     }
 };
-
 /**
- * @desc Controller untuk get hasil psikoligi mahasiswa tertentu
+ * Mengambil hasil analisis psikologis mahasiswa berdasarkan NIM
+ * Get student psychological analysis results by NIM
+ * @desc Controller untuk get hasil psikologi mahasiswa tertentu
+ * @route GET /api/faculty/student/:nim/wellness
+ * @access Private (dosen_wali only)
  */
 exports.getStudentWellness = async (req, res) => {
     try {
         const nim = req.params.nim;
 
+        // Validasi parameter NIM
+        // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -953,10 +1098,13 @@ exports.getStudentWellness = async (req, res) => {
             });
         }
 
+        // Ambil hasil analisis psikologis dari database
+        // Get psychological analysis results from database
         const result = await getWellnessResult(nim);
 
+        // Handle jika mahasiswa belum mengisi kuesioner
+        // Handle if student hasn't filled the questionnaire
         if (!result || result.length === 0) {
-            // Check jika array kosong
             return res.status(200).json({
                 success: true,
                 message: 'Mahasiswa ini belum mengisi quesioner psikologis',
@@ -979,41 +1127,44 @@ exports.getStudentWellness = async (req, res) => {
     }
 };
 
+/**
+ * Mengambil data finansial mahasiswa untuk analisis bantuan keuangan
+ * Get student financial data for financial aid analysis
+ * @desc GET - mengambil data finansial mahasiswa
+ * @route GET /api/faculty/student/:nim/financial
+ * @access Private (dosen_wali only)
+ */
 exports.getStudentFinancial = async (req, res) => {
     try {
         const nim = req.params.nim;
 
+        // Validasi parameter NIM
+        // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
                 success: false,
-                message: 'NIM is required as a query parameter.', // Pesan lebih spesifik
+                message: 'NIM is required as a query parameter.',
             });
         }
 
-        // Panggil fetchRelief yang seharusnya mengembalikan semua data yang dibutuhkan
-        const financialDataArray = await fetchStudentsRelief(nim); // Pastikan di-await!
+        // Panggil fungsi untuk mengambil data finansial mahasiswa
+        // Call function to get student financial data
+        const financialDataArray = await fetchStudentsRelief(nim);
 
-        // Periksa apakah data mahasiswa ditemukan
+        // Handle jika data finansial tidak ditemukan
+        // Handle if financial data not found
         if (!financialDataArray || financialDataArray.length === 0) {
             return res.status(200).json({
-                // 404 Not Found lebih tepat
                 success: true,
                 message: `Student financial data not found for NIM: ${nim}`,
+                data: [],
             });
         }
-
-        // financialDataArray.forEach((row) => {
-        //     if (row.semester  !== null) {
-        //         // Pastikan ada data semester
-        //         perSemester.push({
-        //             semester: row.semester
-        //         });
-        //     }
-        // });
 
         return res.status(200).json({
             success: true,
             data: financialDataArray,
+            message: 'Data finansial mahasiswa berhasil didapatkan',
         });
     } catch (error) {
         console.error('Error in get student financial data:', error);
@@ -1024,13 +1175,20 @@ exports.getStudentFinancial = async (req, res) => {
     }
 };
 
-// Controller function untuk menangani approve/reject financial request
+/**
+ * Mengirim respons terhadap pengajuan bantuan finansial mahasiswa
+ * Send response to student financial aid application
+ * @desc POST - approve/reject financial request
+ * @route POST /api/faculty/financial/:id/response
+ * @access Private (dosen_wali only)
+ */
 exports.sendResponseFinancial = async (req, res) => {
     try {
         const { id } = req.params;
         const { action } = req.body; // 'approve' or 'reject'
 
-        // Validasi ID
+        // Validasi ID pengajuan finansial
+        // Validate financial application ID
         if (!id) {
             return res.status(400).json({
                 success: false,
@@ -1038,7 +1196,8 @@ exports.sendResponseFinancial = async (req, res) => {
             });
         }
 
-        // Validasi action
+        // Validasi action yang diizinkan
+        // Validate allowed actions
         if (!action || !['approve', 'reject'].includes(action)) {
             return res.status(400).json({
                 success: false,
@@ -1046,7 +1205,8 @@ exports.sendResponseFinancial = async (req, res) => {
             });
         }
 
-        // Cek apakah record sudah ada (panggil dengan 1 parameter saja)
+        // Cek apakah respons sudah pernah diberikan sebelumnya
+        // Check if response has been given before
         const existingRecord = await financialResponse(id); // status = null (default)
         if (existingRecord) {
             return res.status(409).json({
@@ -1056,13 +1216,15 @@ exports.sendResponseFinancial = async (req, res) => {
         }
 
         // Tentukan status dan message berdasarkan action
+        // Determine status and message based on action
         const status = action === 'approve' ? 'Disetujui' : 'Ditolak';
         const message =
             action === 'approve'
                 ? 'Pengajuan finansial berhasil disetujui'
                 : 'Pengajuan finansial berhasil ditolak';
 
-        // Insert response ke database (panggil dengan 2 parameter)
+        // Insert respons ke database
+        // Insert response to database
         const result = await financialResponse(id, status);
 
         return res.status(200).json({
@@ -1087,14 +1249,18 @@ exports.sendResponseFinancial = async (req, res) => {
 };
 
 /**
- * @desc Controller buat ML
+ * Testing environment Machine Learning untuk memastikan dependency tersedia
+ * Test Machine Learning environment to ensure dependencies are available
+ * @desc Controller untuk test ML environment
+ * @route GET /api/faculty/ml/test
+ * @access Private (dosen_wali only)
  */
 exports.testMLEnvironment = async (req, res) => {
     try {
-        console.log('=== Starting ML Test ===');
+        let responseAlreadySent = false; // Flag untuk mencegah double response
 
-        let responseAlreadySent = false; // FLAG untuk prevent double response
-
+        // Spawn proses Python untuk test environment ML
+        // Spawn Python process to test ML environment
         const python = spawn('python', [
             '-c',
             'import sys; import joblib; import numpy; import sklearn; print("Python environment OK")',
@@ -1103,21 +1269,25 @@ exports.testMLEnvironment = async (req, res) => {
         let output = '';
         let error = '';
 
+        // Collect output dari stdout
+        // Collect output from stdout
         python.stdout.on('data', (data) => {
             output += data.toString();
         });
 
+        // Collect error dari stderr
+        // Collect error from stderr
         python.stderr.on('data', (data) => {
             error += data.toString();
         });
 
+        // Handle ketika proses Python selesai
+        // Handle when Python process completes
         python.on('close', (code) => {
             if (responseAlreadySent) return; // Prevent double response
             responseAlreadySent = true;
 
             clearTimeout(timeoutId); // Clear timeout
-
-            console.log('=== Python completed with code:', code, '===');
 
             if (code === 0) {
                 return res.status(200).json({
@@ -1134,7 +1304,8 @@ exports.testMLEnvironment = async (req, res) => {
             }
         });
 
-        // Timeout dengan clear dan flag
+        // Set timeout untuk mencegah hanging process
+        // Set timeout to prevent hanging process
         const timeoutId = setTimeout(() => {
             if (responseAlreadySent) return; // Prevent double response
             responseAlreadySent = true;
@@ -1155,21 +1326,20 @@ exports.testMLEnvironment = async (req, res) => {
 };
 
 /**
- * @desc Prediksi status mahasiswa dengan ML
- * POST /api/faculty/predict
- * Body: { akademik, finansial, psikologis }
- */
-/**
- * Prediksi berdasarkan NIM mahasiswa + save to database
- * POST /api/faculty/ml/predict/:nim
- * Body: { ipk, skor_psikologi, finansial }
+ * Prediksi status mahasiswa menggunakan Machine Learning berdasarkan data akademik, psikologis, dan finansial
+ * Predict student status using Machine Learning based on academic, psychological, and financial data
+ * @desc Prediksi berdasarkan NIM mahasiswa + save to database
+ * @route POST /api/faculty/ml/predict/:nim
+ * @body { ipk, skor_psikologi, finansial }
+ * @access Private (dosen_wali only)
  */
 exports.predictStudentByNim = async (req, res) => {
     try {
         const { nim } = req.params;
         const { ipk, skor_psikologi, finansial } = req.body;
 
-        // Validasi input
+        // Validasi parameter NIM
+        // Validate NIM parameter
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -1177,6 +1347,8 @@ exports.predictStudentByNim = async (req, res) => {
             });
         }
 
+        // Validasi input data untuk prediksi ML
+        // Validate input data for ML prediction
         if (
             ipk === undefined ||
             skor_psikologi === undefined ||
@@ -1189,13 +1361,14 @@ exports.predictStudentByNim = async (req, res) => {
             });
         }
 
+        // Path ke script Python untuk prediksi ML
+        // Path to Python script for ML prediction
         const scriptPath = path.join(__dirname, '../ml_models/predict.py');
-
-        console.log('=== Starting Prediction for NIM:', nim, '===');
-        console.log('Input data:', { ipk, skor_psikologi, finansial });
 
         let responseAlreadySent = false;
 
+        // Spawn proses Python untuk menjalankan prediksi ML
+        // Spawn Python process to run ML prediction
         const python = spawn('python', [
             scriptPath,
             ipk,
@@ -1206,6 +1379,8 @@ exports.predictStudentByNim = async (req, res) => {
         let output = '';
         let error = '';
 
+        // Collect output dan error dari proses Python
+        // Collect output and error from Python process
         python.stdout.on('data', (data) => {
             output += data.toString();
         });
@@ -1214,45 +1389,42 @@ exports.predictStudentByNim = async (req, res) => {
             error += data.toString();
         });
 
+        // Handle ketika proses Python selesai
+        // Handle when Python process completes
         python.on('close', async (code) => {
             if (responseAlreadySent) return;
             responseAlreadySent = true;
 
             clearTimeout(timeoutId);
 
-            console.log('=== Python completed with code:', code, '===');
-
             if (code === 0 && output) {
                 try {
+                    // Parse hasil prediksi dari Python script
+                    // Parse prediction result from Python script
                     const result = JSON.parse(output.trim());
 
                     if (result.success) {
-                        // === SAVE TO DATABASE ===
+                        // Simpan hasil prediksi ke database
+                        // Save prediction result to database
                         try {
                             const predicted_status = result.predicted_status;
 
-                            // Use REPLACE INTO to avoid duplicate (delete + insert)
-                            // DELETE existing record first
+                            // Hapus record yang sudah ada untuk menghindari duplikat
+                            // Delete existing record to avoid duplicates
                             const [deleteResult] = await pool.execute(
                                 'DELETE FROM klasifikasi_umum WHERE nim = ?',
                                 [nim]
                             );
 
-                            console.log(
-                                `=== Deleted existing records for NIM ${nim}: ${deleteResult.affectedRows} rows ===`
-                            );
-
-                            // INSERT new prediction result
+                            // Insert hasil prediksi baru ke database
+                            // Insert new prediction result to database
                             const [insertResult] = await pool.execute(
                                 'INSERT INTO klasifikasi_umum (nim, hasil_klasifikasi_umum) VALUES (?, ?)',
                                 [nim, predicted_status]
                             );
 
-                            console.log(
-                                `=== Prediction saved to database: ${nim} -> ${predicted_status} ===`
-                            );
-
-                            // Return success response
+                            // Return respons sukses dengan informasi lengkap
+                            // Return success response with complete information
                             return res.status(200).json({
                                 success: true,
                                 message: 'Prediction successful and saved',
@@ -1271,6 +1443,7 @@ exports.predictStudentByNim = async (req, res) => {
                         } catch (dbError) {
                             console.error('Database save error:', dbError);
 
+                            // Return hasil prediksi meskipun gagal simpan ke database
                             // Return prediction result even if database save fails
                             return res.status(200).json({
                                 success: true,
@@ -1311,7 +1484,8 @@ exports.predictStudentByNim = async (req, res) => {
             }
         });
 
-        // Timeout
+        // Set timeout untuk mencegah hanging process (30 detik)
+        // Set timeout to prevent hanging process (30 seconds)
         const timeoutId = setTimeout(() => {
             if (responseAlreadySent) return;
             responseAlreadySent = true;

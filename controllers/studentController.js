@@ -1,14 +1,25 @@
+// Student Controller - Pengontrol untuk fitur mahasiswa dalam sistem akademik
+// Student Controller for student features in academic system
 const { pool } = require('../config/database');
 
+// Import middleware untuk upload file
+// Import middleware for file upload
 const upload = require('../middlewares/uploadMiddleware');
-// Import queries2 dari folder models
+
+// Import model untuk lampiran
+// Import model for attachments
 const lampiranModel = require('../models/lampiranTable');
 
+// Import utility untuk cloud storage
+// Import utility for cloud storage
 const { uploadFile } = require('../utils/cloudStorage');
 
-// ADDED: Import dateHelper for MySQL datetime formatting
+// Import helper untuk formatting tanggal MySQL
+// Import helper for MySQL date formatting
 const { getCurrentMySQLDateTime } = require('../utils/dateHelper');
 
+// Import queries untuk fitur mata kuliah mahasiswa
+// Import queries for student course features
 const {
     getStudentGrades,
     getNewCourses,
@@ -21,6 +32,8 @@ const {
     getStudentPeminatan,
 } = require('../models/mahasiswaQueries/myCourseQueries');
 
+// Import queries untuk progress akademik mahasiswa
+// Import queries for student academic progress
 const {
     fetchStudentTAK,
     fetchStudentSKSTotal,
@@ -29,28 +42,41 @@ const {
     fetchStudentStatus,
 } = require('../models/mahasiswaQueries/MyProgress');
 
+// Import queries untuk hasil psikologi mahasiswa
+// Import queries for student psychology results
 const {
     fetchPsiResult,
 } = require('../models/mahasiswaQueries/myWellnessQueries');
 
+// Import queries untuk feedback mahasiswa
+// Import queries for student feedback
 const {
     getMyFeedbackList,
 } = require('../models/mahasiswaQueries/myFeedbackQueries');
 
+// Import queries untuk keuangan mahasiswa
+// Import queries for student finance
 const {
     submitRelief,
     fetchRelief,
     saveLampiranFinance,
 } = require('../models/mahasiswaQueries/myFinanceQueries');
 
-// @desc Ambil tak dari mahasisw yang login
-// @route GET /api/student/takMahasiswa
-// @access Private (khusus mahasiswa)
+/**
+ * Mengambil data akademik lengkap mahasiswa (TAK, SKS, IPK, IPS, Status)
+ * Get complete student academic data (TAK, SKS, IPK, IPS, Status)
+ * @desc Ambil tak dari mahasiswa yang login
+ * @route GET /api/student/takMahasiswa
+ * @access Private (khusus mahasiswa)
+ */
 exports.getStudentsTAKSKSIPK = async (req, res) => {
     try {
-        // Ambil nim mahasiswa dari localStorage:
+        // Ambil NIM mahasiswa dari token autentikasi
+        // Get student NIM from authentication token
         const nim = req.user.id;
 
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -59,13 +85,16 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
             });
         }
 
-        // Ambil data tak dari query:
+        // Ambil berbagai data akademik mahasiswa secara paralel
+        // Get various student academic data in parallel
         const rowsTAK = await fetchStudentTAK(nim);
         const rowsSKSTotal = await fetchStudentSKSTotal(nim);
         const rowsIPK = await fetchStudentIPK(nim);
         const rowsIPS = await fetchStudentIPS(nim);
         const rowsStatus = await fetchStudentStatus(nim);
 
+        // Ekstrak nilai dengan fallback default jika data tidak ada
+        // Extract values with default fallback if data doesn't exist
         const takValue = rowsTAK.length > 0 ? rowsTAK[0].tak : 0;
         const sksTotalValue =
             rowsSKSTotal.length > 0 ? rowsSKSTotal[0].sks_lulus : 0;
@@ -73,9 +102,12 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
         const ipsValue = [];
         const statusValue = rowsStatus[0].hasil_klasifikasi;
 
+        // Proses data IPS per semester
+        // Process IPS data per semester
         rowsIPS.forEach((row) => {
             if (row.semester && row.ip_semester !== null) {
-                // Pastikan ada data semester
+                // Pastikan ada data semester yang valid
+                // Ensure valid semester data exists
                 ipsValue.push({
                     semester: row.semester,
                     ipSemester: row.ip_semester,
@@ -83,12 +115,8 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
             }
         });
 
-        console.log('Data Mahasiswa Ditemukan (dari getStudentAcademicData):');
-        console.log('tak: ', takValue);
-        console.log('sks total: ', sksTotalValue);
-        console.log('ips: ', ipsValue);
-        console.log('klasifikasi akademik: ', statusValue);
-
+        // Gabungkan semua data akademik dalam satu objek
+        // Combine all academic data in one object
         const ipkSksTakIps = {
             ipk: ipkValue,
             sksTotal: sksTotalValue,
@@ -110,15 +138,21 @@ exports.getStudentsTAKSKSIPK = async (req, res) => {
     }
 };
 
-// @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
-// @route GET /api/student/riwayatMataKuliah
-// @access Private (khusus mahasiswa)
+/**
+ * Mengambil riwayat mata kuliah mahasiswa dengan sistem ekuivalensi
+ * Get student course history with equivalency system
+ * @desc Ambil daftar riwayat mata kuliah mahasiswa yang login
+ * @route GET /api/student/riwayatMataKuliah
+ * @access Private (khusus mahasiswa)
+ */
 exports.getCourseHistory = async (req, res) => {
     try {
-        // Ambil nim mahasiswa dari session
+        // Ambil NIM mahasiswa dari session/token
+        // Get student NIM from session/token
         const id = req.user.id;
 
-        // Cek dulu kalau id/nim nya ada
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!id) {
             return res.status(400).json({
                 success: false,
@@ -127,9 +161,12 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // 1. Ambil data nilai mahasiswa
+        // 1. Ambil data nilai mahasiswa dari database
+        // 1. Get student grades data from database
         const nilaiRows = await getStudentGrades(id);
 
+        // Handle jika tidak ada data nilai
+        // Handle if no grade data found
         if (nilaiRows.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -138,11 +175,13 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // 2. Bikin array kode_mk dari nilai mahasiswa
+        // 2. Buat array unik kode mata kuliah dari nilai mahasiswa
+        // 2. Create unique array of course codes from student grades
         const kodeMkSet = new Set(nilaiRows.map((row) => row.kode_mk));
         const arrayKodeMk = [...kodeMkSet];
 
-        // Cek lagi untuk jaga-jaga kalau arraynya kosong
+        // Validasi tambahan untuk array kode mata kuliah
+        // Additional validation for course code array
         if (arrayKodeMk.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -151,39 +190,48 @@ exports.getCourseHistory = async (req, res) => {
             });
         }
 
-        // 3. Cari detail matkul di tabel mata_kuliah_baru
+        // 3. Cari detail mata kuliah di tabel mata_kuliah_baru
+        // 3. Find course details in mata_kuliah_baru table
         const newCoursesRows = await getNewCourses(arrayKodeMk);
 
-        // 4. Bikin map untuk pencarian cepat matkul baru
+        // 4. Buat map untuk pencarian cepat mata kuliah baru
+        // 4. Create map for quick lookup of new courses
         const newCoursesMap = {};
         newCoursesRows.forEach((course) => {
             newCoursesMap[course.kode_mk] = course;
         });
 
-        // 5. Cari kode matkul yang nggak ketemu di tabel matkul baru
+        // 5. Cari kode mata kuliah yang tidak ditemukan di tabel mata kuliah baru
+        // 5. Find course codes not found in new courses table
         const notFoundKodeMk = arrayKodeMk.filter(
             (kode) => !newCoursesMap[kode]
         );
 
-        // 6. Cari ekivalensi dan matkul lama jika ada yang belum ketemu
+        // 6. Proses mata kuliah yang tidak ditemukan (cari ekuivalensi dan mata kuliah lama)
+        // 6. Process courses not found (search for equivalents and old courses)
         if (notFoundKodeMk.length > 0) {
-            // Cek apakah ada matkul lama yang punya ekivalensi di matkul baru
+            // Cek apakah ada mata kuliah lama yang punya ekuivalensi di mata kuliah baru
+            // Check if there are old courses that have equivalents in new courses
             const equivalentRows = await getEquivalentCourses(notFoundKodeMk);
 
-            // Bikin map buat nyari ekivalensi dengan cepat
+            // Buat map untuk pencarian ekuivalensi dengan cepat
+            // Create map for quick equivalence lookup
             const equivalentMap = {};
             equivalentRows.forEach((course) => {
                 equivalentMap[course.ekivalensi] = course;
             });
 
-            // Update daftar yang belum ketemu (yang bener-bener nggak ada ekivalensinya)
+            // Update daftar yang belum ditemukan (yang benar-benar tidak ada ekuivalensinya)
+            // Update list of not found courses (those without equivalents)
             const stillNotFound = notFoundKodeMk.filter(
                 (kode) => !equivalentMap[kode]
             );
 
-            // Tambahkan matkul ekivalensi ke map utama
+            // Tambahkan mata kuliah ekuivalensi ke map utama
+            // Add equivalent courses to main map
             equivalentRows.forEach((course) => {
-                // Map kode lama ke detail matkul baru
+                // Map kode lama ke detail mata kuliah baru
+                // Map old code to new course details
                 newCoursesMap[course.ekivalensi] = {
                     nama_mk: course.nama_mk,
                     sks_mk: course.sks_mk,
@@ -193,54 +241,64 @@ exports.getCourseHistory = async (req, res) => {
                 };
             });
 
-            // Kalau masih ada yang belum ketemu, cari di tabel mata_kuliah_lama
+            // Kalau masih ada yang belum ditemukan, cari di tabel mata_kuliah_lama
+            // If there are still not found courses, search in mata_kuliah_lama table
             if (stillNotFound.length > 0) {
                 const oldCoursesRows = await getOldCourses(stillNotFound);
 
-                // Tambahkan matkul lama ke map utama
+                // Tambahkan mata kuliah lama ke map utama
+                // Add old courses to main map
                 oldCoursesRows.forEach((course) => {
                     newCoursesMap[course.kode_mk_lama] = {
                         nama_mk_lama: course.nama_mk_lama,
                         sks_mk_lama: course.sks_mk_lama,
-                        // Matkul lama nggak punya jenis_mk
+                        // Mata kuliah lama tidak punya jenis_mk
+                        // Old courses don't have jenis_mk
                     };
                 });
             }
         }
 
-        // Kumpulkan semua kode ekivalensi yang perlu dicari namanya
+        // 7. Kumpulkan semua kode ekuivalensi yang perlu dicari namanya
+        // 7. Collect all equivalence codes that need their names searched
         const ekivalensiCodes = [];
 
-        // Tambahkan dari matkul yang punya nilai ekivalensi
+        // Tambahkan dari mata kuliah yang punya nilai ekuivalensi
+        // Add from courses that have equivalence values
         newCoursesRows.forEach((course) => {
             if (course.ekivalensi) {
                 ekivalensiCodes.push(course.ekivalensi);
             }
         });
 
-        // Tambahkan dari matkul yang sudah ekivalen (kode lama dari nilai)
+        // Tambahkan dari mata kuliah yang sudah ekivalen (kode lama dari nilai)
+        // Add from courses that are already equivalent (old codes from grades)
         arrayKodeMk.forEach((kode) => {
             if (newCoursesMap[kode] && newCoursesMap[kode].is_equivalent) {
                 ekivalensiCodes.push(kode);
             }
         });
 
-        // Map untuk menyimpan nama matkul lama berdasarkan kode
+        // Map untuk menyimpan nama mata kuliah lama berdasarkan kode
+        // Map to store old course names based on code
         const oldCoursesNamesMap = {};
 
-        // Cari nama matkul lama jika ada kode ekivalensi
+        // 8. Cari nama mata kuliah lama jika ada kode ekuivalensi
+        // 8. Search for old course names if there are equivalence codes
         if (ekivalensiCodes.length > 0) {
             const oldCoursesNamesRows = await getOldCoursesNames(
                 ekivalensiCodes
             );
 
-            // Buat map untuk nama matkul lama
+            // Buat map untuk nama mata kuliah lama
+            // Create map for old course names
             oldCoursesNamesRows.forEach((course) => {
                 oldCoursesNamesMap[course.kode_mk_lama] = course.nama_mk_lama;
             });
         }
 
-        // 7. Proses dan gabungkan data untuk respons
+        // 9. Proses dan gabungkan data untuk respons
+        // 9. Process and combine data for response
         const courseHistory = processCourseHistory(
             nilaiRows,
             newCoursesMap,
@@ -263,15 +321,21 @@ exports.getCourseHistory = async (req, res) => {
     }
 };
 
-// @desc Ambil daftar matakuliah yang direkomendasikan oleh dosen wali
-// @route GET /api/student/rekomendasiMataKuliah
-// @access Private (khusus mahasiswa)
+/**
+ * Mengambil rekomendasi mata kuliah dari dosen wali
+ * Get course recommendations from academic supervisor
+ * @desc Ambil daftar matakuliah yang direkomendasikan oleh dosen wali
+ * @route GET /api/student/rekomendasiMataKuliah
+ * @access Private (khusus mahasiswa)
+ */
 exports.getCourseRecommendation = async (req, res) => {
     try {
-        // Ambil nim mahasiswa dari session
+        // Ambil NIM mahasiswa dari session/token
+        // Get student NIM from session/token
         const nim = req.user.id;
 
-        // Cek dulu kalau id/nim nya ada
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -280,7 +344,8 @@ exports.getCourseRecommendation = async (req, res) => {
             });
         }
 
-        // get data dari query dengan semester_mahasiswa:
+        // Ambil data rekomendasi mata kuliah dengan join ke tabel mata_kuliah_baru
+        // Get course recommendation data with join to mata_kuliah_baru table
         const [mataKuliahRekomendasi] = await pool.execute(
             `SELECT mkr.kode_mk,
                     mkb.nama_mk, 
@@ -297,15 +362,18 @@ exports.getCourseRecommendation = async (req, res) => {
             [nim]
         );
 
-        // Cek data ada atau tidak:
+        // Handle jika belum ada rekomendasi
+        // Handle if no recommendations yet
         if (mataKuliahRekomendasi.length === 0) {
             return res.status(200).json({
                 success: true,
                 message: 'Belum ada rekomendasi mata kuliah dari dosen wali',
+                data: [],
             });
         }
 
-        // Group data by semester untuk frontend
+        // Kelompokkan data berdasarkan semester untuk frontend
+        // Group data by semester for frontend
         const groupedBySemester = mataKuliahRekomendasi.reduce(
             (acc, course) => {
                 const semester = course.semester_mahasiswa;
@@ -344,13 +412,21 @@ exports.getCourseRecommendation = async (req, res) => {
     }
 };
 
-// @desc Ambil daftar nim mahasiswa yang sudah pernah mengisi
-// @route GET /api/student/getPsiResult
-// @access Private (khusus mahasiswa)
+/**
+ * Mengambil hasil tes psikologi mahasiswa
+ * Get student psychology test results
+ * @desc Ambil daftar nim mahasiswa yang sudah pernah mengisi
+ * @route GET /api/student/getPsiResult
+ * @access Private (khusus mahasiswa)
+ */
 exports.getPsiResults = async (req, res) => {
     try {
-        // get nim from localStorage
+        // Ambil NIM dari token autentikasi
+        // Get NIM from authentication token
         const nim = req.user.id;
+
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -359,14 +435,18 @@ exports.getPsiResults = async (req, res) => {
             });
         }
 
-        // Querying
+        // Query hasil tes psikologi dari database
+        // Query psychology test results from database
         const psiResult = await fetchPsiResult(nim);
 
+        // Handle jika belum ada hasil tes
+        // Handle if no test results yet
         if (psiResult.length === 0) {
             return res.status(200).json({
                 success: true,
                 count: 0,
                 data: [],
+                message: 'Belum ada hasil tes psikologi',
             });
         }
 
@@ -384,12 +464,18 @@ exports.getPsiResults = async (req, res) => {
     }
 };
 
-// @desc Mengirim data insert ke database.
-// @route POST /api/student/sendPsiResult
-// @access Private (khusus mahasiswa)
+/**
+ * Menyimpan hasil tes psikologi mahasiswa ke database
+ * Save student psychology test results to database
+ * @desc Mengirim data insert ke database.
+ * @route POST /api/student/sendPsiResult
+ * @access Private (khusus mahasiswa)
+ */
 exports.sendPsiResult = async (req, res) => {
     try {
         const nim = req.user.id;
+
+        // Ekstrak data dari request body
         // Extract data from request body
         const {
             skor_depression,
@@ -401,6 +487,7 @@ exports.sendPsiResult = async (req, res) => {
             klasifikasi,
         } = req.body;
 
+        // Validasi field yang diperlukan
         // Validate required fields
         if (
             !nim ||
@@ -418,7 +505,8 @@ exports.sendPsiResult = async (req, res) => {
             });
         }
 
-        // Verify that nim from token matches nim in request
+        // Verifikasi bahwa NIM dari token sesuai dengan NIM di request
+        // Verify that NIM from token matches NIM in request
         if (req.user.id !== nim) {
             return res.status(403).json({
                 success: false,
@@ -427,20 +515,12 @@ exports.sendPsiResult = async (req, res) => {
             });
         }
 
-        // FIXED: Use MySQL-compatible datetime format
+        // Gunakan format datetime yang kompatibel dengan MySQL
+        // Use MySQL-compatible datetime format
         const tanggalTes = getCurrentMySQLDateTime();
 
-        //? Dicomment untuk memungkinkan mahasiswa bisa mengisi berulang kali tidak hanya sekali.
-        // const [deleteResult] = await pool.execute(
-        //     'DELETE FROM hasil_tes_psikologi WHERE nim = ?',
-        //     [nim]
-        // );
-
-        // console.log(
-        //     `Deleted ${deleteResult.affectedRows} existing records for nim: ${nim}`
-        // );
-
-        // Step 2: Insert new data
+        // Insert data hasil tes psikologi ke database
+        // Insert psychology test results data to database
         const [insertResult] = await pool.execute(
             `
             INSERT INTO hasil_tes_psikologi 
@@ -460,6 +540,7 @@ exports.sendPsiResult = async (req, res) => {
             ]
         );
 
+        // Cek apakah insert berhasil
         // Check if insert was successful
         if (insertResult.affectedRows > 0) {
             return res.status(201).json({
@@ -490,20 +571,20 @@ exports.sendPsiResult = async (req, res) => {
 };
 
 /**
+ * Upload lampiran keluhan mahasiswa ke cloud storage
+ * Upload student complaint attachment to cloud storage
  * @desc controller untuk upload file lampiran MyFeedback ke gcp
  * @route POST /api/student/uploadLampiranKeluhan
+ * @access Private (khusus mahasiswa)
  */
 exports.uploadLampiranKeluhan = async (req, res) => {
     try {
-        // Log request information for debugging
-        console.log('Upload lampiran request received:', {
-            body: req.body,
-            filePresent: !!req.file,
-        });
-
-        // Extract feedback data from request body
+        // Ekstrak data keluhan dari request body
+        // Extract complaint data from request body
         const { title_keluhan, detail_keluhan } = req.body;
         const nim = req.user.id;
+
+        // Validasi field yang diperlukan
         // Validate required fields
         if (!nim || !title_keluhan || !detail_keluhan) {
             return res.status(400).json({
@@ -512,10 +593,12 @@ exports.uploadLampiranKeluhan = async (req, res) => {
             });
         }
 
-        // FIXED: Use MySQL-compatible datetime format
+        // Gunakan format datetime yang kompatibel dengan MySQL
+        // Use MySQL-compatible datetime format
         const tanggalKeluhan = getCurrentMySQLDateTime();
 
-        // Use Promise-based query execution consistently
+        // Insert keluhan ke database menggunakan Promise-based query
+        // Insert complaint to database using Promise-based query
         const [result] = await pool.execute(
             `INSERT INTO keluhan_mahasiswa (nim_keluhan, title_keluhan, detail_keluhan, tanggal_keluhan) 
              VALUES (?, ?, ?, ?)`,
@@ -523,17 +606,16 @@ exports.uploadLampiranKeluhan = async (req, res) => {
         );
 
         const id_keluhan = result.insertId;
-        console.log(`Keluhan inserted with ID: ${id_keluhan}`);
 
-        // Handle file upload if there's a file
+        // Handle upload file jika ada lampiran
+        // Handle file upload if there's an attachment
         let fileData = null;
         if (req.file) {
             try {
-                console.log('Starting file upload to GCP');
-                // Set a timeout for the upload operation
+                // Set timeout untuk operasi upload (30 detik)
+                // Set timeout for upload operation (30 seconds)
                 const uploadPromise = uploadFile(req.file, 'keluhan-lampiran');
 
-                // Add timeout to prevent hanging
                 const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(
                         () => reject(new Error('File upload timeout')),
@@ -541,11 +623,12 @@ exports.uploadLampiranKeluhan = async (req, res) => {
                     )
                 );
 
-                // Race the upload against the timeout
+                // Race antara upload dan timeout
+                // Race between upload and timeout
                 fileData = await Promise.race([uploadPromise, timeoutPromise]);
-                console.log('File uploaded successfully:', fileData.url);
 
-                // Save file data to database using lampiranModel
+                // Simpan metadata file ke database menggunakan lampiranModel
+                // Save file metadata to database using lampiranModel
                 await lampiranModel.saveLampiran({
                     id_keluhan: id_keluhan,
                     file_name: fileData.filename,
@@ -554,11 +637,11 @@ exports.uploadLampiranKeluhan = async (req, res) => {
                     file_type: fileData.mimetype,
                     file_size: fileData.size,
                 });
-                console.log('File metadata saved to database');
             } catch (uploadError) {
                 console.error('Error uploading file:', uploadError);
-                // Continue but note the error - we'll still return the created complaint
-                // but with information about the file upload issue
+
+                // Lanjutkan proses tapi beri tahu ada error upload file
+                // Continue process but notify about file upload error
                 return res.status(201).json({
                     success: true,
                     message: 'Feedback submitted but file upload failed',
@@ -572,8 +655,6 @@ exports.uploadLampiranKeluhan = async (req, res) => {
                     },
                 });
             }
-        } else {
-            console.log('No file to upload');
         }
 
         return res.status(201).json({
@@ -603,13 +684,20 @@ exports.uploadLampiranKeluhan = async (req, res) => {
 };
 
 /**
+ * Mengambil daftar keluhan/feedback yang dibuat oleh mahasiswa
+ * Get list of complaints/feedback created by student
  * @desc controller untuk get list keluhan dari mahasiswa
  * @route GET /api/student/myKeluhan
+ * @access Private (khusus mahasiswa)
  */
 exports.getMyKeluhan = async (req, res) => {
     try {
-        // Get nim from user object (set by auth middleware)
+        // Ambil NIM dari objek user (diset oleh auth middleware)
+        // Get NIM from user object (set by auth middleware)
         const nim = req.user.id;
+
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -618,10 +706,12 @@ exports.getMyKeluhan = async (req, res) => {
             });
         }
 
-        // Get the feedback list
+        // Ambil daftar feedback dari database
+        // Get feedback list from database
         const feedbackList = await getMyFeedbackList(nim);
 
-        // Transform the data for frontend if needed
+        // Transformasi data untuk frontend dengan informasi tambahan
+        // Transform data for frontend with additional information
         const transformedList = feedbackList.map((feedback) => ({
             id_keluhan: feedback.id_keluhan,
             nim_keluhan: feedback.nim_keluhan,
@@ -648,15 +738,20 @@ exports.getMyKeluhan = async (req, res) => {
 };
 
 /**
+ * Mengambil detail keluhan berdasarkan ID dengan respons dari dosen wali
+ * Get complaint details by ID with response from academic supervisor
  * @desc controller untuk get detail keluhan berdasarkan ID
  * @route GET /api/student/myKeluhan/:id
+ * @access Private (khusus mahasiswa)
  */
 exports.getKeluhanDetail = async (req, res) => {
     try {
-        // Get feedback ID from the URL parameter
+        // Ambil ID keluhan dari parameter URL
+        // Get complaint ID from URL parameter
         const { id } = req.params;
 
-        // Validate ID
+        // Validasi ID keluhan
+        // Validate complaint ID
         if (!id) {
             return res.status(400).json({
                 success: false,
@@ -664,15 +759,18 @@ exports.getKeluhanDetail = async (req, res) => {
             });
         }
 
-        // Import query function
+        // Import fungsi query untuk detail feedback
+        // Import query function for feedback detail
         const {
             getFeedbackDetail,
         } = require('../models/mahasiswaQueries/myFeedbackQueries');
 
-        // Get the feedback detail with attachment and response
+        // Ambil detail feedback dengan lampiran dan respons
+        // Get feedback detail with attachment and response
         const feedbackDetail = await getFeedbackDetail(id);
 
-        // If feedback not found
+        // Handle jika feedback tidak ditemukan
+        // Handle if feedback not found
         if (!feedbackDetail) {
             return res.status(404).json({
                 success: false,
@@ -680,7 +778,8 @@ exports.getKeluhanDetail = async (req, res) => {
             });
         }
 
-        // Check if the feedback belongs to the logged-in user
+        // Cek apakah feedback milik user yang sedang login
+        // Check if feedback belongs to the logged-in user
         if (feedbackDetail.nim_keluhan !== req.user.id) {
             return res.status(403).json({
                 success: false,
@@ -688,7 +787,8 @@ exports.getKeluhanDetail = async (req, res) => {
             });
         }
 
-        // Transform the data for the frontend
+        // Transformasi data untuk frontend dengan informasi lengkap
+        // Transform data for frontend with complete information
         const transformedDetail = {
             id_keluhan: feedbackDetail.id_keluhan,
             nim_keluhan: feedbackDetail.nim_keluhan,
@@ -696,13 +796,14 @@ exports.getKeluhanDetail = async (req, res) => {
             detail_keluhan: feedbackDetail.detail_keluhan,
             tanggal_keluhan: feedbackDetail.tanggal_keluhan,
             status: feedbackDetail.status_keluhan || 'Pending',
-            lampiran: feedbackDetail.lampiran, // Lampiran mahasiswa
+            lampiran: feedbackDetail.lampiran, // Lampiran dari mahasiswa
             response: feedbackDetail.response
                 ? {
                       text: feedbackDetail.response.text,
                       date: feedbackDetail.response.date,
                       nip_dosen_wali: feedbackDetail.response.nip_dosen_wali,
-                      // ADDED: Include lampiran response dari dosen wali
+                      // Include lampiran respons dari dosen wali
+                      // Include response attachment from academic supervisor
                       lampiran: feedbackDetail.response.lampiran,
                   }
                 : null,
@@ -722,11 +823,20 @@ exports.getKeluhanDetail = async (req, res) => {
     }
 };
 
+/**
+ * Mengirim data peminatan mahasiswa ke database
+ * Send student specialization data to database
+ * @desc POST - kirim peminatan mahasiswa
+ * @route POST /api/student/peminatan
+ * @access Private (khusus mahasiswa)
+ */
 exports.sendPeminatanMahasiswa = async (req, res) => {
     try {
         const id = req.user.id;
         const { peminatan } = req.body;
 
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!id) {
             return res.status(400).json({
                 success: false,
@@ -735,6 +845,8 @@ exports.sendPeminatanMahasiswa = async (req, res) => {
             });
         }
 
+        // Validasi data peminatan
+        // Validate specialization data
         if (!peminatan) {
             return res.status(400).json({
                 success: false,
@@ -742,9 +854,12 @@ exports.sendPeminatanMahasiswa = async (req, res) => {
             });
         }
 
+        // Update data peminatan di database
+        // Update specialization data in database
         const updatePeminatan = await sendPeminatan(id, peminatan);
 
         // Periksa apakah ada baris yang diupdate
+        // Check if any rows were updated
         if (updatePeminatan.payload === 0) {
             return res.status(404).json({
                 success: false,
@@ -773,14 +888,26 @@ exports.sendPeminatanMahasiswa = async (req, res) => {
     }
 };
 
+/**
+ * Mengambil daftar semua peminatan/kelompok keahlian yang tersedia
+ * Get list of all available specializations/expertise groups
+ * @desc GET - ambil daftar peminatan
+ * @route GET /api/student/peminatan/list
+ * @access Private (khusus mahasiswa)
+ */
 exports.getAllPeminatanList = async (req, res) => {
     try {
+        // Ambil daftar peminatan dari database
+        // Get specialization list from database
         const result = await getListPeminatan();
 
+        // Handle jika tidak ada data peminatan
+        // Handle if no specialization data found
         if (result.length === 0) {
             return res.status(200).json({
                 success: true,
                 message: `Data list kelompok keahlian tidak ditemukan.`,
+                data: [],
             });
         }
 
@@ -799,11 +926,21 @@ exports.getAllPeminatanList = async (req, res) => {
     }
 };
 
-//Ambil data peminatan mahasiswa yang sedang login
+/**
+ * Mengambil data peminatan mahasiswa yang sedang login
+ * Get specialization data of the logged-in student
+ * @desc GET - ambil peminatan mahasiswa
+ * @route GET /api/student/peminatan
+ * @access Private (khusus mahasiswa)
+ */
 exports.getStudentPeminatan = async (req, res) => {
     try {
-        // Ambil nim mahasiswa dari session/token
+        // Ambil NIM mahasiswa dari session/token
+        // Get student NIM from session/token
         const nim = req.user.id;
+
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -812,15 +949,18 @@ exports.getStudentPeminatan = async (req, res) => {
             });
         }
 
-        // Panggil query untuk mendapatkan peminatan
+        // Panggil query untuk mendapatkan peminatan mahasiswa
+        // Call query to get student specialization
         const peminatanResult = await getStudentPeminatan(nim);
 
-        // Berhasil mendapatkan data peminatan
+        // Berhasil mendapatkan data peminatan dengan handling null value
+        // Successfully get specialization data with null value handling
         res.status(200).json({
             success: true,
             message: 'Data peminatan berhasil diambil.',
             data: {
                 // Handle kasus jika kolom peminatan bernilai null
+                // Handle case if specialization column is null
                 peminatan:
                     peminatanResult.peminatan || 'Belum memilih peminatan',
             },
@@ -834,11 +974,18 @@ exports.getStudentPeminatan = async (req, res) => {
     }
 };
 
-// myFinance
+/**
+ * Mengirim pengajuan keringanan biaya kuliah dengan lampiran file
+ * Submit tuition fee relief application with file attachment
+ * @desc POST - kirim pengajuan keringanan biaya
+ * @route POST /api/student/finance/relief
+ * @access Private (khusus mahasiswa)
+ */
 exports.sendRelief = async (req, res) => {
     try {
         const nim = req.user.id;
 
+        // Ekstrak data dari request body
         // Extract data from request body
         const {
             penghasilanBulanan,
@@ -847,13 +994,14 @@ exports.sendRelief = async (req, res) => {
             tempatTinggal,
             pengeluaranPerbulan,
 
-            // Detail Keringanan
+            // Detail Keringanan / Relief Details
             jenisKeringanan,
             alasankeringanan,
             jumlahDiajukan,
             detailAlasan,
         } = req.body;
 
+        // Validasi field yang diperlukan
         // Validate required fields
         if (
             !nim ||
@@ -862,7 +1010,7 @@ exports.sendRelief = async (req, res) => {
             tanggunganOrangTua === undefined ||
             tempatTinggal === undefined ||
             pengeluaranPerbulan === undefined ||
-            // Detail Keringanan
+            // Detail Keringanan validation
             jenisKeringanan === undefined ||
             alasankeringanan === undefined ||
             jumlahDiajukan === undefined ||
@@ -874,7 +1022,8 @@ exports.sendRelief = async (req, res) => {
             });
         }
 
-        // Verify that nim from token matches nim in request
+        // Verifikasi bahwa NIM dari token sesuai dengan NIM di request
+        // Verify that NIM from token matches NIM in request
         if (req.user.id !== nim) {
             return res.status(403).json({
                 success: false,
@@ -883,9 +1032,12 @@ exports.sendRelief = async (req, res) => {
             });
         }
 
-        // FIXED: Use MySQL-compatible datetime format
+        // Gunakan format datetime yang kompatibel dengan MySQL
+        // Use MySQL-compatible datetime format
         const currentDate = getCurrentMySQLDateTime();
 
+        // Siapkan array nilai untuk insert ke database
+        // Prepare value array for database insert
         const valueRelief = [
             nim,
             parseInt(penghasilanBulanan),
@@ -900,19 +1052,20 @@ exports.sendRelief = async (req, res) => {
             currentDate,
         ];
 
-        // Execute the insert query
+        // Eksekusi query insert pengajuan keringanan
+        // Execute relief application insert query
         const insertRelief = await submitRelief(valueRelief);
 
-        // Handle file upload if there's a file
+        // Handle upload file jika ada lampiran
+        // Handle file upload if there's an attachment
         let fileData = null;
         if (req.file) {
             try {
-                console.log('Starting file upload to GCS for finance');
-
-                // Upload file to GCS in finance-lampiran folder
+                // Upload file ke Google Cloud Storage dalam folder finance-lampiran
+                // Upload file to Google Cloud Storage in finance-lampiran folder
                 fileData = await uploadFile(req.file, 'finance-lampiran');
-                console.log('File uploaded successfully:', fileData.url);
 
+                // Simpan metadata file ke tabel lampiranfinance
                 // Save file metadata to lampiranfinance table
                 await saveLampiranFinance({
                     id_keluhan: insertRelief.insertId,
@@ -922,13 +1075,14 @@ exports.sendRelief = async (req, res) => {
                     file_type: fileData.mimetype,
                     file_size: fileData.size,
                 });
-                console.log('File metadata saved to database');
             } catch (uploadError) {
                 console.error('Error uploading file:', uploadError);
-                // Continue but note the error
+                // Lanjutkan proses meskipun upload file gagal
+                // Continue process even if file upload fails
             }
         }
 
+        // Cek apakah insert berhasil
         // Check if insert was successful
         if (insertRelief.affectedRows > 0) {
             return res.status(201).json({
@@ -943,7 +1097,7 @@ exports.sendRelief = async (req, res) => {
                               url: fileData.url,
                               originalName: fileData.originalName,
                           }
-                        : null, // ← TAMBAHKAN ini
+                        : null,
                 },
             });
         } else {
@@ -963,12 +1117,21 @@ exports.sendRelief = async (req, res) => {
     }
 };
 
-// Controller untuk mengambil history pengajuan keringanan biaya
+/**
+ * Mengambil riwayat pengajuan keringanan biaya mahasiswa
+ * Get student's tuition fee relief application history
+ * @desc GET - ambil riwayat pengajuan keringanan
+ * @route GET /api/student/finance/relief
+ * @access Private (khusus mahasiswa)
+ */
 exports.getStudentsRelief = async (req, res) => {
     try {
-        // Ambil nim mahasiswa dari user yang login
+        // Ambil NIM mahasiswa dari user yang login
+        // Get student NIM from logged-in user
         const nim = req.user.id;
 
+        // Validasi keberadaan NIM
+        // Validate NIM existence
         if (!nim) {
             return res.status(400).json({
                 success: false,
@@ -977,11 +1140,9 @@ exports.getStudentsRelief = async (req, res) => {
             });
         }
 
-        // Ambil data Relief dari query
+        // Ambil data riwayat pengajuan keringanan dari database
+        // Get relief application history data from database
         const rowsRelief = await fetchRelief(nim);
-
-        // console.log('Data Mahasiswa Ditemukan (dari getStudentsRelief):');
-        // console.log('Jawaban formulir keuangan: ', rowsRelief);
 
         return res.status(200).json({
             success: true,
