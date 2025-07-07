@@ -1,22 +1,35 @@
+// Admin Routes - Routing untuk fitur administrasi sistem akademik
+// Admin Routes for academic system administration features
 const express = require('express');
 const router = express.Router();
 
-// Import controller
+// Import controller untuk admin operations
+// Import controller for admin operations
 const adminController = require('../controllers/adminController');
-// Import middleware authentikasi
+
+// Import middleware autentikasi dan otorisasi
+// Import authentication and authorization middleware
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
+// Import controller untuk logging aktivitas
+// Import controller for activity logging
 const logController = require('../controllers/logController');
 
+// Import middleware untuk upload file
+// Import middleware for file uploads
 const upload = require('../middlewares/uploadMiddleware');
 const csvUpload = require('../middlewares/csvUploadMiddleware');
 
-// @desc    Endpoint backend untuk ...
+// Contoh endpoint untuk testing (dapat dihapus di production)
+// Example endpoint for testing (can be removed in production)
 router.get('/contoh', protect, authorize('admin'), () => {});
 
 // =============================================
-//?==         KELOLA PENGGUNA ROUTES          ==
+// ==         KELOLA PENGGUNA ROUTES          ==
 // =============================================
+
+// Admin Management Routes - Manajemen data admin
+// Admin Management Routes
 router.get(
     '/kelolaPengguna/getAdmin',
     protect,
@@ -45,7 +58,8 @@ router.put(
     adminController.updateAdmin
 );
 
-// Kelola Dosen Wali
+// Lecturer Supervisor Management Routes - Manajemen data dosen wali
+// Lecturer Supervisor Management Routes
 router.get(
     '/kelolaPengguna/getDosenWali',
     protect,
@@ -74,7 +88,8 @@ router.put(
     adminController.updateDosen
 );
 
-// Kelola Mahasiswa
+// Student Management Routes - Manajemen data mahasiswa
+// Student Management Routes
 router.get(
     '/kelolaPengguna/getMahasiswa',
     protect,
@@ -103,6 +118,8 @@ router.put(
     adminController.updateMahasiswaByNim
 );
 
+// Utility route untuk mengambil daftar kelas
+// Utility route to get class list
 router.get(
     '/kelolaPengguna/getAllKelas',
     protect,
@@ -110,15 +127,18 @@ router.get(
     adminController.getAllKelas
 );
 
-// BULK - Menambah data mahasiswa dengan csv
+// Bulk Import Routes - Route untuk import data secara massal
+// Bulk Import Routes for mass data import
 router.post(
     '/kelolaPengguna/bulkCreateMahasiswa',
     protect,
     authorize('admin'),
-    csvUpload.single('file'),
+    csvUpload.single('file'), // Middleware untuk upload CSV mahasiswa
     adminController.bulkCreateMahasiswa
 );
 
+// Future bulk import untuk dosen wali (saat ini di-comment)
+// Future bulk import for lecturer supervisors (currently commented)
 // router.post(
 //     '/kelolaPengguna/bulkCreateDosenWali',
 //     protect,
@@ -128,8 +148,11 @@ router.post(
 // );
 
 // =======================================================
-//?==         KELOLA KELAS DAN ANGKATAN ROUTES          ==
+// ==         KELOLA KELAS DAN ANGKATAN ROUTES          ==
 // =======================================================
+
+// Class Management Routes - Manajemen data kelas dan assignment dosen wali
+// Class Management Routes
 router.get(
     '/kelolaKelas/getAllKelas',
     protect,
@@ -137,6 +160,8 @@ router.get(
     adminController.getAllKelasforKelas
 );
 
+// Route untuk mendapatkan daftar dosen untuk dropdown
+// Route to get lecturer list for dropdown
 router.get(
     '/kelolaKelas/getDosenList',
     protect,
@@ -170,6 +195,11 @@ router.delete(
 // =============================================
 
 // ============= KELOLA DATA NILAI =============
+// Grade Management Routes - Manajemen data nilai mahasiswa
+// Grade Management Routes
+
+// Route untuk mengambil daftar mahasiswa untuk kelola akademik
+// Route to get student list for academic management
 router.get(
     '/kelolaAkademik/getAllMahasiswa',
     protect,
@@ -177,6 +207,8 @@ router.get(
     adminController.getAllMahasiswaForKelolaAkademik
 );
 
+// Route untuk mengambil riwayat nilai mahasiswa berdasarkan NIM
+// Route to get student grade history by NIM
 router.get(
     '/kelolaAkademik/getGradesMahasiswa/:nim',
     protect,
@@ -184,6 +216,8 @@ router.get(
     adminController.getCourseHistory
 );
 
+// Route untuk mengambil daftar semua mata kuliah
+// Route to get all courses list
 router.get(
     '/kelolaAkademik/getAllCourses',
     protect,
@@ -191,6 +225,8 @@ router.get(
     adminController.getAllCourses
 );
 
+// CRUD Operations untuk nilai mahasiswa
+// CRUD Operations for student grades
 router.post(
     '/kelolaAkademik/createGrade',
     protect,
@@ -212,15 +248,20 @@ router.delete(
     adminController.deleteNilai
 );
 
-// BULK - Menambah data nilai mahasiswa dengan csv
+// Bulk import untuk nilai mahasiswa dari CSV
+// Bulk import for student grades from CSV
 router.post(
     '/kelolaAkademik/bulkCreateGrades/:nim',
     protect,
     authorize('admin'),
-    csvUpload.single('file'),
+    csvUpload.single('file'), // Middleware untuk upload CSV nilai
     adminController.bulkCreateGrades
 );
+
 // ============= KELOLA DATA PRESTASI =============
+// Achievement Management Routes - Manajemen data prestasi akademik
+// Achievement Management Routes
+
 router.get(
     '/kelolaAkademik/getPrestasiData/:nim',
     protect,
@@ -250,6 +291,9 @@ router.delete(
 );
 
 // ============= KELOLA DATA SEMESTER =============
+// Semester Management Routes - Manajemen data per semester mahasiswa
+// Semester Management Routes
+
 router.get(
     '/kelolaAkademik/getSemesterData/:nim',
     protect,
@@ -281,6 +325,12 @@ router.delete(
 // =============================================
 // ==           KELOLA KURIKULUM              ==
 // =============================================
+
+// Curriculum Management Routes - Manajemen kurikulum dan mata kuliah
+// Curriculum Management Routes
+
+// Route untuk mengambil mata kuliah berdasarkan kurikulum tertentu
+// Route to get courses by specific curriculum
 router.get(
     '/kelolaKurikulum/getMataKuliahByKurikulum',
     protect,
@@ -288,6 +338,8 @@ router.get(
     adminController.getMataKuliahByKurikulum
 );
 
+// Route untuk mengambil daftar semua kurikulum
+// Route to get all curriculum list
 router.get(
     '/kelolaKurikulum/getAllKurikulum',
     protect,
@@ -295,6 +347,8 @@ router.get(
     adminController.getAllKurikulum
 );
 
+// Route untuk mengambil detail mata kuliah berdasarkan ID
+// Route to get course details by ID
 router.get(
     '/kelolaKurikulum/getMataKuliahById/:id',
     protect,
@@ -302,6 +356,8 @@ router.get(
     adminController.getMataKuliahById
 );
 
+// CRUD Operations untuk mata kuliah
+// CRUD Operations for courses
 router.post(
     '/kelolaKurikulum/createNewMataKuliah',
     protect,
@@ -323,6 +379,8 @@ router.delete(
     adminController.deleteMataKuliah
 );
 
+// Route untuk mengambil opsi ekuivalensi mata kuliah
+// Route to get course equivalency options
 router.get(
     '/kelolaKurikulum/getEkuivalensiOptions/:kurikulum',
     protect,
@@ -330,6 +388,8 @@ router.get(
     adminController.getEkuivalensiOptions
 );
 
+// Route untuk mengambil daftar kelompok keahlian
+// Route to get expertise group list
 router.get(
     '/kelolaKurikulum/getAllKelompokKeahlian',
     protect,
@@ -341,8 +401,14 @@ router.get(
 // ==                LOGGING                  ==
 // =============================================
 
-// @desc    Endpoint untuk mengambil semua log aktivitas admin
-// @access  Hanya Admin
+// Activity Logging Routes - Route untuk audit trail dan monitoring
+// Activity Logging Routes for audit trail and monitoring
+
+/**
+ * @desc    Endpoint untuk mengambil semua log aktivitas admin
+ * @route   GET /api/admin/logAktivitasAdmin
+ * @access  Private (Admin only)
+ */
 router.get(
     '/logAktivitasAdmin',
     protect,

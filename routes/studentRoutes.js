@@ -1,16 +1,29 @@
+// Student Routes - Routing untuk fitur mahasiswa dalam sistem akademik
+// Student Routes for student features in academic system
 const express = require('express');
 const router = express.Router();
 
-// Import controller
+// Import controller untuk operasi mahasiswa
+// Import controller for student operations
 const studentController = require('../controllers/studentController');
-// Import middleware authentikasi
+
+// Import middleware autentikasi dan otorisasi
+// Import authentication and authorization middleware
 const { protect, authorize } = require('../middlewares/authMiddleware');
+
+// Import middleware untuk upload file
+// Import middleware for file upload
 const upload = require('../middlewares/uploadMiddleware');
 
+// =============================================
+// ==            MY PROGRESS ROUTES           ==
+// =============================================
+
 /**
- * @desc Endpoint backend untuk fitur MyProgress - TAK
- * FR-04 - MyProgress
- * MyProgress.jsx frontend page
+ * @desc    Endpoint untuk data akademik mahasiswa (TAK, SKS, IPK, IPS)
+ * @route   GET /api/student/takMahasiswa
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-04 - MyProgress
  */
 router.get(
     '/takMahasiswa',
@@ -19,10 +32,15 @@ router.get(
     studentController.getStudentsTAKSKSIPK
 );
 
+// =============================================
+// ==             MY COURSE ROUTES            ==
+// =============================================
+
 /**
- * @desc Endpoint backend untuk fitur MyCourse
- * @FR-05 - MyCourse
- * RiwayatMataKuliah.jsx frontend component
+ * @desc    Endpoint untuk riwayat mata kuliah mahasiswa
+ * @route   GET /api/student/riwayatMataKuliah
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-05 - MyCourse
  */
 router.get(
     '/riwayatMataKuliah',
@@ -32,9 +50,10 @@ router.get(
 );
 
 /**
- * @desc Endpoint backend untuk fitur MyCourse
- * @FR-05 - MyCourse - Tabel rekomendasi mata kuliah
- * RekomendasiMataKuliah.jsx frontend component
+ * @desc    Endpoint untuk rekomendasi mata kuliah dari dosen wali
+ * @route   GET /api/student/rekomendasiMataKuliah
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-05 - MyCourse - Tabel rekomendasi mata kuliah
  */
 router.get(
     '/rekomendasiMataKuliah',
@@ -43,13 +62,23 @@ router.get(
     studentController.getCourseRecommendation
 );
 
+/**
+ * @desc    Endpoint untuk mengirim pilihan peminatan mahasiswa
+ * @route   PUT /api/student/sendPeminatanMahasiswa
+ * @access  Private (mahasiswa only)
+ */
 router.put(
     '/sendPeminatanMahasiswa',
     protect,
     authorize('mahasiswa'),
     studentController.sendPeminatanMahasiswa
-)
+);
 
+/**
+ * @desc    Endpoint untuk mendapatkan daftar semua peminatan
+ * @route   GET /api/student/getAllListPeminatan
+ * @access  Private (mahasiswa only)
+ */
 router.get(
     '/getAllListPeminatan',
     protect,
@@ -57,7 +86,11 @@ router.get(
     studentController.getAllPeminatanList
 );
 
-// Endpoint backend untuk fitur MyCourse - Ambil peminatan
+/**
+ * @desc    Endpoint untuk mendapatkan peminatan mahasiswa saat ini
+ * @route   GET /api/student/getPeminatanMahasiswa
+ * @access  Private (mahasiswa only)
+ */
 router.get(
     '/getPeminatanMahasiswa',
     protect,
@@ -65,10 +98,15 @@ router.get(
     studentController.getStudentPeminatan
 );
 
+// =============================================
+// ==           MY WELLNESS ROUTES            ==
+// =============================================
+
 /**
- * @desc Endpoint backend untuk fitur MyWellness
- * @FR-05 - MyWellness - Fetching all nim list from result
- * MyWellnessPage.jsx frontend component
+ * @desc    Endpoint untuk mendapatkan hasil tes psikologi mahasiswa
+ * @route   GET /api/student/getPsiResult
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-06 - MyWellness - Fetching hasil tes psikologi
  */
 router.get(
     '/getPsiResult',
@@ -78,8 +116,10 @@ router.get(
 );
 
 /**
- * @desck Endpoint backend untuk fitur MyWellness
- * FR-05 - MyWellness - Sending / Mengirim hasil tes mahasiswa untuk disimpan di database
+ * @desc    Endpoint untuk mengirim hasil tes psikologi ke database
+ * @route   POST /api/student/sendPsiResult
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-06 - MyWellness - Menyimpan hasil tes psikologi
  */
 router.post(
     '/sendPsiResult',
@@ -88,21 +128,29 @@ router.post(
     studentController.sendPsiResult
 );
 
+// =============================================
+// ==           MY FEEDBACK ROUTES            ==
+// =============================================
+
 /**
- * @desc Endpoint backend untuk fitur MyFeedback
- * FR-08 - MyFeedback - Upload Files to gcp
+ * @desc    Endpoint untuk upload keluhan dengan lampiran file
+ * @route   POST /api/student/uploadLampiranKeluhan
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-08 - MyFeedback - Upload Files to GCP
  */
 router.post(
     '/uploadLampiranKeluhan',
     protect,
     authorize('mahasiswa'),
-    upload.single('file'),
+    upload.single('file'), // Middleware untuk upload file lampiran
     studentController.uploadLampiranKeluhan
 );
 
 /**
- * @desc Endpoint backend untuk fitur MyFeedback
- * FR-08 - MyFeedback - Ambil list keluhan mahasiswa in session / logged in
+ * @desc    Endpoint untuk mendapatkan daftar keluhan mahasiswa
+ * @route   GET /api/student/myKeluhan
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-08 - MyFeedback - List keluhan mahasiswa
  */
 router.get(
     '/myKeluhan',
@@ -112,8 +160,10 @@ router.get(
 );
 
 /**
- * @desc Endpoint backend untuk fitur MyFeedback
- * FR-08 - MyFeedback - Ambil detail keluhan berdasarkan ID
+ * @desc    Endpoint untuk mendapatkan detail keluhan berdasarkan ID
+ * @route   GET /api/student/myKeluhan/:id
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-08 - MyFeedback - Detail keluhan dan respons
  */
 router.get(
     '/myKeluhan/:id',
@@ -122,21 +172,29 @@ router.get(
     studentController.getKeluhanDetail
 );
 
+// =============================================
+// ==            MY FINANCE ROUTES            ==
+// =============================================
+
 /**
- * @desck Endpoint backend untuk fitur MyWellness
- * FR-07 - MyFinance - Sending / Mengirim jawaban formulir keringanan biaya kuliah mahasiswa untuk disimpan di database
+ * @desc    Endpoint untuk mengirim pengajuan keringanan biaya kuliah
+ * @route   POST /api/student/sendRelief
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-07 - MyFinance - Pengajuan keringanan biaya
  */
 router.post(
     '/sendRelief',
     protect,
     authorize('mahasiswa'),
-    upload.single('file'),
+    upload.single('file'), // Middleware untuk upload file lampiran finansial
     studentController.sendRelief
 );
 
 /**
- * @desck Endpoint backend untuk fitur MyWellness
- * FR-07 - MyFinance - fetching / Menangkap jawaban formulir keringanan biaya kuliah mahasiswa untuk disimpan di database
+ * @desc    Endpoint untuk mendapatkan riwayat pengajuan keringanan biaya
+ * @route   GET /api/student/getStudentsRelief
+ * @access  Private (mahasiswa only)
+ * @fitur   FR-07 - MyFinance - Riwayat pengajuan keringanan
  */
 router.get(
     '/getStudentsRelief',

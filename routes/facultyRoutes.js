@@ -1,16 +1,30 @@
+// Faculty Routes - Routing untuk fitur dosen wali dalam sistem akademik
+// Faculty Routes for lecturer supervisor features in academic system
 const express = require('express');
 const router = express.Router();
 
-// Import controller
+// Import controller untuk operasi dosen wali
+// Import controller for faculty operations
 const facultyController = require('../controllers/facultyController');
-// Import middleware authentikasi
+
+// Import middleware autentikasi dan otorisasi
+// Import authentication and authorization middleware
 const { protect, authorize } = require('../middlewares/authMiddleware');
-// Import middleware upload
+
+// Import middleware untuk upload file
+// Import middleware for file upload
 const upload = require('../middlewares/uploadMiddleware');
 
-// @desc    Endpoint backend untuk fitur MyStudent List Mahasiswa
-// @Fitur   FR-01.1 - MyStudents-Overview
-// studentList.jsx route
+// =============================================
+// ==           MY STUDENTS ROUTES             ==
+// =============================================
+
+/**
+ * @desc    Endpoint untuk daftar mahasiswa bimbingan
+ * @route   GET /api/faculty/listMahasiswa
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-01.1 - MyStudents-Overview
+ */
 router.get(
     '/listMahasiswa',
     protect,
@@ -18,121 +32,12 @@ router.get(
     facultyController.getStudentList
 );
 
-// @desc    Endpoint backend untuk fitur MyCourseAdvisor
-// @fitur   FR-02 - MyCourseAdvisor-ChooseClassandStudent
-// MyCourseAdvisorPage.jsx
-router.get(
-    '/courseAdvisor/classesAndStudents',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getClassesAndStudents
-);
-
-// @desc    Endpoint backend untuk fitur MyCourseAdvisor
-// @fitur   FR-02 - MyCourseAdvisor-riwayatMK
-// MyCourseAdvisorPage.jsx
-router.get(
-    '/courseAdvisor/courseHistory',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getHistoryMKMyCourseAdvisor
-);
-
-// @desc    Endpoint backend untuk fitur MyCourseAdvisor
-// @fitur   FR-02 - MyCourseAdvisor-MKTersedia
-// MyCourseAdvisorPage.jsx
-router.get(
-    '/courseAdvisor/mataKuliahAvail',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getAvailableCourse
-);
-
-// @desc    Endpoint backend untuk fitur MyCourseAdvisor
-// @fitur   FR-02 - MyCourseAdvisor - Mengirim Rekomendasi Mata Kuliah
-// MyCourseAdvisorPage.jsx
-router.post(
-    '/courseAdvisor/sendRekomendasiMK',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.sendCourseRecommendation
-);
-
-// @desc    Endpoint backend untuk fitur MyCourseAdvisor untuk get mk yang sudah di rekomendasikan ke mahasiswany
-// @fitur   \ MyCourseAdvisor
-// MyCourseAdvisorPage.jsx
-router.get(
-    '/courseAdvisor/getRecommendedMK',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getRecommendedCourses
-);
-
-// @desc    Endpoint backend untuk fitur MyCourseAdvisor
-// @fitur   \ MyCourseAdvisor
-// MyCourseAdvisorPage.jsx
-router.get(
-    '/courseAdvisor/getLastIPSemester',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getLastIPSemester
-);
-
-router.get(
-    '/getStudentNimSKS',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getStudentNIMSKS
-);
-
-// @desc    Endpoint backend untuk fitur MyReport
-// @fitur   FR-03.1 - MyReport - Overview
-// /src/pages/lecturer/MyReport/MyReportPage.jsx || StudentDetailView.jsx || StudentListView.jsx
-router.get(
-    '/keluhanMahasiswa',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getKeluhanMahasiswa
-);
-
-router.get(
-    '/responseDosenWali/',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getResponDosWal
-);
-
-// Route to get detail of a specific keluhan/feedback
-router.get(
-    '/keluhanMahasiswa/:id',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getKeluhanDetail
-);
-
-// Route to send/update response to student feedback
-router.post(
-    '/sendResponDosWal',
-    protect,
-    authorize('dosen_wali'),
-    upload.single('file'),
-    facultyController.sendResponDosWal
-);
-
-router.get('/datamahasiswa', protect, authorize('dosen_wali'));
-
-router.get(
-    '/takipksksMahasiswa',
-    protect,
-    authorize('dosen_wali'),
-    facultyController.getStudentAcademicDetails
-);
-
 /**
- * @desc Endpoint backend untuk fitur MyStudents - Analisis Psikologi
- * @fitur FR-01.3 - MyStudents - WellnessAnalysis
+ * @desc    Endpoint untuk analisis psikologi mahasiswa
+ * @route   GET /api/faculty/analisisPsikologi/:nim
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-01.3 - MyStudents - WellnessAnalysis
  */
-
 router.get(
     '/analisisPsikologi/:nim',
     protect,
@@ -140,6 +45,11 @@ router.get(
     facultyController.getStudentWellness
 );
 
+/**
+ * @desc    Endpoint untuk analisis finansial mahasiswa
+ * @route   GET /api/faculty/analisisFinansial/:nim
+ * @access  Private (dosen_wali only)
+ */
 router.get(
     '/analisisFinansial/:nim',
     protect,
@@ -148,8 +58,21 @@ router.get(
 );
 
 /**
- * @decs Endpoint backend untuk fitur MyStudents - Analisis Akademik - Detal Nilai Akademik
- * @fitur
+ * @desc    Endpoint untuk detail akademik mahasiswa (TAK, IPK, SKS)
+ * @route   GET /api/faculty/takipksksMahasiswa
+ * @access  Private (dosen_wali only)
+ */
+router.get(
+    '/takipksksMahasiswa',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getStudentAcademicDetails
+);
+
+/**
+ * @desc    Endpoint untuk detail nilai mata kuliah mahasiswa
+ * @route   GET /api/faculty/MyStudentDetailNilaiMK/:nim
+ * @access  Private (dosen_wali only)
  */
 router.get(
     '/MyStudentDetailNilaiMK/:nim',
@@ -158,6 +81,161 @@ router.get(
     facultyController.getHistoryMKMyCourseAdvisor
 );
 
+// =============================================
+// ==         MY COURSE ADVISOR ROUTES        ==
+// =============================================
+
+/**
+ * @desc    Endpoint untuk daftar kelas dan mahasiswa yang diampu
+ * @route   GET /api/faculty/courseAdvisor/classesAndStudents
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-02 - MyCourseAdvisor-ChooseClassandStudent
+ */
+router.get(
+    '/courseAdvisor/classesAndStudents',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getClassesAndStudents
+);
+
+/**
+ * @desc    Endpoint untuk riwayat mata kuliah mahasiswa
+ * @route   GET /api/faculty/courseAdvisor/courseHistory
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-02 - MyCourseAdvisor-riwayatMK
+ */
+router.get(
+    '/courseAdvisor/courseHistory',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getHistoryMKMyCourseAdvisor
+);
+
+/**
+ * @desc    Endpoint untuk mata kuliah yang tersedia
+ * @route   GET /api/faculty/courseAdvisor/mataKuliahAvail
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-02 - MyCourseAdvisor-MKTersedia
+ */
+router.get(
+    '/courseAdvisor/mataKuliahAvail',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getAvailableCourse
+);
+
+/**
+ * @desc    Endpoint untuk mengirim rekomendasi mata kuliah
+ * @route   POST /api/faculty/courseAdvisor/sendRekomendasiMK
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-02 - MyCourseAdvisor - Mengirim Rekomendasi MK
+ */
+router.post(
+    '/courseAdvisor/sendRekomendasiMK',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.sendCourseRecommendation
+);
+
+/**
+ * @desc    Endpoint untuk mendapatkan mata kuliah yang sudah direkomendasikan
+ * @route   GET /api/faculty/courseAdvisor/getRecommendedMK
+ * @access  Private (dosen_wali only)
+ */
+router.get(
+    '/courseAdvisor/getRecommendedMK',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getRecommendedCourses
+);
+
+/**
+ * @desc    Endpoint untuk mendapatkan IP semester terakhir mahasiswa
+ * @route   GET /api/faculty/courseAdvisor/getLastIPSemester
+ * @access  Private (dosen_wali only)
+ */
+router.get(
+    '/courseAdvisor/getLastIPSemester',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getLastIPSemester
+);
+
+/**
+ * @desc    Endpoint untuk mendapatkan data SKS mahasiswa
+ * @route   GET /api/faculty/getStudentNimSKS
+ * @access  Private (dosen_wali only)
+ */
+router.get(
+    '/getStudentNimSKS',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getStudentNIMSKS
+);
+
+// =============================================
+// ==            MY REPORT ROUTES             ==
+// =============================================
+
+/**
+ * @desc    Endpoint untuk daftar keluhan mahasiswa
+ * @route   GET /api/faculty/keluhanMahasiswa
+ * @access  Private (dosen_wali only)
+ * @fitur   FR-03.1 - MyReport - Overview
+ */
+router.get(
+    '/keluhanMahasiswa',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getKeluhanMahasiswa
+);
+
+/**
+ * @desc    Endpoint untuk detail keluhan mahasiswa
+ * @route   GET /api/faculty/keluhanMahasiswa/:id
+ * @access  Private (dosen_wali only)
+ */
+router.get(
+    '/keluhanMahasiswa/:id',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getKeluhanDetail
+);
+
+/**
+ * @desc    Endpoint untuk respons dosen wali terhadap keluhan
+ * @route   GET /api/faculty/responseDosenWali
+ * @access  Private (dosen_wali only)
+ */
+router.get(
+    '/responseDosenWali/',
+    protect,
+    authorize('dosen_wali'),
+    facultyController.getResponDosWal
+);
+
+/**
+ * @desc    Endpoint untuk mengirim respons dengan lampiran file
+ * @route   POST /api/faculty/sendResponDosWal
+ * @access  Private (dosen_wali only)
+ */
+router.post(
+    '/sendResponDosWal',
+    protect,
+    authorize('dosen_wali'),
+    upload.single('file'), // Middleware untuk upload file lampiran
+    facultyController.sendResponDosWal
+);
+
+// =============================================
+// ==         FINANCIAL ANALYSIS ROUTES       ==
+// =============================================
+
+/**
+ * @desc    Endpoint untuk respons pengajuan finansial mahasiswa
+ * @route   POST /api/faculty/analisisFinansial/responseFinancial/:id
+ * @access  Private (dosen_wali only)
+ */
 router.post(
     '/analisisFinansial/responseFinancial/:id',
     protect,
@@ -165,14 +243,35 @@ router.post(
     facultyController.sendResponseFinancial
 );
 
+// =============================================
+// ==       MACHINE LEARNING ROUTES           ==
+// =============================================
+
+/**
+ * @desc    Endpoint untuk testing environment Machine Learning
+ * @route   GET /api/faculty/ml/test
+ * @access  Private (dosen_wali only)
+ */
 router.get('/ml/test', facultyController.testMLEnvironment);
 
-// Ganti route yang ada jadi:
+/**
+ * @desc    Endpoint untuk prediksi status mahasiswa menggunakan ML
+ * @route   POST /api/faculty/ml/predict/:nim
+ * @access  Private (dosen_wali only)
+ */
 router.post(
     '/ml/predict/:nim',
     protect,
     authorize('dosen_wali'),
     facultyController.predictStudentByNim
 );
+
+// =============================================
+// ==            FUTURE ROUTES                ==
+// =============================================
+
+// Route placeholder untuk pengembangan masa depan
+// Placeholder route for future development
+router.get('/datamahasiswa', protect, authorize('dosen_wali'));
 
 module.exports = router;
