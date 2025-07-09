@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const setUpSwagger = require('./config/swagger')
 
 // Import database
 const { testConnection } = require('./config/database');
@@ -28,6 +29,8 @@ dotenv.config();
 
 // Initialize express app
 const app = express();
+
+setUpSwagger(app)
 
 // FIXED: Dynamic CORS configuration for different environments
 const corsOptions = {
