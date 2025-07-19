@@ -7,8 +7,11 @@ import {
     Navigate,
 } from 'react-router-dom';
 
+// Mengimpor komponen untuk rute yang dilindungi
+// Importing the component for protected routes
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-//  Student Pages
+// Mengimpor Halaman Mahasiswa
+// Importing Student Pages
 import MainLayout from './layout/MainLayout.jsx';
 import FeedbackList from './pages/pagesMahasiswa/Feedback/FeedbackList.jsx';
 import FeedbackDetail from './pages/pagesMahasiswa/Feedback/FeedbackDetail.jsx';
@@ -23,17 +26,20 @@ import MyWellnessHistory from './components/compMahasiswa/myWellnessComponents/M
 import MyWellness_Test from './pages/pagesMahasiswa/MyWellness_Test.jsx';
 import Login from './pages/Login/LoginPage.jsx';
 
-//  Lecturer Pages
+// Mengimpor Halaman Dosen
+// Importing Lecturer Pages
 import LecturerDashboard from './pages/lecturer/LecturerDashboard.jsx';
 import MyCourseAdvisorPage from './pages/lecturer/myCourseAdvisor/MyCourseAdvisorPage.jsx';
 import MyReportPage from './pages/lecturer/MyReport/MyReportPage.jsx';
 import MyStudentDetail from './pages/lecturer/myStudent/DetailMahasiswaPage.jsx';
 import MyStudentList from './pages/lecturer/myStudent/studentList.jsx';
 
-// Import your not found page
+// Mengimpor halaman Not Found
+// Importing the Not Found page
 import NotFoundPage from './pages/lecturer/NotFoundPage.jsx'; // Make sure this path is correct
 
-// Admin Pages
+// Mengimpor Halaman Admin
+// Importing Admin Pages
 import KelolaPenggunaPage from './pages/pagesAdmin/KelolaPenggunaPage.jsx';
 import KelolaKelasPage from './pages/pagesAdmin/KelolaKelasPage.jsx';
 import KelolaAkademikPage from './pages/pagesAdmin/KelolaAkademikPage.jsx';
@@ -41,12 +47,19 @@ import DetailAkademikPage from './pages/pagesAdmin/DetailAkademikPage.jsx';
 import KelolaKurikulumPage from './pages/pagesAdmin/KelolaKurikulumPage.jsx';
 import LogAktivitasPage from './pages/pagesAdmin/LogAktivitasPage.jsx';
 
+/**
+ * Komponen root aplikasi yang mendefinisikan semua rute (routing).
+ * The root application component that defines all the routes (routing).
+ */
 const App = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route>
+                {/* Rute publik untuk halaman login */}
+                {/* Public route for the login page */}
                 <Route path="/" element={<Login />} />
 
+                {/* Rute Mahasiswa yang Dilindungi */}
                 {/* Protected Student Routes */}
                 <Route
                     path="/student"
@@ -87,6 +100,7 @@ const App = () => {
                     />
                 </Route>
 
+                {/* Rute Dosen yang Dilindungi */}
                 {/* Protected Lecturer Routes */}
                 <Route
                     path="/lecturer"
@@ -116,6 +130,7 @@ const App = () => {
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
 
+                {/* Rute Admin yang Dilindungi */}
                 {/* Protected Admin Routes */}
                 <Route
                     path="/admin"

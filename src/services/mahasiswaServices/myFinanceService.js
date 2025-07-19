@@ -1,7 +1,8 @@
 // src/services/mahasiswaServices/myFinanceService.js
 import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
-// Valid file types
+// Daftar tipe file yang diizinkan untuk diunggah
+// List of allowed file types for upload
 const VALID_FILE_TYPES = [
     'application/pdf', // PDF
     'application/msword', // DOC
@@ -13,7 +14,10 @@ const VALID_FILE_TYPES = [
 ];
 
 /**
- * Validate if a file is of an allowed type
+ * Memvalidasi apakah sebuah file memiliki tipe yang diizinkan.
+ * Validates if a file has an allowed type.
+ * @param {File} file - File yang akan divalidasi.
+ * @returns {boolean} - True jika valid, false jika tidak.
  */
 export const isValidFileType = (file) => {
     if (!file) return true;
@@ -21,14 +25,24 @@ export const isValidFileType = (file) => {
 };
 
 /**
- * Get human-readable list of allowed file extensions
+ * Mendapatkan daftar ekstensi file yang diizinkan dalam format yang mudah dibaca.
+ * Gets a human-readable list of allowed file extensions.
+ * @returns {string} - Daftar ekstensi.
  */
 export const getAllowedFileExtensions = () => {
     return 'PDF, DOC, DOCX, XLS, XLSX, JPG, dan PNG';
 };
 
+/**
+ * Mengirimkan formulir pengajuan keringanan biaya kuliah ke server.
+ * Submits the tuition fee relief application form to the server.
+ * @param {object} formData - Data dari form.
+ * @param {File} file - File lampiran (opsional).
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const submitRelief = async (formData, file) => {
     try {
+        // Validasi tipe file sebelum mengirim
         // Validate file type before sending
         if (file && !isValidFileType(file)) {
             throw new Error(
@@ -44,14 +58,18 @@ export const submitRelief = async (formData, file) => {
             };
         }
 
+        // Menggunakan FormData karena ada pengiriman file
+        // Using FormData because a file is being sent
         const formDataToSend = new FormData();
 
-        // Append all form fields
+        // Menambahkan semua field dari form
+        // Appending all form fields
         Object.keys(formData).forEach((key) => {
             formDataToSend.append(key, formData[key]);
         });
 
-        // Append file if exists
+        // Menambahkan file jika ada
+        // Appending the file if it exists
         if (file) {
             formDataToSend.append('file', file);
         }
@@ -66,7 +84,8 @@ export const submitRelief = async (formData, file) => {
 
         const data = await response.json();
 
-        // Check if response was successful
+        // Memeriksa apakah respons berhasil 
+        // Checking if the response was successful
         if (!response.ok) {
             return {
                 success: false,
@@ -77,7 +96,8 @@ export const submitRelief = async (formData, file) => {
             };
         }
 
-        // Return successful response with proper structure
+        // Mengembalikan respons sukses dengan struktur yang konsisten
+        // Returning a successful response with a consistent structure
         return {
             success: true,
             message: 'Pengajuan keringanan berhasil dikirim',
@@ -93,9 +113,15 @@ export const submitRelief = async (formData, file) => {
     }
 };
 
+/**
+ * Mengambil daftar riwayat pengajuan keringanan biaya mahasiswa.
+ * Fetches the history list of the student's tuition relief applications.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getReliefList = async () => {
     try {
-        // Make the API request
+        // Melakukan panggilan API
+        // Making the API call
         const response = await fetch(getApiUrl('/student/getStudentsRelief'), {
             method: 'GET',
             headers: {
@@ -104,7 +130,8 @@ export const getReliefList = async () => {
             },
         });
 
-        // Parse response
+        // Mem-parsing respons
+        // Parsing the response
         const data = await response.json();
 
         if (!response.ok) {

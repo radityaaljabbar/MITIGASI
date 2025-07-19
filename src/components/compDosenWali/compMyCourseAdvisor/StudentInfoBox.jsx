@@ -1,17 +1,21 @@
 import React from 'react';
 import { useMyCourseAdvisor } from '../../../pages/lecturer/myCourseAdvisor/MyCourseAdvisorContext';
 
+/**
+ * Komponen untuk menampilkan kotak informasi ringkas tentang mahasiswa yang dipilih.
+ * Component to display a concise information box about the selected student.
+ */
 const StudentInfoBox = () => {
+    // Mengambil data SKS dan informasi mahasiswa yang dipilih dari konteks
+    // Fetching SKS data and selected student information from the context
     const { studentSKSData, selectedStudent } = useMyCourseAdvisor();
 
-    // Don't show if no student selected or no data
+    // Jangan tampilkan komponen jika tidak ada mahasiswa yang dipilih atau tidak ada data
+    // Do not render the component if no student is selected or there is no data
     if (!selectedStudent || !studentSKSData) {
         return null;
     }
 
-    // console.log(studentSKSData)
-
-    // belum dapat menampilkan peminatannya
     return (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 shadow-sm">
             <div className="flex items-center justify-between">
@@ -35,6 +39,8 @@ const StudentInfoBox = () => {
                 </div>
             </div>
 
+            {/* Grid untuk menampilkan detail informasi mahasiswa */}
+            {/* Grid to display student information details */}
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">NIM:</span>
@@ -48,6 +54,8 @@ const StudentInfoBox = () => {
                     <span className="text-sm font-semibold text-gray-900">
                         {studentSKSData.sksLulus} SKS
                     </span>
+                    {/* Tooltip untuk menjelaskan apa itu SKS Lulus */}
+                    {/* Tooltip to explain what 'SKS Lulus' is */}
                     <div className="relative group">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

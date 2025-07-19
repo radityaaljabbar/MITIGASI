@@ -1,15 +1,32 @@
 import React, { useState, useRef } from 'react';
 
+/**
+ * Komponen popup untuk import data mahasiswa secara massal dari file CSV.
+ * Popup component for bulk importing student data from a CSV file.
+ * @param {object} props - Props komponen.
+ * @param {boolean} props.isOpen - Status apakah popup terbuka.
+ * @param {function} props.onClose - Fungsi untuk menutup popup.
+ * @param {function} props.onImport - Fungsi yang dipanggil saat tombol import diklik.
+ * @param {boolean} props.loading - Status loading dari parent.
+ */
 const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
+    // State untuk file yang dipilih, status import, dan hasil import
+    // State for the selected file, import status, and import results
     const [selectedFile, setSelectedFile] = useState(null);
     const [importing, setImporting] = useState(false);
     const [results, setResults] = useState(null);
-    const fileInputRef = useRef(null);
+    const fileInputRef = useRef(null); // Ref untuk mereset input file / Ref to reset the file input
 
+    /**
+     * Menangani pemilihan file dan validasi tipe file.
+     * Handles file selection and file type validation.
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Event dari input file.
+     */
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validate file type
+            // Validasi file harus .csv
+            // Validate that the file must be .csv
             if (!file.name.toLowerCase().endsWith('.csv')) {
                 alert('Hanya file CSV yang diperbolehkan');
                 return;
@@ -18,6 +35,10 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
         }
     };
 
+    /**
+     * Memulai proses import dengan memanggil fungsi onImport dari parent.
+     * Starts the import process by calling the onImport function from the parent.
+     */
     const handleImport = async () => {
         if (!selectedFile) {
             alert('Pilih file CSV terlebih dahulu');
@@ -25,24 +46,32 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
         }
 
         setImporting(true);
-        const importResults = await onImport(selectedFile);
+        const importResults = await onImport(selectedFile); // Panggil fungsi dari parent / Call function from parent
 
         if (importResults) {
-            setResults(importResults);
+            setResults(importResults); // Tampilkan hasil / Show results
         }
         setImporting(false);
     };
 
+    /**
+     * Menutup popup dan mereset semua state ke kondisi awal.
+     * Closes the popup and resets all states to their initial condition.
+     */
     const handleClose = () => {
         setSelectedFile(null);
         setResults(null);
         setImporting(false);
         if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+            fileInputRef.current.value = ''; // Reset input file
         }
         onClose();
     };
 
+    /**
+     * Membuat dan mengunduh file template CSV.
+     * Creates and downloads a CSV template file.
+     */
     const downloadTemplate = () => {
         const csvContent =
             'nim,nama,kelas,password\n1103210001,John Doe,TK-45-01,\n1103210002,Jane Smith,TK-45-02,custom123';
@@ -60,6 +89,8 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                {/* Header Popup */}
+                {/* Popup Header */}
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                         Import Data Mahasiswa dari CSV
@@ -82,9 +113,12 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
                     </button>
                 </div>
 
+                {/* Tampilan sebelum import atau setelah ditutup */}
+                {/* View before import or after closing */}
                 {!results ? (
                     <>
-                        {/* Instructions */}
+                        {/* Petunjuk Import */}
+                        {/* Import Instructions */}
                         <div className="mb-4 p-4 bg-blue-50 rounded-lg">
                             <h4 className="font-medium text-blue-800 mb-2">
                                 Petunjuk Import:
@@ -103,7 +137,8 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
                             </ul>
                         </div>
 
-                        {/* Download Template */}
+                        {/* Tombol Download Template */}
+                        {/* Download Template Button */}
                         <div className="mb-4">
                             <button
                                 onClick={downloadTemplate}
@@ -112,6 +147,7 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
                             </button>
                         </div>
 
+                        {/* Input File */}
                         {/* File Input */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -131,7 +167,8 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Tombol Aksi (Batal & Import) */}
+                        {/* Action Buttons (Cancel & Import) */}
                         <div className="flex space-x-3">
                             <button
                                 onClick={handleClose}
@@ -155,8 +192,11 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
                         </div>
                     </>
                 ) : (
-                    /* Results Display */
+                    /* Tampilan Hasil Import */
+                    /* Import Results Display */
                     <div>
+                        {/* Ringkasan Hasil */}
+                        {/* Results Summary */}
                         <div className="mb-4 p-4 bg-green-50 rounded-lg">
                             <h4 className="font-medium text-green-800 mb-2">
                                 Hasil Import:
@@ -168,7 +208,8 @@ const BulkImportPopup = ({ isOpen, onClose, onImport, loading }) => {
                             </div>
                         </div>
 
-                        {/* Error Details */}
+                        {/* Detail Error jika ada */}
+                        {/* Error Details if any */}
                         {results.errors && results.errors.length > 0 && (
                             <div className="mb-4 p-4 bg-red-50 rounded-lg max-h-60 overflow-y-auto">
                                 <h4 className="font-medium text-red-800 mb-2">

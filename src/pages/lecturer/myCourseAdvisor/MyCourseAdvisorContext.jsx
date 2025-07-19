@@ -7,7 +7,8 @@ import React, {
 } from 'react';
 import { toast } from 'react-toastify';
 
-// Import the service functions
+// Mengimpor semua fungsi layanan (service) yang dibutuhkan dari satu file
+// Importing all necessary service functions from a single file
 import {
     getClassAndStudentList,
     getStudentCourseHistory,
@@ -18,40 +19,46 @@ import {
     getStudentNIMSKS,
 } from '../../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService';
 
-// Create context
+// Membuat React Context untuk berbagi state dan fungsi antar komponen
+// Creating a React Context to share state and functions between components
 const MyCourseAdvisorContext = createContext();
 
-// Default maximum SKS (akan diupdate berdasarkan IP mahasiswa)
+// Nilai default untuk SKS maksimum, akan diperbarui berdasarkan IP mahasiswa
+// Default value for maximum SKS, will be updated based on the student's GPA
 const DEFAULT_MAX_SKS = 24;
 
+/**
+ * Provider untuk MyCourseAdvisorContext.
+ * Komponen ini akan membungkus bagian dari web yang memerlukan akses ke state rekomendasi mata kuliah.
+ * Provider for the MyCourseAdvisorContext.
+ * This component will wrap parts of the application that need access to the course recommendation state.
+ */
 export const MyCourseAdvisorProvider = ({ children }) => {
-    const [classesList, setClassesList] = useState([]);
-    const [studentsList, setStudentsList] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-    const [isLoadingCourses, setIsLoadingCourses] = useState(false);
-    const [selectedClass, setSelectedClass] = useState('');
-    const [selectedStudent, setSelectedStudent] = useState('');
-    const [selectedSemester, setSelectedSemester] = useState('');
-    const [targetSemester, setTargetSemester] = useState('');
-    const [maxSKS, setMaxSKS] = useState(DEFAULT_MAX_SKS);
-    const [availableCourses, setAvailableCourses] = useState([]);
-    const [staticAvailableCoursesData, setStaticAvailableCoursesData] =
-        useState([]);
-    const [recommendedCourses, setRecommendedCourses] = useState([]);
-    const [studentCourseHistory, setStudentCourseHistory] = useState([]);
-    const [mergedCourseHistory, setMergedCourseHistory] = useState([]);
-    const [sksLimitExceeded, setSksLimitExceeded] = useState(false);
-    // State getRecommendedCourse
-    const [hasExistingRecommendations, setHasExistingRecommendations] =
-        useState(false);
-    const [isLoadingRecommendations, setIsLoadingRecommendations] =
-        useState(false);
-    const [studentSKSData, setStudentSKSData] = useState(null);
-    // Add flag to track if initial data has been fetched
-    const [initialDataFetched, setInitialDataFetched] = useState(false);
+    // === DEKLARASI STATE ===
+    // === STATE DECLARATIONS ===
+    const [classesList, setClassesList] = useState([]); // Daftar kelas
+    const [studentsList, setStudentsList] = useState([]); // Daftar semua mahasiswa
+    const [isLoading, setIsLoading] = useState(true); // Status loading data awal (kelas, mahasiswa, MK)
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false); // Status loading riwayat MK mahasiswa
+    const [isLoadingCourses, setIsLoadingCourses] = useState(false); // Status loading MK tersedia (tidak terpakai saat ini)
+    const [selectedClass, setSelectedClass] = useState(''); // Kelas yang dipilih di dropdown
+    const [selectedStudent, setSelectedStudent] = useState(''); // Mahasiswa yang dipilih di dropdown
+    const [selectedSemester, setSelectedSemester] = useState(''); // Filter semester untuk MK tersedia
+    const [targetSemester, setTargetSemester] = useState(''); // Semester tujuan untuk rekomendasi
+    const [maxSKS, setMaxSKS] = useState(DEFAULT_MAX_SKS); // Batas SKS yang boleh diambil
+    const [availableCourses, setAvailableCourses] = useState([]); // Daftar MK yang tersedia untuk direkomendasikan
+    const [staticAvailableCoursesData, setStaticAvailableCoursesData] = useState([]); // Salinan asli data MK tersedia
+    const [recommendedCourses, setRecommendedCourses] = useState([]); // Daftar MK yang direkomendasikan
+    const [studentCourseHistory, setStudentCourseHistory] = useState([]); // Riwayat MK mahasiswa dari API
+    const [mergedCourseHistory, setMergedCourseHistory] = useState([]); // Riwayat MK yang sudah digabung dengan detail MK
+    const [sksLimitExceeded, setSksLimitExceeded] = useState(false); // Flag jika SKS terlampaui
+    const [hasExistingRecommendations, setHasExistingRecommendations] = useState(false); // Flag jika sudah ada rekomendasi di DB
+    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false); // Status loading saat mengambil/membuat rekomendasi
+    const [studentSKSData, setStudentSKSData] = useState(null); // Data SKS dan NIM mahasiswa
+    const [initialDataFetched, setInitialDataFetched] = useState(false); // Flag untuk memastikan data awal hanya di-fetch sekali
 
-    // Add state to track if toast has been shown
+    // Menghitung total SKS dari mata kuliah yang direkomendasikan
+    // Calculating the total SKS from the recommended courses
     const [toastShown, setToastShown] = useState(false);
 
     const totalRecommendedSKS = recommendedCourses.reduce(
@@ -59,26 +66,31 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         0
     );
 
-    // Initial data fetch - only runs once on mount
+    // Effect untuk mengambil data awal (kelas, mahasiswa, daftar MK) saat komponen pertama kali dimuat
+    // Effect to fetch initial data (classes, students, course list) when the component first mounts
     useEffect(() => {
-        // Prevent multiple executions
+        // Mencegah eksekusi berulang jika data sudah diambil
+        // Prevents re-execution if data has already been fetched
         if (initialDataFetched) return;
 
         const fetchInitialData = async () => {
             setIsLoading(true);
 
             try {
-                // Fetch both data sources in parallel
+                // Mengambil data kelas/mahasiswa dan data MK secara paralel untuk efisiensi
+                // Fetching class/student data and course data in parallel for efficiency
                 const [classStudentResult, courseResult] = await Promise.all([
                     getClassAndStudentList(),
                     getAvailableCourse(),
                 ]);
 
-                // Handle class and student data
+                // Memproses hasil data kelas dan mahasiswa
+                // Processing the result of class and student data
                 if (classStudentResult.success) {
                     const classesList = classStudentResult.classesList || [];
                     const studentsList = classStudentResult.studentsList || [];
 
+                    // Memformat daftar kelas
                     const formattedClasses = classesList.map(
                         (className, index) => ({
                             id: `class_${index}`,
@@ -86,22 +98,23 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         })
                     );
 
+                    // Membuat pemetaan nama kelas ke ID untuk mahasiswa
                     const classNameToIdMap = {};
                     formattedClasses.forEach((cls) => {
                         classNameToIdMap[cls.name] = cls.id;
                     });
 
+                    // Memformat daftar mahasiswa
                     const formattedStudents = studentsList.map((student) => ({
                         id: student.id,
                         name: student.name,
                         classId: classNameToIdMap[student.class] || null,
-                        peminatan: student.peminatan, // Store student's specialization
+                        peminatan: student.peminatan, // Menyimpan peminatan mahasiswa
                     }));
 
                     setClassesList(formattedClasses);
                     setStudentsList(formattedStudents);
 
-                    // REMOVED: Toast messages from here
                 } else {
                     setClassesList([]);
                     setStudentsList([]);
@@ -111,7 +124,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     );
                 }
 
-                // Handle course data
+                // Memproses hasil data mata kuliah
+                // Processing the result of course data
                 if (courseResult.success) {
                     const availableCourses =
                         courseResult.availableCourses || [];
@@ -120,7 +134,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         id: c.id || `course_${i}`,
                     }));
                     setAvailableCourses(coursesWithId);
-                    setStaticAvailableCoursesData(coursesWithId);
+                    setStaticAvailableCoursesData(coursesWithId); // Simpan salinan asli
                 } else {
                     setAvailableCourses([]);
                     setStaticAvailableCoursesData([]);
@@ -132,25 +146,25 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             } catch (error) {
                 console.error('Error fetching initial data:', error);
                 toast.error('An error occurred while fetching data');
+                // Reset state jika terjadi error
                 setClassesList([]);
                 setStudentsList([]);
                 setAvailableCourses([]);
                 setStaticAvailableCoursesData([]);
             } finally {
                 setIsLoading(false);
-                setInitialDataFetched(true);
+                setInitialDataFetched(true); // Tandai bahwa data awal sudah diambil
             }
         };
 
         fetchInitialData();
-    }, [initialDataFetched]); // Only depend on the flag
+    }, [initialDataFetched]); // Only depend on the flag / Hanya bergantung pada flag `initialDataFetched`
 
-    // Separate effect for showing toast after data is loaded
+    // Separate terpisah untuk menampilkan toast info setelah data dimuat
+    // Separate effect for showing an info toast after data is loaded
     useEffect(() => {
-        // Only show toast when:
-        // 1. Initial data has been fetched
-        // 2. Not loading anymore
-        // 3. Toast hasn't been shown yet
+        // Hanya tampilkan toast jika data sudah dimuat, tidak sedang loading, dan toast belum pernah ditampilkan
+        // Only show the toast if data is loaded, not currently loading, and the toast hasn't been shown yet
         if (!isLoading && initialDataFetched && !toastShown) {
             if (classesList.length === 0 && studentsList.length === 0) {
                 toast.info(
@@ -177,9 +191,11 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         toastShown,
     ]);
 
-    // Fetch student data when selected student changes
+    // Efek untuk mengambil data spesifik mahasiswa (IP, riwayat, SKS) saat mahasiswa dipilih
+    // Effect to fetch specific student data (GPA, history, SKS) when a student is selected
     useEffect(() => {
         if (!selectedStudent) {
+            // Reset state jika tidak ada mahasiswa yang dipilih
             setMaxSKS(DEFAULT_MAX_SKS);
             setStudentCourseHistory([]);
             setStudentSKSData(null);
@@ -187,7 +203,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         }
 
         const fetchStudentData = async () => {
-            // Fetch all student data in parallel for better performance
+            // Mengambil semua data mahasiswa secara paralel
+            // Fetching all student data in parallel
             const [ipResult, historyResult, sksResult] =
                 await Promise.allSettled([
                     getLastIPSemester(selectedStudent),
@@ -195,7 +212,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     getStudentNIMSKS(selectedStudent),
                 ]);
 
-            // Handle IP result
+            // Memproses hasil IP untuk menentukan batas SKS
+            // Processing the GPA result to determine the SKS limit
             if (ipResult.status === 'fulfilled' && ipResult.value.success) {
                 setMaxSKS(ipResult.value.maxSKS);
                 if (ipResult.value.maxSKS < DEFAULT_MAX_SKS) {
@@ -210,7 +228,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 );
             }
 
-            // Handle Course History result
+            // Memproses hasil riwayat mata kuliah
+            // Processing the course history result
             setIsLoadingHistory(true);
             if (
                 historyResult.status === 'fulfilled' &&
@@ -230,14 +249,16 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             }
             setIsLoadingHistory(false);
 
-            // Handle SKS Data result
+            // Memproses hasil data SKS
+            // Processing the SKS data result
             if (sksResult.status === 'fulfilled' && sksResult.value.success) {
                 // Find student details from the main list to get their specialization
                 const studentInfo = studentsList.find(
                     (s) => s.id === selectedStudent
                 );
 
-                // Combine the SKS data with the specialization info
+                // Menggabungkan data SKS dengan info peminatan
+                // Combining SKS data with specialization info
                 const combinedData = {
                     ...sksResult.value.studentData, // Contains nim and sksLulus
                     peminatan: studentInfo ? studentInfo.peminatan : null,
@@ -253,9 +274,11 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         fetchStudentData();
     }, [selectedStudent, studentsList]);
 
-    // Main effect for processing recommendations
+    // Main effect untuk memproses dan membuat rekomendasi mata kuliah
+    // Main effect for processing and creating course recommendations
     useEffect(() => {
-        // Early return with comprehensive checks
+        // Keluar lebih awal jika kondisi prasyarat tidak terpenuhi
+        // Early return if prerequisite conditions are not met
         if (
             !selectedStudent ||
             !targetSemester ||
@@ -273,7 +296,6 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             return;
         }
 
-        // PRE-PROCESSING: Create efficient look-up maps
         const courseMap = new Map(
             staticAvailableCoursesData.map((c) => [c.kode_mk, c])
         );
@@ -284,14 +306,21 @@ export const MyCourseAdvisorProvider = ({ children }) => {
             }
         });
 
-        // Function to find the current course code from a history code
+        // Fungsi untuk mencari kode MK terbaru dari kode MK lama (ekivalensi)
+        // Function to find the latest course code from an old (equivalent) course code
         const getCurrentCode = (historyCode) => {
             return equivalenceMap.get(historyCode) || historyCode;
         };
 
+        /**
+         * Mengambil rekomendasi yang sudah ada dari DB atau membuat rekomendasi otomatis.
+         * Fetches existing recommendations from the DB or generates automatic recommendations.
+         */
         const fetchAndProcessRecommendations = async () => {
             setIsLoadingRecommendations(true);
             try {
+                // Cek apakah ada rekomendasi yang sudah disimpan di DB
+                // Check if there are recommendations already saved in the DB
                 const existingRec = await getRecommendedMK(
                     selectedStudent,
                     targetSemester
@@ -301,6 +330,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     existingRec.recommendations &&
                     existingRec.recommendations.length > 0
                 ) {
+                    // Jika ada, gunakan rekomendasi tersebut
+                    // If yes, use those recommendations
                     const recsFromStaticData = existingRec.recommendations
                         .map((rec) => courseMap.get(rec.kodeMataKuliah))
                         .filter(Boolean) // Filter out any courses that might no longer exist
@@ -316,6 +347,7 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     setRecommendedCourses(recsFromStaticData);
                     setHasExistingRecommendations(true);
 
+                    // Update daftar MK tersedia dengan menghapus yang sudah direkomendasikan
                     const recommendedIds = new Set(
                         recsFromStaticData.map((r) => r.kodeMataKuliah)
                     );
@@ -327,6 +359,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         `Menampilkan ${recsFromStaticData.length} rekomendasi yang sudah ada.`
                     );
                 } else {
+                    // Jika tidak ada, buat rekomendasi baru secara otomatis
+                    // If not, generate new recommendations automatically
                     setHasExistingRecommendations(false);
                     generateAutoRecommendations();
                 }
@@ -335,12 +369,16 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                     'Error fetching existing recommendations:',
                     error
                 );
-                generateAutoRecommendations();
+                generateAutoRecommendations(); // Fallback ke pembuatan otomatis jika fetch gagal
             } finally {
                 setIsLoadingRecommendations(false);
             }
         };
 
+        /**
+         * Logika untuk membuat rekomendasi mata kuliah secara otomatis berdasarkan aturan.
+         * Logic to automatically generate course recommendations based on rules.
+         */
         const generateAutoRecommendations = () => {
             // Get student details to find their specialization
             const studentDetails = studentsList.find(
@@ -586,10 +624,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                         const isSemesterNotTooHigh =
                             courseSemesterInt <= targetSemesterInt;
 
-                        // MODIFIED: Semester Rule Logic
                         const isSemesterTypeMatch =
                             (courseSemesterInt % 2 !== 0) === isTargetSemesterOdd;
-                        // ADDED: Exception for elective courses in semester 8
                         const semesterRuleSatisfied = isSemesterTypeMatch || (isElective && targetSemesterInt === 8);
 
                         return (
@@ -619,8 +655,6 @@ export const MyCourseAdvisorProvider = ({ children }) => {
                 });
             }
 
-            // --- END: MODIFIED PRIORITY LOGIC FOR ELECTIVES ---
-
             setRecommendedCourses(recommendations);
             setAvailableCourses(availableForPicking);
 
@@ -644,7 +678,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         staticAvailableCoursesData,
     ]);
 
-    // Merge course history with static data
+    // Effect untuk menggabungkan data riwayat MK dengan detail MK dari data statis
+    // Effect to merge course history data with course details from static data
     useEffect(() => {
         if (
             !Array.isArray(studentCourseHistory) ||
@@ -686,13 +721,15 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         setMergedCourseHistory(merged);
     }, [studentCourseHistory, staticAvailableCoursesData]);
 
-    // Memoized filtered students
+    // Menggunakan useMemo untuk memfilter daftar mahasiswa, hanya berjalan jika dependensi berubah
+    // Using useMemo to filter the student list, only runs when dependencies change
     const filteredStudents = useMemo(() => {
         if (!selectedClass || !Array.isArray(studentsList)) return [];
         return studentsList.filter((s) => s && s.classId === selectedClass);
     }, [selectedClass, studentsList]);
 
-    // Memoized filtered available courses
+    // Menggunakan useMemo untuk memfilter daftar MK tersedia
+    // Using useMemo to filter the available courses list
     const filteredAvailableCourses = useMemo(() => {
         if (!Array.isArray(availableCourses)) return [];
         if (!selectedSemester) return availableCourses;
@@ -701,7 +738,8 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         );
     }, [availableCourses, selectedSemester]);
 
-    // Helper functions
+    // === FUNGSI-FUNGSI HELPER DAN HANDLER ===
+    // === HELPER AND HANDLER FUNCTIONS ===
     const resetFormStates = () => {
         setSelectedStudent('');
         setTargetSemester('');
@@ -767,6 +805,10 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         setSksLimitExceeded(false);
     };
 
+    /**
+     * Mengirimkan rekomendasi yang sudah final ke server.
+     * Sends the final recommendations to the server.
+     */
     const sendRecommendations = async () => {
         if (
             !selectedStudent ||
@@ -818,9 +860,17 @@ export const MyCourseAdvisorProvider = ({ children }) => {
         }
     };
 
+    /**
+     * Memeriksa apakah penambahan SKS akan melebihi batas.
+     * Checks if adding SKS will exceed the limit.
+     * @param {number} courseSKS - SKS dari mata kuliah yang akan ditambahkan.
+     * @returns {boolean}
+     */
     const wouldExceedSKSLimit = (courseSKS) =>
         totalRecommendedSKS + courseSKS > maxSKS;
 
+    // Nilai yang akan disediakan oleh Context Provider
+    // The value that will be provided by the Context Provider
     const contextValue = {
         classesList,
         studentsList,
@@ -861,6 +911,11 @@ export const MyCourseAdvisorProvider = ({ children }) => {
     );
 };
 
+/**
+ * Custom hook untuk memudahkan penggunaan MyCourseAdvisorContext.
+ * Custom hook to simplify the use of MyCourseAdvisorContext.
+ * @returns {object} - Nilai dari konteks.
+ */
 export function useMyCourseAdvisor() {
     const context = useContext(MyCourseAdvisorContext);
     if (!context) {

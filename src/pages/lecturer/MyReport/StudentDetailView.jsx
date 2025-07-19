@@ -16,71 +16,54 @@ import {
     sendResponse,
 } from '../../../services/dosenWali/myReport/listFeedbackMahasiswaService';
 
-// Direct implementation of sendResponse to ensure it works properly
-// const sendResponse = async (responseData) => {
-//     try {
-//         const token = localStorage.getItem('token');
-//         if (!token) {
-//             return { success: false, message: 'Token tidak ditemukan' };
-//         }
-
-//         const response = await fetch(
-//             'https://capstone-backend-local-1059248723043.asia-southeast2.run.app/api/faculty/sendResponDosWal',
-//             {
-//                 method: 'POST',
-//                 headers: {
-//                     Authorization: `Bearer ${token}`,
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify(responseData),
-//             }
-//         );
-
-//         console.log('HTTP Status:', response.status, response.statusText);
-
-//         if (!response.ok) {
-//             return {
-//                 success: false,
-//                 message: `HTTP Error: ${response.status}`,
-//             };
-//         }
-
-//         const data = await response.json();
-
-//         // Always return success if we got here and there's no explicit error
-//         return {
-//             success: true,
-//             message: data.message || 'Tanggapan berhasil dikirim',
-//             data: data.payload || {},
-//         };
-//     } catch (error) {
-//         console.error('Network error:', error);
-//         return {
-//             success: false,
-//             message: `Error: ${error.message || 'Unknown error'}`,
-//         };
-//     }
-// };
-
+/**
+ * Komponen untuk menampilkan detail feedback dari seorang mahasiswa.
+ * Dosen dapat melihat detail keluhan, lampiran, dan mengirimkan tanggapan.
+ * Component to display the details of a feedback from a student.
+ * The lecturer can view complaint details, attachments, and send a response.
+ * @param {object} props - Props komponen.
+ * @param {object} props.student - Data dasar mahasiswa yang dipilih.
+ * @param {function} props.onBack - Callback untuk kembali ke daftar mahasiswa.
+ */
 const StudentDetailView = ({ student, onBack }) => {
+    // State untuk input teks tanggapan.
+    // State for the response text input.
     const [responseText, setResponseText] = useState('');
+    // State untuk status loading dan error.
+    // State for loading and error status.
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    // State untuk menyimpan detail lengkap feedback mahasiswa.
+    // State to store the full details of the student's feedback.
     const [studentDetail, setStudentDetail] = useState(student);
+    // State untuk menyimpan data tanggapan dari dosen.
+    // State to store the response data from the lecturer.
     const [responseData, setResponseData] = useState(null);
+    // State untuk status pengiriman tanggapan.
+    // State for the submission status of the response.
     const [isSubmitting, setIsSubmitting] = useState(false);
+    // State untuk mengontrol modal PDF.
+    // State to control the PDF modal.
     const [showPdfModal, setShowPdfModal] = useState(false);
     const [activePdf, setActivePdf] = useState(null);
-    const [refreshKey, setRefreshKey] = useState(0); // For forcing refreshes
+    // State untuk memicu pembaruan data.
+    // State to trigger a data refresh.
+    const [refreshKey, setRefreshKey] = useState(0);
+    // State untuk file yang akan dilampirkan.
+    // State for the file to be attached.
     const [selectedFile, setSelectedFile] = useState(null);
+    // Ref untuk input file yang tersembunyi.
+    // Ref for the hidden file input.
     const [fileInputRef] = useState(React.createRef());
 
-    // Function to refresh data
+    // Fungsi untuk memuat ulang data, dibungkus useCallback untuk optimasi.
+    // Function to reload data, wrapped in useCallback for optimization.
     const refreshData = useCallback(() => {
         setRefreshKey((prevKey) => prevKey + 1);
     }, []);
 
-    // File handling functions
+    // Fungsi-fungsi untuk menangani pemilihan dan penghapusan file.
+    // Functions to handle file selection and removal.
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -135,7 +118,8 @@ const StudentDetailView = ({ student, onBack }) => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    // Fetch detailed feedback data including attachments
+    // useEffect untuk mengambil detail feedback (termasuk lampiran mahasiswa).
+    // useEffect to fetch feedback details (including student's attachment).
     useEffect(() => {
         const fetchFeedbackDetails = async () => {
             if (student.feedbackId) {
@@ -146,17 +130,7 @@ const StudentDetailView = ({ student, onBack }) => {
                     );
 
                     if (detailResponse.success) {
-                        // console.log(
-                        //     '🔍 Feedback detail response:',
-                        //     detailResponse.data
-                        // );
-                        // console.log(
-                        //     '📎 Feedback lampiran:',
-                        //     detailResponse.data.lampiran
-                        // );
-
                         setStudentDetail((prev) => {
-                            // FIXED: Don't override existing data, only update what's needed
                             const updated = {
                                 ...prev,
                                 // Only update feedback-specific fields, don't spread everything
@@ -172,10 +146,6 @@ const StudentDetailView = ({ student, onBack }) => {
                                 status:
                                     prev.status || detailResponse.data.status,
                             };
-                            // console.log(
-                            //     '✅ Updated studentDetail (selective):',
-                            //     updated
-                            // );
                             return updated;
                         });
                     } else {
@@ -195,7 +165,8 @@ const StudentDetailView = ({ student, onBack }) => {
         fetchFeedbackDetails();
     }, [student.feedbackId, refreshKey]);
 
-    // Fetch dosen response if exists
+    // useEffect untuk mengambil tanggapan dosen yang sudah ada.
+    // useEffect to fetch the existing lecturer's response.
     useEffect(() => {
         const fetchDosenResponse = async () => {
             if (student.feedbackId) {
@@ -204,22 +175,12 @@ const StudentDetailView = ({ student, onBack }) => {
                         student.feedbackId
                     );
 
-                    // console.log('🔍 Dosen response:', response.data);
-                    // console.log(
-                    //     '📎 Response lampiran:',
-                    //     response.data?.lampiran
-                    // );
-
                     if (response.success && response.data) {
                         const newResponseData = {
                             ...response.data,
                             lampiranResponse: response.data.lampiran,
                             lampiran: undefined,
                         };
-                        // console.log(
-                        //     '✅ Setting responseData:',
-                        //     newResponseData
-                        // );
                         setResponseData(newResponseData);
                         setResponseText(response.data.responseText);
 
@@ -231,10 +192,6 @@ const StudentDetailView = ({ student, onBack }) => {
                             };
                             return updated;
                         });
-                    } else {
-                        // console.log(
-                        //     '🔍 No dosen response found or unsuccessful response'
-                        // );
                     }
                 } catch (error) {
                     console.error('❌ Error fetching dosen response:', error);
@@ -245,6 +202,10 @@ const StudentDetailView = ({ student, onBack }) => {
         fetchDosenResponse();
     }, [student.feedbackId, refreshKey, student.status]);
 
+    /**
+     * Menangani pengiriman tanggapan baru dari dosen.
+     * Handles the submission of a new response from the lecturer.
+     */
     const handleSubmitResponse = async () => {
         if (!responseText.trim()) {
             toast.warning('Silakan isi tanggapan terlebih dahulu');
@@ -257,7 +218,7 @@ const StudentDetailView = ({ student, onBack }) => {
             const responsePayload = {
                 id_keluhan: student.feedbackId,
                 response_keluhan: responseText,
-                status_keluhan: 1, // 1 for "Sudah Direspon"
+                status_keluhan: 1, // 1 artinya "Sudah Direspon"
             };
 
             // Call sendResponse with file parameter
@@ -265,7 +226,8 @@ const StudentDetailView = ({ student, onBack }) => {
 
             // Always assume success if we don't get an explicit error message
             if (result.success !== false) {
-                // Update the response data
+                // Logika setelah berhasil mengirim.
+                // Logic after successful submission.
                 const newResponseData = {
                     responseId: result.data?.id || `temp-${Date.now()}`,
                     feedbackId: student.feedbackId,
@@ -277,16 +239,14 @@ const StudentDetailView = ({ student, onBack }) => {
                     }),
                     status: 'Sudah Direspon',
                     statusCode: 1,
-                    // RENAMED: Add attachment info with clear naming
                     lampiranResponse: selectedFile
                         ? {
                               original_name: selectedFile.name,
                               file_size: selectedFile.size,
                               file_type: selectedFile.type,
-                              file_url: result.data?.lampiran?.url || '#', // Use actual URL from response
+                              file_url: result.data?.lampiran?.url || '#',
                           }
                         : null,
-                    // Remove old lampiran field
                     lampiran: undefined,
                 };
 
@@ -333,6 +293,8 @@ const StudentDetailView = ({ student, onBack }) => {
         }
     };
 
+    // Fungsi-fungsi untuk modal PDF dan unduh file.
+    // Functions for the PDF modal and file download.
     const handleOpenPdf = (pdf) => {
         setActivePdf(pdf);
         setShowPdfModal(true);
@@ -360,6 +322,7 @@ const StudentDetailView = ({ student, onBack }) => {
         }
     };
 
+    // Tampilan loading.
     if (loading) {
         return (
             <div className="bg-white rounded-xl shadow p-4 md:p-6 flex justify-center items-center h-64">
@@ -368,6 +331,7 @@ const StudentDetailView = ({ student, onBack }) => {
         );
     }
 
+    // Tampilan error.
     if (error) {
         return (
             <div className="bg-white rounded-xl shadow p-4 md:p-6">
@@ -397,7 +361,8 @@ const StudentDetailView = ({ student, onBack }) => {
 
     return (
         <div className="bg-white rounded-xl shadow overflow-hidden transition-all duration-300 hover:shadow-lg">
-            {/* Header with breadcrumb */}
+            {/* Header dengan tombol kembali dan status */}
+            {/* Header with back button and status */}
             <div className="bg-gray-50 p-4 md:p-6 border-b">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                     <button
@@ -425,8 +390,10 @@ const StudentDetailView = ({ student, onBack }) => {
                 </div>
             </div>
 
-            {/* Content */}
+            {/* Konten detail */}
+            {/* Detail content */}
             <div className="p-4 md:p-6 space-y-6">
+                {/* Kartu info mahasiswa */}
                 {/* Student info card */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <div className="flex flex-col md:flex-row md:justify-between gap-2">
@@ -453,7 +420,8 @@ const StudentDetailView = ({ student, onBack }) => {
                     </div>
                 </div>
 
-                {/* Report content */}
+                {/* Isi keluhan/feedback */}
+                {/* Complaint/feedback content */}
                 <div className="space-y-4">
                     <div className="border-b pb-2">
                         <h3 className="font-bold text-base mb-1">
@@ -466,7 +434,8 @@ const StudentDetailView = ({ student, onBack }) => {
                     </div>
                 </div>
 
-                {/* Attachments - show mahasiswa attachments if available */}
+                {/* Lampiran dari mahasiswa */}
+                {/* Attachment from student */}
                 {studentDetail.lampiranMahasiswa && (
                     <div className="space-y-3">
                         <p className="font-semibold text-sm">
@@ -536,12 +505,15 @@ const StudentDetailView = ({ student, onBack }) => {
                     </div>
                 )}
 
-                {/* Response section */}
+                {/* Bagian tanggapan dosen */}
+                {/* Lecturer response section */}
                 <div className="border-t pt-4">
                     <h4 className="font-semibold text-base mb-3">
                         Tanggapan Dosen Wali:
                     </h4>
 
+                    {/* Menampilkan tanggapan yang sudah ada atau form input baru */}
+                    {/* Displaying existing response or a new input form */}
                     {responseData ? (
                         <div className="bg-green-50 border border-green-100 p-4 rounded-lg mb-4">
                             <div className="flex justify-between mb-2">
@@ -650,7 +622,8 @@ const StudentDetailView = ({ student, onBack }) => {
                         </div>
                     )}
 
-                    {/* Response input */}
+                    {/* Input untuk tanggapan baru */}
+                    {/* Input for new response */}
                     <div className="mt-4 space-y-2">
                         {/* Hidden file input */}
                         <input
@@ -728,7 +701,8 @@ const StudentDetailView = ({ student, onBack }) => {
                 </div>
             </div>
 
-            {/* PDF Viewer Modal */}
+            {/* Modal untuk menampilkan PDF */}
+            {/* Modal for displaying PDF */}
             {showPdfModal && activePdf && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full h-5/6 flex flex-col">

@@ -1,9 +1,10 @@
 // src/services/mahasiswaServices/myCourseService.js
 import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
-// Get list riwayat MK mahasiswa dari backend:
 /**
- * @returns {Promise<Object>}
+ * Mengambil riwayat mata kuliah mahasiswa yang sedang login dari backend.
+ * Fetches the course history of the currently logged-in student from the backend.
+ * @returns {Promise<Object>} - Sebuah promise yang resolve dengan data riwayat atau objek error.
  */
 export const getCourseHistory = async () => {
     try {
@@ -18,7 +19,8 @@ export const getCourseHistory = async () => {
             };
         }
 
-        // Fetch API:
+        // Melakukan panggilan fetch ke API
+        // Making a fetch call to the API
         const response = await fetch(getApiUrl('/student/riwayatMataKuliah'), {
             method: 'GET',
             headers: {
@@ -44,7 +46,11 @@ export const getCourseHistory = async () => {
     }
 };
 
-// Get rekomendasi MK yang dikirimkan oleh dosen wali
+/**
+ * Mengambil rekomendasi mata kuliah yang dikirimkan oleh dosen wali.
+ * Fetches course recommendations sent by the course advisor.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
+ */
 export const getRecommendedCourse = async () => {
     try {
         // Get dan validasi token dari localStorage user
@@ -74,16 +80,16 @@ export const getRecommendedCourse = async () => {
         if (!response.ok) {
             return {
                 success: false,
-                message:
-                    result.message || 'Failed to fetch recommended courses',
+                message: result.message || 'Failed to fetch recommended courses',
                 data: [],
             };
         }
 
+        // Mengembalikan data dengan struktur yang lebih detail
+        // Returning data with a more detailed structure
         return {
             success: true,
-            message:
-                result.message || 'successfully fetch recommended course data',
+            message: result.message || 'successfully fetch recommended course data',
             data: result.data || [],
             groupedData: result.groupedData || {},
             totalRecommendations: result.totalRecommendations || 0,
@@ -100,7 +106,11 @@ export const getRecommendedCourse = async () => {
 };
 
 
-// Get list kelompok keahlian/peminatan dari backend
+/**
+ * Mengambil daftar semua kelompok keahlian/peminatan dari backend.
+ * Fetches a list of all specialization groups from the backend.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
+ */
 export const getListPeminatan = async () => {
     try {
         const token = localStorage.getItem('token');
@@ -143,7 +153,12 @@ export const getListPeminatan = async () => {
     }
 };
 
-// Send/Update peminatan mahasiswa ke backend
+/**
+ * Mengirim atau memperbarui pilihan peminatan mahasiswa ke backend.
+ * Sends or updates the student's specialization choice to the backend.
+ * @param {string} peminatan - Peminatan yang dipilih.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
+ */
 export const sendPeminatanMahasiswa = async (peminatan) => {
     try {
         const token = localStorage.getItem('token');
@@ -191,7 +206,11 @@ export const sendPeminatanMahasiswa = async (peminatan) => {
 };
 
 
-// Get peminatan mahasiswa dari backend
+/**
+ * Mengambil peminatan yang sudah dipilih oleh mahasiswa dari backend.
+ * Fetches the student's currently selected specialization from the backend.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
+ */
 export const getStudentPeminatan = async () => {
     try {
         const token = localStorage.getItem('token');

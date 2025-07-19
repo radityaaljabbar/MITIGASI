@@ -1,13 +1,21 @@
 import React from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Import komponen (kita akan buat ini selanjutnya)
+// Mengimpor komponen tabel log
+// Importing the log table component
 import LogTable from '../../components/compAdmin/logAktivitas/LogTable';
 
-// Import custom hook (kita akan buat ini selanjutnya)
+// Mengimpor custom hook untuk logika log aktivitas
+// Importing the custom hook for activity log logic
 import { useLogAktivitas } from '../../components/compAdmin/logAktivitas/hooks/useLogAktivitas';
 
+/**
+ * Komponen halaman untuk menampilkan log aktivitas admin.
+ * Page component for displaying admin activity logs.
+ */
 const LogAktivitasPage = () => {
+    // Menggunakan custom hook untuk mendapatkan state dan fungsi-fungsi yang diperlukan
+    // Using the custom hook to get the necessary state and functions
     const {
         // State
         loading,
@@ -34,7 +42,8 @@ const LogAktivitasPage = () => {
 
     return (
         <div className="p-6 bg-[#FAF0E6] min-h-screen">
-            {/* Header */}
+            {/* Header Halaman */}
+            {/* Page Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -54,7 +63,8 @@ const LogAktivitasPage = () => {
                 </button>
             </div>
             
-            {/* Table dan Filter */}
+            {/* Komponen Tabel dan Filter */}
+            {/* Table and Filter Component */}
             <LogTable
                 currentData={currentData}
                 filteredData={filteredData}

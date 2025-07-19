@@ -8,22 +8,33 @@ import {
 } from '../../../services/adminServices/kelolaAkademikServices';
 import DeleteConfirmationModal from '../kelolaPengguna/DeleteConfirmationModal';
 
+/**
+ * Komponen IPSemesterTab
+ * Component IPSemesterTab
+ * @desc    Menampilkan dan mengelola data riwayat IP dan SKS per semester mahasiswa.
+ *          Displays and manages the history of GPA and SKS per semester for a student.
+ * @props   {object} mahasiswaData - Data mahasiswa yang sedang dilihat. / Data of the student being viewed.
+ */
 const IPSemesterTab = ({ mahasiswaData }) => {
-    // State untuk data
-    const [semesterData, setSemesterData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [loadingAction, setLoadingAction] = useState(false);
+    // State untuk data dan UI
+    // State for data and UI
+    const [semesterData, setSemesterData] = useState([]); // Menyimpan array data riwayat semester. / Stores an array of semester history data.
+    const [loading, setLoading] = useState(false); // Status loading untuk tabel. / Loading status for the table.
+    const [loadingAction, setLoadingAction] = useState(false); // Status loading untuk aksi di modal/delete. / Loading status for actions in modal/delete.
 
-    // State untuk modal
-    const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState(''); // 'add' atau 'edit'
-    const [currentEditData, setCurrentEditData] = useState(null);
+    // State untuk modal tambah/edit
+    // State for add/edit modal
+    const [showModal, setShowModal] = useState(false); // Kontrol visibilitas modal. / Controls modal visibility.
+    const [modalType, setModalType] = useState(''); // Tipe modal: 'add' atau 'edit'. / Modal type: 'add' or 'edit'.
+    const [currentEditData, setCurrentEditData] = useState(null); // Data yang sedang diedit. / Data currently being edited.
 
-    // State untuk delete confirmation
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deleteData, setDeleteData] = useState(null);
+    // State untuk konfirmasi hapus
+    // State for delete confirmation
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // Kontrol visibilitas modal hapus. / Controls delete modal visibility.
+    const [deleteData, setDeleteData] = useState(null); // Data yang akan dihapus. / Data to be deleted.
 
-    // State untuk form
+    // State untuk form di dalam modal
+    // State for the form inside the modal
     const [formData, setFormData] = useState({
         ip_semester: '',
         semester: '',
@@ -32,14 +43,18 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         jenis_semester: 'GANJIL',
     });
 
-    // Load data saat component mount
+    // Effect untuk memuat data saat komponen mount atau `mahasiswaData` berubah
+    // Effect to load data on component mount or when `mahasiswaData` changes
     useEffect(() => {
         if (mahasiswaData?.nim) {
             loadSemesterData();
         }
     }, [mahasiswaData]);
 
-    // Load semester data
+    /**
+     * @desc    Memuat data riwayat semester mahasiswa dari API.
+     *          Loads student semester history data from the API.
+     */
     const loadSemesterData = async () => {
         setLoading(true);
         try {
@@ -56,7 +71,10 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle input change
+    /**
+     * @desc    Menangani perubahan pada input form di modal.
+     *          Handles changes in the modal form inputs.
+     */
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -65,10 +83,15 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         }));
     };
 
-    // Handle add
+    /**
+     * @desc    Mempersiapkan dan menampilkan modal untuk menambah data baru.
+     *          Prepares and displays the modal for adding new data.
+     */
     const handleAdd = () => {
         setModalType('add');
         setCurrentEditData(null);
+        // Reset form ke nilai default
+        // Reset form to default values
         setFormData({
             ip_semester: '',
             semester: '',
@@ -79,10 +102,15 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         setShowModal(true);
     };
 
-    // Handle edit
+    /**
+     * @desc    Mempersiapkan dan menampilkan modal untuk mengedit data yang ada.
+     *          Prepares and displays the modal for editing existing data.
+     */
     const handleEdit = (semester) => {
         setModalType('edit');
         setCurrentEditData(semester);
+        // Isi form dengan data yang akan diedit
+        // Fill the form with the data to be edited
         setFormData({
             ip_semester: semester.ip_semester?.toString() || '',
             semester: semester.semester?.toString() || '',
@@ -93,7 +121,10 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         setShowModal(true);
     };
 
-    // Handle submit
+    /**
+     * @desc    Menangani submit form dari modal, baik untuk tambah atau edit.
+     *          Handles form submission from the modal, for both add or edit.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoadingAction(true);
@@ -122,8 +153,8 @@ const IPSemesterTab = ({ mahasiswaData }) => {
 
             if (response.success) {
                 toast.success(response.message);
-                setShowModal(false);
-                loadSemesterData();
+                setShowModal(false); // Tutup modal setelah berhasil
+                loadSemesterData(); // Muat ulang data tabel
             } else {
                 toast.error(response.message || 'Terjadi kesalahan');
             }
@@ -134,21 +165,27 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle delete
+    /**
+     * @desc    Menangani klik pada tombol hapus di baris tabel.
+     *          Handles the click on the delete button in a table row.
+     */
     const handleDeleteClick = (semester) => {
         setDeleteData(semester);
         setShowDeleteModal(true);
     };
 
-    // Confirm delete
+    /**
+     * @desc    Mengeksekusi penghapusan data setelah dikonfirmasi.
+     *          Executes data deletion after confirmation.
+     */
     const confirmDelete = async () => {
         setLoadingAction(true);
         try {
             const response = await deleteSemesterData(deleteData.id);
             if (response.success) {
                 toast.success(response.message);
-                setShowDeleteModal(false);
-                loadSemesterData();
+                setShowDeleteModal(false); // Tutup modal konfirmasi
+                loadSemesterData(); // Muat ulang data tabel
             } else {
                 toast.error(response.message || 'Gagal menghapus data');
             }
@@ -159,7 +196,10 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Get IP badge color
+    /**
+     * @desc    Mengembalikan kelas CSS untuk badge IP berdasarkan nilainya.
+     *          Returns a CSS class for the IP badge based on its value.
+     */
     const getIPBadge = (ip) => {
         if (ip >= 3.5) return 'bg-green-100 text-green-800';
         if (ip >= 3.0) return 'bg-blue-100 text-blue-800';
@@ -167,14 +207,16 @@ const IPSemesterTab = ({ mahasiswaData }) => {
         return 'bg-red-100 text-red-800';
     };
 
-    // Sort semester data by semester number
+    // Mengurutkan data semester berdasarkan nomor semester untuk tampilan yang konsisten
+    // Sorts semester data by semester number for consistent display
     const sortedSemesterData = [...semesterData].sort(
         (a, b) => a.semester - b.semester
     );
 
     return (
         <div className="p-6">
-            {/* Header Actions */}
+             {/* Header dengan tombol "Tambah Data" */}
+            {/* Header with "Add Data" button */}
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-800">
                     Data IP Semester
@@ -199,7 +241,8 @@ const IPSemesterTab = ({ mahasiswaData }) => {
                 </button>
             </div>
 
-            {/* Summary Cards */}
+            {/* Kartu Ringkasan: Ditampilkan jika ada data */}
+            {/* Summary Cards: Displayed if data exists */}
             {sortedSemesterData.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
@@ -292,8 +335,10 @@ const IPSemesterTab = ({ mahasiswaData }) => {
                 </div>
             )}
 
-            {/* Table */}
+            {/* Tabel Data Semester */}
+            {/* Semester Data Table */}
             {loading ? (
+                // Tampilan loading
                 <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
@@ -324,6 +369,8 @@ const IPSemesterTab = ({ mahasiswaData }) => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
+                                {/* Mapping data semester yang sudah diurutkan ke baris tabel */}
+                                {/* Mapping sorted semester data to table rows */}
                                 {sortedSemesterData.map((semester) => (
                                     <tr
                                         key={semester.id}
@@ -380,6 +427,8 @@ const IPSemesterTab = ({ mahasiswaData }) => {
                         </table>
                     </div>
 
+                    {/* Tampilan Kosong: Ditampilkan jika tidak ada data */}
+                    {/* Empty State: Displayed if no data exists */}
                     {sortedSemesterData.length === 0 && (
                         <div className="text-center py-12">
                             <svg
@@ -406,7 +455,8 @@ const IPSemesterTab = ({ mahasiswaData }) => {
                 </div>
             )}
 
-            {/* Modal Form */}
+            {/* Modal Form untuk Tambah/Edit Data */}
+            {/* Modal Form for Add/Edit Data */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
@@ -569,6 +619,7 @@ const IPSemesterTab = ({ mahasiswaData }) => {
                 </div>
             )}
 
+            {/* Modal Konfirmasi Hapus */}
             {/* Delete Confirmation Modal */}
             <DeleteConfirmationModal
                 isOpen={showDeleteModal}

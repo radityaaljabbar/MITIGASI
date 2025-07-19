@@ -1,5 +1,27 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan tabel data pengguna dengan fitur pencarian, paginasi, dan aksi.
+ * Component to display a user data table with search, pagination, and action features.
+ * @param {object} props - Props komponen.
+ * @param {string} props.activeTab - Tab yang sedang aktif.
+ * @param {Array} props.currentData - Data yang akan ditampilkan di halaman saat ini.
+ * @param {Array} props.filteredData - Seluruh data yang sudah difilter (untuk info paginasi).
+ * @param {string} props.searchTerm - Kata kunci pencarian saat ini.
+ * @param {function} props.setSearchTerm - Fungsi untuk mengubah searchTerm.
+ * @param {number} props.currentPage - Halaman yang sedang aktif.
+ * @param {function} props.setCurrentPage - Fungsi untuk mengubah halaman.
+ * @param {number} props.totalPages - Total jumlah halaman.
+ * @param {number} props.startIndex - Indeks awal data pada halaman ini.
+ * @param {number} props.endIndex - Indeks akhir data pada halaman ini.
+ * @param {number} props.itemsPerPage - Jumlah item per halaman.
+ * @param {boolean} props.loading - Status loading data.
+ * @param {function} props.onEdit - Handler untuk tombol edit.
+ * @param {function} props.onDelete - Handler untuk tombol hapus.
+ * @param {function} props.onStatusChange - Handler untuk mengubah status (aktif/non-aktif).
+ * @param {function} props.onAdd - Handler untuk tombol tambah data.
+ * @param {function} props.onBulkImport - Handler untuk tombol import massal.
+ */
 const KelolaPenggunaTable = ({
     activeTab,
     currentData,
@@ -19,6 +41,11 @@ const KelolaPenggunaTable = ({
     onAdd,
     onBulkImport,
 }) => {
+    /**
+     * Mendapatkan header tabel berdasarkan tab yang aktif.
+     * Gets the table headers based on the active tab.
+     * @returns {Array<string>} - Array berisi string header.
+     */
     const getTableHeaders = () => {
         switch (activeTab) {
             case 'admin':
@@ -32,7 +59,16 @@ const KelolaPenggunaTable = ({
         }
     };
 
+    /**
+     * Merender satu baris (row) pada tabel untuk setiap item data.
+     * Renders a single table row for each data item.
+     * @param {object} item - Objek data.
+     * @param {number} index - Indeks item.
+     * @returns {React.ReactNode} - Elemen JSX untuk baris tabel.
+     */
     const renderTableRow = (item, index) => {
+        // Tombol aksi yang umum untuk semua tab (Edit, Hapus)
+        // Common action buttons for all tabs (Edit, Delete)
         const commonActionButtons = (
             <div className="flex space-x-2">
                 <button
@@ -48,6 +84,8 @@ const KelolaPenggunaTable = ({
             </div>
         );
 
+        // Render baris untuk tab Admin
+        // Render row for Admin tab
         if (activeTab === 'admin') {
             return (
                 <tr
@@ -76,6 +114,8 @@ const KelolaPenggunaTable = ({
             );
         }
 
+        // Render baris untuk tab Dosen
+        // Render row for Dosen (lecturer) tab
         if (activeTab === 'dosen') {
             return (
                 <tr
@@ -91,6 +131,8 @@ const KelolaPenggunaTable = ({
                         {item.kode}
                     </td>
                     <td className="px-6 py-4 text-sm">
+                        {/* Kolom status dengan toggle switch */}
+                        {/* Status column with a toggle switch */}
                         <label className="inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
@@ -118,6 +160,8 @@ const KelolaPenggunaTable = ({
             );
         }
 
+        // Render baris untuk tab Mahasiswa
+        // Render row for Mahasiswa (student) tab
         if (activeTab === 'mahasiswa') {
             return (
                 <tr
@@ -133,6 +177,8 @@ const KelolaPenggunaTable = ({
                         {item.kelas}
                     </td>
                     <td className="px-6 py-4 text-sm">
+                         {/* Kolom status dengan toggle switch */}
+                        {/* Status column with a toggle switch */}
                         <label className="inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
@@ -163,6 +209,10 @@ const KelolaPenggunaTable = ({
         return null;
     };
 
+    /**
+     * Mendapatkan warna tombol utama berdasarkan tab.
+     * Gets the main button color based on the tab.
+     */
     const getTabColor = () => {
         switch (activeTab) {
             case 'admin':
@@ -176,6 +226,10 @@ const KelolaPenggunaTable = ({
         }
     };
 
+    /**
+     * Mendapatkan label untuk tombol dan judul.
+     * Gets the label for buttons and titles.
+     */
     const getTabLabel = () => {
         switch (activeTab) {
             case 'admin':
@@ -191,15 +245,16 @@ const KelolaPenggunaTable = ({
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
-            {/* Header actions */}
-            {/* Header actions */}
+            {/* Header: Judul, Pencarian, dan Tombol Aksi */}
+            {/* Header: Title, Search, and Action Buttons */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-4">
                     <h2 className="text-xl font-semibold text-gray-800">
                         Daftar {getTabLabel()}
                     </h2>
 
-                    {/* Search */}
+                    {/* Input Pencarian */}
+                    {/* Search Input */}
                     <div className="relative">
                         <input
                             type="text"
@@ -226,9 +281,11 @@ const KelolaPenggunaTable = ({
                     </div>
                 </div>
 
-                {/* ← UBAH BAGIAN INI */}
+                {/* Tombol Aksi di Kanan (Import & Tambah) */}
+                {/* Action Buttons on the Right (Import & Add) */}
                 <div className="flex space-x-3">
-                    {/* Import CSV Button - Only show for mahasiswa tab */}
+                    {/* Tombol Import CSV - Hanya tampil di tab mahasiswa */}
+                    {/* Import CSV Button - Only shows on the mahasiswa tab */}
                     {activeTab === 'mahasiswa' && (
                         <button
                             onClick={onBulkImport}
@@ -238,7 +295,8 @@ const KelolaPenggunaTable = ({
                         </button>
                     )}
 
-                    {/* Add Button */}
+                    {/* Tombol Tambah Pengguna */}
+                    {/* Add User Button */}
                     <button
                         onClick={onAdd}
                         className={`px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:scale-105 ${getTabColor()}`}>
@@ -248,8 +306,11 @@ const KelolaPenggunaTable = ({
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Tabel Data */}
+            {/* Data Table */}
             {loading ? (
+                // Tampilan saat loading
+                // View during loading
                 <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
@@ -276,6 +337,7 @@ const KelolaPenggunaTable = ({
                         </table>
                     </div>
 
+                    {/* Paginasi */}
                     {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between mt-6">
@@ -323,7 +385,9 @@ const KelolaPenggunaTable = ({
                             </div>
                         </div>
                     )}
-
+                    
+                    {/* Pesan jika tidak ada data */}
+                    {/* Message if no data is available */}
                     {filteredData.length === 0 && (
                         <div className="text-center py-12">
                             <div className="text-gray-500 text-lg">

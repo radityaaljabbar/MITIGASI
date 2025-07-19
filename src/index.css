@@ -1,7 +1,11 @@
+/* Mengimpor direktif dasar dari Tailwind CSS */
+/* Importing the base directives from Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Kelas utilitas kustom untuk mengubah teks menjadi format kapital (capitalize) */
+/* Custom utility class to transform text to capitalize format */
 .capitalize-text {
   text-transform: capitalize;
 }

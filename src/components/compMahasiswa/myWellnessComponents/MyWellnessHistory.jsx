@@ -2,13 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPsiResult } from '../../../services/mahasiswaServices/myWellnessService';
 
+/**
+ * Komponen halaman untuk menampilkan daftar riwayat evaluasi psikologis mahasiswa.
+ * Page component to display the history list of a student's psychological evaluations.
+ */
 const MyWellnessHistory = () => {
+    // State untuk menyimpan daftar riwayat, status loading, dan pesan error
+    // State to store the history list, loading status, and error messages
     const [historyList, setHistoryList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    // State untuk modal detail hasil evaluasi
+    // State for the evaluation result detail modal
     const [selectedResult, setSelectedResult] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
 
+    // Effect untuk mengambil data riwayat saat komponen dimuat
+    // Effect to fetch history data when the component mounts
     useEffect(() => {
         const fetchHistory = async () => {
             try {
@@ -16,7 +26,8 @@ const MyWellnessHistory = () => {
                 const response = await getPsiResult();
 
                 if (response.success) {
-                    // Sort by date (newest first)
+                    // Mengurutkan data berdasarkan tanggal (terbaru di atas)
+                    // Sorting data by date (newest first)
                     const sortedData = (response.data || []).sort(
                         (a, b) =>
                             new Date(b.tanggalTes) - new Date(a.tanggalTes)
@@ -39,16 +50,31 @@ const MyWellnessHistory = () => {
         fetchHistory();
     }, []);
 
+    /**
+     * Menangani pembukaan modal detail.
+     * Handles opening the detail modal.
+     * @param {object} result - Data hasil tes yang dipilih.
+     */
     const handleViewDetail = (result) => {
         setSelectedResult(result);
         setShowDetailModal(true);
     };
 
+    /**
+     * Menangani penutupan modal detail.
+     * Handles closing the detail modal.
+     */
     const closeDetailModal = () => {
         setShowDetailModal(false);
         setSelectedResult(null);
     };
 
+    /**
+     * Memformat string tanggal menjadi format lokal yang mudah dibaca.
+     * Formats a date string into an easy-to-read local format.
+     * @param {string} dateString - String tanggal dari API.
+     * @returns {string} - Tanggal yang sudah diformat.
+     */
     const formatDate = (dateString) => {
         const options = {
             year: 'numeric',
@@ -60,6 +86,12 @@ const MyWellnessHistory = () => {
         return new Date(dateString).toLocaleDateString('id-ID', options);
     };
 
+     /**
+     * Mendapatkan kelas warna untuk badge klasifikasi.
+     * Gets the color class for the classification badge.
+     * @param {string} klasifikasi - Status klasifikasi.
+     * @returns {string} - Kelas Tailwind CSS.
+     */
     const getKlasifikasiColor = (klasifikasi) => {
         const lowerKlasifikasi = klasifikasi?.toLowerCase();
         switch (lowerKlasifikasi) {
@@ -74,6 +106,13 @@ const MyWellnessHistory = () => {
         }
     };
 
+    /**
+     * Memotong teks jika terlalu panjang dan menambahkan elipsis.
+     * Truncates text if it's too long and adds an ellipsis.
+     * @param {string} text - Teks asli.
+     * @param {number} maxLength - Panjang maksimum teks.
+     * @returns {string} - Teks yang sudah dipotong.
+     */
     const truncateText = (text, maxLength = 100) => {
         if (!text) return '';
         return text.length > maxLength
@@ -84,15 +123,18 @@ const MyWellnessHistory = () => {
     return (
         <div className="min-h-screen bg-[#FAF0E6] py-6 px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
-                {/* Header */}
+                {/* Header Halaman */}
+                {/* Page Header */}
                 <div className="bg-[#951A22] rounded-t-lg shadow-md py-6 px-8">
                     <h1 className="text-white text-3xl font-bold text-center">
                         Riwayat Evaluasi Psikologis
                     </h1>
                 </div>
 
-                {/* Content */}
+                {/* Konten Halaman */}
+                {/* Page Content */}
                 <div className="bg-white rounded-b-lg shadow-md py-6 px-8">
+                    {/* Tombol Kembali */}
                     {/* Back Button */}
                     <div className="mb-6">
                         <Link
@@ -115,7 +157,8 @@ const MyWellnessHistory = () => {
                         </Link>
                     </div>
 
-                    {/* Scoring Information */}
+                    {/* Kotak Informasi Skoring */}
+                    {/* Scoring Information Box */}
                     <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
                         <h3 className="font-semibold text-amber-900 mb-2 flex items-center">
                             <svg
@@ -150,6 +193,7 @@ const MyWellnessHistory = () => {
                         </div>
                     </div>
 
+                    {/* Tampilan Error */}
                     {/* Error Display */}
                     {error && (
                         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -157,6 +201,7 @@ const MyWellnessHistory = () => {
                         </div>
                     )}
 
+                     {/* Tampilan Loading */}
                     {/* Loading State */}
                     {isLoading ? (
                         <div className="flex justify-center items-center py-12">
@@ -179,6 +224,8 @@ const MyWellnessHistory = () => {
                             </svg>
                         </div>
                     ) : historyList.length === 0 ? (
+                        // Tampilan jika tidak ada riwayat (Empty State)
+                        // Display if there is no history (Empty State)
                         <div className="text-center py-12">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -208,6 +255,8 @@ const MyWellnessHistory = () => {
                             </div>
                         </div>
                     ) : (
+                        // Tampilan daftar riwayat
+                        // History list display
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {historyList.map((result, index) => (
                                 <div
@@ -276,10 +325,13 @@ const MyWellnessHistory = () => {
                 </div>
             </div>
 
+            {/* Modal Detail */}
             {/* Detail Modal */}
             {showDetailModal && selectedResult && (
                 <div className="fixed z-10 inset-0 overflow-y-auto">
                     <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        {/* Latar belakang modal */}
+                        {/* Modal backdrop */}
                         <div
                             className="fixed inset-0 transition-opacity"
                             aria-hidden="true">
@@ -292,6 +344,8 @@ const MyWellnessHistory = () => {
                             &#8203;
                         </span>
 
+                        {/* Konten modal */}
+                        {/* Modal content */}
                         <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <div className="sm:flex sm:items-start">

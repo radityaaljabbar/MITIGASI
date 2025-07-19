@@ -1,17 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 
+/**
+ * Komponen untuk menampilkan analisis tren akademik mahasiswa menggunakan grafik.
+ * Component to display a student's academic trend analysis using charts.
+ * @param {object} props - Props komponen.
+ * @param {object} props.studentData - Data akademik mahasiswa.
+ */
 const AnalisisTrendContent = ({ studentData }) => {
+    // Refs untuk elemen canvas dan instance chart
+    // Refs for canvas elements and chart instances
     const ipkChartRef = useRef(null);
     const sksChartRef = useRef(null);
     const ipkChartInstance = useRef(null);
     const sksChartInstance = useRef(null);
 
-    // Prepare data untuk charts
+    // Mempersiapkan data per semester dari props
+    // Preparing per-semester data from props
     const semesterData = studentData?.perSemester || [];
 
+    // Efek untuk membuat dan membersihkan chart saat data berubah
+    // Effect to create and clean up charts when data changes
     useEffect(() => {
-        // Cleanup existing charts
+        // Hapus instance chart yang ada sebelum membuat yang baru
+        // Destroy existing chart instances before creating new ones
         if (ipkChartInstance.current) {
             ipkChartInstance.current.destroy();
         }
@@ -19,6 +31,7 @@ const AnalisisTrendContent = ({ studentData }) => {
             sksChartInstance.current.destroy();
         }
 
+        // Membuat Grafik Tren IPK
         // Create IPK Trend Chart
         if (ipkChartRef.current && semesterData.length > 0) {
             const ctx = ipkChartRef.current.getContext('2d');
@@ -121,11 +134,13 @@ const AnalisisTrendContent = ({ studentData }) => {
             });
         }
 
+        // Membuat Grafik Progres SKS
         // Create SKS Progress Chart
         if (sksChartRef.current && semesterData.length > 0) {
             const ctx = sksChartRef.current.getContext('2d');
 
-            // Calculate cumulative SKS
+            // Menghitung SKS kumulatif
+            // Calculating cumulative SKS
             let cumulativeSks = 0;
             const cumulativeSksData = semesterData.map((item) => {
                 cumulativeSks += item.sksSemester || 0;
@@ -257,7 +272,8 @@ const AnalisisTrendContent = ({ studentData }) => {
             });
         }
 
-        // Cleanup function
+        // Fungsi cleanup untuk menghapus chart saat komponen unmount
+        // Cleanup function to destroy charts on component unmount
         return () => {
             if (ipkChartInstance.current) {
                 ipkChartInstance.current.destroy();
@@ -268,7 +284,8 @@ const AnalisisTrendContent = ({ studentData }) => {
         };
     }, [semesterData]);
 
-    // Calculate statistics
+    // Menghitung statistik ringkas
+    // Calculating summary statistics
     const currentIPK = studentData?.ipk || 0;
     const totalSKS = studentData?.sksTotal || 0;
     const averageIPPerSemester =
@@ -285,6 +302,8 @@ const AnalisisTrendContent = ({ studentData }) => {
               (semesterData[semesterData.length - 2]?.ipSemester || 0)
             : 0;
 
+    // Tampilan jika tidak ada data semester
+    // Display if there is no semester data        
     if (!semesterData || semesterData.length === 0) {
         return (
             <div className="p-6">
@@ -317,6 +336,7 @@ const AnalisisTrendContent = ({ studentData }) => {
 
     return (
         <div className="p-6 space-y-6">
+            {/* Header Halaman */}
             {/* Header */}
             <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
@@ -327,6 +347,7 @@ const AnalisisTrendContent = ({ studentData }) => {
                 </p>
             </div>
 
+            {/* Kartu Statistik */}
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
@@ -434,8 +455,10 @@ const AnalisisTrendContent = ({ studentData }) => {
                 </div>
             </div>
 
+            {/* Grafik */}
             {/* Charts */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {/* Grafik Tren IPK */}
                 {/* IPK Trend Chart */}
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                     <div className="mb-4">
@@ -451,6 +474,7 @@ const AnalisisTrendContent = ({ studentData }) => {
                     </div>
                 </div>
 
+                {/* Grafik Progres SKS */}
                 {/* SKS Progress Chart */}
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                     <div className="mb-4">
@@ -467,6 +491,7 @@ const AnalisisTrendContent = ({ studentData }) => {
                 </div>
             </div>
 
+            {/* Insight Performa Akademik */}
             {/* Academic Performance Insights */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4">

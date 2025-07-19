@@ -4,13 +4,21 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router';
 import { getReliefList } from '../../../services/mahasiswaServices/myFinanceService';
 
+/**
+ * Komponen untuk menampilkan riwayat pengajuan keringanan biaya kuliah.
+ * Component to display the history of tuition fee relief applications.
+ */
 const TuitionReliefHistory = () => {
+    // State untuk daftar pengajuan, status loading, modal, dan filter
+    // State for application list, loading status, modal, and filter
     const [reliefList, setReliefList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState('all');
 
+    // Mengambil data riwayat saat komponen dimuat
+    // Fetching history data when the component mounts
     useEffect(() => {
         const fetchRelief = async () => {
             try {
@@ -35,15 +43,18 @@ const TuitionReliefHistory = () => {
         fetchRelief();
     }, []);
 
+    // Handler untuk membuka dan menutup modal detail
+    // Handlers for opening and closing the detail modal
     const handleViewDetail = (application) => {
         setSelectedApplication(application);
         setShowDetailModal(true);
     };
-
     const closeDetailModal = () => {
         setShowDetailModal(false);
     };
 
+    // Fungsi-fungsi helper untuk format tampilan (badge status, tanggal, mata uang)
+    // Helper functions for display formatting (status badge, date, currency)
     const getStatusBadge = (status) => {
         switch (status) {
             case 'Menunggu Review':
@@ -86,6 +97,8 @@ const TuitionReliefHistory = () => {
         }).format(amount);
     };
 
+    // Menerapkan filter status pada daftar pengajuan
+    // Applying the status filter to the application list
     const filteredApplications = reliefList.filter((app) => {
         if (filterStatus === 'all') return true;
         return app.status_pengajuan === filterStatus;
@@ -107,16 +120,19 @@ const TuitionReliefHistory = () => {
             />
 
             <div className="max-w-6xl mx-auto">
-                {/* Header */}
+                {/* Header Halaman */}
+                {/* Page Header */}
                 <div className="bg-[#951A22] rounded-t-lg shadow-md py-6 px-8">
                     <h1 className="text-white text-3xl font-bold text-center">
                         Riwayat Pengajuan Keringanan Biaya Kuliah
                     </h1>
                 </div>
 
-                {/* Content */}
+                {/* Konten Utama */}
+                {/* Main Content */}
                 <div className="bg-white rounded-b-lg shadow-md py-6 px-8">
-                    {/* Filter dan Tombol */}
+                    {/* Filter dan Tombol Aksi */}
+                    {/* Filter and Action Buttons */}
                     <div className="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0">
                         <div>
                             <label
@@ -158,7 +174,8 @@ const TuitionReliefHistory = () => {
                         </button>
                     </div>
 
-                    {/* Loading State */}
+                    {/* Render kondisional: Loading, Data Kosong, atau Tabel */}
+                    {/* Conditional Rendering: Loading, Empty Data, or Table */}
                     {isLoading ? (
                         <div className="flex justify-center items-center py-12">
                             <svg
@@ -297,7 +314,8 @@ const TuitionReliefHistory = () => {
                 </div>
             </div>
 
-            {/* Detail Modal */}
+            {/* Modal Detail Pengajuan */}
+            {/* Application Detail Modal */}
             {showDetailModal && selectedApplication && (
                 <div className="fixed z-10 inset-0 overflow-y-auto">
                     <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

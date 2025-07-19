@@ -1,11 +1,11 @@
 // src/services/adminServices/kelolaKelasService.js
 import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
-// =============================================
-// ==           KELAS SERVICES                ==
-// =============================================
-
-// GET - Ambil semua kelas
+/**
+ * Mengambil semua data kelas dari server.
+ * Fetches all class data from the server.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllKelas = async () => {
     try {
         const response = await fetch(
@@ -29,7 +29,11 @@ export const getAllKelas = async () => {
     }
 };
 
-// GET - Ambil daftar dosen untuk dropdown
+/**
+ * Mengambil daftar dosen untuk digunakan di dropdown penugasan dosen wali.
+ * Fetches a list of lecturers for use in the course advisor assignment dropdown.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getDosenList = async () => {
     try {
         const response = await fetch(
@@ -53,7 +57,12 @@ export const getDosenList = async () => {
     }
 };
 
-// POST - Tambah kelas baru
+/**
+ * Mengirim data untuk membuat kelas baru.
+ * Sends data to create a new class.
+ * @param {object} kelasData - Data kelas baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createKelas = async (kelasData) => {
     try {
         const response = await fetch(
@@ -79,7 +88,13 @@ export const createKelas = async (kelasData) => {
     }
 };
 
-// PUT - Update kelas (hanya dosen wali)
+/**
+ * Mengirim data untuk memperbarui data kelas yang ada (cntoh, mengubah dosen wali).
+ * Sends data to update an existing class  data(example, changing the course advisor).
+ * @param {number|string} id - ID kelas yang akan diupdate.
+ * @param {object} kelasData - Data kelas yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateKelas = async (id, kelasData) => {
     try {
         const response = await fetch(

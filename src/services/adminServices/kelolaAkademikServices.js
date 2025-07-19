@@ -1,11 +1,11 @@
 // src/services/adminServices/kelolaAkademikService.js
 import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
-// =============================================
-// ==           MAHASISWA SERVICES            ==
-// =============================================
-
-// GET - Ambil semua mahasiswa
+/**
+ * Mengambil semua data mahasiswa untuk ditampilkan di halaman Kelola Akademik.
+ * Fetches all student data to be displayed on the Manage Academics page.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllMahasiswa = async () => {
     try {
         const response = await fetch(
@@ -29,11 +29,12 @@ export const getAllMahasiswa = async () => {
     }
 };
 
-// =============================================
-// ==           NILAI/GRADES SERVICES         ==
-// =============================================
-
-// GET - Ambil nilai mahasiswa berdasarkan NIM
+/**
+ * Mengambil riwayat nilai mahasiswa berdasarkan NIM.
+ * Fetches student's grade history by NIM.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getGradesMahasiswa = async (nim) => {
     try {
         const response = await fetch(
@@ -57,7 +58,11 @@ export const getGradesMahasiswa = async (nim) => {
     }
 };
 
-// GET - Ambil semua mata kuliah
+/**
+ * Mengambil daftar semua mata kuliah.
+ * Fetches a list of all courses.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllCourses = async () => {
     try {
         const response = await fetch(
@@ -81,7 +86,12 @@ export const getAllCourses = async () => {
     }
 };
 
-// POST - Tambah nilai baru
+/**
+ * Mengirim data untuk membuat/menambahkan nilai baru untuk mahasiswa.
+ * Sends data to create/add a new grade for a student.
+ * @param {object} gradeData - Data nilai baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createGrade = async (gradeData) => {
     try {
         const response = await fetch(
@@ -107,7 +117,13 @@ export const createGrade = async (gradeData) => {
     }
 };
 
-// PUT - Update nilai
+/**
+ * Mengirim data untuk memperbarui nilai yang sudah ada.
+ * Sends data to update an existing grade.
+ * @param {number|string} id - ID dari entri nilai yang akan diupdate.
+ * @param {object} gradeData - Data nilai yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateGrade = async (id, gradeData) => {
     try {
         const response = await fetch(
@@ -133,7 +149,12 @@ export const updateGrade = async (id, gradeData) => {
     }
 };
 
-// DELETE - Hapus nilai
+/**
+ * Menghapus entri nilai berdasarkan ID-nya.
+ * Deletes a grade entry by its ID.
+ * @param {number|string} id - ID entri nilai.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deleteGrade = async (id) => {
     try {
         const response = await fetch(
@@ -157,11 +178,12 @@ export const deleteGrade = async (id) => {
     }
 };
 
-// =============================================
-// ==           PRESTASI SERVICES             ==
-// =============================================
-
-// GET - Ambil data prestasi mahasiswa
+/**
+ * Mengambil data prestasi seorang mahasiswa berdasarkan NIM.
+ * Fetches a student's achievement data by NIM.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getPrestasiData = async (nim) => {
     try {
         const response = await fetch(
@@ -185,7 +207,12 @@ export const getPrestasiData = async (nim) => {
     }
 };
 
-// POST - Tambah data prestasi
+/**
+ * Mengirim data untuk membuat/menambahkan data prestasi baru.
+ * Sends data to create/add new achievement data.
+ * @param {object} prestasiData - Data prestasi baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createPrestasiData = async (prestasiData) => {
     try {
         const response = await fetch(
@@ -211,7 +238,13 @@ export const createPrestasiData = async (prestasiData) => {
     }
 };
 
-// PUT - Update data prestasi
+/**
+ * Mengirim data untuk memperbarui data prestasi yang ada.
+ * Sends data to update existing achievement data.
+ * @param {string} nim - NIM mahasiswa yang prestasinya akan diupdate.
+ * @param {object} prestasiData - Data prestasi yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updatePrestasiData = async (nim, prestasiData) => {
     try {
         const response = await fetch(
@@ -237,7 +270,12 @@ export const updatePrestasiData = async (nim, prestasiData) => {
     }
 };
 
-// DELETE - Hapus data prestasi
+/**
+ * Menghapus data prestasi berdasarkan NIM.
+ * Deletes achievement data by NIM.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deletePrestasiData = async (nim) => {
     try {
         const response = await fetch(
@@ -261,11 +299,12 @@ export const deletePrestasiData = async (nim) => {
     }
 };
 
-// =============================================
-// ==           SEMESTER SERVICES             ==
-// =============================================
-
-// GET - Ambil data semester mahasiswa
+/**
+ * Mengambil data per semester (seperti IP) seorang mahasiswa.
+ * Fetches per-semester data (like GPA) for a student.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getSemesterData = async (nim) => {
     try {
         const response = await fetch(
@@ -289,7 +328,13 @@ export const getSemesterData = async (nim) => {
     }
 };
 
-// POST - Tambah data semester
+/**
+ * Mengirim data untuk membuat/menambahkan data semester (seperti IP) baru.
+ * Sends data to create/add new semester data (like GPA).
+ * @param {string} nim - NIM mahasiswa.
+ * @param {object} semesterData - Data semester baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createSemesterData = async (nim, semesterData) => {
     try {
         const response = await fetch(
@@ -315,7 +360,13 @@ export const createSemesterData = async (nim, semesterData) => {
     }
 };
 
-// PUT - Update data semester
+/**
+ * Mengirim data untuk memperbarui data semester (IP, SKS) yang ada.
+ * Sends data to update existing semester data (GPA, SKS).
+ * @param {number|string} id - ID dari entri data semester.
+ * @param {object} semesterData - Data semester yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateSemesterData = async (id, semesterData) => {
     try {
         const response = await fetch(
@@ -341,7 +392,12 @@ export const updateSemesterData = async (id, semesterData) => {
     }
 };
 
-// DELETE - Hapus data semester
+/**
+ * Menghapus data semester mahasiswa berdasarkan ID.
+ * Deletes student semester data by ID.
+ * @param {number|string} id - ID entri data semester.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deleteSemesterData = async (id) => {
     try {
         const response = await fetch(
@@ -365,7 +421,13 @@ export const deleteSemesterData = async (id) => {
     }
 };
 
-// BULK - Import data nilai from CSV
+/**
+ * Mengirim file CSV untuk import data nilai mahasiswa secara massal.
+ * Sends a CSV file to bulk import student's grade data.
+ * @param {string} nim - NIM mahasiswa yang nilainya akan diimpor.
+ * @param {File} file - File CSV yang berisi data nilai.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const bulkCreateGrades = async (nim, file) => {
     try {
         const formData = new FormData();

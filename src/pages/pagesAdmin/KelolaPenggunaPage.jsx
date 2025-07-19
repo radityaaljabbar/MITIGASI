@@ -2,30 +2,40 @@ import React, { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Import komponen
+// Mengimpor komponen-komponen yang diperlukan
+// Importing necessary components
 import KelolaPenggunaTabs from '../../components/compAdmin/kelolaPengguna/kelolaPenggunaTabs';
 import KelolaPenggunaTable from '../../components/compAdmin/kelolaPengguna/KelolaPenggunaTable';
 import KelolaPenggunaModal from '../../components/compAdmin/kelolaPengguna/KelolaPenggunaModal';
 import DeleteConfirmationModal from '../../components/compAdmin/kelolaPengguna/DeleteConfirmationModal';
 import BulkImportPopup from '../../components/compAdmin/kelolaPengguna/BulkImportPopup';
 
-// Import custom hook
+// Mengimpor custom hook untuk logika pengelolaan pengguna
+// Importing the custom hook for user management logic
 import { useKelolaPengguna } from '../../components/compAdmin/kelolaPengguna/hooks/useKelolaPengguna';
 
+/**
+ * Komponen halaman untuk mengelola data pengguna (Admin, Dosen Wali, Mahasiswa).
+ * Page component for managing user data (Admin, Course Advisor, Student).
+ */
 const KelolaPenggunaPage = () => {
-    // State untuk modal
+    // State untuk mengelola visibilitas dan tipe modal form
+    // State for managing the visibility and type of the form modal
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState(''); // 'add' atau 'edit'
     const [currentEditData, setCurrentEditData] = useState(null);
 
-    // State untuk konfirmasi delete
+    // State untuk mengelola modal konfirmasi penghapusan
+    // State for managing the delete confirmation modal
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteData, setDeleteData] = useState(null);
 
-    // State untuk bulk import popup
+    // State untuk mengelola popup import massal
+    // State for managing the bulk import popup
     const [showBulkImportPopup, setShowBulkImportPopup] = useState(false);
 
-    // Custom hook untuk logic
+    // Menggunakan custom hook untuk mendapatkan state dan fungsi logika
+    // Using the custom hook to get state and logic functions
     const {
         // State
         activeTab,
@@ -55,21 +65,24 @@ const KelolaPenggunaPage = () => {
         loadData,
     } = useKelolaPengguna();
 
-    // Handle tambah data
+    // Handler untuk membuka modal tambah
+    // Handler to open the add modal
     const handleAdd = () => {
         setModalType('add');
         setCurrentEditData(null);
         setShowModal(true);
     };
 
-    // Handle edit data
+    // Handler untuk membuka modal edit
+    // Handler to open the edit modal
     const handleEdit = (data) => {
         setModalType('edit');
         setCurrentEditData(data);
         setShowModal(true);
     };
 
-    // Handle submit form modal
+    // Handler untuk submit form dari modal
+    // Handler for form submission from the modal
     const handleModalSubmit = async (formData, id) => {
         let success = false;
 
@@ -85,13 +98,15 @@ const KelolaPenggunaPage = () => {
         }
     };
 
-    // Handle confirm delete
+    // Handler untuk membuka modal konfirmasi hapus
+    // Handler to open the delete confirmation modal
     const handleDeleteClick = (data) => {
         setDeleteData(data);
         setShowDeleteModal(true);
     };
 
-    // Handle confirm delete
+     // Handler untuk konfirmasi penghapusan
+    // Handler for delete confirmation
     const handleConfirmDelete = async () => {
         const id = deleteData?.id || deleteData?.nip || deleteData?.nim;
         const success = await handleDelete(id);
@@ -102,7 +117,8 @@ const KelolaPenggunaPage = () => {
         }
     };
 
-    // Handle close modals
+    // Handler untuk menutup semua jenis modal
+    // Handlers for closing all types of modals
     const handleCloseModal = () => {
         setShowModal(false);
         setCurrentEditData(null);
@@ -122,7 +138,12 @@ const KelolaPenggunaPage = () => {
         setShowBulkImportPopup(false);
     };
 
-    // Handle toggle status aktif/nonaktif langsung dari tabel
+    /**
+     * Menangani perubahan status (aktif/non-aktif) langsung dari tabel.
+     * Handles status changes (active/inactive) directly from the table.
+     * @param {object} user - Data pengguna yang statusnya akan diubah.
+     * @param {string} newStatus - Status baru ('aktif' atau 'nonaktif').
+     */
     const handleStatusChange = async (user, newStatus) => {
         const updatedUser = { ...user, status: newStatus };
         const id = user.id || user.nip || user.nim;
@@ -138,7 +159,8 @@ const KelolaPenggunaPage = () => {
 
     return (
         <div className="p-6 bg-[#FAF0E6] min-h-screen">
-            {/* Header */}
+            {/* Header Halaman */}
+            {/* Page Header */}
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
                     Kelola Pengguna
@@ -148,13 +170,15 @@ const KelolaPenggunaPage = () => {
                 </p>
             </div>
 
-            {/* Tabs */}
+            {/* Komponen Tabs */}
+            {/* Tabs Component */}
             <KelolaPenggunaTabs
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
             />
 
-            {/* Table */}
+            {/* Komponen Tabel Pengguna */}
+            {/* User Table Component */}
             <KelolaPenggunaTable
                 activeTab={activeTab}
                 currentData={currentData}
@@ -175,7 +199,8 @@ const KelolaPenggunaPage = () => {
                 onBulkImport={handleBulkImportClick}
             />
 
-            {/* Modal Form */}
+            {/* Komponen Modal Form Pengguna */}
+            {/* User Form Modal Component */}
             <KelolaPenggunaModal
                 isOpen={showModal}
                 onClose={handleCloseModal}
@@ -187,7 +212,8 @@ const KelolaPenggunaPage = () => {
                 loading={loadingAction}
             />
 
-            {/* Delete Confirmation Modal */}
+            {/* Komponen Modal Konfirmasi Hapus */}
+            {/* Delete Confirmation Modal Component */}
             <DeleteConfirmationModal
                 isOpen={showDeleteModal}
                 onClose={handleCloseDeleteModal}
@@ -196,7 +222,8 @@ const KelolaPenggunaPage = () => {
                 loading={loadingAction}
             />
 
-            {/* Bulk Import Popup */}
+             {/* Komponen Popup Import Massal */}
+            {/* Bulk Import Popup Component */}
             <BulkImportPopup
                 isOpen={showBulkImportPopup}
                 onClose={handleCloseBulkImportPopup}

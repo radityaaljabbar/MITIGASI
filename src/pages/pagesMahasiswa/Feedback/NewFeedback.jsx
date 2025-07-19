@@ -8,8 +8,14 @@ import {
 } from '../../../services/mahasiswaServices/feedbackService';
 import { toast } from 'react-toastify';
 
+/**
+ * Komponen form untuk membuat feedback baru.
+ * Form component for creating new feedback.
+ */
 const FeedbackForm = () => {
     const navigate = useNavigate();
+    // State untuk data form, file, status, dan pesan
+    // State for form data, file, status, and messages
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState(null);
@@ -26,7 +32,11 @@ const FeedbackForm = () => {
             .toLowerCase();
     };
 
-    // Handle file selection
+    /**
+     * Menangani pemilihan file, termasuk validasi tipe file.
+     * Handles file selection, including file type validation.
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Event dari input file.
+     */
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
 
@@ -34,7 +44,8 @@ const FeedbackForm = () => {
             return;
         }
 
-        // Validate file type
+        // Validasi tipe file menggunakan service
+        // Validate file type using the service
         if (!isValidFileType(selectedFile)) {
             setError(
                 `Format file tidak didukung. Hanya ${getAllowedFileExtensions()} yang diperbolehkan.`
@@ -51,11 +62,16 @@ const FeedbackForm = () => {
         setFileName(selectedFile.name);
     };
 
-    // Handle form submission
+    /**
+     * Menangani proses submit form.
+     * Handles the form submission process.
+     * @param {React.FormEvent} e - Event form.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate form
+        // Validasi form sebelum submit
+        // Validate form before submission
         if (!content.trim()) {
             setError('Isi feedback tidak boleh kosong');
             return;
@@ -73,7 +89,8 @@ const FeedbackForm = () => {
             setIsSubmitting(true);
             setError('');
 
-            // Submit feedback using the service
+            // Memanggil service untuk mengirim feedback
+            // Calling the service to submit feedback
             const response = await submitFeedback(
                 title.trim() || 'Feedback Tanpa Judul', // Default title if empty
                 content,
@@ -83,13 +100,15 @@ const FeedbackForm = () => {
             setSuccessMessage('Feedback berhasil dikirim!');
             toast.success('Feedback berhasil dikirim!');
 
-            // Reset form after successful submission
+            // Reset form setelah berhasil
+            // Reset form after success
             setTitle('');
             setContent('');
             setFile(null);
             setFileName('');
 
-            // Redirect to feedback list after short delay
+            // Arahkan kembali ke daftar feedback setelah jeda singkat
+            // Redirect back to the feedback list after a short delay
             setTimeout(() => {
                 navigate('/student/my-feedback');
             }, 2000);
@@ -106,15 +125,25 @@ const FeedbackForm = () => {
         }
     };
 
+    /**
+     * Menangani klik tombol kembali.
+     * Handles the back button click.
+     * @param {React.MouseEvent} e - Event klik.
+     */
     const handleBackClick = (e) => {
         e.preventDefault();
         handleBack();
     };
 
+    /**
+     * Menghapus file yang sudah dipilih.
+     * Removes the selected file.
+     */
     const removeFile = () => {
         setFile(null);
         setFileName('');
-        // Reset the input file element
+        // Mereset elemen input file
+        // Resetting the file input element
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -123,14 +152,16 @@ const FeedbackForm = () => {
     return (
         <div className="flex flex-col items-center justify-start min-h-screen p-4 md:p-8 bg-[#FAF0E6] h-screen overflow-auto">
             <div className="bg-white shadow-md rounded-xl p-4 md:p-8 w-full max-w-3xl mx-auto transition-all duration-300">
-                {/* Success message */}
+                {/* Pesan Sukses */}
+                {/* Success Message */}
                 {successMessage && (
                     <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
                         {successMessage}
                     </div>
                 )}
 
-                {/* Error message */}
+                {/* Pesan Error */}
+                {/* Error Message */}
                 {error && (
                     <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
                         {error}
@@ -138,6 +169,8 @@ const FeedbackForm = () => {
                 )}
 
                 <form className="flex flex-col" onSubmit={handleSubmit}>
+                    {/* Input Judul */}
+                    {/* Title Input */}
                     <label
                         htmlFor="feedback-title"
                         className="font-semibold mb-2 text-gray-800">
@@ -152,6 +185,8 @@ const FeedbackForm = () => {
                         className="w-full px-4 py-3 mb-6 border border-gray-200 rounded-lg focus:outline-none focus:border-red-800 focus:ring-2 focus:ring-red-800/10 font-sans transition-all duration-300"
                     />
 
+                    {/* Input Konten Feedback */}
+                    {/* Feedback Content Input */}
                     <label
                         htmlFor="feedback-content"
                         className="font-semibold mb-2 text-gray-800">
@@ -166,6 +201,7 @@ const FeedbackForm = () => {
                         className="w-full px-3 mb-6 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-h-40"
                     />
 
+                    {/* Unggah Dokumen */}
                     {/* Document Upload */}
                     <label
                         htmlFor="supportDocument"
@@ -214,6 +250,8 @@ const FeedbackForm = () => {
                         />
                     )}
 
+                    {/* Tombol Aksi */}
+                    {/* Action Buttons */}
                     <div className="flex flex-wrap gap-4 mt-2 justify-start sm:flex-row flex-col">
                         <button
                             type="button"

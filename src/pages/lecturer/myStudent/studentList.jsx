@@ -23,46 +23,46 @@ import {
 import { getListMahasiswa } from '../../../services/dosenWali/myStudent/listMahasiswaService';
 import { mlPredictionService } from '../../../services/dosenWali/myStudent/mlPredictionService';
 
+/**
+ * Komponen untuk menampilkan daftar mahasiswa wali dengan fitur filter, sorting, dan prediksi.
+ * Component to display a list of advisee students with filtering, sorting, and prediction features.
+ */
 export default function DaftarMahasiswaWali() {
+    // State untuk filter dan pencarian
+    // State for filters and search
     const [selectedClass, setSelectedClass] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
-    const [showDetail, setShowDetail] = useState(null);
+
+    // State untuk data dan UI
+    // State for data and UI
+    const [showDetail, setShowDetail] = useState(null);// Menyimpan NIM mahasiswa yang detailnya ditampilkan
     const [filterStatus, setFilterStatus] = useState('all');
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [classOptions, setClassOptions] = useState([]);
     const [activeTab, setActiveTab] = useState('overview');
+
+    // State khusus untuk fitur prediksi ML
+    // State specifically for the ML prediction feature
     const [showPrediction, setShowPrediction] = useState(false);
     const [isLoadingPrediction, setIsLoadingPrediction] = useState(false);
     const [predictionResult, setPredictionResult] = useState(null);
     const [predictionError, setPredictionError] = useState(null);
 
-    // New state for sorting
+    // State untuk konfigurasi sorting
+    // State for sorting configuration
     const [sortConfig, setSortConfig] = useState({
         key: null,
         direction: 'asc',
     });
 
+    // Hook untuk navigasi
+    // Hook for navigation
     const navigate = useNavigate();
-
-    // Mock prediction result (replace with actual API call)
-    // const getPredictionResult = (student) => ({
-    //     predictedStatus: 'Bermasalah',
-    //     confidence: 78,
-    //     riskFactors: [
-    //         { factor: 'IPK Menurun', weight: 35, status: 'high' },
-    //         { factor: 'Masalah Finansial', weight: 28, status: 'high' },
-    //         { factor: 'Absensi Rendah', weight: 15, status: 'medium' },
-    //     ],
-    //     recommendations: [
-    //         'Konseling akademik intensif',
-    //         'Bantuan beasiswa/keringanan biaya',
-    //         'Monitoring kehadiran ketat',
-    //     ],
-    // });
-
-    // Fetch data from backend when component mounts
+    
+    // Mengambil data mahasiswa dari backend saat komponen dimuat
+    // Fetching student data from the backend when the component mounts
     useEffect(() => {
         const fetchStudents = async () => {
             setLoading(true);
@@ -71,7 +71,8 @@ export default function DaftarMahasiswaWali() {
                 if (response.success) {
                     setStudents(response.data);
 
-                    // Extract unique class options from the data
+                    // Mengekstrak opsi kelas unik dari data
+                    // Extracting unique class options from the data
                     const uniqueClasses = [
                         ...new Set(
                             response.data.map((student) => student.kelas)
@@ -92,7 +93,8 @@ export default function DaftarMahasiswaWali() {
         fetchStudents();
     }, []);
 
-    // Reset popup states when showDetail changes
+    // Mereset state popup detail saat popup dibuka/ditutup
+    // Resetting detail popup states when the popup is opened/closed
     useEffect(() => {
         if (showDetail) {
             setActiveTab('overview');
@@ -103,7 +105,11 @@ export default function DaftarMahasiswaWali() {
         }
     }, [showDetail]);
 
-    // Sorting function
+    /**
+     * Menangani permintaan sorting saat header tabel diklik.
+     * Handles sorting requests when a table header is clicked.
+     * @param {string} key - Kunci kolom yang akan di-sort.
+     */
     const handleSort = (key) => {
         let direction = 'asc';
         if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -112,7 +118,12 @@ export default function DaftarMahasiswaWali() {
         setSortConfig({ key, direction });
     };
 
-    // Get sort icon
+    /**
+     * Menampilkan ikon sorting yang sesuai pada header tabel.
+     * Displays the appropriate sorting icon in the table header.
+     * @param {string} columnKey - Kunci kolom.
+     * @returns {JSX.Element} - Ikon sorting.
+     */
     const getSortIcon = (columnKey) => {
         if (sortConfig.key !== columnKey) {
             return <ArrowUpDown className="h-4 w-4 ml-1 text-white" />;
@@ -124,6 +135,8 @@ export default function DaftarMahasiswaWali() {
         );
     };
 
+    // Fungsi-fungsi helper untuk styling berdasarkan status
+    // Helper functions for styling based on status
     const getStatusColor = (status) => {
         switch (status) {
             case 'aman':
@@ -163,23 +176,33 @@ export default function DaftarMahasiswaWali() {
         }
     };
 
+    /**
+     * Menavigasi ke halaman detail mahasiswa.
+     * Navigates to the student detail page.
+     * @param {string} nim - NIM mahasiswa.
+     */
     const handleRowClick = (nim) => {
         navigate(`/lecturer/detailMahasiswa/${nim}`);
     };
 
-    // GANTI SELURUH FUNCTION INI:
+     /**
+     * Menjalankan prediksi status mahasiswa menggunakan layanan ML.
+     * Runs a prediction on the student's status using the ML service.
+     */
     const handlePrediction = async () => {
         setIsLoadingPrediction(true);
         setPredictionError(null);
 
         try {
-            // Get current student data
+            // Menyiapkan data input sesuai format yang diharapkan backend
+            // Preparing input data in the format expected by the backend
             const currentStudent = students.find((s) => s.nim === showDetail);
             if (!currentStudent) {
                 throw new Error('Student data not found');
             }
 
-            // Prepare prediction data sesuai backend expectation
+            // Memanggil layanan prediksi ML
+            // Calling the ML prediction service
             const predictionData = {
                 ipk: parseFloat(currentStudent.ipk) || undefined,
                 skor_psikologi: parseInt(currentStudent.skor_psikologi) || undefined,
@@ -214,7 +237,8 @@ export default function DaftarMahasiswaWali() {
         }
     };
 
-    // Enhanced filtering and sorting
+    // Menerapkan filter dan sorting pada daftar mahasiswa
+    // Applying filters and sorting to the student list
     const filteredAndSortedStudents = students
         .filter(
             (student) =>
@@ -258,7 +282,8 @@ export default function DaftarMahasiswaWali() {
                     Daftar Mahasiswa Wali
                 </h2>
 
-                {/* Control Panel */}
+                {/* Panel Kontrol (Filter dan Pencarian) */}
+                {/* Control Panel (Filters and Search) */}
                 <div className="bg-white p-4 mb-6 rounded-lg shadow flex flex-col md:flex-row justify-between items-center gap-4">
                     {/* Class Selector */}
                     <div className="w-full md:w-auto">
@@ -337,14 +362,13 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 )}
 
-                {/* Loading State */}
+                {/* Tampilan Loading dan Error */}
+                {/* Loading and Error States */}
                 {loading && (
                     <div className="bg-white p-8 rounded-lg shadow text-center">
                         <p className="text-lg">Loading student data...</p>
                     </div>
                 )}
-
-                {/* Error State */}
                 {error && (
                     <div className="bg-white p-8 rounded-lg shadow text-center">
                         <p className="text-lg text-red-600">{error}</p>
@@ -356,7 +380,8 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 )}
 
-                {/* Table */}
+                {/* Tabel Mahasiswa */}
+                {/* Student Table */}
                 {!loading && !error && (
                     <div className="overflow-x-auto bg-white rounded-lg shadow">
                         <table className="w-full">
@@ -465,6 +490,7 @@ export default function DaftarMahasiswaWali() {
                     </div>
                 )}
 
+                {/* Popup Detail Mahasiswa yang Ditingkatkan */}
                 {/* Enhanced Student Detail Popup */}
                 {showDetail && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start sm:items-center p-2 sm:p-4 z-50 overflow-y-auto">
@@ -474,8 +500,6 @@ export default function DaftarMahasiswaWali() {
                                     (s) => s.nim === showDetail
                                 );
                                 if (!student) return null;
-
-                                // const predictionResult = getPredictionResult(student);
 
                                 return (
                                     <>
@@ -524,7 +548,7 @@ export default function DaftarMahasiswaWali() {
                                             </div>
                                         </div>
 
-                                        {/* Tabs - Mobile Scrollable */}
+                                        {/* Tabs - Scrollable */}
                                         <div className="border-b border-gray-200 overflow-x-auto">
                                             <div className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max">
                                                 <button
@@ -556,7 +580,7 @@ export default function DaftarMahasiswaWali() {
                                             </div>
                                         </div>
 
-                                        {/* Content - Mobile Optimized */}
+                                        {/* Content - Optimized */}
                                         <div
                                             className="p-4 sm:p-6 overflow-y-auto"
                                             style={{
@@ -633,7 +657,7 @@ export default function DaftarMahasiswaWali() {
                                                         </div>
                                                     </div>
 
-                                                    {/* Quick Status Overview - Mobile Optimized */}
+                                                    {/* Quick Status Overview - Optimized */}
                                                     <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
                                                         <h4 className="font-semibold text-gray-800 mb-3 text-sm sm:text-base">
                                                             Status Monitoring
@@ -782,7 +806,7 @@ export default function DaftarMahasiswaWali() {
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-4 sm:space-y-6">
-                                                            {/* Prediction Result - Mobile Optimized */}
+                                                            {/* Prediction Result - Optimized */}
                                                             <div
                                                                 className={`rounded-xl p-4 sm:p-6 border ${
                                                                     predictionResult?.predicted_status ===
@@ -1033,7 +1057,7 @@ export default function DaftarMahasiswaWali() {
                                             )}
                                         </div>
 
-                                        {/* Footer - Mobile Optimized */}
+                                        {/* Footer - Optimized */}
                                         <div className="border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
                                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
                                                 <p className="text-xs sm:text-sm text-gray-500 hidden sm:block"></p>

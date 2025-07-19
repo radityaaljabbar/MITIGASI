@@ -1,7 +1,14 @@
 // src/services/authService.js - Updated with dynamic API configuration
 import { getApiUrl, getAuthHeaders } from '../config/api.js';
 
-// Login function
+/**
+ * Mengirim permintaan login ke server.
+ * Sends a login request to the server.
+ * @param {string} id - NIM/NIP/Username pengguna.
+ * @param {string} password - Password pengguna.
+ * @param {string} role - Peran pengguna ('mahasiswa', 'dosen_wali', 'admin').
+ * @returns {Promise<object>} - Hasil dari panggilan API, termasuk token dan data pengguna jika berhasil.
+ */
 export const loginUser = async (id, password, role) => {
     try {
         const response = await fetch(getApiUrl('/login'), {
@@ -14,7 +21,8 @@ export const loginUser = async (id, password, role) => {
 
         const data = await response.json();
 
-        // If login is successful, store the token and user info
+        // Jika login berhasil, simpan token dan informasi pengguna di localStorage
+        // If login is successful, store the token and user info in localStorage
         if (data.success) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -30,33 +38,53 @@ export const loginUser = async (id, password, role) => {
     }
 };
 
-// Get current user from localStorage
+/**
+ * Mengambil data pengguna yang saat ini login dari localStorage.
+ * Gets the currently logged-in user's data from localStorage.
+ * @returns {object} - Objek pengguna.
+ */
 export const getCurrentUser = () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
 };
 
-// Get auth token from localStorage
+/**
+ * Mengambil token otentikasi dari localStorage.
+ * Gets the authentication token from localStorage.
+ * @returns {string} - Token.
+ */
 export const getToken = () => {
     return localStorage.getItem('token');
 };
 
-// Check if user is authenticated
+/**
+ * Memeriksa apakah pengguna sudah terotentikasi (memiliki token).
+ * Checks if the user is authenticated (has a token).
+ */
 export const isAuthenticated = () => {
     return !!getToken();
 };
 
-// Get user role
+/**
+ * Mengambil peran (role) pengguna yang saat ini login.
+ * Gets the role of the currently logged-in user.
+ */
 export const getUserRole = () => {
     const user = getCurrentUser();
     return user ? user.role : null;
 };
 
-// Logout function - calls the backend logout endpoint and clears localStorage
+/**
+ * Menangani proses logout, memanggil endpoint logout di backend dan membersihkan localStorage.
+ * Handles the logout process, calling the backend logout endpoint and clearing localStorage.
+ * @returns {Promise<object>} - Hasil dari panggilan API logout.
+ */
 export const logoutUser = async () => {
     try {
         const token = localStorage.getItem('token');
 
+        // Jika tidak ada token, cukup bersihkan localStorage
+        // If no token exists, just clear localStorage
         if (!token) {
             // If no token, just clear localStorage and return
             localStorage.removeItem('token');
@@ -64,7 +92,8 @@ export const logoutUser = async () => {
             return { success: true };
         }
 
-        // Call the backend logout endpoint with the token
+        // Memanggil endpoint logout di backend dengan token
+        // Calling the backend logout endpoint with the token
         const response = await fetch(getApiUrl('/logout'), {
             method: 'GET',
             headers: {
@@ -72,14 +101,16 @@ export const logoutUser = async () => {
             },
         });
 
-        // Clear localStorage regardless of response
+        // Membersihkan localStorage terlepas dari respons server
+        // Clearing localStorage regardless of the server's response
         localStorage.removeItem('token');
         localStorage.removeItem('user');
 
         return await response.json();
     } catch (error) {
         console.error('Logout error:', error);
-        // Clear localStorage even if there was an error
+        // Tetap bersihkan localStorage meskipun terjadi error jaringan
+        // Still clear localStorage even if a network error occurs
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         return {
@@ -90,7 +121,11 @@ export const logoutUser = async () => {
     }
 };
 
-// Function to fetch current user data from the backend
+/**
+ * Mengambil data pengguna yang sedang login langsung dari backend menggunakan token.
+ * Fetches the currently logged-in user's data directly from the backend using the token.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const fetchCurrentUser = async () => {
     try {
         const token = localStorage.getItem('token');

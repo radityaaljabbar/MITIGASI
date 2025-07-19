@@ -1,8 +1,22 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan informasi ringkas mahasiswa terkait psikologi.
+ * Component to display concise student information related to psychology.
+ * @param {object} props - Props komponen.
+ * @param {object} props.student - Data mahasiswa.
+ */
 export default function StudentInfo({ student }) {
+    // Jika tidak ada data mahasiswa, jangan render
+    // If there is no student data, do not render
     if (!student) return null;
 
+    /**
+     * Mendapatkan warna badge berdasarkan status.
+     * Gets the badge color based on the status.
+     * @param {string} status - Status mahasiswa.
+     * @returns {string} - Kelas Tailwind CSS untuk warna.
+     */
     const getStatusBadgeColor = (status) => {
         switch (status?.toLowerCase()) {
             case 'aman':
@@ -19,6 +33,8 @@ export default function StudentInfo({ student }) {
     return (
         <div className="bg-[#FAF0E6] p-6 rounded-lg lg:col-span-2 border">
             <h3 className="text-lg font-medium mb-4">Informasi Mahasiswa</h3>
+            {/* Grid untuk informasi dasar */}
+            {/* Grid for basic information */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <p className="text-sm text-gray-600">Nama</p>
@@ -34,6 +50,8 @@ export default function StudentInfo({ student }) {
                 </div>
             </div>
 
+            {/* Informasi status */}
+            {/* Status information */}
             <div className="mt-4 pt-4 border-t border-amber-200">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between ">
                     <div>
@@ -48,6 +66,8 @@ export default function StudentInfo({ student }) {
                         </span>
                     </div>
 
+                    {/* Menampilkan tanggal tes terakhir jika ada */}
+                    {/* Displaying the last test date if available */}
                     {student.tanggalTes && (
                         <div className="mt-2 sm:mt-0">
                             <p className="text-sm text-gray-600 mb-1">
@@ -59,6 +79,8 @@ export default function StudentInfo({ student }) {
                         </div>
                     )}
 
+                    {/* Menampilkan status kuesioner jika ada */}
+                    {/* Displaying the questionnaire status if available */}
                     {student.statusKuesioner && (
                         <div className="mt-2 sm:mt-0 ">
                             <p className="text-sm text-gray-600 mb-1">

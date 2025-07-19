@@ -1,10 +1,17 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan informasi dasar dan ringkasan finansial mahasiswa.
+ * Component to display basic and financial summary information of a student.
+ * @param {object} props - Props komponen.
+ * @param {object} props.studentData - Data mahasiswa.
+ */
 const StudentInfoFinansialPage = ({ studentData }) => {
     return (
         <div className="bg-orange-50 p-4 rounded-lg mb-6 border">
             <h3 className="text-lg font-medium mb-4">Informasi Mahasiswa</h3>
             
+            {/* Grid Informasi Dasar */}
             {/* Basic Information Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
@@ -21,10 +28,11 @@ const StudentInfoFinansialPage = ({ studentData }) => {
                 </div>
             </div>
 
+            {/* Bagian Status Finansial */}
             {/* Financial Status Section */}
             <div className="border-t pt-4">
-                
-                {/* Additional financial info if available */}
+                {/* Informasi waktu pembaruan data */}
+                {/* Data last updated information */}
                 {studentData?.lastUpdated && studentData.lastUpdated !== '-' && (
                     <div className="mt-2">
                         <p className="text-xs text-gray-500">
@@ -33,7 +41,8 @@ const StudentInfoFinansialPage = ({ studentData }) => {
                     </div>
                 )}
 
-                {/* Summary statistics */}
+                {/* Statistik ringkasan pengajuan */}
+                {/* Request summary statistics */}
                 <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-white p-3 rounded border">
                         <p className="text-xs text-gray-600">Total Pengajuan Pending</p>

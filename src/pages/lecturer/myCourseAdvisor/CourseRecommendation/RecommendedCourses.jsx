@@ -2,7 +2,15 @@ import React from 'react';
 import { useMyCourseAdvisor } from '../MyCourseAdvisorContext';
 import RecommendationSummary from './RecommendationSummary';
 
+/**
+ * Komponen untuk menampilkan tabel mata kuliah yang sudah direkomendasikan.
+ * Pengguna dapat menghapus mata kuliah dari daftar ini.
+ * Component to display a table of already recommended courses.
+ * The user can remove courses from this list.
+ */
 const RecommendedCourses = () => {
+    // Mengambil state dan fungsi yang relevan dari konteks
+    // Fetching relevant state and functions from the context
     const {
         recommendedCourses,
         removeCourse,
@@ -14,6 +22,8 @@ const RecommendedCourses = () => {
         <div>
             <h3 className="text-lg font-medium mb-2 flex items-center justify-between">
                 <span>Mata Kuliah Direkomendasikan</span>
+                {/* Menampilkan tanggal pembuatan rekomendasi jika merupakan rekomendasi yang sudah ada */}
+                {/* Displaying the creation date of the recommendation if it's an existing one */}
                 {hasExistingRecommendations &&
                     recommendedCourses.length > 0 && (
                         <span className="text-xs text-gray-500">
@@ -37,6 +47,8 @@ const RecommendedCourses = () => {
                         </tr>
                     </thead>
                     <tbody>
+                        {/* Tampilan kondisional berdasarkan status loading dan ketersediaan data */}
+                        {/* Conditional rendering based on loading status and data availability */}
                         {isLoadingRecommendations ? (
                             <tr>
                                 <td
@@ -46,6 +58,8 @@ const RecommendedCourses = () => {
                                 </td>
                             </tr>
                         ) : recommendedCourses.length > 0 ? (
+                            // Merender setiap mata kuliah yang direkomendasikan
+                            // Rendering each recommended course
                             recommendedCourses.map((course) => (
                                 <tr
                                     key={course.id}
@@ -75,6 +89,8 @@ const RecommendedCourses = () => {
                                 </tr>
                             ))
                         ) : (
+                            // Pesan jika tidak ada rekomendasi
+                            // Message if there are no recommendations
                             <tr>
                                 <td
                                     colSpan="6"
@@ -89,7 +105,8 @@ const RecommendedCourses = () => {
                 </table>
             </div>
 
-            {/* Show summary if there are recommended courses */}
+            {/* Menampilkan ringkasan hanya jika ada mata kuliah yang direkomendasikan */}
+            {/* Displaying the summary only if there are recommended courses */}
             {recommendedCourses.length > 0 && <RecommendationSummary />}
         </div>
     );

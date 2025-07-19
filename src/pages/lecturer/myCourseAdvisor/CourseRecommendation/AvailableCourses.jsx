@@ -1,7 +1,15 @@
 import React from 'react';
 import { useMyCourseAdvisor } from '../MyCourseAdvisorContext';
 
+/**
+ * Komponen untuk menampilkan daftar mata kuliah yang tersedia untuk direkomendasikan.
+ * Dilengkapi dengan filter semester dan logika untuk menambahkan mata kuliah ke daftar rekomendasi.
+ * Component to display the list of available courses for recommendation.
+ * It includes a semester filter and logic for adding courses to the recommendation list.
+ */
 const AvailableCourses = () => {
+    // Mengambil state dan fungsi yang dibutuhkan dari context
+    // Fetching the necessary state and functions from the context
     const {
         selectedSemester,
         handleSemesterChange,
@@ -12,10 +20,11 @@ const AvailableCourses = () => {
         addCourse,
         MAX_SKS,
     } = useMyCourseAdvisor();
-    // 1. Buat array baru yang unik berdasarkan `kode_mk`
-    // Kita menggunakan Map untuk efisiensi. Map akan secara otomatis
-    // menimpa entri dengan kunci (kode_mk) yang sama, sehingga hanya
-    // entri terakhir yang unik yang tersisa.
+
+    // Logika untuk memastikan setiap mata kuliah hanya muncul sekali dalam daftar
+    // Logic to ensure each course appears only once in the list
+    // Map digunakan untuk efisiensi, menimpa entri dengan kunci (kode_mk) yang sama.
+    // A Map is used for efficiency, overwriting entries with the same key (kode_mk).
     const uniqueCoursesMap = new Map();
     filteredAvailableCourses.forEach((course) => {
         uniqueCoursesMap.set(course.kode_mk, course);
@@ -26,6 +35,8 @@ const AvailableCourses = () => {
         <div>
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-medium">Mata Kuliah Tersedia</h3>
+                {/* Filter berdasarkan semester */}
+                {/* Filter by semester */}
                 <div className="flex items-center">
                     <label className="mr-2 text-sm font-medium text-gray-700">
                         Semester:
@@ -47,6 +58,8 @@ const AvailableCourses = () => {
                 </div>
             </div>
 
+            {/* Peringatan jika batas SKS terlampaui */}
+            {/* Warning if the SKS limit is exceeded */}
             {sksLimitExceeded && (
                 <div className="mb-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700">
                     <p>
@@ -56,7 +69,8 @@ const AvailableCourses = () => {
                 </div>
             )}
 
-            {/* Table for available courses */}
+            {/* Tabel mata kuliah yang tersedia */}
+            {/* Table of available courses */}
             <div className="overflow-x-auto border rounded-lg shadow-sm max-h-[600px] overflow-y-auto">
                 <table className="w-full border-collapse bg-white">
                     <thead className="sticky top-0 z-10">
@@ -71,7 +85,8 @@ const AvailableCourses = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* 2. Gunakan array yang sudah unik ini untuk dirender */}
+                        {/* Menggunakan data unik untuk dirender */}
+                        {/* Using the unique data for rendering */}
                         {uniqueFilteredCourses.length > 0 ? (
                             uniqueFilteredCourses
                                 .sort((a, b) => {
@@ -80,6 +95,8 @@ const AvailableCourses = () => {
                                     return aName.localeCompare(bName);
                                 })
                                 .map((course) => {
+                                    // Memeriksa riwayat mata kuliah untuk memberikan highlight
+                                    // Checking course history to apply highlighting
                                     const courseHistory =
                                         studentCourseHistory.find(
                                             (history) =>
@@ -100,6 +117,8 @@ const AvailableCourses = () => {
                                         }
                                     }
 
+                                    // Memeriksa apakah penambahan mata kuliah ini akan melebihi batas SKS
+                                    // Checking if adding this course will exceed the SKS limit
                                     const exceedsSKSLimit = wouldExceedSKSLimit(
                                         course.sks_mk
                                     );
@@ -157,6 +176,8 @@ const AvailableCourses = () => {
                                     );
                                 })
                         ) : (
+                            // Pesan jika tidak ada mata kuliah tersedia
+                            // Message if no available courses
                             <tr>
                                 <td
                                     colSpan="7"

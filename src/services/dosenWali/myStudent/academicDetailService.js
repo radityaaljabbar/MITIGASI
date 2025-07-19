@@ -1,7 +1,8 @@
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
- * @desc Get detail riwayat nilai mata kuliah mahasiswa
+ * Mengambil detail riwayat nilai mata kuliah seorang mahasiswa.
+ * Gets the detailed course grade history of a student.
  * @param {string}
  * @return {Promise <Object>}
  */
@@ -30,6 +31,8 @@ export const getStudentCourseHistory = async (nim) => {
             }
         );
 
+        // Penanganan error berdasarkan status code HTTP
+        // Error handling based on HTTP status code
         if (!response.ok) {
             if (response.status === 401) {
                 return {
@@ -62,6 +65,8 @@ export const getStudentCourseHistory = async (nim) => {
         const data = await response.json();
         console.log('API Response:', data);
 
+        // Memastikan struktur respons konsisten
+        // Ensuring a consistent response structure
         return {
             success: data.success || true,
             message: data.message || 'Data berhasil diambil',

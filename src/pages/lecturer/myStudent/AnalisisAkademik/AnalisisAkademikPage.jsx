@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { getStudentTAKIPKSKS } from '../../../../services/dosenWali/myStudent/academicMahasiswaService';
-
-// Import separated components
 import AnalisisTrendContent from '../../../../components/compDosenWali/compMyStudent/compAnalisisAkademik/AnalisisTrendContent';
 import DetailNilaiContent from '../../../../components/compDosenWali/compMyStudent/compAnalisisAkademik/DetailNilaiContent';
 
+/**
+ * Fungsi helper untuk mendapatkan style visual berdasarkan status akademik.
+ * Helper function to get visual styling based on academic status.
+ * @param {string} status - Status akademik ('aman', 'siaga', 'bermasalah').
+ * @returns {object} - Objek berisi kelas-kelas CSS dan ikon.
+ */
 const getStatusStyle = (status) => {
     const normalizedStatus = status?.toLowerCase();
     
@@ -45,6 +49,12 @@ const getStatusStyle = (status) => {
     }
 };
 
+/**
+ * Komponen untuk menampilkan kartu informasi dasar mahasiswa.
+ * Component to display the basic student information card.
+ * @param {object} props - Props.
+ * @param {object} props.studentData - Data mahasiswa.
+ */
 const StudentInfoAkademik = ({ studentData }) => {
     const statusStyle = getStatusStyle(studentData.klasifikasi);
 
@@ -82,6 +92,12 @@ const StudentInfoAkademik = ({ studentData }) => {
     );
 };
 
+/**
+ * Komponen untuk menampilkan dashboard ringkasan akademik (IPK, SKS, TAK, dll).
+ * Component to display the academic summary dashboard (GPA, SKS, TAK, etc.).
+ * @param {object} props - Props.
+ * @param {object} props.studentData - Data mahasiswa.
+ */
 const AkademikDashboard = ({ studentData }) => {
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -166,19 +182,33 @@ const AkademikDashboard = ({ studentData }) => {
     );
 };
 
+/**
+ * Komponen halaman utama untuk analisis akademik seorang mahasiswa.
+ * Main page component for a student's academic analysis.
+ */
 const AnalisisAkademikPage = () => {
+    // Mengambil NIM dari parameter URL.
+    // Getting the NIM from the URL parameters.
     const { nim } = useParams();
-    const [activeSubTab, setActiveSubTab] = useState('analisisTrend'); // Default ke Detail Nilai
-    const [takValue, setTakValue] = useState(0);
+    // State untuk mengontrol tab yang aktif (analisis trend atau detail nilai).
+    // State to control the active tab (trend analysis or grade details).
+    const [activeSubTab, setActiveSubTab] = useState('analisisTrend');
+    // State untuk menyimpan data-data akademik mahasiswa.
+    // State to store the student's academic data.
     const [sksValue, setSksValue] = useState(0);
+    const [takValue, setTakValue] = useState(0);
     const [ipkValue, setIpkValue] = useState(0);
     const [namaValue, setnamaValue] = useState('');
     const [kelasValue, setkelasValue] = useState('');
     const [klasfikasiValue, setklasfikasiValue] = useState(0);
     const [perSemesterValue, setperSemesterValue] = useState([]);
+    // State untuk loading dan error.
+    // State for loading and errors.
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // useEffect untuk mengambil data akademik saat komponen dimuat atau NIM berubah.
+    // useEffect to fetch academic data when the component mounts or the NIM changes.
     useEffect(() => {
         const fetchTAK = async () => {
             try {
@@ -209,10 +239,12 @@ const AnalisisAkademikPage = () => {
         }
     }, [nim]);
 
-    // mengambil data semester sekarang
+    // Mengambil semester terakhir dari data.
+    // Getting the latest semester from the data.
     const semuaSemester = perSemesterValue.map((item) => item.semester);
 
-    //? Mock data untuk simulasi
+    // Membuat objek data mahasiswa dari state yang sudah di-fetch.
+    // Creating the student data object from the fetched state.
     const mockStudentData = {
         name: namaValue,
         nim: nim,
@@ -225,7 +257,11 @@ const AnalisisAkademikPage = () => {
         klasifikasi : klasfikasiValue
     };
 
-    // Function to render content based on active tab
+    /**
+     * Merender konten sub-tab yang aktif.
+     * Renders the content of the active sub-tab.
+     * @returns {JSX.Element} - Komponen yang akan dirender.
+     */
     const renderContent = () => {
         switch (activeSubTab) {
             case 'analisisTrend':
@@ -237,6 +273,8 @@ const AnalisisAkademikPage = () => {
         }
     };
 
+    // Tampilan saat loading.
+    // View during loading.
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-6">
@@ -247,6 +285,8 @@ const AnalisisAkademikPage = () => {
         );
     }
 
+    // Tampilan saat error.
+    // View on error.
     if (error) {
         return (
             <div className="container mx-auto px-4 py-6">
@@ -259,15 +299,19 @@ const AnalisisAkademikPage = () => {
 
     return (
         <div className="container mx-auto px-4 py-6">
-            {/* Student Info */}
+            {/* Kartu Informasi Mahasiswa */}
+            {/* Student Information Card */}
             <StudentInfoAkademik studentData={mockStudentData} />
 
-            {/* AkademikDashboard - simplified */}
+            {/* Dashboard Akademik */}
+            {/* Academic Dashboard */}
             <AkademikDashboard studentData={mockStudentData} />
 
-            {/* Tab Content Container - Contains both the navbar and content */}
+            {/* Kontainer untuk Konten dengan Tab */}
+            {/* Container for Tabbed Content */}
             <div className="bg-white rounded-lg shadow-md">
-                {/* Sub Navigation - Only 2 tabs now */}
+                {/* Navigasi Sub-Tab */}
+                {/* Sub-Tab Navigation */}
                 <div className="flex justify-center border-b border-gray-200">
                     <button
                         onClick={() => setActiveSubTab('analisisTrend')}
@@ -290,7 +334,8 @@ const AnalisisAkademikPage = () => {
                     </button>
                 </div>
 
-                {/* Content based on active tab - in the same container */}
+                {/* Konten yang dirender berdasarkan tab aktif */}
+                {/* Content rendered based on the active tab */}
                 {renderContent()}
             </div>
         </div>

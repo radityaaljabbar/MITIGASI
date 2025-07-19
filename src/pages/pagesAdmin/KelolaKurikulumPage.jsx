@@ -1,14 +1,22 @@
 import React from 'react';
 
-// Import komponen
+// Mengimpor komponen-komponen yang diperlukan
+// Importing necessary components
 import KelolaKurikulumTable from '../../components/compAdmin/kelolaKurikulum/KelolaKurikulumTable';
 import KelolaKurikulumModal from '../../components/compAdmin/kelolaKurikulum/KelolaKurikulumModal';
 import DeleteConfirmationModal from '../../components/compAdmin/kelolaPengguna/DeleteConfirmationModal';
 
-// Import custom hook
+// Mengimpor custom hook untuk logika pengelolaan kurikulum
+// Importing the custom hook for curriculum management logic
 import useKelolaKurikulum from '../../components/compAdmin/kelolaKurikulum/hooks/useKelolaKurikulum';
 
+/**
+ * Komponen halaman untuk mengelola data kurikulum dan mata kuliah.
+ * Page component for managing curriculum and course data.
+ */
 const KelolaKurikulumPage = () => {
+    // Mendestrukturisasi state dan fungsi dari custom hook
+    // Destructuring state and functions from the custom hook
     const {
         // Data
         kurikulumList,
@@ -49,7 +57,8 @@ const KelolaKurikulumPage = () => {
 
     return (
         <div className="p-6 bg-[#FAF0E6] min-h-screen">
-            {/* Header */}
+            {/* Header Halaman */}
+            {/* Page Header */}
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
                     Kelola Kurikulum
@@ -59,10 +68,12 @@ const KelolaKurikulumPage = () => {
                 </p>
             </div>
 
-            {/* Toolbar */}
+            {/* Toolbar untuk Filter dan Aksi */}
+            {/* Toolbar for Filters and Actions */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                 <div className="space-y-4">
                     {/* Baris pertama: Filter kurikulum dan tombol tambah */}
+                    {/* First row: Curriculum filter and add button */}
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                         <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
@@ -101,7 +112,8 @@ const KelolaKurikulumPage = () => {
                         </button>
                     </div>
 
-                    {/* Baris kedua: Search dan filter */}
+                    {/* Baris kedua: Pencarian dan filter tambahan */}
+                    {/* Second row: Search and additional filters */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Search */}
                         <div className="relative">
@@ -159,7 +171,8 @@ const KelolaKurikulumPage = () => {
                         </div>
                     </div>
 
-                    {/* Info jumlah data */}
+                    {/* Informasi jumlah data dan tombol reset filter */}
+                    {/* Data count info and reset filter button */}
                     {!loading.mataKuliah && (
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600">
@@ -185,7 +198,8 @@ const KelolaKurikulumPage = () => {
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Komponen Tabel Mata Kuliah */}
+            {/* Course Table Component */}
             <KelolaKurikulumTable
                 mataKuliahList={filteredMataKuliah}
                 loading={loading.mataKuliah}
@@ -193,7 +207,8 @@ const KelolaKurikulumPage = () => {
                 onDelete={handleOpenDeleteModal}
             />
 
-            {/* Modal Form */}
+            {/* Komponen Modal Form Mata Kuliah */}
+            {/* Course Form Modal Component */}
             <KelolaKurikulumModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
@@ -206,7 +221,8 @@ const KelolaKurikulumPage = () => {
                 kelompokKeahlianList={kelompokKeahlianList}
             />
 
-            {/* Delete Confirmation Modal */}
+            {/* Komponen Modal Konfirmasi Hapus */}
+            {/* Delete Confirmation Modal Component */}
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={handleCloseDeleteModal}

@@ -3,12 +3,23 @@ import { FaFileDownload } from 'react-icons/fa';
 import { FileText, Download, ExternalLink, X } from 'lucide-react';
 import StatusAksiDosen from './StatusAksiDosen';
 
+/**
+ * Komponen modal untuk menampilkan detail pengajuan finansial dan memberikan aksi (setuju/tolak).
+ * Modal component to display financial request details and provide actions (approve/reject).
+ * @param {object} props - Props komponen.
+ * @param {object} props.selectedRequest - Data pengajuan yang dipilih.
+ * @param {function} props.onClose - Fungsi untuk menutup modal.
+ * @param {function} props.onApprove - Fungsi untuk menyetujui pengajuan.
+ * @param {function} props.onReject - Fungsi untuk menolak pengajuan.
+ */
 const DetailPengajuanFinansial = ({
     selectedRequest,
     onClose,
     onApprove,
     onReject,
 }) => {
+    // State untuk mengelola status pemrosesan dan modal PDF
+    // State to manage processing status and the PDF modal
     const [isProcessing, setIsProcessing] = useState(false);
     const [processingAction, setProcessingAction] = useState('');
     const [showPdfModal, setShowPdfModal] = useState(false);
@@ -34,18 +45,22 @@ const DetailPengajuanFinansial = ({
         }
     };
 
-    // Handle PDF modal
+    // Menangani aksi buka modal PDF
+    // Handle opening the PDF modal
     const handleOpenPdf = (pdf) => {
         setActivePdf(pdf);
         setShowPdfModal(true);
     };
 
+    // Menangani aksi tutup modal PDF
+    // Handle closing the PDF modal
     const handleClosePdf = () => {
         setShowPdfModal(false);
         setActivePdf(null);
     };
 
-    // Handle file download
+    // Menangani aksi unduh file
+    // Handle file download action
     const handleDownload = (url, filename) => {
         const anchor = document.createElement('a');
         anchor.href = url;
@@ -58,6 +73,8 @@ const DetailPengajuanFinansial = ({
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+                {/* Header Modal */}
+                {/* Modal Header */}
                 <div className="bg-[#951A22] text-white p-4 flex justify-between items-center">
                     <h3 className="text-lg font-medium">Detail Pengajuan</h3>
                     <button
@@ -66,7 +83,11 @@ const DetailPengajuanFinansial = ({
                         ✕
                     </button>
                 </div>
+                {/* Konten Modal */}
+                {/* Modal Content */}
                 <div className="p-6">
+                    {/* Detail-detail pengajuan */}
+                    {/* Request details */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <p className="text-sm text-gray-600">
@@ -143,6 +164,8 @@ const DetailPengajuanFinansial = ({
                         </div>
                     </div>
 
+                    {/* Tampil jika ada rencana cicilan */}
+                    {/* Display if installment plan exists */}
                     {selectedRequest.installmentPlan && (
                         <div className="mb-6">
                             <p className="text-sm text-gray-600 mb-1">
@@ -154,6 +177,8 @@ const DetailPengajuanFinansial = ({
                         </div>
                     )}
 
+                    {/* Tampil jika pengajuan ditolak */}
+                    {/* Display if the request was rejected */}
                     {selectedRequest.rejectionReason && (
                         <div className="mb-6">
                             <p className="text-sm text-gray-600 mb-1">
@@ -165,6 +190,8 @@ const DetailPengajuanFinansial = ({
                         </div>
                     )}
 
+                    {/* Bagian lampiran dokumen */}
+                    {/* Document attachment section */}
                     {selectedRequest.lampiran && (
                         <div className="mb-6">
                             <p className="text-sm text-gray-600 mb-2">
@@ -203,6 +230,8 @@ const DetailPengajuanFinansial = ({
                         </div>
                     )}
 
+                    {/* Tombol aksi untuk dosen, hanya muncul jika status "Menunggu Review" */}
+                    {/* Action buttons for the lecturer, only appear if status is "Menunggu Review" */}
                     {selectedRequest.status === 'Menunggu Review' && (
                         <div className="flex justify-end space-x-3 mt-6">
                             <button
@@ -220,6 +249,9 @@ const DetailPengajuanFinansial = ({
                     )}
                 </div>
             </div>
+
+            {/* Modal untuk menampilkan PDF */}
+            {/* Modal to display PDF */}
             {showPdfModal && activePdf && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full h-5/6 flex flex-col">
@@ -256,8 +288,6 @@ const DetailPengajuanFinansial = ({
                                 </button>
                             </div>
                         </div>
-
-                        {/* PDF Viewer */}
                         <div className="flex-1 overflow-hidden p-4">
                             <div className="w-full h-full">
                                 <iframe

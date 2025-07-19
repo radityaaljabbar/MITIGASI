@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 
-// Updated to accept students directly as a prop
+/**
+ * Komponen untuk menampilkan daftar feedback mahasiswa.
+ * Dilengkapi dengan fitur pencarian dan filter berdasarkan kelas.
+ * Component to display a list of student feedback.
+ * Includes search and class-based filtering features.
+ * @param {object} props - Props komponen.
+ * @param {function} props.onViewDetail - Callback saat baris mahasiswa diklik.
+ * @param {Array} props.students - Array data feedback mahasiswa.
+ */
 const StudentListView = ({ onViewDetail, students = [] }) => {
+    // State untuk menyimpan nilai input pencarian.
+    // State to store the value of the search input.
     const [searchTerm, setSearchTerm] = useState('');
+    // State untuk menyimpan nilai filter kelas.
+    // State to store the value of the class filter.
     const [filterKelas, setFilterKelas] = useState('');
 
-    // Filter students based on search and class
+    // Logika untuk memfilter mahasiswa berdasarkan pencarian dan kelas.
+    // Logic to filter students based on search and class.
     const filteredStudents = students.filter((student) => {
-        // Add null checks for all properties
+        // Pengecekan null untuk setiap properti untuk menghindari error.
+        // Null checks for each property to avoid errors.
         const name = student?.name || '';
         const nim = student?.nim || '';
         const kelas = student?.kelas || '';
@@ -25,7 +39,8 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
         return matchesSearch && matchesFilter;
     });
 
-    // Extract unique classes for dropdown filter
+    // Mengekstrak daftar kelas unik untuk opsi dropdown filter.
+    // Extracting a unique list of classes for the filter dropdown options.
     const uniqueClasses = [
         ...new Set(
             students
@@ -36,7 +51,11 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
 
     return (
         <div className="bg-white rounded-xl shadow p-4 md:p-6 transition-all duration-300 hover:shadow-lg">
+            {/* Bagian kontrol filter dan pencarian */}
+            {/* Filter and search controls section */}
             <div className="flex flex-col md:flex-row gap-4 mb-6">
+                {/* Input pencarian */}
+                {/* Search input */}
                 <div className="relative flex-grow">
                     <Search
                         size={18}
@@ -51,6 +70,8 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
                     />
                 </div>
 
+                {/* Dropdown filter kelas */}
+                {/* Class filter dropdown */}
                 <div className="flex gap-2">
                     <div className="relative">
                         <select
@@ -74,6 +95,8 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
                 </div>
             </div>
 
+            {/* Tabel daftar feedback */}
+            {/* Feedback list table */}
             <div className="overflow-x-auto rounded-xl border">
                 <table className="w-full text-sm">
                     <thead className="bg-[#951A22] text-white">
@@ -149,6 +172,8 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
                                 </tr>
                             ))
                         ) : (
+                            // Tampilan jika tidak ada data yang cocok dengan filter
+                            // View if no data matches the filter
                             <tr>
                                 <td
                                     colSpan="7"
@@ -161,6 +186,8 @@ const StudentListView = ({ onViewDetail, students = [] }) => {
                 </table>
             </div>
 
+            {/* Menampilkan total hasil filter */}
+            {/* Displaying the total number of filtered results */}
             <div className="mt-4 text-sm text-gray-500">
                 Total: {filteredStudents.length} mahasiswa
             </div>

@@ -1,5 +1,10 @@
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
+/**
+ * Mengambil daftar kelas dan mahasiswa yang berada di bawah perwalian dosen yang sedang login.
+ * Fetches the list of classes and students under the advisory of the currently logged-in lecturer.
+ * @returns {Promise<object>} - Hasil dari panggilan API yang berisi daftar kelas dan mahasiswa.
+ */
 export const getClassAndStudentList = async () => {
     try {
         // Get dan validasi token:
@@ -24,7 +29,8 @@ export const getClassAndStudentList = async () => {
 
         const data = await response.json();
 
-        // Chek fetch api di data.successnya true atau false?
+        // Memeriksa flag `success` dari respons API
+        // Checking the `success` flag from the API response
         if (data.success) {
             return {
                 success: true,
@@ -50,7 +56,12 @@ export const getClassAndStudentList = async () => {
     }
 };
 
-// Get riwayat MK
+/**
+ * Mengambil riwayat mata kuliah seorang mahasiswa berdasarkan NIM.
+ * Fetches the course history of a student by their NIM.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getStudentCourseHistory = async (nim) => {
     try {
         // Get and validate token
@@ -76,11 +87,12 @@ export const getStudentCourseHistory = async (nim) => {
         const data = await response.json();
 
         if (data.success) {
-            // Transform the data to match the format expected by the component
+            // Mengubah format data dari backend agar sesuai dengan yang diharapkan oleh komponen frontend
+            // Transforming the data format from the backend to match what the frontend component expects
             const studentCourseHistory = data.data.map((course, index) => {
                 // Create an object with all expected properties with proper defaults
                 const transformedCourse = {
-                    id: `history_${index}`, // Generate an id for each course history item
+                    id: `history_${index}`, // Membuat ID unik untuk setiap item riwayat
                     kodeMataKuliah: course.kode_mata_kuliah || '',
                     namaMataKuliah:
                         course.nama_mata_kuliah || 'Data tidak tersedia',
@@ -117,10 +129,11 @@ export const getStudentCourseHistory = async (nim) => {
     }
 };
 
-// In: ../../services/dosenWali/myCourseAdvisor/myCourseAdvisorService.js
-
-// ... (other service functions like getStudentCourseHistory, getClassAndStudentList)
-
+/**
+ * Mengambil daftar semua mata kuliah yang tersedia untuk direkomendasikan.
+ * Fetches a list of all available courses to be recommended.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAvailableCourse = async () => {
     try {
         // Get and validate token
@@ -147,11 +160,9 @@ export const getAvailableCourse = async () => {
         const data = await fetchResponse.json(); // Parse the JSON response
 
         if (data.success) {
-            // Check the success flag from the parsed data
-            // Transform the data to match the format expected by the component
-            // Expected: id, kodeMataKuliah, namaMataKuliah, jenis, sks, semester
+            // Mengubah format data agar sesuai dengan yang diharapkan komponen
+            // Transforming data to match the format expected by the component
             const listAvailCourses = data.data.map((course, index) => ({
-                // Assuming data.data is the array of courses
                 id: `avail_course_${course.kode_mata_kuliah || index}`,
                 kode_mk: course.kode_mk,
                 nama_mk: course.nama_mk,
@@ -184,6 +195,14 @@ export const getAvailableCourse = async () => {
     }
 };
 
+/**
+ * Mengirimkan rekomendasi mata kuliah untuk seorang mahasiswa ke server.
+ * Sends course recommendations for a student to the server.
+ * @param {string} nim - NIM mahasiswa.
+ * @param {Array<object>} recommendedCourses - Daftar mata kuliah yang direkomendasikan.
+ * @param {string|number} targetSemester - Semester target untuk rekomendasi.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const sendRecommendedCourses = async (
     nim,
     recommendedCourses,
@@ -199,7 +218,8 @@ export const sendRecommendedCourses = async (
             };
         }
 
-        // Mengambil 'kodeMataKuliah' dari setiap objek di array 'recommendedCourses'
+        // Mengekstrak hanya kode mata kuliah dari objek
+        // Extracting only the course codes from the objects
         const courseCodes = recommendedCourses.map(
             (course) => course.kodeMataKuliah
         );
@@ -248,6 +268,12 @@ export const sendRecommendedCourses = async (
     }
 };
 
+/**
+ * Mengambil IP semester terakhir seorang mahasiswa untuk menentukan batas SKS.
+ * Fetches a student's last semester GPA to determine the SKS limit.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API, hanya berisi maxSKS.
+ */
 export const getLastIPSemester = async (nim) => {
     try {
         // Get and validate token
@@ -293,6 +319,13 @@ export const getLastIPSemester = async (nim) => {
     }
 };
 
+/**
+ * Mengambil daftar mata kuliah yang sudah direkomendasikan untuk seorang mahasiswa.
+ * Fetches the list of courses that have already been recommended for a student.
+ * @param {string} nim - NIM mahasiswa.
+ * @param {string|number} targetSemester - (Opsional) Filter berdasarkan semester.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getRecommendedMK = async (nim, targetSemester) => {
     try {
         // Ambil dan validasi token
@@ -366,6 +399,12 @@ export const getRecommendedMK = async (nim, targetSemester) => {
     }
 };
 
+/**
+ * Mengambil data SKS lulus seorang mahasiswa.
+ * Fetches a student's completed SKS data.
+ * @param {string} nim - NIM mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getStudentNIMSKS = async (nim) => {
     try {
         // Get and validate token

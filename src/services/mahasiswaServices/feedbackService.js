@@ -1,7 +1,8 @@
 // src/services/mahasiswaServices/feedbackService.js
 import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
-// Valid file types
+// Daftar tipe file yang diizinkan untuk diunggah
+// List of allowed file types for upload
 const VALID_FILE_TYPES = [
     'application/pdf', // PDF
     'application/msword', // DOC
@@ -13,9 +14,10 @@ const VALID_FILE_TYPES = [
 ];
 
 /**
- * Format date to Indonesian format with time
- * @param {Date} date - The date to format
- * @returns {string} - Formatted date with time (e.g., "SENIN, 10 JANUARI 2023 14:30 WIB")
+ * Memformat tanggal ke format Indonesia lengkap dengan waktu.
+ * Formats a date to the full Indonesian format with time.
+ * @param {Date|string} date - Objek tanggal atau string yang akan diformat.
+ * @returns {string} - Tanggal yang sudah diformat.
  */
 export const formatDateTime = (date) => {
     if (!date || isNaN(new Date(date).getTime())) {
@@ -60,9 +62,10 @@ export const formatDateTime = (date) => {
 };
 
 /**
- * Validate if a file is of an allowed type
- * @param {File} file - File to validate
- * @returns {boolean} - Whether the file is valid
+ * Memvalidasi apakah sebuah file memiliki tipe yang diizinkan.
+ * Validates if a file has an allowed type.
+ * @param {File} file - File yang akan divalidasi.
+ * @returns {boolean} - True jika valid.
  */
 export const isValidFileType = (file) => {
     if (!file) return true; // No file is valid (optional attachment)
@@ -70,22 +73,25 @@ export const isValidFileType = (file) => {
 };
 
 /**
- * Get human-readable list of allowed file extensions
- * @returns {string} - Comma-separated list of allowed extensions
+ * Mendapatkan daftar ekstensi file yang diizinkan dalam format string.
+ * Gets a string list of allowed file extensions.
+ * @returns {string} - Daftar ekstensi.
  */
 export const getAllowedFileExtensions = () => {
     return 'PDF, DOC, DOCX, XLS, XLSX, JPG, dan PNG';
 };
 
 /**
- * Submit feedback with optional file attachment
- * @param {string} title - Feedback title
- * @param {string} detail - Feedback content/details
- * @param {File} file - Optional file attachment
- * @returns {Promise} - API response
+ * Mengirimkan feedback beserta lampiran (jika ada) ke server.
+ * Submits feedback with an optional attachment to the server.
+ * @param {string} title - Judul feedback.
+ * @param {string} detail - Isi feedback.
+ * @param {File} file - File lampiran (opsional).
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
  */
 export const submitFeedback = async (title, detail, file) => {
     try {
+        // Validasi tipe file sebelum mengirim
         // Validate file type before sending
         if (file && !isValidFileType(file)) {
             throw new Error(
@@ -110,7 +116,7 @@ export const submitFeedback = async (title, detail, file) => {
                 method: 'POST',
                 headers: {
                     ...getAuthHeaders(),
-                    // Don't set Content-Type for FormData - let browser set it with boundary
+                    // Browser akan mengatur Content-Type secara otomatis untuk FormData
                 },
                 body: formData,
             }
@@ -143,8 +149,9 @@ export const submitFeedback = async (title, detail, file) => {
 };
 
 /**
- * Get list of user's feedback
- * @returns {Promise} - API response with feedback list
+ * Mengambil daftar semua feedback yang pernah dikirim oleh mahasiswa.
+ * Fetches a list of all feedback previously submitted by the student.
+ * @returns {Promise<Object>} - Hasil dari panggilan API dengan data yang sudah diformat.
  */
 export const getFeedbackList = async () => {
     try {
@@ -164,7 +171,8 @@ export const getFeedbackList = async () => {
             throw new Error(data.message || 'Failed to get feedback list');
         }
 
-        // Format the tanggal_keluhan in the response data
+        // Memformat tanggal di setiap item data sebelum mengembalikannya
+        // Formatting the date in each data item before returning
         if (data.data && Array.isArray(data.data)) {
             data.data = data.data.map((item) => ({
                 ...item,
@@ -174,7 +182,6 @@ export const getFeedbackList = async () => {
             }));
         }
 
-        // ADDED: Format the response date if it exists
         if (data.data && data.data.response && data.data.response.date) {
             data.data.response.date = formatDateTime(
                 new Date(data.data.response.date)
@@ -189,9 +196,10 @@ export const getFeedbackList = async () => {
 };
 
 /**
- * Get feedback details by ID
- * @param {string|number} id - Feedback ID
- * @returns {Promise} - API response with feedback details
+ * Mengambil detail dari satu feedback berdasarkan ID-nya.
+ * Fetches the details of a single feedback by its ID.
+ * @param {string|number} id - ID feedback.
+ * @returns {Promise<Object>} - Hasil dari panggilan API dengan data yang sudah diformat.
  */
 export const getFeedbackDetail = async (id) => {
     try {
@@ -211,7 +219,8 @@ export const getFeedbackDetail = async (id) => {
             throw new Error(data.message || 'Failed to get feedback details');
         }
 
-        // Format the tanggal_keluhan in the response data
+        // Memformat tanggal di data sebelum mengembalikannya
+        // Formatting the date in the data before returning it
         if (data.data && data.data.tanggal_keluhan) {
             data.data.tanggal_keluhan = formatDateTime(
                 new Date(data.data.tanggal_keluhan)

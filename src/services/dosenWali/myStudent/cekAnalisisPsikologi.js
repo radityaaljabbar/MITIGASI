@@ -4,9 +4,10 @@
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
- * Fetch data analisis psikologi berdasarkan NIM
- * @param {string} nim - Nomor Induk Mahasiswa
- * @returns {Promise<Object>} Response data dari backend
+ * Mengambil data analisis psikologi seorang mahasiswa berdasarkan NIM.
+ * Fetches psychology analysis data for a student by NIM.
+ * @param {string} nim - Nomor Induk Mahasiswa.
+ * @returns {Promise<Object>} - Respons data dari backend.
  */
 export const getAnalisisPsikologi = async (nim) => {
     try {
@@ -33,7 +34,8 @@ export const getAnalisisPsikologi = async (nim) => {
             }
         );
 
-        // Check if response is ok
+        // Penanganan error berdasarkan status code HTTP
+        // Error handling based on HTTP status code
         if (!response.ok) {
             if (response.status === 401) {
                 return {
@@ -65,7 +67,8 @@ export const getAnalisisPsikologi = async (nim) => {
 
         const data = await response.json();
 
-        // Return the data as-is since it already has the success structure
+        // Mengembalikan data apa adanya karena sudah memiliki struktur 'success'
+        // Returning the data as-is since it already has the 'success' structure
         return data;
     } catch (error) {
         console.error('Error fetching analisis psikologi:', error);
@@ -78,9 +81,10 @@ export const getAnalisisPsikologi = async (nim) => {
 };
 
 /**
- * Transform data dari backend ke format yang dibutuhkan frontend
- * @param {Object} backendData - Data dari backend
- * @returns {Object} Data yang sudah ditransform
+ * Mengubah data dari backend menjadi format yang dibutuhkan oleh komponen frontend.
+ * Transforms data from the backend into the format required by the frontend components.
+ * @param {Object} backendData - Data dari backend.
+ * @returns {Object} - Data yang sudah ditransformasi.
  */
 export const transformPsychologyData = (backendData) => {
     if (!backendData || !backendData.data || backendData.data.length === 0) {
@@ -115,9 +119,10 @@ export const transformPsychologyData = (backendData) => {
 };
 
 /**
- * Get chart data untuk DASS-21 visualization
- * @param {Object} transformedData - Data yang sudah ditransform
- * @returns {Array} Data untuk chart
+ * Menyiapkan data untuk visualisasi chart DASS-21.
+ * Prepares data for DASS-21 chart visualization.
+ * @param {Object} transformedData - Data yang sudah ditransformasi.
+ * @returns {Array} - Array data yang siap digunakan oleh chart.
  */
 export const getChartDataFromDASS21 = (transformedData) => {
     if (!transformedData || !transformedData.aspekPsikologi) {
@@ -134,10 +139,11 @@ export const getChartDataFromDASS21 = (transformedData) => {
 };
 
 /**
- * Analisis tingkat berdasarkan skor DASS-21
- * @param {number} score - Skor aspek
- * @param {string} aspect - Jenis aspek (depression, anxiety, stress)
- * @returns {Object} Level dan deskripsi
+ * Menganalisis dan mengkategorikan tingkat keparahan skor DASS-21.
+ * Analyzes and categorizes the severity level of a DASS-21 score.
+ * @param {number} score - Skor aspek.
+ * @param {string} aspect - Jenis aspek (depression, anxiety, stress).
+ * @returns {Object} - Objek berisi level dan warna.
  */
 export const analyzeDASS21Level = (score, aspect) => {
     const ranges = {
@@ -171,9 +177,10 @@ export const analyzeDASS21Level = (score, aspect) => {
 };
 
 /**
- * Transform all psychology data (for history view)
- * @param {Object} backendData - Data dari backend
- * @returns {Array} Array of transformed data
+ * Mengubah semua data riwayat psikologi untuk tampilan histori.
+ * Transforms all psychology history data for the history view.
+ * @param {Object} backendData - Data dari backend.
+ * @returns {Array} - Array data yang sudah ditransformasi.
  */
 export const transformAllPsychologyData = (backendData) => {
     if (!backendData || !backendData.data || backendData.data.length === 0) {
@@ -208,10 +215,11 @@ export const transformAllPsychologyData = (backendData) => {
 };
 
 /**
- * Get comparison data between two test results
- * @param {Object} current - Current test data
- * @param {Object} previous - Previous test data
- * @returns {Object} Comparison analysis
+ * Membandingkan dua hasil tes psikologi untuk melihat tren.
+ * Compares two psychology test results to identify trends.
+ * @param {Object} current - Data tes saat ini.
+ * @param {Object} previous - Data tes sebelumnya.
+ * @returns {Object} - Objek hasil perbandingan.
  */
 export const compareTestResults = (current, previous) => {
     if (!current || !previous) return null;

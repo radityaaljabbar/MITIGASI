@@ -1,14 +1,31 @@
 import React from 'react';
 import { Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
+/**
+ * Komponen untuk menampilkan riwayat tes psikologi dalam format timeline.
+ * Component to display psychology test history in a timeline format.
+ * @param {object} props - Props komponen.
+ * @param {Array} props.historyData - Data riwayat tes.
+ * @param {number} props.selectedIndex - Indeks tes yang sedang dipilih.
+ * @param {function} props.onSelectTest - Fungsi untuk memilih tes dari timeline.
+ * @param {boolean} props.showComparison - Menampilkan perbandingan dengan tes sebelumnya.
+ */
 export default function PsychologyHistoryTimeline({
     historyData,
     selectedIndex,
     onSelectTest,
     showComparison = false,
 }) {
+    // Jika tidak ada data, jangan render komponen
+    // If there is no data, do not render the component
     if (!historyData || historyData.length === 0) return null;
 
+    /**
+     * Mendapatkan warna untuk badge klasifikasi.
+     * Gets the color for the classification badge.
+     * @param {string} klasifikasi - Status klasifikasi ('aman', 'sedang', 'tinggi').
+     * @returns {string} - Kelas Tailwind CSS untuk warna.
+     */
     const getKlasifikasiColor = (klasifikasi) => {
         const lowerKlasifikasi = klasifikasi?.toLowerCase();
         switch (lowerKlasifikasi) {
@@ -23,6 +40,13 @@ export default function PsychologyHistoryTimeline({
         }
     };
 
+    /**
+     * Mendapatkan ikon tren berdasarkan perbandingan skor total dengan tes sebelumnya.
+     * Gets the trend icon based on the total score comparison with the previous test.
+     * @param {object} current - Data tes saat ini.
+     * @param {object} previous - Data tes sebelumnya.
+     * @returns {JSX.Element|null} - Ikon tren.
+     */
     const getTrendIcon = (current, previous) => {
         if (!previous) return null;
 
@@ -43,9 +67,11 @@ export default function PsychologyHistoryTimeline({
             </h3>
 
             <div className="relative">
-                {/* Timeline line */}
+                {/* Garis vertikal timeline */}
+                {/* Vertical timeline line */}
                 <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
 
+                {/* Item-item pada timeline */}
                 {/* Timeline items */}
                 <div className="space-y-6">
                     {historyData.map((item, index) => {
@@ -61,6 +87,7 @@ export default function PsychologyHistoryTimeline({
                                 key={item.id}
                                 className={`relative flex items-start cursor-pointer transition-all`}
                                 onClick={() => onSelectTest(index)}>
+                                {/* Titik pada timeline */}
                                 {/* Timeline dot */}
                                 <div
                                     className={`
@@ -73,6 +100,7 @@ export default function PsychologyHistoryTimeline({
                                     ${isLatest ? 'animate-pulse' : ''}
                                 `}></div>
 
+                                {/* Kartu konten */}
                                 {/* Content card */}
                                 <div
                                     className={`
@@ -118,6 +146,8 @@ export default function PsychologyHistoryTimeline({
                                         </div>
                                     </div>
 
+                                    {/* Ringkasan skor DASS-21 */}
+                                    {/* DASS-21 score summary */}
                                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mt-2">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">
@@ -153,6 +183,8 @@ export default function PsychologyHistoryTimeline({
                                         </div>
                                     </div>
 
+                                    {/* Ringkasan perbandingan jika diaktifkan */}
+                                    {/* Comparison summary if enabled */}
                                     {showComparison && previousItem && (
                                         <div className="mt-2 pt-2 border-t border-gray-100">
                                             <ComparisonSummary
@@ -171,11 +203,19 @@ export default function PsychologyHistoryTimeline({
     );
 }
 
+/**
+ * Komponen kecil untuk menampilkan ringkasan perbandingan.
+ * Small component to display a comparison summary.
+ * @param {object} props - Props komponen.
+ * @param {object} props.current - Data tes saat ini.
+ * @param {object} props.previous - Data tes sebelumnya.
+ */
 function ComparisonSummary({ current, previous }) {
     const totalChange =
         current.aspekPsikologi.totalSkor - previous.aspekPsikologi.totalSkor;
-    const isImproved = totalChange > 0; // For DASS-21, higher total score is better
-
+    // Untuk DASS-21, skor total yang lebih rendah lebih baik
+    // For DASS-21, higher total score is better
+    const isImproved = totalChange > 0; 
     return (
         <div className="text-xs text-gray-600">
             <span>Perubahan dari tes sebelumnya: </span>

@@ -1,8 +1,10 @@
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
- * Fetch data analisis finansial berdasarkan NIM
- * @param {string} nim - Nomor Induk Mahasiswa
+ * Mengambil data analisis finansial seorang mahasiswa berdasarkan NIM.
+ * Fetches the financial analysis data of a student by NIM.
+ * @param {string} nim - Nomor Induk Mahasiswa.
+ * @returns {Promise<Object>} - Data finansial yang sudah ditransformasi.
  */
 export const getFinancialRelief = async (nim) => {
     try {
@@ -34,7 +36,8 @@ export const getFinancialRelief = async (nim) => {
             );
         }
 
-        // Transform backend data to match frontend expectations
+        // Mengubah data dari backend agar sesuai dengan format frontend
+        // Transforming backend data to match the frontend format
         return transformFinancialData(result.data, nim);
     } catch (error) {
         console.error('Error in getFinancialRelief:', error);
@@ -43,12 +46,15 @@ export const getFinancialRelief = async (nim) => {
 };
 
 /**
- * Transform backend data structure to match frontend expectations
- * @param {Array} backendData - Array of financial relief data from backend
- * @param {string} nim - Student NIM
+ * Mengubah struktur data finansial dari backend agar sesuai dengan ekspektasi frontend.
+ * Transforms the financial data structure from the backend to match frontend expectations.
+ * @param {Array} backendData - Array data dari backend.
+ * @param {string} nim - NIM mahasiswa.
  */
 const transformFinancialData = (backendData, nim) => {
     if (!backendData || backendData.length === 0) {
+        // Mengembalikan struktur default jika tidak ada data
+        // Returning a default structure if there is no data
         return {
             name: 'Data Tidak Ditemukan',
             nim: nim || '-',
@@ -60,11 +66,11 @@ const transformFinancialData = (backendData, nim) => {
         };
     }
 
-    // Get the latest entry for basic info (assuming first entry has the most recent data)
+    // Mengambil data terbaru untuk informasi dasar
+    // Getting the latest entry for basic information
     const latestEntry = backendData[0];
 
     // Transform each relief request
-
     const formatDate = (dateString) => {
         if (!dateString) return null;
         const date = new Date(dateString);
@@ -114,7 +120,8 @@ const transformFinancialData = (backendData, nim) => {
             : null,
     }));
 
-    // Separate pending and completed requests
+    // Memisahkan pengajuan yang masih pending dan yang sudah selesai
+    // Separating pending and completed requests
     const pendingRequests = transformedRequests.filter(
         (req) => req.status === 'Menunggu Review'
     );
@@ -137,13 +144,16 @@ const transformFinancialData = (backendData, nim) => {
     return {
         name: latestEntry.nama,
         nim: nim,
-        semester: latestEntry.current_semester, // Backend doesn't provide semester info
+        semester: latestEntry.current_semester,
         financialStatus: determineFinancialStatus(backendData),
         lastUpdated: lastUpdated,
         pendingRequests: pendingRequests,
         previousRequests: previousRequests,
     };
 };
+
+// Fungsi-fungsi helper untuk transformasi data
+// Helper functions for data transformation
 
 /**
  * Convert backend relief type to readable label
@@ -211,9 +221,10 @@ const determineFinancialStatus = (data) => {
 };
 
 /**
- * Send response for financial request (approve/reject)
- * @param {number} id - Financial request ID
- * @param {string} action - 'approve' or 'reject'
+ * Mengirimkan respon (setuju/tolak) untuk pengajuan finansial.
+ * Sends a response (approve/reject) for a financial request.
+ * @param {number} id - ID pengajuan finansial.
+ * @param {string} action - Aksi yang akan dilakukan ('approve' atau 'reject').
  */
 export const sendFinancialResponse = async (id, action) => {
     try {

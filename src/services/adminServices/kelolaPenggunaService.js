@@ -1,11 +1,11 @@
 // src/services/adminServices/kelolaPenggunaService.js
 import { getApiUrl, getAuthHeaders } from '../../config/api';
 
-// =============================================
-// ==           ADMIN SERVICES                ==
-// =============================================
-
-// GET - Ambil semua admin
+/**
+ * Mengambil semua data admin dari server.
+ * Fetches all admin data from the server.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllAdmins = async () => {
     try {
         const response = await fetch(
@@ -29,7 +29,12 @@ export const getAllAdmins = async () => {
     }
 };
 
-// POST - Tambah admin baru
+/**
+ * Mengirim data untuk membuat admin baru.
+ * Sends data to create a new admin.
+ * @param {object} adminData - Data admin baru (nama, username, password).
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createAdmin = async (adminData) => {
     try {
         const response = await fetch(
@@ -55,7 +60,13 @@ export const createAdmin = async (adminData) => {
     }
 };
 
-// PUT - Update admin
+/**
+ * Mengirim data untuk memperbarui admin yang ada.
+ * Sends data to update an existing admin.
+ * @param {number|string} id - ID admin yang akan diupdate.
+ * @param {object} adminData - Data admin yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateAdmin = async (id, adminData) => {
     try {
         const response = await fetch(
@@ -81,7 +92,12 @@ export const updateAdmin = async (id, adminData) => {
     }
 };
 
-// DELETE - Hapus admin
+/**
+ * Menghapus data admin berdasarkan ID.
+ * Deletes admin data by ID.
+ * @param {number|string} id - ID admin yang akan dihapus.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deleteAdmin = async (id) => {
     try {
         const response = await fetch(
@@ -105,11 +121,11 @@ export const deleteAdmin = async (id) => {
     }
 };
 
-// =============================================
-// ==           DOSEN WALI SERVICES           ==
-// =============================================
-
-// GET - Ambil semua dosen wali
+/**
+ * Mengambil semua data dosen wali dari server.
+ * Fetches all course advisor data from the server.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllDosen = async () => {
     try {
         const response = await fetch(
@@ -133,7 +149,12 @@ export const getAllDosen = async () => {
     }
 };
 
-// POST - Tambah dosen wali baru
+/**
+ * Mengirim data untuk membuat dosen wali baru.
+ * Sends data to create a new course advisor.
+ * @param {object} dosenData - Data dosen wali baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createDosen = async (dosenData) => {
     try {
         const response = await fetch(
@@ -159,7 +180,13 @@ export const createDosen = async (dosenData) => {
     }
 };
 
-// PUT - Update dosen wali
+/**
+ * Mengirim data untuk memperbarui data dosen wali yang ada.
+ * Sends data to update an existing course advisor data.
+ * @param {string} nip - NIP dosen wali yang akan diupdate.
+ * @param {object} dosenData - Data dosen wali yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateDosen = async (nip, dosenData) => {
     try {
         const response = await fetch(
@@ -185,7 +212,12 @@ export const updateDosen = async (nip, dosenData) => {
     }
 };
 
-// DELETE - Hapus dosen wali
+/**
+ * Menghapus data dosen wali berdasarkan NIP.
+ * Deletes course advisor data by NIP.
+ * @param {string} nip - NIP dosen wali yang akan dihapus.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deleteDosen = async (nip) => {
     try {
         const response = await fetch(
@@ -209,11 +241,11 @@ export const deleteDosen = async (nip) => {
     }
 };
 
-// =============================================
-// ==           MAHASISWA SERVICES            ==
-// =============================================
-
-// GET - Ambil semua mahasiswa
+/**
+ * Mengambil semua data mahasiswa.
+ * Fetches all student data.
+ * @returns {Promise<object>}
+ */
 export const getAllMahasiswa = async () => {
     try {
         const response = await fetch(
@@ -237,7 +269,12 @@ export const getAllMahasiswa = async () => {
     }
 };
 
-// POST - Tambah mahasiswa baru
+/**
+ * Mengirim data untuk membuat mahasiswa baru.
+ * Sends data to create a new student.
+ * @param {object} mahasiswaData - Data mahasiswa baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createMahasiswa = async (mahasiswaData) => {
     try {
         const response = await fetch(
@@ -263,7 +300,13 @@ export const createMahasiswa = async (mahasiswaData) => {
     }
 };
 
-// PUT - Update mahasiswa
+/**
+ * Mengirim data untuk memperbarui mahasiswa yang ada.
+ * Sends data to update an existing student.
+ * @param {string} nim - NIM mahasiswa yang akan diupdate.
+ * @param {object} mahasiswaData - Data mahasiswa yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateMahasiswa = async (nim, mahasiswaData) => {
     try {
         const response = await fetch(
@@ -289,7 +332,12 @@ export const updateMahasiswa = async (nim, mahasiswaData) => {
     }
 };
 
-// DELETE - Hapus mahasiswa
+/**
+ * Menghapus data mahasiswa berdasarkan NIM.
+ * Deletes student data by NIM.
+ * @param {string} nim - NIM mahasiswa yang akan dihapus.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deleteMahasiswa = async (nim) => {
     try {
         const response = await fetch(
@@ -313,7 +361,12 @@ export const deleteMahasiswa = async (nim) => {
     }
 };
 
-// BULK - Import mahasiswa from CSV
+/**
+ * Mengirim file CSV untuk import data mahasiswa secara massal.
+ * Sends a CSV file to bulk import student data.
+ * @param {File} file - File CSV yang berisi data mahasiswa.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const bulkCreateMahasiswa = async (file) => {
     try {
         const formData = new FormData();
@@ -341,11 +394,11 @@ export const bulkCreateMahasiswa = async (file) => {
     }
 };
 
-// =============================================
-// ==           HELPER SERVICES               ==
-// =============================================
-
-// GET - Ambil daftar kelas untuk dropdown
+/**
+ * Mengambil daftar semua kelas untuk digunakan di dropdown.
+ * Fetches a list of all classes for use in a dropdown.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllKelas = async () => {
     try {
         const response = await fetch(

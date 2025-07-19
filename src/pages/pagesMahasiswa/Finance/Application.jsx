@@ -7,7 +7,13 @@ import {
     getAllowedFileExtensions,
 } from '../../../services/mahasiswaServices/myFinanceService';
 
+/**
+ * Komponen form untuk pengajuan keringanan biaya kuliah.
+ * Form component for tuition fee relief application.
+ */
 const TuitionReliefForm = () => {
+    // State untuk data form
+    // State for form data
     const [formData, setFormData] = useState({
         // Informasi Ekonomi
         penghasilanBulanan: '',
@@ -23,15 +29,17 @@ const TuitionReliefForm = () => {
         detailAlasan: '',
     });
 
+    // State untuk file, status, dan UI lainnya
+    // State for file, status, and other UI elements
     const [file, setFile] = useState(null);
     const [fileName, setFileName] = useState('');
     const fileInputRef = useRef(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [submissionSuccess, setSubmissionSuccess] = useState(false);
-    const [referenceNumber, setReferenceNumber] = useState('');
 
-    // UseEffect untuk mengirim data ke server setelah validasi lokal berhasil
+    // effect ini akan berjalan setelah validasi lokal berhasil (isSubmitted=true)
+    // This effect runs after local validation succeeds (isSubmitted=true)
     useEffect(() => {
         const sendDataToServer = async () => {
             if (isSubmitted && !submissionSuccess) {
@@ -40,12 +48,7 @@ const TuitionReliefForm = () => {
 
                     if (response && response.success) {
                         setSubmissionSuccess(true);
-                        // Generate nomor referensi
-                        const generatedRefNumber = new Date()
-                            .getTime()
-                            .toString(36)
-                            .toUpperCase();
-                        setReferenceNumber(generatedRefNumber);
+                        
                         toast.success('Pengajuan berhasil dikirim ke server!');
                     } else {
                         // Jika ada error dari server
@@ -72,6 +75,8 @@ const TuitionReliefForm = () => {
         }
     }, [isSubmitted, formData, submissionSuccess]);
 
+    // Handler untuk perubahan input form
+    // Handler for form input changes
     const handleInputChange = (e) => {
         const { name, value, type, checked, files } = e.target;
         setFormData((prev) => ({
@@ -85,7 +90,8 @@ const TuitionReliefForm = () => {
         }));
     };
 
-    // Handle file selection
+    // Handler untuk pemilihan file
+    // Handler for file selection
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
@@ -102,6 +108,8 @@ const TuitionReliefForm = () => {
         setFileName(selectedFile.name);
     };
 
+    // Handler untuk menghapus file yang dipilih
+    // Handler to remove a selected file
     const removeFile = () => {
         setFile(null);
         setFileName('');
@@ -110,6 +118,11 @@ const TuitionReliefForm = () => {
         }
     };
 
+    /**
+     * Memvalidasi semua input form sebelum pengiriman.
+     * Validates all form inputs before submission.
+     * @returns {boolean} - True jika valid, false jika tidak.
+     */
     const validateForm = () => {
         // Validasi dasar
         if (
@@ -147,6 +160,11 @@ const TuitionReliefForm = () => {
         return true;
     };
 
+    /**
+     * Menangani proses submit form.
+     * Handles the form submission process.
+     * @param {React.FormEvent} e - Event form.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -172,6 +190,8 @@ const TuitionReliefForm = () => {
         }
     };
 
+    // Handler untuk mereset form
+    // Handler for resetting the form
     const handleReset = () => {
         toast.info('Formulir direset!');
         setFile(null); // ← TAMBAH ini
@@ -205,7 +225,8 @@ const TuitionReliefForm = () => {
                     <form
                         onSubmit={handleSubmit}
                         className="py-6 px-8 space-y-8">
-                        {/* Section: Informasi Ekonomi */}
+                        {/* Bagian Informasi Ekonomi */}
+                        {/* Economic Information Section */}
                         <div className="border-b border-gray-200 pb-6">
                             <h2 className="text-lg font-medium text-gray-900 mb-4">
                                 Informasi Ekonomi
@@ -342,7 +363,8 @@ const TuitionReliefForm = () => {
                             </div>
                         </div>
 
-                        {/* Section: Detail Keringanan */}
+                        {/* Bagian Detail Keringanan */}
+                        {/* Relief Details Section */}
                         <div className="border-b border-gray-200 pb-6">
                             <h2 className="text-lg font-medium text-gray-900 mb-4">
                                 Detail Keringanan
@@ -485,7 +507,8 @@ const TuitionReliefForm = () => {
                             </div>
                         </div>
 
-                        {/* Section: Bukti Tambahan Pengajuan */}
+                        {/* Bagian Bukti Tambahan */}
+                        {/* Supporting Evidence Section */}
                         <div className="border-b border-gray-200 pb-6">
                             <h2 className="text-lg font-medium text-gray-900 mb-4">
                                 Bukti Tambahan Pengajuan
@@ -580,6 +603,8 @@ const TuitionReliefForm = () => {
                         </div>
                     </form>
                 ) : (
+                    // Tampilan setelah berhasil submit
+                    // View after successful submission
                     <div className="py-12 px-8 text-center">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
                             <svg
@@ -601,22 +626,9 @@ const TuitionReliefForm = () => {
                         </h2>
                         <p className="text-gray-600 mb-6">
                             Terima kasih! Permohonan keringanan biaya kuliah
-                            Anda telah berhasil dikirim. Kami akan memproses
-                            pengajuan Anda dan menghubungi Anda melalui email
-                            dalam 7-14 hari kerja.
+                            Anda telah berhasil dikirim.
                         </p>
-                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                            <p className="text-sm font-medium text-gray-700">
-                                Nomor Referensi:
-                            </p>
-                            <p className="text-lg font-bold text-[#951A22]">
-                                {referenceNumber}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                                Harap simpan nomor referensi ini untuk keperluan
-                                pelacakan pengajuan
-                            </p>
-                        </div>
+                        
                         <button
                             onClick={handleReset}
                             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#951A22] hover:bg-[#7a1118] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#951A22]">

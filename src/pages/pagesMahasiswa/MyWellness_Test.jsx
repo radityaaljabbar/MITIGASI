@@ -5,18 +5,28 @@ import pertanyaanPsikologi from '../../assets/data/UsedData/DASS12Questionnaire_
 import scoreCategories from '../../assets/data/UsedData/scoreCategories.json';
 import { sendPsiResult } from '../../services/mahasiswaServices/myWellnessService';
 
+/**
+ * Komponen untuk halaman tes evaluasi psikologis (DASS-21).
+ * Component for the psychological evaluation test page (DASS-21).
+ */
 const MyWelness_Test = () => {
-    // Make useState untuk tracking kondisi jawaban yang dipilih:
+    // State untuk melacak jawaban yang dipilih
+    // State to track selected answers
     const [selectedAnswers, setSelectedAnswers] = useState({});
-    // Make useState juga untuk tracking kondisi jawaban yang belum dipilih:
+    // State untuk melacak pertanyaan yang belum dijawab
+    // State to track unanswered questions
     const [unansweredQuestions, setUnansweredQuestions] = useState([]);
-    // useState untuk simpen data akhir:
+    // State untuk menyimpan data hasil tes akhir sebelum dikirim
+    // State to store the final test data before submission
     const [psiTestData, setPsiTestData] = useState({});
-    // Add loading state for API calls
+    // State untuk status loading saat mengirim data ke API
+    // State for loading status when sending data to the API
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const navigate = useNavigate();
 
+    // Effect akan berjalan ketika `psiTestData` diperbarui (setelah form disubmit)
+    // This effect runs when `psiTestData` is updated (after the form is submitted)
     useEffect(() => {
         try {
             // If we have psiTestData and it's not empty (meaning the form was submitted)
@@ -45,7 +55,13 @@ const MyWelness_Test = () => {
         }
     }, [psiTestData, navigate]);
 
-    // Handler untuk seleksi pilihan:
+    /**
+     * Menangani perubahan pilihan jawaban pada pertanyaan.
+     * Handles answer selection changes for a question.
+     * @param {number} idPertanyaan - ID pertanyaan.
+     * @param {string} choice - Pilihan jawaban teks.
+     * @param {number} score - Skor dari pilihan jawaban.
+     */
     const handleOptionChange = (idPertanyaan, choice, score) => {
         setSelectedAnswers((prev) => ({
             ...prev,
@@ -58,7 +74,12 @@ const MyWelness_Test = () => {
         );
     };
 
-    // UPDATED: Function to convert raw total score (0-63) to 1-100 scale
+    /**
+     * Mengonversi skor mentah DASS-21 (0-63, di mana 0 terbaik) ke skala 1-100 (di mana 100 terbaik).
+     * Converts the raw DASS-21 score (0-63, where 0 is best) to a 1-100 scale (where 100 is best).
+     * @param {number} rawTotalScore - Skor total mentah.
+     * @returns {number} - Skor dalam skala 1-100.
+     */
     const convertToHundredScale = (rawTotalScore) => {
         // Raw score range: 0-63 (DASS-21: 0 = terbaik, 63 = terburuk)
         // Target scale: 1-100 (1 = terburuk, 100 = terbaik)
@@ -247,6 +268,8 @@ const MyWelness_Test = () => {
 
     return (
         <div className="p-8 w-full overflow-y-auto text-sm">
+            {/* Header dan Instruksi */}
+            {/* Header and Instructions */}
             <div className="text-[#333] mb-6 text-center text-2xl font-bold">
                 <h1 className="pb-4">Evaluasi Psikologis Mahasiswa</h1>
                 <p className="text-sm max-w-xl mx-auto">
@@ -295,6 +318,8 @@ const MyWelness_Test = () => {
             </div>
             <div className="max-w-2xl mx-auto p-4">
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Melakukan iterasi untuk menampilkan semua pertanyaan */}
+                    {/* Iterating to display all questions */}
                     {pertanyaanPsikologi.map((item) => (
                         <div
                             key={item.idPertanyaan}
@@ -353,6 +378,8 @@ const MyWelness_Test = () => {
                         </div>
                     ))}
 
+                    {/* Tombol Submit */}
+                    {/* Submit Button */}
                     <button
                         type="submit"
                         disabled={isSubmitting}

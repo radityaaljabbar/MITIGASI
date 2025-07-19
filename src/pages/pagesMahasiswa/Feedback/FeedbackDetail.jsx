@@ -4,14 +4,25 @@ import handleBack from '../../../components/handleBack';
 import { FileText, X, Download, ExternalLink } from 'lucide-react'; // Import icons
 import { getFeedbackDetail } from '../../../services/mahasiswaServices/feedbackService';
 
+/**
+ * Komponen untuk menampilkan detail dari satu feedback, termasuk respon dari dosen wali.
+ * Component to display the details of a single feedback, including the response from the course advisor.
+ */
 const MyFeedbackDetails = () => {
+    // State untuk data feedback, status loading, dan modal PDF
+    // State for feedback data, loading status, and PDF modal
     const [feedbackData, setFeedbackData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showPdfModal, setShowPdfModal] = useState(false);
     const [activePdf, setActivePdf] = useState(null);
     const { feedbackId } = useParams();
 
-    // Helper function to convert status code to display text
+    /**
+     * Fungsi helper untuk mengonversi kode status menjadi teks.
+     * Helper function to convert status code to text.
+     * @param {number|string} status - Kode status.
+     * @returns {string} - Teks status.
+     */
     const getStatusDisplay = (status) => {
         // Convert numeric status to string representation
         if (status === 1 || status === '1') {
@@ -21,6 +32,8 @@ const MyFeedbackDetails = () => {
         return status || 'Pending';
     };
 
+    // Effect untuk mengambil detail feedback saat komponen dimuat atau ID berubah
+    // Effect to fetch feedback details when the component mounts or the ID changes
     useEffect(() => {
         const fetchFeedbackDetail = async () => {
             try {
@@ -28,12 +41,12 @@ const MyFeedbackDetails = () => {
                 const response = await getFeedbackDetail(feedbackId);
 
                 if (response.success) {
-                    // Process the response data
+                    // Memproses data dari API ke format yang dibutuhkan UI
+                    // Processing data from the API into the format needed by the UI
                     const feedback = {
                         feedbackId: response.data.id_keluhan,
                         title: response.data.title_keluhan,
                         details: response.data.detail_keluhan,
-                        // ✅ FIXED: Langsung gunakan tanggal yang sudah diformat dari service
                         feedbackDate: response.data.tanggal_keluhan,
                         // Use the helper function to convert status codes
                         status: getStatusDisplay(response.data.status),
@@ -45,7 +58,8 @@ const MyFeedbackDetails = () => {
                             response.data.response.date
                                 ? response.data.response.date // Sudah diformat di service
                                 : null,
-                        // ADDED: Process response attachments
+                        // Memproses lampiran respon jika ada
+                        // Processing response attachments if they exist
                         responseAttachments:
                             response.data.response &&
                             response.data.response.lampiran
@@ -83,6 +97,8 @@ const MyFeedbackDetails = () => {
         }
     }, [feedbackId]);
 
+    // Handler untuk membuka/menutup modal PDF dan mengunduh file
+    // Handlers for opening/closing the PDF modal and downloading files
     const handleOpenPdf = (pdf) => {
         setActivePdf(pdf);
         setShowPdfModal(true);
@@ -104,6 +120,8 @@ const MyFeedbackDetails = () => {
         document.body.removeChild(anchor);
     };
 
+    // Tampilan saat loading
+    // Loading view
     if (isLoading) {
         return (
             <div className="bg-[#FAF0E6] min-h-screen flex items-center justify-center p-4">
@@ -118,10 +136,10 @@ const MyFeedbackDetails = () => {
     }
 
     return (
-        // Changed from items-start to items-center to center the content vertically
         <div className="bg-[#FAF0E6] min-h-screen flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 max-w-2xl w-full">
-                {/* Status Badge - show at the top of the card */}
+                {/* Badge Status */}
+                {/* Status Badge */}
                 <div className="mb-4">
                     <span
                         className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
@@ -133,7 +151,8 @@ const MyFeedbackDetails = () => {
                     </span>
                 </div>
 
-                {/* Feedback Details Section */}
+                {/* Bagian Detail Feedback Mahasiswa */}
+                {/* Student Feedback Details Section */}
                 <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-5">
                     <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3">
                         {feedbackData?.title}
@@ -230,7 +249,8 @@ const MyFeedbackDetails = () => {
                         )}
                 </div>
 
-                {/* Advisor's Response Section - only show if there's a response */}
+                {/* Bagian Respon Dosen Wali (hanya tampil jika ada) */}
+                {/* Course Advisor's Response Section (only shown if it exists) */}
                 {feedbackData?.response && (
                     <div className="bg-gray-100 rounded-xl p-4 sm:p-6 mb-6">
                         <div className="flex items-center mb-3">
@@ -345,7 +365,9 @@ const MyFeedbackDetails = () => {
                             )}
                     </div>
                 )}
-                {/* Back Button with Animation */}
+
+                {/* Tombol Kembali */}
+                {/* Back Button */}
                 <button
                     onClick={handleBack}
                     className="flex items-center bg-[#951A22] hover:bg-[#7A1118] text-white px-5 py-2.5 rounded-lg transform transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
@@ -366,6 +388,7 @@ const MyFeedbackDetails = () => {
                 </button>
             </div>
 
+            {/* Modal Penampil PDF */}
             {/* PDF Viewer Modal */}
             {showPdfModal && activePdf && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

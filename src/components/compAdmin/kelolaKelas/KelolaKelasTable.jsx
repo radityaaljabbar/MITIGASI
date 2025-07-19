@@ -1,5 +1,24 @@
 import React from 'react';
 
+/**
+ * Komponen KelolaKelasTable
+ * Component KelolaKelasTable
+ * @desc    Komponen presentasional untuk menampilkan data kelas dalam bentuk tabel, lengkap dengan pencarian dan paginasi.
+ *          A presentational component to display class data in a table, complete with search and pagination.
+ * @props   {array} currentData - Data untuk halaman saat ini. / Data for the current page.
+ * @props   {array} filteredData - Total data setelah difilter. / Total data after filtering.
+ * @props   {string} searchTerm - Kata kunci pencarian. / Search keyword.
+ * @props   {function} setSearchTerm - Fungsi untuk mengubah searchTerm. / Function to change searchTerm.
+ * @props   {number} currentPage - Halaman aktif. / Active page.
+ * @props   {function} setCurrentPage - Fungsi untuk mengubah halaman. / Function to change the page.
+ * @props   {number} totalPages - Total halaman paginasi. / Total pagination pages.
+ * @props   {number} startIndex - Indeks awal data. / Start index of data.
+ * @props   {number} endIndex - Indeks akhir data. / End index of data.
+ * @props   {boolean} loading - Status loading. / Loading status.
+ * @props   {function} onEdit - Fungsi yang dipanggil saat tombol edit diklik. / Function called on edit button click.
+ * @props   {function} onDelete - Fungsi yang dipanggil saat tombol hapus diklik. / Function called on delete button click.
+ * @props   {function} onAdd - Fungsi yang dipanggil saat tombol tambah diklik. / Function called on add button click.
+ */
 const KelolaKelasTable = ({
     currentData,
     filteredData,
@@ -10,23 +29,23 @@ const KelolaKelasTable = ({
     totalPages,
     startIndex,
     endIndex,
-    itemsPerPage,
     loading,
     onEdit,
     onDelete,
     onAdd,
-    getDosenNameByCode,
 }) => {
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
-            {/* Header actions */}
+            {/* Header tabel: Judul, Pencarian, Tombol Tambah */}
+            {/* Table header: Title, Search, Add Button */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-4">
                     <h2 className="text-xl font-semibold text-gray-800">
                         Daftar Semua Kelas
                     </h2>
 
-                    {/* Search */}
+                    {/* Input Pencarian */}
+                    {/* Search Input */}
                     <div className="relative">
                         <input
                             type="text"
@@ -34,7 +53,7 @@ const KelolaKelasTable = ({
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
-                                setCurrentPage(1);
+                                setCurrentPage(1); // Reset ke halaman 1 saat mencari / Reset to page 1 when searching
                             }}
                             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
                         />
@@ -53,6 +72,8 @@ const KelolaKelasTable = ({
                     </div>
                 </div>
 
+                {/* Tombol Tambah Kelas Baru */}
+                {/* Add New Class Button */}
                 <button
                     onClick={onAdd}
                     className="px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:scale-105 bg-blue-500 hover:bg-blue-600">
@@ -61,7 +82,8 @@ const KelolaKelasTable = ({
                 </button>
             </div>
 
-            {/* Table */}
+            {/* Konten Tabel atau Indikator Loading */}
+            {/* Table Content or Loading Indicator */}
             {loading ? (
                 <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -90,6 +112,7 @@ const KelolaKelasTable = ({
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
+                                {/* Render setiap baris data / Render each data row */}
                                 {currentData.map((item) => (
                                     <tr
                                         key={item.id_kelas}
@@ -103,6 +126,7 @@ const KelolaKelasTable = ({
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {/* Tampilkan nama dosen atau pesan default / Show lecturer name or default message */}
                                             {item.nama_dosen ? (
                                                 <span className="text-gray-900">
                                                     {item.nama_dosen}
@@ -114,6 +138,7 @@ const KelolaKelasTable = ({
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {/* Tampilkan kode dosen atau pesan default / Show lecturer code or default message */}
                                             {item.kode_dosen ? (
                                                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                                                     {item.kode_dosen}
@@ -125,6 +150,7 @@ const KelolaKelasTable = ({
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {/* Tombol Aksi per baris / Action buttons per row */}
                                             <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => onEdit(item)}
@@ -148,7 +174,8 @@ const KelolaKelasTable = ({
                         </table>
                     </div>
 
-                    {/* Pagination */}
+                    {/* Kontrol Paginasi */}
+                    {/* Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between mt-6">
                             <div className="text-sm text-gray-700">
@@ -168,7 +195,7 @@ const KelolaKelasTable = ({
                                     className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                                     Sebelumnya
                                 </button>
-
+                                {/* Render tombol nomor halaman / Render page number buttons */}
                                 {[...Array(totalPages)].map((_, i) => (
                                     <button
                                         key={i + 1}
@@ -196,6 +223,7 @@ const KelolaKelasTable = ({
                         </div>
                     )}
 
+                    {/* Pesan jika tidak ada data / Message if no data */}
                     {filteredData.length === 0 && (
                         <div className="text-center py-12">
                             <div className="text-gray-500 text-lg">

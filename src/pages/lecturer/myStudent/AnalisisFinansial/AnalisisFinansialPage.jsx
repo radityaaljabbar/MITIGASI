@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
-//? Import komponen-komponen yang dibutuhkan:
 import LoadingAnalisisFinansial from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/LoadingAnalisisFinansial';
 import StudentInfoFinansialPage from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentInfoFinansialPage';
 import StudentFinancialList from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/StudentFinancialList';
 import DetailPengajuanFinansial from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/DetailPengajuanFinansial';
 import BelumMengisiFinansial from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/BelumMengisiFinansial';
 import handleBack from '../../../../components/handleBack';
-
-//? Service / Data Handler / loader:
+// Mengimpor fungsi-fungsi service/loader data
+// Importing service/data loader functions
 import {
     fetchStudentFinancialData,
     approveRequest,
@@ -17,9 +15,16 @@ import {
     downloadAttachment,
 } from '../../../../components/compDosenWali/compMyStudent/compAnalisisFinansial/AnalisisFinansialDataLoader';
 
-
+/**
+ * Komponen halaman utama untuk analisis finansial seorang mahasiswa.
+ * Main page component for a student's financial analysis.
+ */
 const AnalisisFinansial = () => {
+    // Mengambil NIM dari parameter URL
+    // Getting the NIM from the URL parameters
     const { nim } = useParams();
+    // State untuk data mahasiswa, loading, modal, dan error
+    // State for student data, loading, modal, and errors
     const [studentData, setStudentData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -27,7 +32,11 @@ const AnalisisFinansial = () => {
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Function to load student data
+    /**
+     * Fungsi untuk memuat data finansial mahasiswa dari server.
+     * Function to load student's financial data from the server.
+     * @param {boolean} showRefreshingIndicator - Menampilkan indikator refresh kecil.
+     */
     const loadStudentData = async (showRefreshingIndicator = false) => {
         if (!nim) {
             setError('NIM tidak ditemukan');
@@ -51,7 +60,8 @@ const AnalisisFinansial = () => {
             
             setError(error.message || 'Gagal memuat data mahasiswa');
             
-            // Set empty default data structure to prevent errors
+            // Mengatur struktur data default untuk mencegah error pada UI
+            // Setting a default data structure to prevent UI errors
             setStudentData({
                 name: 'Data Tidak Ditemukan',
                 nim: nim || '-',
@@ -67,7 +77,8 @@ const AnalisisFinansial = () => {
         }
     };
 
-    // Initial data load
+    // Pemuatan data awal saat komponen dimuat
+    // Initial data load when the component mounts
     useEffect(() => {
         let isMounted = true;
 
@@ -79,27 +90,35 @@ const AnalisisFinansial = () => {
 
         loadData();
 
-        // Cleanup function
+        // Fungsi cleanup untuk mencegah update state pada komponen yang sudah unmounted
+        // Cleanup function to prevent state updates on an unmounted component
         return () => {
             isMounted = false;
         };
     }, [nim]);
 
+    /**
+     * Menangani aksi untuk melihat detail pengajuan.
+     * Handles the action to view request details.
+     * @param {object} request - Objek data pengajuan.
+     */
     const handleViewDetail = (request) => {
         setSelectedRequest(request);
         setShowDetailModal(true);
     };
 
+    /**
+     * Menangani aksi menyetujui pengajuan.
+     * Handles the action to approve a request.
+     * @param {string|number} id - ID pengajuan.
+     */
     const handleApproveRequest = async (id) => {
         try {
             await approveRequest(id);
-            
             // Close modal
             setShowDetailModal(false);
             setSelectedRequest(null);
-            
-            // Refresh the data after approval
-            await loadStudentData(true);
+            await loadStudentData(true); // Muat ulang data setelah aksi
             
         } catch (error) {
             console.error('Error approving request:', error);
@@ -108,24 +127,28 @@ const AnalisisFinansial = () => {
         }
     };
 
+    /**
+     * Menangani aksi menolak pengajuan.
+     * Handles the action to reject a request.
+     * @param {string|number} id - ID pengajuan.
+     */
     const handleRejectRequest = async (id) => {
         try {
             await rejectRequest(id);
-            
-            // Close modal
             setShowDetailModal(false);
             setSelectedRequest(null);
-            
-            // Refresh the data after rejection
-            await loadStudentData(true);
+            await loadStudentData(true); // Muat ulang data setelah aksi
             
         } catch (error) {
             console.error('Error rejecting request:', error);
-            // Error message is already shown by the rejectRequest function
-            // Keep modal open so user can try again if needed
         }
     };
 
+    /**
+     * Menangani aksi mengunduh lampiran.
+     * Handles the action to download an attachment.
+     * @param {string} filename - Nama file.
+     */
     const handleDownloadAttachment = async (filename) => {
         try {
             await downloadAttachment(filename);
@@ -134,7 +157,8 @@ const AnalisisFinansial = () => {
         }
     };
 
-    // Early return for loading state
+    // Tampilan loading awal.
+    // Initial loading view.
     if (loading) {
         return (
             <div className="p-4 max-w-6xl mx-auto">
@@ -143,7 +167,8 @@ const AnalisisFinansial = () => {
         );
     }
 
-    // Early return for error state
+    // Tampilan jika terjadi error fatal saat memuat data awal.
+    // View for a fatal error during initial data load.
     if (error && (!studentData || studentData.name === 'Data Tidak Ditemukan')) {
         return (
             <div className="p-4 max-w-6xl mx-auto">
@@ -174,7 +199,8 @@ const AnalisisFinansial = () => {
         );
     }
 
-    // Check if the student has any financial requests (pending or previous)
+    // Memeriksa apakah mahasiswa memiliki data finansial (pending atau riwayat).
+    // Checking if the student has any financial data (pending or history).
     const hasFinancialData =
         studentData &&
         ((studentData.pendingRequests && studentData.pendingRequests.length > 0) ||
@@ -207,11 +233,14 @@ const AnalisisFinansial = () => {
                 <div className="p-5">
                     {hasFinancialData ? (
                         <>
-                            {/* Student info is always shown */}
+                            {/* Menampilkan informasi mahasiswa */}
+                            {/* Displaying student information */}
                             <StudentInfoFinansialPage
                                 studentData={studentData}
                             />
 
+                            {/* Menampilkan daftar pengajuan yang sedang menunggu */}
+                            {/* Displaying the list of pending requests */}
                             <StudentFinancialList
                                 requests={studentData.pendingRequests || []}
                                 title="Pengajuan Menunggu Review"
@@ -220,6 +249,8 @@ const AnalisisFinansial = () => {
                                 isPending={true}
                             />
 
+                            {/* Menampilkan daftar riwayat pengajuan */}
+                            {/* Displaying the list of request history */}
                             <StudentFinancialList
                                 requests={studentData.previousRequests || []}
                                 title="Riwayat Pengajuan"
@@ -229,11 +260,15 @@ const AnalisisFinansial = () => {
                             />
                         </>
                     ) : (
+                        // Menampilkan komponen jika belum ada data finansial
+                        // Displaying a component if there is no financial data yet
                         <BelumMengisiFinansial studentName={studentData.nama} />
                     )}
                 </div>
             </div>
 
+            {/* Modal untuk detail pengajuan */}
+            {/* Modal for request details */}
             {showDetailModal && selectedRequest && (
                 <DetailPengajuanFinansial
                     selectedRequest={selectedRequest}

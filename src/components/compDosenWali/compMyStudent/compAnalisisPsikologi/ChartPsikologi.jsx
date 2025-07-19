@@ -10,10 +10,22 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 
+/**
+ * Komponen untuk menampilkan grafik batang profil psikologi DASS-21.
+ * Component to display a DASS-21 psychology profile bar chart.
+ * @param {object} props - Props komponen.
+ * @param {Array} props.data - Data yang akan ditampilkan di chart.
+ */
 export default function PsychologyChart({ data }) {
+    // Jika tidak ada data, jangan render komponen
+    // If there is no data, do not render the component
     if (!data || data.length === 0) return null;
 
-    // Custom tooltip untuk menampilkan informasi yang lebih detail
+    /**
+     * Komponen kustom untuk tooltip pada chart.
+     * Custom component for the chart's tooltip.
+     * @param {object} props - Props dari Recharts.
+     */
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
@@ -30,12 +42,19 @@ export default function PsychologyChart({ data }) {
         return null;
     };
 
-    // Function to get color based on score and aspect type
+    /**
+     * Fungsi untuk mendapatkan warna bar berdasarkan skor dan jenis aspek.
+     * Function to get the bar color based on the score and aspect type.
+     * @param {object} entry - Data item (termasuk nama dan nilai).
+     * @returns {string} - Kode warna heksadesimal.
+     */
     const getBarColor = (entry) => {
         const score = entry.nilai;
         const aspect = entry.name.toLowerCase();
 
         let ranges;
+        // Rentang skor untuk setiap aspek DASS-21
+        // Score ranges for each DASS-21 aspect
         if (aspect === 'depression') {
             ranges = [
                 { min: 0, max: 4, color: '#22c55e' }, // Normal - Green
@@ -53,7 +72,8 @@ export default function PsychologyChart({ data }) {
                 { min: 10, max: 21, color: '#991b1b' },
             ];
         } else {
-            // stress
+            // Aspek 'stress'
+            // 'stress' aspect
             ranges = [
                 { min: 0, max: 7, color: '#22c55e' },
                 { min: 8, max: 9, color: '#eab308' },
@@ -67,7 +87,8 @@ export default function PsychologyChart({ data }) {
         return range ? range.color : '#9f1239';
     };
 
-    // Transform data untuk menambahkan warna
+    // Transformasi data untuk menambahkan properti 'fill' (warna) ke setiap item
+    // Transforming data to add a 'fill' (color) property to each item
     const dataWithColors = data.map((item) => ({
         ...item,
         fill: getBarColor(item),
@@ -122,7 +143,8 @@ export default function PsychologyChart({ data }) {
                 </ResponsiveContainer>
             </div>
 
-            {/* Legend untuk tingkat */}
+            {/* Legenda untuk tingkat keparahan */}
+            {/* Legend for severity levels */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                 <div className="flex items-center">
                     <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
+/**
+ * Komponen KelolaKurikulumModal
+ * @desc
+ *   Komponen modal untuk menambah atau mengedit data mata kuliah.
+ *   Modal component for adding or editing course data.
+ * @props
+ *   Semua props yang diperlukan untuk fungsionalitas modal.
+ *   All necessary props for modal functionality.
+ */
 const KelolaKurikulumModal = ({
     isOpen,
     onClose,
@@ -12,6 +21,8 @@ const KelolaKurikulumModal = ({
     loading,
     onKurikulumChange, // Fungsi callback untuk menangani perubahan kurikulum
 }) => {
+    // State lokal untuk mengelola data form.
+    // Local state to manage form data.
     const [formData, setFormData] = useState({
         kurikulum: '',
         kode_mk: '',
@@ -26,11 +37,14 @@ const KelolaKurikulumModal = ({
     // State ini sekarang hanya untuk opsi LAINNYA di dropdown
     const [otherEkuivalensiOptions, setOtherEkuivalensiOptions] = useState([]);
 
+    // Effect untuk menginisialisasi atau mereset form setiap kali modal dibuka atau datanya berubah.
+    // Effect to initialize or reset the form whenever the modal is opened or its data changes.
     useEffect(() => {
         if (isOpen) {
             // Logika untuk Mode Edit
             if (mode === 'edit' && selectedMataKuliah) {
-                // 1. Langsung isi form dengan data yang ada
+                // Mode Edit: Isi form dengan data yang sudah ada.
+                // Edit Mode: Populate the form with existing data.
                 setFormData({
                     kurikulum: selectedMataKuliah.kurikulum || '',
                     kode_mk: selectedMataKuliah.kode_mk || '',
@@ -42,7 +56,8 @@ const KelolaKurikulumModal = ({
                     kelompok_keahlian: selectedMataKuliah.kelompok_keahlian || '',
                 });
 
-                // 2. Siapkan opsi dropdown LAINNYA
+                // Siapkan opsi ekuivalensi lainnya untuk dropdown.
+                // Prepare other equivalency options for the dropdown.
                 const filteredOptions = ekuivalensiOptions.filter(
                     (option) =>
                         // Tampilkan hanya opsi yang BUKAN merupakan ekuivalensi yang sudah terpilih
@@ -52,9 +67,9 @@ const KelolaKurikulumModal = ({
                             parseInt(selectedMataKuliah.kurikulum)
                 );
                 setOtherEkuivalensiOptions(filteredOptions);
-
-                // Logika untuk Mode Tambah
             } else {
+                // Mode Tambah: Reset form dan set kurikulum default.
+                // Add Mode: Reset the form and set the default curriculum.
                 setFormData({
                     kurikulum: selectedKurikulum || '',
                     kode_mk: '',
@@ -66,7 +81,8 @@ const KelolaKurikulumModal = ({
                     kelompok_keahlian: '',
                 });
 
-                // Tampilkan semua opsi yang valid
+                // Tampilkan semua opsi ekuivalensi yang valid.
+                // Display all valid equivalency options.
                 const filteredOptions = ekuivalensiOptions.filter(
                     (option) =>
                         parseInt(option.kurikulum_type) <=
@@ -83,11 +99,17 @@ const KelolaKurikulumModal = ({
         ekuivalensiOptions,
     ]);
 
+    /**
+     * @desc
+     *   Menangani perubahan pada input form dan memanggil callback jika kurikulum berubah.
+     *   Handles form input changes and calls a callback if the curriculum changes.
+     */
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
         
-        // Jika kurikulum berubah, panggil callback untuk mengupdate ekuivalensi options
+        // Jika kurikulum berubah, panggil `onKurikulumChange` untuk memperbarui opsi ekuivalensi.
+        // If the curriculum changes, call `onKurikulumChange` to update equivalency options.
         if (name === 'kurikulum' && onKurikulumChange) {
             onKurikulumChange(value);
             // Reset ekuivalensi karena options akan berubah
@@ -95,6 +117,11 @@ const KelolaKurikulumModal = ({
         }
     };
 
+    /**
+     * @desc
+     *   Mempersiapkan dan mengirim data form saat disubmit.
+     *   Prepares and sends form data on submission.
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
         const semester = parseInt(formData.semester);
@@ -110,6 +137,8 @@ const KelolaKurikulumModal = ({
         });
     };
 
+    // Jangan render apapun jika modal tidak terbuka.
+    // Do not render anything if the modal is not open.
     if (!isOpen) return null;
 
     console.log(kelompokKeahlianList)
@@ -290,6 +319,7 @@ const KelolaKurikulumModal = ({
                                     </option>
 
                                     {/* KHUSUS MODE EDIT: Tampilkan info ekuivalensi yang sudah ada sebagai pilihan UTAMA */}
+                                    {/* EDIT MODE ONLY: Display the existing equivalency info as the PRIMARY option */}
                                     {mode === 'edit' &&
                                         selectedMataKuliah &&
                                         selectedMataKuliah.ekuivalensi_info && (
@@ -303,6 +333,7 @@ const KelolaKurikulumModal = ({
                                         )}
 
                                     {/* Tampilkan sisa opsi lain yang valid */}
+                                    {/* Display the rest of the valid options */}
                                     {otherEkuivalensiOptions.map((option, index) => (
                                         <option
                                             key={`ekuivalensi-${index}-${option.kode}-${option.kurikulum_type}`}

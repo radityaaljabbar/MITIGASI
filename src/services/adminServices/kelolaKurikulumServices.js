@@ -1,6 +1,10 @@
 import { getApiUrl, getAuthHeaders } from '../../config/api';
 
-// Get all kurikulum
+/**
+ * Mengambil daftar semua tahun kurikulum yang tersedia.
+ * Fetches a list of all available curriculum years.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllKurikulum = async () => {
     try {
         const response = await fetch(
@@ -24,7 +28,12 @@ export const getAllKurikulum = async () => {
     }
 };
 
-// Get mata kuliah by kurikulum
+/**
+ * Mengambil daftar mata kuliah berdasarkan tahun kurikulum.
+ * Fetches a list of courses based on the curriculum year.
+ * @param {string} kurikulum - Tahun kurikulum yang dipilih.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getMataKuliahByKurikulum = async (kurikulum) => {
     try {
         const response = await fetch(
@@ -50,7 +59,12 @@ export const getMataKuliahByKurikulum = async (kurikulum) => {
     }
 };
 
-// Get mata kuliah by ID
+/**
+ * Mengambil detail satu mata kuliah berdasarkan ID-nya.
+ * Fetches the details of a single course by its ID.
+ * @param {number|string} id - ID mata kuliah.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getMataKuliahById = async (id) => {
     try {
         const response = await fetch(
@@ -74,7 +88,12 @@ export const getMataKuliahById = async (id) => {
     }
 };
 
-// Create new mata kuliah
+/**
+ * Mengirim data untuk membuat mata kuliah baru.
+ * Sends data to create a new course.
+ * @param {object} mataKuliahData - Data mata kuliah baru.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const createNewMataKuliah = async (mataKuliahData) => {
     try {
         const response = await fetch(
@@ -100,7 +119,13 @@ export const createNewMataKuliah = async (mataKuliahData) => {
     }
 };
 
-// Update mata kuliah
+/**
+ * Mengirim data untuk memperbarui data mata kuliah yang ada.
+ * Sends data to update an existing course data.
+ * @param {number|string} id - ID mata kuliah yang akan diupdate.
+ * @param {object} mataKuliahData - Data mata kuliah yang diperbarui.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const updateMataKuliah = async (id, mataKuliahData) => {
     try {
         const response = await fetch(
@@ -126,7 +151,12 @@ export const updateMataKuliah = async (id, mataKuliahData) => {
     }
 };
 
-// Delete mata kuliah
+/**
+ * Menghapus data mata kuliah berdasarkan ID.
+ * Deletes course data by ID.
+ * @param {number|string} id - ID mata kuliah yang akan dihapus.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const deleteMataKuliah = async (id) => {
     try {
         const response = await fetch(
@@ -150,7 +180,12 @@ export const deleteMataKuliah = async (id) => {
     }
 };
 
-// Get ekuivalensi options
+/**
+ * Mengambil daftar mata kuliah yang bisa dijadikan ekuivalensi.
+ * Fetches a list of courses that can be used as equivalencies.
+ * @param {string} kurikulum - Tahun kurikulum.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getEkuivalensiOptions = async (kurikulum) => {
     try {
         const response = await fetch(
@@ -174,7 +209,11 @@ export const getEkuivalensiOptions = async (kurikulum) => {
     }
 };
 
-// Get all Kelompok Keahlian
+/**
+ * Mengambil semua data Kelompok Keahlian (peminatan).
+ * Fetches all Specialization Group (peminatan) data.
+ * @returns {Promise<object>} - Hasil dari panggilan API.
+ */
 export const getAllKelompokKeahlian = async () => {
     try {
         const response = await fetch(

@@ -1,6 +1,11 @@
 // src/components/compAdmin/logAktivitas/LogTable.jsx
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan tabel data log aktivitas beserta kontrol filter.
+ * Component to display the activity log data table along with filter controls.
+ * @param {object} props - Props komponen yang diterima dari hook useLogAktivitas.
+ */
 const LogTable = ({
     currentData, filteredData, searchTerm, setSearchTerm,
     filterStatus, setFilterStatus, currentPage, setCurrentPage,
@@ -8,21 +13,30 @@ const LogTable = ({
     dateRange, handleDateChange, resetFilters
 }) => {
     
+    /**
+     * Mendapatkan kelas CSS untuk badge status berdasarkan status log.
+     * Gets the CSS class for the status badge based on the log status.
+     * @param {string} status - Status log ('success' atau 'fail').
+     * @returns {string} - Kelas Tailwind CSS.
+     */
     const getStatusBadge = (status) => {
         return status === 'success'
             ? 'bg-green-100 text-green-800'
             : 'bg-red-100 text-red-800';
     };
 
-    // Cek apakah ada filter yang aktif
+    // Cek apakah ada filter yang sedang aktif untuk menampilkan tombol reset
+    // Check if any filter is active to display the reset button
     const isFilterActive = searchTerm || filterStatus || dateRange.startDate || dateRange.endDate;
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
-            {/* Header actions */}
+            {/* Kontrol Filter (Pencarian, Status, Tanggal) */}
+            {/* Filter Controls (Search, Status, Date) */}
             <div className="space-y-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Search */}
+                    {/* Filter Pencarian Teks */}
+                    {/* Text Search Filter */}
                     <div className="relative">
                         <label className="text-sm font-medium text-gray-600 mb-1 block">Cari</label>
                         <input
@@ -51,6 +65,7 @@ const LogTable = ({
                     </div>
 
                     {/* Filter Status */}
+                    {/* Status Filter */}
                     <div>
                         <label className="text-sm font-medium text-gray-600 mb-1 block">Status</label>
                         <select
@@ -68,6 +83,7 @@ const LogTable = ({
                     </div>
 
                     {/* Filter Tanggal Mulai */}
+                    {/* Start Date Filter */}
                     <div>
                         <label className="text-sm font-medium text-gray-600 mb-1 block">Dari Tanggal</label>
                         <input
@@ -80,6 +96,7 @@ const LogTable = ({
                     </div>
                     
                     {/* Filter Tanggal Selesai */}
+                    {/* End Date Filter */}
                     <div>
                         <label className="text-sm font-medium text-gray-600 mb-1 block">Sampai Tanggal</label>
                         <input
@@ -87,11 +104,13 @@ const LogTable = ({
                             name="endDate"
                             value={dateRange.endDate}
                             onChange={handleDateChange}
-                            min={dateRange.startDate} // <-- Cegah memilih tanggal sebelum start date
+                            min={dateRange.startDate} // Cegah memilih tanggal sebelum tanggal mulai / Prevent selecting a date before the start date
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                 </div>
+                {/* Tombol Reset Filter */}
+                {/* Reset Filter Button */}
                  {isFilterActive && (
                     <div className="flex justify-end">
                         <button
@@ -105,8 +124,11 @@ const LogTable = ({
                 )}
             </div>
 
-            {/* Table */}
+            {/* Tabel Data Log */}
+            {/* Log Data Table */}
             {loading ? (
+                // Tampilan saat loading
+                // View during loading
                 <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
@@ -146,7 +168,8 @@ const LogTable = ({
                         </table>
                     </div>
 
-                    {/* Pagination */}
+                    {/* Kontrol Paginasi */}
+                    {/* Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between mt-6">
                             <div className="text-sm text-gray-700">
@@ -172,6 +195,8 @@ const LogTable = ({
                         </div>
                     )}
                     
+                    {/* Pesan jika tidak ada data */}
+                    {/* Message if no data is available */}
                     {filteredData.length === 0 && !loading && (
                         <div className="text-center py-12 text-gray-500">
                             Tidak ada log yang ditemukan.

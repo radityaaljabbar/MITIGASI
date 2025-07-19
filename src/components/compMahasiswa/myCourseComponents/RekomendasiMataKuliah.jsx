@@ -3,28 +3,47 @@ import {
     getRecommendedCourse, 
     getListPeminatan, 
     sendPeminatanMahasiswa,
-    getStudentPeminatan // DITAMBAHKAN: Import service baru
+    getStudentPeminatan 
 } from '../../../services/mahasiswaServices/myCourseService';
 
+/**
+ * Komponen untuk menampilkan rekomendasi mata kuliah bagi mahasiswa.
+ * Component to display course recommendations for students.
+ */
 const RekomendasiMataKuliah = () => {
+    // State untuk menyimpan data rekomendasi dari API
+    // State to store recommendation data from the API
     const [recommendedData, setRecommendedData] = useState({});
+    // State untuk menyimpan data yang sudah dikelompokkan per semester
+    // State to store data grouped by semester
     const [groupedData, setGroupedData] = useState({});
+    // State untuk status loading saat mengambil data
+    // State for loading status while fetching data
     const [loading, setLoading] = useState(false);
+    // State untuk menyimpan pesan error
+    // State to store error messages
     const [error, setError] = useState(null);
+    // State untuk menandakan apakah ada rekomendasi atau tidak
+    // State to indicate whether there are recommendations or not
     const [noRecommendations, setNoRecommendations] = useState(true);
     
-    // State untuk kelompok keahlian
+    // State untuk fitur pemilihan kelompok keahlian (peminatan)
+    // State for the specialization selection feature
     const [selectedKeahlian, setSelectedKeahlian] = useState('');
     const [kelompokKeahlianList, setKelompokKeahlianList] = useState([]);
     const [loadingPeminatan, setLoadingPeminatan] = useState(false);
     const [savingPeminatan, setSavingPeminatan] = useState(false);
     const [peminatanMessage, setPeminatanMessage] = useState('');
 
-    // DITAMBAHKAN: State untuk menyimpan peminatan mahasiswa saat ini
+    // State untuk menyimpan peminatan yang sudah dipilih mahasiswa
+    // State to store the specialization already chosen by the student
     const [currentPeminatan, setCurrentPeminatan] = useState('');
     const [loadingCurrentPeminatan, setLoadingCurrentPeminatan] = useState(true);
 
-    // Fetch list peminatan dari backend
+    /**
+     * Mengambil daftar pilihan peminatan dari server untuk mengisi dropdown.
+     * Fetches the list of specialization options from the server to populate the dropdown.
+     */
     const fetchListPeminatan = async () => {
         try {
             setLoadingPeminatan(true);
@@ -36,6 +55,8 @@ const RekomendasiMataKuliah = () => {
                 );
                 setKelompokKeahlianList(peminatanList);
             } else {
+                // Gunakan daftar default jika fetch gagal
+                // Use a default list if the fetch fails
                 setKelompokKeahlianList([
                     'Data Science & Analytics', 'Software Engineering', 'Artificial Intelligence',
                     'Computer Networks & Security', 'Human Computer Interaction', 'Information Systems'
@@ -44,6 +65,8 @@ const RekomendasiMataKuliah = () => {
             }
         } catch (error) {
             console.error('Error fetching peminatan list:', error);
+            // Fallback ke daftar default jika terjadi error
+            // Fallback to the default list if an error occurs
             setKelompokKeahlianList([
                 'Data Science & Analytics', 'Software Engineering', 'Artificial Intelligence',
                 'Computer Networks & Security', 'Human Computer Interaction', 'Information Systems'
@@ -53,7 +76,10 @@ const RekomendasiMataKuliah = () => {
         }
     };
     
-    // DITAMBAHKAN: Fetch peminatan yang sudah dipilih mahasiswa
+    /**
+     * Mengambil peminatan yang saat ini sudah dipilih oleh mahasiswa.
+     * Fetches the specialization currently selected by the student.
+     */
     const fetchCurrentPeminatan = async () => {
         setLoadingCurrentPeminatan(true);
         try {
@@ -61,7 +87,7 @@ const RekomendasiMataKuliah = () => {
             if (response.success && response.data.peminatan && response.data.peminatan !== 'Belum memilih peminatan') {
                 const studentPeminatan = response.data.peminatan;
                 setCurrentPeminatan(studentPeminatan);
-                setSelectedKeahlian(studentPeminatan); // Set dropdown ke peminatan saat ini
+                setSelectedKeahlian(studentPeminatan); // Atur dropdown sesuai pilihan saat ini
             }
         } catch (error) {
             console.error("Error fetching student's current peminatan:", error);
@@ -70,7 +96,11 @@ const RekomendasiMataKuliah = () => {
         }
     };
 
-    // Handle data dari service
+    /**
+     * Mengambil data rekomendasi mata kuliah dari server.
+     * Fetches recommended course data from the server.
+     * @param {string|null} kelompokKeahlian - Peminatan yang dipilih untuk filter.
+     */
     const fetchRecommendedCourse = async (kelompokKeahlian = null) => {
         try {
             setLoading(true);
@@ -100,19 +130,24 @@ const RekomendasiMataKuliah = () => {
         }
     };
 
-    // Load data awal saat komponen dimount
+    // Effect untuk memuat semua data awal saat komponen pertama kali di-mount
+    // Effect to load all initial data when the component first mounts
     useEffect(() => {
-        // DIUPDATE: Jalankan fetch secara berurutan agar lebih terstruktur
+        // Menjalankan fetch secara berurutan agar terstruktur
+        // Running fetches sequentially for a structured load
         const loadInitialData = async () => {
-            await fetchListPeminatan(); // 1. Ambil daftar pilihan peminatan
-            await fetchCurrentPeminatan(); // 2. Ambil peminatan mahasiswa saat ini
-            await fetchRecommendedCourse(); // 3. Ambil rekomendasi MK
+            await fetchListPeminatan();       // 1. Ambil daftar pilihan peminatan
+            await fetchCurrentPeminatan();    // 2. Ambil peminatan mahasiswa saat ini
+            await fetchRecommendedCourse();   // 3. Ambil rekomendasi MK
         };
         
         loadInitialData();
-    }, []);
+    }, []); // Dependensi kosong berarti hanya berjalan sekali
 
-    // Handle submit kelompok keahlian
+    /**
+     * Menangani pengiriman pilihan kelompok keahlian ke server.
+     * Handles submitting the chosen specialization to the server.
+     */
     const handleSubmitKeahlian = async () => {
         if (!selectedKeahlian) return;
 
@@ -126,8 +161,8 @@ const RekomendasiMataKuliah = () => {
                     type: 'success',
                     text: response.message || 'Peminatan berhasil disimpan!'
                 });
-                setCurrentPeminatan(selectedKeahlian); // Update UI peminatan saat ini
-                await fetchRecommendedCourse(selectedKeahlian);
+                setCurrentPeminatan(selectedKeahlian); // Perbarui UI peminatan saat ini
+                await fetchRecommendedCourse(selectedKeahlian); // Ambil rekomendasi baru
             } else {
                 setPeminatanMessage({
                     type: 'error',
@@ -142,11 +177,18 @@ const RekomendasiMataKuliah = () => {
             });
         } finally {
             setSavingPeminatan(false);
+            // Sembunyikan pesan setelah 3 detik
+            // Hide the message after 3 seconds
             setTimeout(() => setPeminatanMessage(''), 3000);
         }
     };
 
-    // Format tanggal
+    /**
+     * Memformat string tanggal menjadi format yang lebih mudah dibaca.
+     * Formats a date string into a more readable format.
+     * @param {string} dateString - String tanggal dari API.
+     * @returns {string} - Tanggal yang sudah diformat.
+     */
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('id-ID', {
@@ -154,6 +196,8 @@ const RekomendasiMataKuliah = () => {
         });
     };
 
+    // Tampilan saat loading
+    // Loading view
     if (loading) {
         return (
             <div className="bg-white w-full max-w-[1200px] min-h-[500px] p-6 rounded-2xl shadow-xl border border-gray-200 flex justify-center items-center">
@@ -165,6 +209,8 @@ const RekomendasiMataKuliah = () => {
         );
     }
 
+    // Tampilan saat terjadi error
+    // Error view
     if (error) {
         return (
             <div className="bg-white w-full max-w-[1200px] min-h-[500px] p-6 rounded-2xl shadow-xl border border-gray-200 flex justify-center items-center">
@@ -183,7 +229,8 @@ const RekomendasiMataKuliah = () => {
 
     return (
         <div className="bg-white w-full max-w-[1200px] min-h-[500px] max-h-[1000px] p-6 rounded-2xl shadow-xl border border-gray-200 flex flex-col items-center space-y-5">
-            {/* Header */}
+            {/* Header Komponen */}
+            {/* Component Header */}
             <div className="w-full flex items-center justify-between">
                 <div className="flex items-center mb-2">
                     <div className="bg-gradient-to-r from-[#951a22] to-[#7a1419] p-3 rounded-lg mr-4">
@@ -198,13 +245,13 @@ const RekomendasiMataKuliah = () => {
 
             </div>
 
-            {/* Kelompok Keahlian Section */}
+            {/* Bagian Pemilihan Kelompok Keahlian */}
+            {/* Specialization Selection Section */}
             <div className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 shadow-sm">
                 <div className="flex items-center mb-4">
                     <div className="bg-blue-500 text-white p-2 rounded-full mr-3">🎯</div>
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900">Kelompok Keahlian</h3>
-                        {/* DI-IMPROVE: Tampilkan peminatan saat ini */}
                         <p className="text-sm text-gray-600">
                             Pilih kelompok keahlian untuk mendapatkan rekomendasi mata kuliah yang lebih personal.
                             {loadingCurrentPeminatan ? (
@@ -258,6 +305,8 @@ const RekomendasiMataKuliah = () => {
                             </button>
                         </div>
                         
+                        {/* Pesan feedback setelah menyimpan peminatan */}
+                        {/* Feedback message after saving specialization */}
                         {peminatanMessage && (
                             <div className={`mt-3 p-3 rounded-lg text-sm ${
                                 peminatanMessage.type === 'success' 
@@ -274,8 +323,11 @@ const RekomendasiMataKuliah = () => {
                 </div>
             </div>
 
-            {/* Content */}
+            {/* Konten Utama: Daftar Rekomendasi atau Pesan Kosong */}
+            {/* Main Content: Recommendation List or Empty Message */}
             {noRecommendations ? (
+                // Tampilan jika tidak ada rekomendasi
+                // View if there are no recommendations
                 <div className="w-full flex-1 flex flex-col justify-center items-center py-16">
                     <div className="text-center">
                         <div className="text-6xl mb-6">📚</div>
@@ -287,13 +339,18 @@ const RekomendasiMataKuliah = () => {
                     </div>
                 </div>
             ) : (
+                // Tampilan jika ada rekomendasi
+                // View if there are recommendations
                 <div className="w-full h-[calc(100%-200px)] overflow-y-auto overflow-x-auto rounded-lg">
                     {Object.entries(groupedData)
+                        // Urutkan berdasarkan semester
+                        // Sort by semester
                         .sort(([a], [b]) => parseInt(a) - parseInt(b))
                         .map(([semester, courses]) => (
                             <div key={semester} className="mb-6 last:mb-0">
                                 
-                                {/* Semester Header */}
+                                {/* Header untuk setiap semester */}
+                                {/* Header for each semester */}
                                 <div className="flex items-center justify-between mb-3 p-4 bg-gradient-to-r from-[#951a22] to-[#7a1419] rounded-lg text-white shadow-md">
                                     <div className="flex items-center">
                                         <div className="bg-white text-[#951a22] px-4 py-2 rounded-full text-sm font-bold shadow-sm">
@@ -308,7 +365,8 @@ const RekomendasiMataKuliah = () => {
                                     <div className="text-sm opacity-90">Dibuat: {formatDate(courses[0]?.tanggal_dibuat)}</div>
                                 </div>
 
-                                {/* Table */}
+                                {/* Tabel Mata Kuliah */}
+                                {/* Course Table */}
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                                     <table className="w-full text-sm">
                                         <thead>

@@ -1,6 +1,16 @@
 import React from 'react';
 import { analyzeDASS21Level } from '../../../../services/dosenWali/myStudent/cekAnalisisPsikologi';
 
+/**
+ * Komponen untuk menampilkan detail hasil tes psikologi DASS-21.
+ * Component to display the detailed results of a DASS-21 psychology test.
+ * @param {object} props - Props komponen.
+ * @param {object} props.psychologyData - Data umum hasil tes.
+ * @param {object} props.aspectData - Data skor per aspek.
+ * @param {string} props.kesimpulan - Kesimpulan dari hasil tes.
+ * @param {string} props.saran - Saran berdasarkan hasil tes.
+ * @param {string} props.tanggalTes - Tanggal pelaksanaan tes.
+ */
 export default function PsychologyDetails({
     psychologyData,
     aspectData,
@@ -8,8 +18,12 @@ export default function PsychologyDetails({
     saran,
     tanggalTes,
 }) {
+    // Jika data tidak lengkap, jangan render
+    // If data is incomplete, do not render
     if (!aspectData || !psychologyData) return null;
 
+    // Definisi aspek-aspek yang diukur dalam DASS-21
+    // Definition of the aspects measured in DASS-21
     const aspects = [
         {
             key: 'depression',
@@ -34,6 +48,13 @@ export default function PsychologyDetails({
         },
     ];
 
+    /**
+     * Mendapatkan warna progress bar berdasarkan skor dan aspek.
+     * Gets the progress bar color based on the score and aspect.
+     * @param {number} score - Skor aspek.
+     * @param {string} aspect - Nama aspek.
+     * @returns {string} - Kelas Tailwind CSS untuk warna.
+     */
     const getProgressBarColor = (score, aspect) => {
         const level = analyzeDASS21Level(score, aspect);
         const colorMap = {
@@ -46,6 +67,12 @@ export default function PsychologyDetails({
         return colorMap[level.color] || 'bg-gray-500';
     };
 
+    /**
+     * Mendapatkan warna badge berdasarkan tingkat keparahan.
+     * Gets the badge color based on the severity level.
+     * @param {string} level - Nama tingkat (Normal, Ringan, dll).
+     * @returns {string} - Kelas Tailwind CSS untuk warna.
+     */
     const getLevelBadgeColor = (level) => {
         const colorMap = {
             Normal: 'bg-green-100 text-green-800 border-green-200',
@@ -128,6 +155,7 @@ export default function PsychologyDetails({
             </div>
 
             {/* Kesimpulan dan Saran */}
+            {/* Conclusion and Suggestions */}
             <div className="mt-8 space-y-4">
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <h4 className="font-semibold mb-2 text-blue-800">
@@ -144,7 +172,8 @@ export default function PsychologyDetails({
                 </div>
             </div>
 
-            {/* DASS-21 Information */}
+            {/* Informasi tentang DASS-21 */}
+            {/* Information about DASS-21 */}
             <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h4 className="font-semibold mb-2 text-gray-800">
                     Tentang DASS-21:

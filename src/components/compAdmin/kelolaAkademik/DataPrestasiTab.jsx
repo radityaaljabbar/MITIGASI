@@ -8,31 +8,48 @@ import {
 } from '../../../services/adminServices/kelolaAkademikServices';
 import DeleteConfirmationModal from '../kelolaPengguna/DeleteConfirmationModal';
 
+/**
+ * Komponen DataPrestasiTab
+ * Component DataPrestasiTab
+ * @desc    Menampilkan dan mengelola data prestasi akademik mahasiswa (TAK, IPK, SKS Lulus).
+ *          Features display and management of student academic achievement data (TAK, IPK, Total SKS).
+ * @props   {object} mahasiswaData - Data mahasiswa yang sedang dilihat. / Data of the student being viewed.
+ */
 const DataPrestasiTab = ({ mahasiswaData }) => {
-    // State untuk data
-    const [prestasiData, setPrestasiData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [loadingAction, setLoadingAction] = useState(false);
+    // State untuk data dan UI
+    // State for data and UI
+    const [prestasiData, setPrestasiData] = useState(null); // Menyimpan data prestasi dari API. / Stores achievement data from the API.
+    const [loading, setLoading] = useState(false); // Status loading untuk pengambilan data awal. / Loading status for initial data fetch.
+    const [loadingAction, setLoadingAction] = useState(false); // Status loading untuk aksi (simpan, hapus). / Loading status for actions (save, delete).
 
     // State untuk mode edit
-    const [isEditing, setIsEditing] = useState(false);
+    // State for edit mode
+    const [isEditing, setIsEditing] = useState(false); // Menentukan apakah form edit sedang aktif. / Determines if the edit form is active.
 
-    // 🔧 TAMBAHAN: State untuk delete confirmation modal
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deleteData, setDeleteData] = useState(null);
+    // State untuk modal konfirmasi hapus
+    // State for delete confirmation modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // Kontrol visibilitas modal konfirmasi hapus. / Controls the visibility of the delete confirmation modal.
+    const [deleteData, setDeleteData] = useState(null); // Data yang akan dihapus, untuk ditampilkan di modal. / Data to be deleted, for display in the modal.
 
-    // State untuk form
+    // State untuk form input
+    // State for the input form
     const [formData, setFormData] = useState({
         tak: '',
         sks_lulus: '',
         ipk_lulus: '',
     });
 
-    // 🚀 HELPER FUNCTION: Cek apakah data prestasi benar-benar ada (bukan hanya null values)
+    /**
+     * @desc    Fungsi helper untuk memeriksa apakah data prestasi yang ada valid (bukan hanya null atau 0).
+     *          Helper function to check if the existing achievement data is valid (not just null or 0).
+     * @param   {object} data - Objek data prestasi. / Achievement data object.
+     * @returns {boolean} True jika ada setidaknya satu field yang valid. / True if at least one field is valid.
+     */
     const hasValidPrestasiData = (data) => {
         if (!data) return false;
 
         // Cek apakah minimal ada satu field yang tidak null/undefined/0
+        // Check if at least one field is not null/undefined/0
         return (
             (data.tak !== null && data.tak !== undefined && data.tak !== 0) ||
             (data.ipk !== null && data.ipk !== undefined && data.ipk !== 0) ||
@@ -42,21 +59,26 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         );
     };
 
-    // Load data saat component mount
+    // Effect untuk memuat data saat komponen pertama kali dirender atau `mahasiswaData` berubah
+    // Effect to load data when the component first renders or `mahasiswaData` changes
     useEffect(() => {
         if (mahasiswaData?.nim) {
             loadPrestasiData();
         }
     }, [mahasiswaData]);
 
-    // Load prestasi data
+    /**
+     * @desc    Memuat data prestasi mahasiswa dari API.
+     *          Loads student achievement data from the API.
+     */
     const loadPrestasiData = async () => {
         setLoading(true);
         try {
             const response = await getPrestasiData(mahasiswaData.nim);
             if (response.success) {
                 setPrestasiData(response.data);
-                // Set form data jika ada data VALID
+                // Setel data form jika data yang diterima valid
+                // Set form data if the received data is valid
                 if (hasValidPrestasiData(response.data)) {
                     setFormData({
                         tak: response.data.tak?.toString() || '',
@@ -64,7 +86,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                         ipk_lulus: response.data.ipk?.toString() || '',
                     });
                 } else {
-                    // Reset form jika data semua null
+                    // Reset form jika data tidak valid atau semua null
+                    // Reset form if data is invalid or all null
                     setFormData({
                         tak: '',
                         sks_lulus: '',
@@ -72,7 +95,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                     });
                 }
             } else {
-                // Jika data tidak ditemukan, set null
+                // Jika API mengembalikan success: false (misal, data tidak ditemukan)
+                // If API returns success: false (e.g., data not found)
                 setPrestasiData(null);
                 setFormData({
                     tak: '',
@@ -88,7 +112,10 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle input change
+    /**
+     * @desc    Menangani perubahan pada input form.
+     *          Handles changes in the form inputs.
+     */
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -97,7 +124,10 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         }));
     };
 
-    // Handle submit
+    /**
+     * @desc    Menangani submit form, baik untuk membuat data baru atau memperbarui data yang ada.
+     *          Handles form submission, for both creating new data or updating existing data.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoadingAction(true);
@@ -111,22 +141,25 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                 ipk_lulus: formData.ipk_lulus,
             };
 
-            // 🔧 FIXED LOGIC: Gunakan hasValidPrestasiData untuk menentukan CREATE vs UPDATE
+            // Logika untuk menentukan apakah akan membuat (create) atau memperbarui (update)
+            // Logic to determine whether to create or update
             if (hasValidPrestasiData(prestasiData)) {
+                // Update data yang sudah ada
                 // Update existing data
                 response = await updatePrestasiData(
                     mahasiswaData.nim,
                     submitData
                 );
             } else {
+                // Buat data baru
                 // Create new data
                 response = await createPrestasiData(submitData);
             }
 
             if (response.success) {
                 toast.success(response.message);
-                setIsEditing(false);
-                loadPrestasiData();
+                setIsEditing(false); // Keluar dari mode edit setelah berhasil
+                loadPrestasiData(); // Muat ulang data untuk menampilkan perubahan
             } else {
                 toast.error(response.message || 'Terjadi kesalahan');
             }
@@ -137,9 +170,11 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         }
     };
 
-    // 🔧 FIXED: Handle delete click - gunakan modal
+    /**
+     * @desc    Menangani klik pada tombol hapus, mempersiapkan data dan menampilkan modal konfirmasi.
+     *          Handles the delete button click, prepares data, and shows the confirmation modal.
+     */
     const handleDeleteClick = () => {
-        // Set data untuk modal (bisa menggunakan prestasiData atau mahasiswaData)
         setDeleteData({
             id: mahasiswaData.nim, // Menggunakan NIM sebagai identifier
             name: `Data Prestasi - ${mahasiswaData.name}`,
@@ -148,13 +183,18 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         setShowDeleteModal(true);
     };
 
-    // 🔧 FIXED: Confirm delete - fungsi yang dipanggil oleh modal
+    /**
+     * @desc    Mengeksekusi penghapusan data setelah dikonfirmasi melalui modal.
+     *          Executes data deletion after confirmation via the modal.
+     */
     const confirmDelete = async () => {
         setLoadingAction(true);
         try {
             const response = await deletePrestasiData(mahasiswaData.nim);
             if (response.success) {
                 toast.success(response.message);
+                // Reset semua state terkait data prestasi
+                // Reset all states related to achievement data
                 setPrestasiData(null);
                 setFormData({
                     tak: '',
@@ -173,7 +213,10 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle edit mode
+    /**
+     * @desc    Mengaktifkan mode edit dan mengisi form dengan data yang ada.
+     *          Activates edit mode and fills the form with existing data.
+     */
     const handleEdit = () => {
         setIsEditing(true);
         if (hasValidPrestasiData(prestasiData)) {
@@ -185,9 +228,14 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle cancel edit
+    /**
+     * @desc    Membatalkan mode edit dan mengembalikan nilai form ke state semula.
+     *          Cancels edit mode and reverts form values to their original state.
+     */
     const handleCancel = () => {
         setIsEditing(false);
+        // Kembalikan data form ke data yang ada di `prestasiData` atau kosongkan jika tidak ada data
+        // Revert form data to the data in `prestasiData` or clear it if no data exists
         if (hasValidPrestasiData(prestasiData)) {
             setFormData({
                 tak: prestasiData.tak?.toString() || '',
@@ -206,22 +254,27 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
     return (
         <div className="p-6">
             <div className="max-w-2xl">
-                {/* Header */}
+                {/* Header Section */}
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-semibold text-gray-800">
                         Data Prestasi Akademik
                     </h3>
                 </div>
 
+                {/* Tampilan Loading */}
+                {/* Loading Display */}
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
                 ) : (
                     <div className="bg-white border rounded-lg p-6">
-                        {/* 🔧 FIXED: Display Mode - Hanya tampil jika ada data VALID */}
+                        {/* Mode Tampilan: Ditampilkan jika tidak dalam mode edit dan ada data prestasi yang valid */}
+                        {/* Display Mode: Shown if not in edit mode and there is valid achievement data */}
                         {!isEditing && hasValidPrestasiData(prestasiData) ? (
                             <div className="space-y-6">
+                                {/* Kartu Data Prestasi */}
+                                {/* Achievement Data Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {/* TAK */}
                                     <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
@@ -311,7 +364,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                     </div>
                                 </div>
 
-                                {/* Action Buttons */}
+                                {/* Tombol Aksi (Edit, Hapus) */}
+                                {/* Action Buttons (Edit, Delete) */}
                                 <div className="flex space-x-3 pt-4">
                                     <button
                                         onClick={handleEdit}
@@ -331,7 +385,6 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                         </svg>
                                         <span>Edit Data</span>
                                     </button>
-                                    {/* 🔧 FIXED: Ganti handler ke handleDeleteClick */}
                                     <button
                                         onClick={handleDeleteClick}
                                         disabled={loadingAction}
@@ -353,12 +406,15 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                 </div>
                             </div>
                         ) : (
-                            /* Form Mode - Tampil saat edit atau belum ada data valid */
+                            /* Mode Form: Ditampilkan jika dalam mode edit atau belum ada data valid */
+                            /* Form Mode: Shown if in edit mode or no valid data exists yet */
                             <div>
-                                {/* 🔧 FIXED: Tampil form jika isEditing ATAU belum ada data valid */}
+                                {/* Kondisi untuk menampilkan form: isEditing=true ATAU tidak ada data prestasi */}
+                                {/* Condition to show form: isEditing=true OR no achievement data exists */}
                                 {isEditing ||
                                 !hasValidPrestasiData(prestasiData) ? (
                                     <>
+                                        {/* Header Form */}
                                         <div className="mb-4">
                                             <h4 className="text-md font-medium text-gray-800">
                                                 {hasValidPrestasiData(
@@ -376,6 +432,7 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                             </p>
                                         </div>
 
+                                        {/* Form Input Data Prestasi */}
                                         <form
                                             onSubmit={handleSubmit}
                                             className="space-y-4">
@@ -456,7 +513,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                                                 </small>
                                             </div>
 
-                                            {/* Buttons */}
+                                            {/* Tombol Form (Batal, Simpan) */}
+                                            {/* Form Buttons (Cancel, Save) */}
                                             <div className="flex space-x-3 pt-4">
                                                 <button
                                                     type="button"
@@ -485,7 +543,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                             </div>
                         )}
 
-                        {/* 🔧 FIXED: Empty State - Hanya tampil jika tidak editing DAN tidak ada data valid */}
+                        {/* Tampilan Kosong: Ditampilkan jika tidak dalam mode edit dan tidak ada data prestasi */}
+                        {/* Empty State: Shown if not in edit mode and no achievement data exists */}
                         {!isEditing && !hasValidPrestasiData(prestasiData) && (
                             <div className="text-center py-12">
                                 <svg
@@ -532,7 +591,8 @@ const DataPrestasiTab = ({ mahasiswaData }) => {
                 )}
             </div>
 
-            {/* 🔧 TAMBAHAN: Delete Confirmation Modal */}
+            {/* Modal Konfirmasi Hapus */}
+            {/* Delete Confirmation Modal */}
             <DeleteConfirmationModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}

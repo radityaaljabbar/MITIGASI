@@ -3,22 +3,40 @@ import { Link } from 'react-router-dom';
 import getStatusColor from '../../../components/statusColor';
 import { getFeedbackList } from '../../../services/mahasiswaServices/feedbackService';
 
+/**
+ * Komponen untuk menampilkan daftar feedback yang telah dikirim oleh mahasiswa.
+ * Component to display a list of feedback submitted by the student.
+ */
 const MyFeedback = () => {
+    // State untuk menyimpan daftar feedback, status loading, dan pesan error
+    // State to store the feedback list, loading status, and error message
     const [feedbackList, setFeedbackList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Helper function to convert status code to display text
+    /**
+     * Fungsi helper untuk mengonversi kode status (misal: angka) menjadi teks yang bisa ditampilkan.
+     * Helper function to convert a status code (e.g., a number) into displayable text.
+     * @param {number|string} status - Kode status dari API.
+     * @returns {string} - Teks status.
+     */
     const getStatusDisplay = (status) => {
-        // Convert numeric status to string representation
+        // Mengonversi status numerik ke representasi string
+        // Converting numeric status to string representation
         if (status === 1 || status === '1') {
             return 'Direspon';
         }
+        // Menambahkan pemetaan status lain jika diperlukan
         // Add other status mappings as needed
         return status || 'Pending';
     };
 
-    // Helper function to get color based on status
+    /**
+     * Fungsi helper untuk mendapatkan kelas warna CSS berdasarkan status feedback.
+     * Helper function to get the CSS color class based on the feedback status.
+     * @param {number|string} status - Kode status dari API.
+     * @returns {string} - Kelas Tailwind CSS.
+     */
     const getStatusColorClass = (status) => {
         const displayStatus = getStatusDisplay(status);
 
@@ -28,13 +46,16 @@ const MyFeedback = () => {
             case 'Pending':
                 return 'bg-yellow-100 text-yellow-800';
             default:
+                // Fallback ke helper umum jika ada, atau default ke abu-abu
+                // Fallback to a common helper if available, or default to gray
                 return (
                     getStatusColor(displayStatus) || 'bg-gray-100 text-gray-800'
                 );
         }
     };
 
-    // Fetch feedback data using the service
+    // Effect untuk mengambil data feedback saat komponen dimuat
+    // Effect to fetch feedback data when the component mounts
     useEffect(() => {
         const fetchFeedback = async () => {
             try {
@@ -69,6 +90,8 @@ const MyFeedback = () => {
                     Daftar Feedback
                 </h1>
 
+                {/* Tombol untuk membuat feedback baru */}
+                {/* Button to create new feedback */}
                 <Link
                     to="new-feedback"
                     className="flex items-center gap-2 bg-[#951A22] hover:bg-[#7A1118] text-white font-medium py-2 px-4 rounded transition-all duration-200 mb-6 shadow-sm hover:shadow">
@@ -86,15 +109,23 @@ const MyFeedback = () => {
                     <span>Buat Feedback Baru</span>
                 </Link>
 
+                {/* Render kondisional berdasarkan status (loading, error, atau data) */}
+                {/* Conditional rendering based on status (loading, error, or data) */}
                 {isLoading ? (
+                    // Tampilan saat loading
+                    // Loading view
                     <div className="flex justify-center items-center h-40">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#951A22]"></div>
                     </div>
                 ) : error ? (
+                    // Tampilan saat terjadi error
+                    // Error view
                     <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
                         {error}
                     </div>
                 ) : (
+                    // Tampilan daftar feedback
+                    // Feedback list view
                     <ul className="space-y-3">
                         {feedbackList.length > 0 ? (
                             feedbackList.map((feedback) => (
@@ -111,7 +142,8 @@ const MyFeedback = () => {
                                         </span>
                                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm mt-2 sm:mt-0">
                                             <span className="text-gray-500">
-                                                {/* ✅ FIXED: Langsung gunakan tanggal yang sudah diformat dari service */}
+                                                {/* Menggunakan tanggal yang sudah diformat dari service */}
+                                                {/* Using the pre-formatted date from the service */}
                                                 {feedback.tanggal_keluhan ||
                                                     feedback.feedbackDate}
                                             </span>
@@ -136,6 +168,8 @@ const MyFeedback = () => {
                                 </li>
                             ))
                         ) : (
+                            // Tampilan jika tidak ada feedback
+                            // View if there is no feedback
                             <div className="flex flex-col items-center justify-center py-12">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"

@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
+/**
+ * Komponen KelolaKelasPopUp
+ * Component KelolaKelasPopUp
+ * @desc    Komponen modal (popup) untuk menambah atau mengedit data kelas.
+ *          Modal (popup) component for adding or editing class data.
+ * @props   {boolean} isOpen - Mengontrol visibilitas modal. / Controls modal visibility.
+ * @props   {function} onClose - Fungsi untuk menutup modal. / Function to close the modal.
+ * @props   {function} onSubmit - Fungsi yang dipanggil saat form disubmit. / Function called on form submission.
+ * @props   {string} modalType - Tipe modal ('add' atau 'edit'). / Modal type ('add' or 'edit').
+ * @props   {object} initialData - Data awal untuk mode edit. / Initial data for edit mode.
+ * @props   {array} dosenList - Daftar dosen untuk dropdown. / List of lecturers for the dropdown.
+ * @props   {boolean} loading - Status loading untuk menonaktifkan tombol. / Loading status to disable buttons.
+ */
 const KelolaKelasPopUp = ({
     isOpen,
     onClose,
@@ -9,23 +22,29 @@ const KelolaKelasPopUp = ({
     dosenList,
     loading,
 }) => {
+    // State lokal untuk menampung data input form
+    // Local state to hold form input data
     const [formData, setFormData] = useState({
         tahun_angkatan: '',
         kode_kelas: '',
         kode_dosen: '',
     });
 
-    // Reset form ketika modal dibuka/ditutup atau data berubah
+    // Effect untuk mengisi form saat modal dibuka atau datanya berubah
+    // Effect to populate the form when the modal is opened or its data changes
     useEffect(() => {
         if (isOpen) {
             if (modalType === 'edit' && initialData) {
+                // Mode edit: isi form dengan data yang ada
+                // Edit mode: fill the form with existing data
                 setFormData({
                     tahun_angkatan: initialData.tahun_angkatan || '',
                     kode_kelas: initialData.kode_kelas || '',
                     kode_dosen: initialData.kode_dosen || '',
                 });
             } else {
-                // Reset untuk add mode
+                // Mode tambah: reset form
+                // Add mode: reset the form
                 setFormData({
                     tahun_angkatan: '',
                     kode_kelas: '',
@@ -35,6 +54,10 @@ const KelolaKelasPopUp = ({
         }
     }, [isOpen, modalType, initialData]);
 
+    /**
+     * @desc    Menangani perubahan pada setiap input form.
+     *          Handles changes on each form input.
+     */
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -43,41 +66,64 @@ const KelolaKelasPopUp = ({
         }));
     };
 
+    /**
+     * @desc    Menangani proses submit form.
+     *          Handles the form submission process.
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Validation
+        // Validasi sederhana untuk mode tambah
+        // Simple validation for add mode
         if (modalType === 'add') {
             if (!formData.tahun_angkatan || !formData.kode_kelas) {
-                return;
+                return; // Mencegah submit jika field wajib kosong / Prevent submission if required fields are empty
             }
         }
 
+        // Menyiapkan data untuk dikirim
+        // Preparing data to be sent
         const submitData = {
             tahun_angkatan: formData.tahun_angkatan,
             kode_kelas: formData.kode_kelas,
-            kode_dosen: formData.kode_dosen || null,
+            kode_dosen: formData.kode_dosen || null, // Kirim null jika tidak dipilih / Send null if not selected
         };
 
-        // Get ID untuk update
+        // Mendapatkan ID kelas untuk proses update
+        // Getting the class ID for the update process
         const id = modalType === 'edit' ? initialData?.id_kelas : null;
 
+        // Memanggil fungsi `onSubmit` dari props dengan data yang relevan
+        // Calling the `onSubmit` function from props with relevant data
         onSubmit(submitData, id);
     };
 
+    /**
+     * @desc    Mengembalikan judul modal berdasarkan tipenya.
+     *          Returns the modal title based on its type.
+     */
     const getModalTitle = () => {
         return modalType === 'add'
             ? 'Tambah Kelas Baru'
             : 'Edit Dosen Wali untuk Kelas';
     };
 
+    // Menentukan apakah input harus read-only (untuk mode edit)
+    // Determines if the input should be read-only (for edit mode)
     const isReadonly = modalType === 'edit';
 
+    // Jangan render apapun jika modal tidak terbuka
+    // Do not render anything if the modal is not open
     if (!isOpen) return null;
 
     return (
+        // Latar belakang overlay
+        // Overlay background
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            {/* Konten Modal */}
+            {/* Modal Content */}
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                {/* Header Modal */}
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                         {getModalTitle()}
@@ -101,7 +147,7 @@ const KelolaKelasPopUp = ({
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Tahun Angkatan */}
+                    {/* Input Tahun Angkatan */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Tahun Angkatan{' '}
@@ -130,7 +176,7 @@ const KelolaKelasPopUp = ({
                         )}
                     </div>
 
-                    {/* Kode Kelas */}
+                    {/* Input Kode Kelas */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Kode Kelas <span className="text-red-500">*</span>
@@ -161,7 +207,7 @@ const KelolaKelasPopUp = ({
                         )}
                     </div>
 
-                    {/* Dosen Wali */}
+                    {/* Dropdown Dosen Wali */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Dosen Wali
@@ -172,6 +218,7 @@ const KelolaKelasPopUp = ({
                             onChange={handleInputChange}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Belum Ditentukan --</option>
+                            {/* Filter dosen yang aktif saja / Filter active lecturers only */}
                             {dosenList
                                 .filter((dosen) => dosen.status === 'aktif')
                                 .map((dosen) => (
@@ -187,7 +234,7 @@ const KelolaKelasPopUp = ({
                         </small>
                     </div>
 
-                    {/* Form Actions */}
+                    {/* Tombol Aksi Form */}
                     <div className="flex space-x-3 pt-4">
                         <button
                             type="button"

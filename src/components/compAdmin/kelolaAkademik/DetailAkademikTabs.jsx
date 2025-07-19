@@ -1,11 +1,24 @@
+// DetailAkademikTabs Component - Komponen untuk menampilkan tab navigasi detail akademik mahasiswa
+// DetailAkademikTabs Component for displaying academic detail navigation tabs
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan tab navigasi dan header info mahasiswa
+ * Component to display navigation tabs and student header information
+ * @param {string} activeTab - Tab yang sedang aktif / Currently active tab
+ * @param {function} onTabChange - Callback untuk mengganti tab / Callback to change tab
+ * @param {object} mahasiswaData - Data mahasiswa yang ditampilkan / Student data to display
+ */
 const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
+    // Konfigurasi tab-tab yang tersedia dengan icon SVG
+    // Configuration of available tabs with SVG icons
     const tabs = [
         {
             key: 'nilai',
             label: 'Nilai Mata Kuliah',
             icon: (
+                // Icon untuk tab nilai mata kuliah (dokumen dengan garis)
+                // Icon for course grades tab (document with lines)
                 <svg
                     className="w-5 h-5"
                     fill="none"
@@ -24,6 +37,8 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
             key: 'prestasi',
             label: 'Data Prestasi',
             icon: (
+                // Icon untuk tab prestasi (badge/medali)
+                // Icon for achievement tab (badge/medal)
                 <svg
                     className="w-5 h-5"
                     fill="none"
@@ -42,6 +57,8 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
             key: 'semester',
             label: 'IP Semester',
             icon: (
+                // Icon untuk tab IP semester (chart/grafik batang)
+                // Icon for semester GPA tab (bar chart)
                 <svg
                     className="w-5 h-5"
                     fill="none"
@@ -60,14 +77,22 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
 
     return (
         <div className="bg-white rounded-lg shadow-sm">
-            {/* Header dengan info mahasiswa */}
+            {/* Header dengan informasi detail mahasiswa */}
+            {/* Header with detailed student information */}
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                     <div>
+                        {/* Nama mahasiswa dengan fallback default */}
+                        {/* Student name with default fallback */}
                         <h2 className="text-2xl font-bold text-gray-800">
                             {mahasiswaData?.name || 'Nama Mahasiswa'}
                         </h2>
+                        
+                        {/* Informasi detail mahasiswa dalam bentuk badge */}
+                        {/* Student detail information in badge format */}
                         <div className="mt-2 flex items-center space-x-6 text-sm text-gray-600">
+                            {/* NIM dengan icon kartu identitas */}
+                            {/* Student ID with ID card icon */}
                             <div className="flex items-center space-x-2">
                                 <svg
                                     className="w-4 h-4"
@@ -86,6 +111,9 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
                                     {mahasiswaData?.nim || '-'}
                                 </span>
                             </div>
+                            
+                            {/* Kelas dengan icon gedung */}
+                            {/* Class with building icon */}
                             <div className="flex items-center space-x-2">
                                 <svg
                                     className="w-4 h-4"
@@ -104,6 +132,9 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
                                     {mahasiswaData?.detail_kelas?.kelas || '-'}
                                 </span>
                             </div>
+                            
+                            {/* Angkatan dengan icon kalender */}
+                            {/* Class year with calendar icon */}
                             <div className="flex items-center space-x-2">
                                 <svg
                                     className="w-4 h-4"
@@ -123,6 +154,9 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
                                         '-'}
                                 </span>
                             </div>
+                            
+                            {/* Dosen Wali - tampil hanya jika ada data */}
+                            {/* Academic Advisor - only shown if data exists */}
                             {mahasiswaData?.detail_kelas?.dosen_wali && (
                                 <div className="flex items-center space-x-2">
                                     <svg
@@ -148,7 +182,8 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
                         </div>
                     </div>
 
-                    {/* Status Badge */}
+                    {/* Badge status mahasiswa dengan kondisi warna */}
+                    {/* Student status badge with conditional color */}
                     <div className="flex items-center space-x-3">
                         <span
                             className={`px-3 py-1 text-sm font-medium rounded-full ${
@@ -164,7 +199,8 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
                 </div>
             </div>
 
-            {/* Tab Navigation */}
+            {/* Navigasi Tab dengan styling yang responsive */}
+            {/* Tab Navigation with responsive styling */}
             <div className="border-b border-gray-200">
                 <nav className="flex space-x-8 px-6">
                     {tabs.map((tab) => (
@@ -173,8 +209,8 @@ const DetailAkademikTabs = ({ activeTab, onTabChange, mahasiswaData }) => {
                             onClick={() => onTabChange(tab.key)}
                             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex items-center space-x-2 ${
                                 activeTab === tab.key
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-blue-600' // Style untuk tab aktif
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' // Style untuk tab tidak aktif dengan hover
                             }`}>
                             {tab.icon}
                             <span>{tab.label}</span>

@@ -1,9 +1,10 @@
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
- * Format date to Indonesian format without time
- * @param {Date} date - The date to format
- * @returns {string} - Formatted date (e.g., "SENIN, 10 JANUARI 2023")
+ * Memformat tanggal ke format Indonesia (misal: SENIN, 10 JANUARI 2023).
+ * Formats a date to the Indonesian format (e.g., "SENIN, 10 JANUARI 2023").
+ * @param {Date|string} date - Objek tanggal atau string yang akan diformat.
+ * @returns {string} - Tanggal yang sudah diformat.
  */
 export const formatDateOnly = (date) => {
     if (!date || isNaN(new Date(date).getTime())) {
@@ -44,9 +45,10 @@ export const formatDateOnly = (date) => {
 };
 
 /**
- * Format date to Indonesian format with time
- * @param {Date} date - The date to format
- * @returns {string} - Formatted date with time (e.g., "SENIN, 10 JANUARI 2023 14:30 WIB")
+ * Memformat tanggal ke format Indonesia lengkap dengan waktu.
+ * Formats a date to the full Indonesian format with time.
+ * @param {Date|string} date - Objek tanggal atau string yang akan diformat.
+ * @returns {string} - Tanggal yang sudah diformat dengan waktu.
  */
 export const formatDateTime = (date) => {
     if (!date || isNaN(new Date(date).getTime())) {
@@ -91,8 +93,9 @@ export const formatDateTime = (date) => {
 };
 
 /**
- * Get list of student feedback/complaints
- * @returns {Promise<Object>} - API response with feedback list
+ * Mengambil daftar semua feedback/keluhan dari mahasiswa yang menjadi bimbingan dosen.
+ * Fetches a list of all feedback/complaints from students advised by the lecturer.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
  */
 export const getFeedbackList = async () => {
     try {
@@ -116,8 +119,10 @@ export const getFeedbackList = async () => {
 
         const rawData = await response.json();
 
+        // PENANGANAN STRUKTUR DATA BERTINGKAT (TRIPLE-NESTED)
         // TRIPLE-NESTED STRUCTURE HANDLING
-        // [0].payload[0].payload is where the actual data lives
+        // Kode ini secara spesifik mencari data aktual yang mungkin terbungkus dalam beberapa lapisan 'payload'.
+        // This code specifically looks for the actual data which might be wrapped in several 'payload' layers.
         if (
             Array.isArray(rawData) &&
             rawData.length > 0 &&
@@ -152,7 +157,8 @@ export const getFeedbackList = async () => {
             return { success: true, data: formattedData };
         }
 
-        // Try to search for any array with id_keluhan property in first item
+        // Pencarian data alternatif jika struktur tidak sesuai dengan yang utama.
+        // Alternative data search if the structure doesn't match the primary one.
         const findDataArray = (obj, depth = 0, maxDepth = 5) => {
             if (depth > maxDepth) return null;
 
@@ -210,9 +216,10 @@ export const getFeedbackList = async () => {
 };
 
 /**
- * Get detail of a specific feedback/complaint
- * @param {string|number} id - Feedback ID
- * @returns {Promise<Object>} - API response with feedback detail
+ * Mengambil detail dari satu feedback/keluhan tertentu.
+ * Fetches the detail of a specific feedback/complaint.
+ * @param {string|number} id - ID feedback.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
  */
 export const getFeedbackDetail = async (id) => {
     try {
@@ -238,7 +245,8 @@ export const getFeedbackDetail = async (id) => {
 
         const rawData = await response.json();
 
-        // Helper function to find the details object at any nesting level
+        // Fungsi helper untuk mencari objek detail di dalam respons yang mungkin bertingkat.
+        // Helper function to find the detail object within a potentially nested response.
         const findDetailObject = (data) => {
             // Check if this object has the expected properties
             if (data && data.id_keluhan && data.nim && data.title_keluhan) {
@@ -308,9 +316,10 @@ export const getFeedbackDetail = async (id) => {
 };
 
 /**
- * Get response from dosen wali for a specific feedback
- * @param {string|number} id - Feedback ID
- * @returns {Promise<Object>} - API response with response data
+ * Mengambil tanggapan dosen wali untuk sebuah feedback.
+ * Fetches the course advisor's response for a specific feedback.
+ * @param {string|number} id - ID feedback.
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
  */
 export const getFeedbackResponse = async (id) => {
     try {
@@ -337,7 +346,8 @@ export const getFeedbackResponse = async (id) => {
 
         const rawData = await response.json();
 
-        // Helper function to find response data at any level of nesting
+        // Fungsi helper untuk mencari data tanggapan di dalam respons yang mungkin bertingkat.
+        // Helper function to find response data within a potentially nested response.
         const findResponseData = (data) => {
             // If this is an array with response properties, return the first item
             if (
@@ -419,10 +429,11 @@ export const getFeedbackResponse = async (id) => {
 };
 
 /**
- * Send or update response from dosen wali with optional file attachment
- * @param {Object} responseData - Response data
- * @param {File|null} file - Optional file attachment
- * @returns {Promise<Object>} - API response
+ * Mengirim atau memperbarui tanggapan dosen wali, dengan lampiran opsional.
+ * Sends or updates a course advisor's response, with an optional attachment.
+ * @param {Object} responseData - Data tanggapan.
+ * @param {File|null} file - File lampiran (opsional).
+ * @returns {Promise<Object>} - Hasil dari panggilan API.
  */
 export const sendResponse = async (responseData, file = null) => {
     try {
@@ -436,7 +447,8 @@ export const sendResponse = async (responseData, file = null) => {
             ...getAuthHeaders(),
         };
 
-        // If file is provided, use FormData, otherwise use JSON
+        // Jika ada file, gunakan FormData. Jika tidak, gunakan JSON.
+        // If a file is present, use FormData. Otherwise, use JSON.
         if (file) {
             const formData = new FormData();
             formData.append('id_keluhan', responseData.id_keluhan);

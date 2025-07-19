@@ -7,7 +7,8 @@ import { getApiUrl, getAuthHeaders } from '../../../config/api';
  */
 export const mlPredictionService = {
     /**
-     * Prediksi status mahasiswa berdasarkan NIM dan data akademik
+     * Memprediksi status mahasiswa berdasarkan NIM dan data akademik/non-akademik.
+     * Predicts a student's status based on NIM and academic/non-academic data.
      * @param {string} nim - NIM mahasiswa
      * @param {Object} predictionData - Data untuk prediksi
      * @param {number} predictionData.ipk - IPK mahasiswa (0-4)
@@ -40,7 +41,8 @@ export const mlPredictionService = {
             };
         } catch (error) {
             console.error('ML Prediction error:', error);
-
+            // Penanganan error spesifik untuk timeout
+            // Specific error handling for timeout
             if (error.code === 'ECONNABORTED') {
                 return {
                     success: false,
@@ -59,7 +61,9 @@ export const mlPredictionService = {
     },
 
     /**
-     * Test ML service health
+     * Menguji kesehatan service (endpoint) Machine Learning.
+     * Tests the health of the Machine Learning service (endpoint).
+     * @returns {Promise<Object>} - Status dari service ML.
      */
     async testMLService() {
         try {

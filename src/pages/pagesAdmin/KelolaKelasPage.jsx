@@ -2,25 +2,34 @@ import React, { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Import komponen
+// Mengimpor komponen-komponen yang dibutuhkan
+// Importing necessary components
 import KelolaKelasTable from '../../components/compAdmin/kelolaKelas/KelolaKelasTable';
 import KelolaKelasPopUp from '../../components/compAdmin/kelolaKelas/KelolaKelasPopUp';
 import DeleteConfirmationModal from '../../components/compAdmin/kelolaPengguna/DeleteConfirmationModal';
 
-// Import custom hook
+// Mengimpor custom hook untuk logika pengelolaan kelas
+// Importing the custom hook for class management logic
 import { useKelolaKelas } from '../../components/compAdmin/kelolaKelas/hooks/useKelolaKelas';
 
+/**
+ * Komponen halaman untuk mengelola data kelas dan penugasan dosen wali.
+ * Page component for managing class data and course advisor assignments.
+ */
 const KelolaKelasPage = () => {
-    // State untuk modal
+    // State untuk mengelola visibilitas dan tipe modal form
+    // State for managing the visibility and type of the form modal
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState(''); // 'add' atau 'edit'
     const [currentEditData, setCurrentEditData] = useState(null);
 
-    // State untuk konfirmasi delete
+    // State untuk mengelola modal konfirmasi penghapusan
+    // State for managing the delete confirmation modal
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteData, setDeleteData] = useState(null);
 
-    // Custom hook untuk logic
+    // Menggunakan custom hook untuk mendapatkan state dan fungsi-fungsi logika
+    // Using the custom hook to get state and logic functions
     const {
         // State
         loading,
@@ -46,21 +55,33 @@ const KelolaKelasPage = () => {
         getDosenNameByCode,
     } = useKelolaKelas();
 
-    // Handle tambah data
+    /**
+     * Menangani aksi klik tombol "Tambah Data".
+     * Handles the "Add Data" button click action.
+     */
     const handleAdd = () => {
         setModalType('add');
         setCurrentEditData(null);
         setShowModal(true);
     };
 
-    // Handle edit data
+    /**
+     * Menangani aksi klik tombol "Edit".
+     * Handles the "Edit" button click action.
+     * @param {object} data - Data kelas yang akan diedit.
+     */
     const handleEdit = (data) => {
         setModalType('edit');
         setCurrentEditData(data);
         setShowModal(true);
     };
 
-    // Handle submit form modal
+    /**
+     * Menangani submit form dari modal (baik tambah maupun edit).
+     * Handles form submission from the modal (both add and edit).
+     * @param {object} formData - Data dari form.
+     * @param {string|number} id - ID data (untuk mode edit).
+     */
     const handleModalSubmit = async (formData, id) => {
         let success = false;
 
@@ -76,13 +97,20 @@ const KelolaKelasPage = () => {
         }
     };
 
-    // Handle confirm delete
+    /**
+     * Menangani aksi klik tombol "Hapus", membuka modal konfirmasi.
+     * Handles the "Delete" button click action, opening the confirmation modal.
+     * @param {object} data - Data yang akan dihapus.
+     */
     const handleDeleteClick = (data) => {
         setDeleteData(data);
         setShowDeleteModal(true);
     };
 
-    // Handle confirm delete
+    /**
+     * Menangani konfirmasi penghapusan data.
+     * Handles the confirmation of data deletion.
+     */
     const handleConfirmDelete = async () => {
         const success = await handleDelete(deleteData.id_kelas);
 
@@ -92,7 +120,8 @@ const KelolaKelasPage = () => {
         }
     };
 
-    // Handle close modals
+    // Fungsi-fungsi untuk menutup modal
+    // Functions for closing modals
     const handleCloseModal = () => {
         setShowModal(false);
         setCurrentEditData(null);

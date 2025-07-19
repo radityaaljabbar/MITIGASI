@@ -3,6 +3,8 @@ import { getApiUrl, getAuthHeaders } from '../../config/api.js';
 
 /**
  * Mengambil semua log aktivitas admin dari backend.
+ * Fetches all admin activity logs from the backend.
+ * @returns {Promise<object>}
  */
 export const getAllLogs = async () => {
     try {

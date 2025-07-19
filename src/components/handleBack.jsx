@@ -1,6 +1,11 @@
+/**
+ * Fungsi helper sederhana untuk menavigasi ke halaman sebelumnya dalam riwayat browser.
+ * A simple helper function to navigate to the previous page in the browser's history.
+ */
 const handleBack = () => {
-    // Navigation logic would go here
+    // Logika navigasi ditempatkan di sini.
+    // Navigation logic go here. 
     window.history.back();
   };
 
-export default handleBack 
+export default handleBack;

@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
+/**
+ * Komponen Modal untuk menambah atau mengedit data pengguna (Admin, Dosen, Mahasiswa).
+ * Modal component for adding or editing user data (Admin, Dosen, Mahasiswa).
+ * @param {object} props - Props komponen.
+ * @param {boolean} props.isOpen - Status apakah modal terbuka.
+ * @param {function} props.onClose - Fungsi untuk menutup modal.
+ * @param {function} props.onSubmit - Fungsi untuk submit form.
+ * @param {string} props.activeTab - Tab yang sedang aktif ('admin', 'dosen', 'mahasiswa').
+ * @param {string} props.modalType - Tipe modal ('add' atau 'edit').
+ * @param {object} props.initialData - Data awal untuk mode edit.
+ * @param {Array} props.kelasList - Daftar kelas untuk dropdown mahasiswa.
+ * @param {boolean} props.loading - Status loading untuk tombol submit.
+ */
 const KelolaPenggunaModal = ({
     isOpen,
     onClose,
@@ -10,6 +23,8 @@ const KelolaPenggunaModal = ({
     kelasList,
     loading,
 }) => {
+    // State untuk menampung data dari input form
+    // State to hold data from the form inputs
     const [formData, setFormData] = useState({
         // Admin fields
         name: '',
@@ -25,15 +40,18 @@ const KelolaPenggunaModal = ({
         kelas: '',
     });
 
-    // Reset form ketika modal dibuka/ditutup atau data berubah
+    // Effect untuk mengisi atau mereset form saat modal dibuka atau props berubah
+    // Effect to populate or reset the form when the modal opens or props change
     useEffect(() => {
         if (isOpen) {
             if (modalType === 'edit' && initialData) {
+                // Mengisi form dengan initialData untuk mode edit
+                // Populate the form with initialData for edit mode
                 if (activeTab === 'admin') {
                     setFormData({
                         name: initialData.name || '',
                         username: initialData.username || '',
-                        password: '',
+                        password: '', // Password dikosongkan untuk keamanan / Password is cleared for security
                     });
                 } else if (activeTab === 'dosen') {
                     setFormData({
@@ -53,7 +71,8 @@ const KelolaPenggunaModal = ({
                     });
                 }
             } else {
-                // Reset untuk add mode
+                // Mereset form untuk mode tambah
+                // Reset the form for add mode
                 setFormData({
                     name: '',
                     username: '',
@@ -69,6 +88,11 @@ const KelolaPenggunaModal = ({
         }
     }, [isOpen, modalType, initialData, activeTab]);
 
+    /**
+     * Menangani perubahan pada input form.
+     * Handles changes in the form inputs.
+     * @param {React.ChangeEvent<HTMLInputElement|HTMLSelectElement>} e - Event dari input.
+     */
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -77,9 +101,16 @@ const KelolaPenggunaModal = ({
         }));
     };
 
+    /**
+     * Menangani submit form.
+     * Handles form submission.
+     * @param {React.FormEvent<HTMLFormElement>} e - Event submit form.
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Menyiapkan data yang akan dikirim berdasarkan tab aktif
+        // Prepare the data to be sent based on the active tab
         let submitData = {};
 
         if (activeTab === 'admin') {
@@ -112,7 +143,8 @@ const KelolaPenggunaModal = ({
             }
         }
 
-        // Get ID untuk update
+        // Mendapatkan ID untuk mode update
+        // Get the ID for update mode
         const id =
             modalType === 'edit'
                 ? initialData?.id || initialData?.nip || initialData?.nim
@@ -121,6 +153,11 @@ const KelolaPenggunaModal = ({
         onSubmit(submitData, id);
     };
 
+    /**
+     * Mendapatkan judul modal secara dinamis.
+     * Gets the modal title dynamically.
+     * @returns {string} - Judul modal.
+     */
     const getModalTitle = () => {
         const action = modalType === 'add' ? 'Tambah' : 'Edit';
         const type =
@@ -132,6 +169,11 @@ const KelolaPenggunaModal = ({
         return `${action} ${type}`;
     };
 
+    /**
+     * Mendapatkan warna tombol submit berdasarkan tab aktif.
+     * Gets the submit button color based on the active tab.
+     * @returns {string} - Kelas Tailwind CSS untuk warna tombol.
+     */
     const getButtonColor = () => {
         switch (activeTab) {
             case 'admin':
@@ -148,8 +190,14 @@ const KelolaPenggunaModal = ({
     if (!isOpen) return null;
 
     return (
+        // Latar belakang modal
+        // Modal backdrop
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            {/* Konten modal */}
+            {/* Modal content */}
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                {/* Header modal */}
+                {/* Modal header */}
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                         {getModalTitle()}
@@ -173,6 +221,7 @@ const KelolaPenggunaModal = ({
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Form Fields untuk Admin */}
                     {/* Admin Form Fields */}
                     {activeTab === 'admin' && (
                         <>
@@ -231,6 +280,7 @@ const KelolaPenggunaModal = ({
                         </>
                     )}
 
+                    {/* Form Fields untuk Dosen */}
                     {/* Dosen Form Fields */}
                     {activeTab === 'dosen' && (
                         <>
@@ -326,6 +376,7 @@ const KelolaPenggunaModal = ({
                         </>
                     )}
 
+                    {/* Form Fields untuk Mahasiswa */}
                     {/* Mahasiswa Form Fields */}
                     {activeTab === 'mahasiswa' && (
                         <>
@@ -424,7 +475,8 @@ const KelolaPenggunaModal = ({
                         </>
                     )}
 
-                    {/* Form Actions */}
+                    {/* Tombol Aksi Form (Batal & Simpan) */}
+                    {/* Form Action Buttons (Cancel & Save) */}
                     <div className="flex space-x-3 pt-4">
                         <button
                             type="button"
@@ -438,6 +490,8 @@ const KelolaPenggunaModal = ({
                             disabled={loading}
                             className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 ${getButtonColor()}`}>
                             {loading ? (
+                                // Tampilan loading
+                                // Loading state
                                 <div className="flex items-center justify-center">
                                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
                                     Menyimpan...

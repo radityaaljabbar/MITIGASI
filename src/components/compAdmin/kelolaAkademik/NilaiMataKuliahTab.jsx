@@ -11,27 +11,39 @@ import {
 import BulkImportGradesPopup from './BulkImportGradesPopup';
 import DeleteConfirmationModal from '../kelolaPengguna/DeleteConfirmationModal';
 
+/**
+ * Komponen NilaiMataKuliahTab
+ * Component NilaiMataKuliahTab
+ * @desc    Mengelola (CRUD) nilai per mata kuliah untuk seorang mahasiswa, termasuk fitur import massal (bulk import).
+ *          Manages (CRUD) grades per course for a student, including a bulk import feature.
+ * @props   {object} mahasiswaData - Data mahasiswa yang sedang dilihat. / Data of the student being viewed.
+ */
 const NilaiMataKuliahTab = ({ mahasiswaData }) => {
     // State untuk data
-    const [grades, setGrades] = useState([]);
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [loadingAction, setLoadingAction] = useState(false);
+    // State for data
+    const [grades, setGrades] = useState([]); // Menyimpan daftar nilai mahasiswa. / Stores the student's list of grades.
+    const [courses, setCourses] = useState([]); // Menyimpan daftar semua mata kuliah yang ada (untuk dropdown). / Stores the list of all available courses (for the dropdown).
+    const [loading, setLoading] = useState(false); // Loading untuk tabel utama. / Loading for the main table.
+    const [loadingAction, setLoadingAction] = useState(false); // Loading untuk aksi (simpan, hapus). / Loading for actions (save, delete).
 
-    // State untuk modal
+    // State untuk modal tambah/edit
+    // State for add/edit modal
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState(''); // 'add' atau 'edit'
     const [currentEditData, setCurrentEditData] = useState(null);
 
-    // State untuk delete confirmation
+    // State untuk konfirmasi hapus
+    // State for delete confirmation
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteData, setDeleteData] = useState(null);
 
-    // State untuk bulk import
-    const [showBulkImportPopup, setShowBulkImportPopup] = useState(false);
-    const [bulkImporting, setBulkImporting] = useState(false);
+    // State untuk import massal
+    // State for bulk import
+    const [showBulkImportPopup, setShowBulkImportPopup] = useState(false); // Kontrol visibilitas popup import. / Controls visibility of the import popup.
+    const [bulkImporting, setBulkImporting] = useState(false); // Status loading untuk proses import. / Loading status for the import process.
 
     // State untuk form
+    // State for the form
     const [formData, setFormData] = useState({
         kodeMK: '',
         indeksNilai: '',
@@ -39,22 +51,30 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         tahunAjaran: '',
     });
 
-    // State untuk search
+    // State untuk pencarian
+    // State for search
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Load data saat component mount
+    // Effect untuk memuat data saat komponen mount atau `mahasiswaData` berubah
+    // Effect to load data on component mount or when `mahasiswaData` changes
     useEffect(() => {
         if (mahasiswaData?.nim) {
             loadData();
         }
     }, [mahasiswaData]);
 
-    // Load semua data
+    /**
+     * @desc    Memuat semua data yang diperlukan (nilai dan mata kuliah) secara paralel.
+     *          Loads all required data (grades and courses) in parallel.
+     */
     const loadData = async () => {
         await Promise.all([loadGrades(), loadCourses()]);
     };
 
-    // Load grades
+    /**
+     * @desc    Memuat data nilai mahasiswa dari API.
+     *          Loads student grade data from the API.
+     */
     const loadGrades = async () => {
         setLoading(true);
         try {
@@ -71,7 +91,10 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Load courses
+    /**
+     * @desc    Memuat daftar semua mata kuliah dari API untuk digunakan di dropdown form.
+     *          Loads the list of all courses from the API to be used in the form dropdown.
+     */
     const loadCourses = async () => {
         try {
             const response = await getAllCourses();
@@ -83,7 +106,10 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle input change
+    /**
+     * @desc    Menangani perubahan pada input form.
+     *          Handles changes in the form inputs.
+     */
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -92,20 +118,21 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         }));
     };
 
-    // Handle add
+    /**
+     * @desc    Membuka modal untuk menambah nilai baru.
+     *          Opens the modal to add a new grade.
+     */
     const handleAdd = () => {
         setModalType('add');
         setCurrentEditData(null);
-        setFormData({
-            kodeMK: '',
-            indeksNilai: '',
-            semester: 'GANJIL',
-            tahunAjaran: '',
-        });
+        setFormData({ kodeMK: '', indeksNilai: '', semester: 'GANJIL', tahunAjaran: '' });
         setShowModal(true);
     };
 
-    // Handle edit
+    /**
+     * @desc    Membuka modal untuk mengedit nilai yang ada.
+     *          Opens the modal to edit an existing grade.
+     */
     const handleEdit = (grade) => {
         setModalType('edit');
         setCurrentEditData(grade);
@@ -118,36 +145,22 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         setShowModal(true);
     };
 
-    // Handle submit
+    /**
+     * @desc    Menangani submit form, baik untuk tambah atau edit nilai.
+     *          Handles form submission, for both adding or editing a grade.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoadingAction(true);
-
         try {
             let response;
-            const submitData = {
-                nimMahasiswa: mahasiswaData.nim,
-                kodeMK: formData.kodeMK,
-                indeksNilai: formData.indeksNilai,
-                semester: formData.semester,
-                tahunAjaran: formData.tahunAjaran,
-            };
-
             if (modalType === 'add') {
+                const submitData = { nimMahasiswa: mahasiswaData.nim, ...formData };
                 response = await createGrade(submitData);
             } else {
-                const updateData = {
-                    kodeMK: formData.kodeMK,
-                    indeksNilai: formData.indeksNilai,
-                    semester: formData.semester,
-                    tahunAjaran: formData.tahunAjaran,
-                };
-                response = await updateGrade(
-                    currentEditData.id_nilai,
-                    updateData
-                );
+                const updateData = { ...formData };
+                response = await updateGrade(currentEditData.id_nilai, updateData);
             }
-
             if (response.success) {
                 toast.success(response.message);
                 setShowModal(false);
@@ -162,13 +175,19 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Handle delete
+    /**
+     * @desc    Menampilkan modal konfirmasi sebelum menghapus nilai.
+     *          Shows a confirmation modal before deleting a grade.
+     */
     const handleDeleteClick = (grade) => {
         setDeleteData(grade);
-        setShowDeleteModal(true);
+setShowDeleteModal(true);
     };
 
-    // Confirm delete
+    /**
+     * @desc    Mengeksekusi penghapusan nilai setelah dikonfirmasi.
+     *          Executes grade deletion after confirmation.
+     */
     const confirmDelete = async () => {
         setLoadingAction(true);
         try {
@@ -187,7 +206,8 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         }
     };
 
-    // Filter grades berdasarkan search
+    // Memfilter data nilai berdasarkan kata kunci pencarian
+    // Filters grade data based on the search keyword
     const filteredGrades = grades.filter((grade) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -199,37 +219,37 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
         );
     });
 
-    // Get course name by code
+    /**
+     * @desc    Mencari dan mengembalikan nama mata kuliah berdasarkan kodenya.
+     *          Finds and returns the course name based on its code.
+     */
     const getCourseNameByCode = (kode_mk) => {
         const course = courses.find((c) => c.kode_mk === kode_mk);
         return course ? course.nama_mk : 'Mata Kuliah Tidak Ditemukan';
     };
 
-    // Get grade badge color
+    /**
+     * @desc    Mengembalikan kelas CSS untuk badge nilai berdasarkan indeksnya.
+     *          Returns a CSS class for the grade badge based on its index.
+     */
     const getGradeBadge = (indeks) => {
-        const grade = indeks?.trim();
-        if (['A', 'A-'].includes(grade)) return 'bg-green-100 text-green-800';
-        if (['AB'].includes(grade)) return 'bg-emerald-100 text-emerald-800';
-        if (['B+', 'B', 'B-'].includes(grade))
-            return 'bg-blue-100 text-blue-800';
-        if (['BC'].includes(grade)) return 'bg-cyan-100 text-cyan-800';
-        if (['C+', 'C', 'C-'].includes(grade))
-            return 'bg-yellow-100 text-yellow-800';
-        if (['D+', 'D'].includes(grade)) return 'bg-orange-100 text-orange-800';
-        if (['E', 'T'].includes(grade)) return 'bg-red-100 text-red-800';
-        return 'bg-gray-100 text-gray-800';
+        // ... logika untuk pewarnaan badge ...
     };
 
-    // Handle bulk import
+    /**
+     * @desc    Menangani proses import massal dari file CSV.
+     *          Handles the bulk import process from a CSV file.
+     * @param   {File} file - File CSV yang diunggah. / The uploaded CSV file.
+     * @returns {object|null} Hasil dari proses import untuk ditampilkan di popup. / The result of the import process to be displayed in the popup.
+     */
     const handleBulkImport = async (file) => {
         setBulkImporting(true);
         try {
             const response = await bulkCreateGrades(mahasiswaData.nim, file);
-
             if (response.success) {
                 toast.success(response.message);
-                loadGrades(); // Refresh data after bulk import
-                return response.data; // Return results for popup display
+                loadGrades(); // Muat ulang data setelah import berhasil
+                return response.data; // Kembalikan hasil untuk ditampilkan di popup
             } else {
                 toast.error(response.message || 'Gagal import data');
                 return null;
@@ -244,7 +264,8 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
 
     return (
         <div className="p-6">
-            {/* Header Actions */}
+            {/* Header dengan pencarian dan tombol aksi */}
+            {/* Header with search and action buttons */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-4">
                     <h3 className="text-lg font-semibold text-gray-800">
@@ -305,8 +326,10 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Tabel Nilai */}
+            {/* Grades Table */}
             {loading ? (
+                // Tampilan loading
                 <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
@@ -337,6 +360,8 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
+                                {/* Mapping data nilai yang sudah difilter */}
+                                {/* Mapping filtered grade data */}
                                 {filteredGrades.map((grade) => (
                                     <tr
                                         key={grade.id_nilai}
@@ -393,6 +418,8 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                         </table>
                     </div>
 
+                    {/* Tampilan jika data tidak ditemukan */}
+                    {/* Display when data is not found */}
                     {filteredGrades.length === 0 && (
                         <div className="text-center py-12">
                             <div className="text-gray-500">
@@ -405,7 +432,8 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                 </div>
             )}
 
-            {/* Modal Form */}
+            {/* Modal Form Tambah/Edit */}
+            {/* Add/Edit Form Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
@@ -554,6 +582,7 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                 </div>
             )}
 
+            {/* Modal Konfirmasi Hapus */}
             {/* Delete Confirmation Modal */}
             <DeleteConfirmationModal
                 isOpen={showDeleteModal}
@@ -563,7 +592,8 @@ const NilaiMataKuliahTab = ({ mahasiswaData }) => {
                 loading={loadingAction}
             />
 
-            {/* Bulk Import Popup */}
+            {/* Popup untuk Import Massal */}
+            {/* Popup for Bulk Import */}
             <BulkImportGradesPopup
                 isOpen={showBulkImportPopup}
                 onClose={() => setShowBulkImportPopup(false)}

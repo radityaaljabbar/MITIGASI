@@ -1,9 +1,10 @@
 import { getApiUrl, getAuthHeaders } from '../../../config/api';
 
 /**
- * Get TAK dari mahasiswa yang sedang login
- * @param nim
- * @return {Promise<Object>}
+ * Mengambil data TAK, IPK, dan SKS seorang mahasiswa berdasarkan NIM.
+ * Fetches TAK, GPA, and SKS data for a student by NIM.
+ * @param {string} nim - NIM mahasiswa.
+ * @return {Promise<Object>} - Hasil dari panggilan API.
  */
 
 export const getStudentTAKIPKSKS = async (nim) => {

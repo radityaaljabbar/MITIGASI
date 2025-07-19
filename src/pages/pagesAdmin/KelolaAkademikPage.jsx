@@ -1,14 +1,21 @@
 import React from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Import komponen
+// Mengimpor komponen tabel mahasiswa
+// Importing the student table component
 import MahasiswaTable from '../../components/compAdmin/kelolaAkademik/MahasiswaTable';
 
-// Import custom hook
+// Mengimpor custom hook untuk logika halaman
+// Importing the custom hook for page logic
 import { useKelolaAkademik } from '../../components/compAdmin/kelolaAkademik/hooks/useKelolaAkademik';
 
+/**
+ * Komponen halaman untuk menampilkan daftar mahasiswa yang data akademiknya dapat dikelola.
+ * Page component to display a list of students whose academic data can be managed.
+ */
 const KelolaAkademikPage = () => {
-    // Custom hook untuk logic
+    // Menggunakan custom hook untuk mendapatkan state dan fungsi
+    // Using the custom hook to get state and functions
     const {
         // State
         loading,
@@ -31,7 +38,8 @@ const KelolaAkademikPage = () => {
 
     return (
         <div className="p-6 bg-[#FAF0E6] min-h-screen">
-            {/* Header */}
+            {/* Header Halaman */}
+            {/* Page Header */}
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
                     Kelola Akademik
@@ -42,7 +50,8 @@ const KelolaAkademikPage = () => {
                 </p>
             </div>
 
-            {/* Instructions */}
+            {/* Kotak Petunjuk */}
+            {/* Instruction Box */}
             <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg">
                 <div className="flex">
                     <div className="flex-shrink-0">
@@ -68,7 +77,8 @@ const KelolaAkademikPage = () => {
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Komponen Tabel Mahasiswa */}
+            {/* Student Table Component */}
             <MahasiswaTable
                 currentData={currentData}
                 filteredData={filteredData}

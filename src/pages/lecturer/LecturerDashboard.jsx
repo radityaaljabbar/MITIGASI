@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+/**
+ * Komponen halaman dashboard untuk dosen. (Saat ini terlihat sebagai contoh/placeholder)
+ * Dashboard page component for lecturers. (Currently appears to be an example/placeholder)
+ */
 const LecturerDashboard = () => {
+  // State untuk menyimpan data pengguna yang login
+  // State to store the logged-in user's data
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  // Effect untuk mengambil data pengguna dari localStorage saat komponen dimuat
+  // Effect to get user data from localStorage when the component mounts
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -12,16 +20,23 @@ const LecturerDashboard = () => {
     }
   }, []);
 
+  /**
+   * Menangani proses logout.
+   * Handles the logout process.
+   */
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/');
   };
 
+  // Jika tidak ada data pengguna, jangan render apapun (mencegah error)
+  // If there's no user data, render nothing (prevents errors)
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
+      {/* Header Halaman */}
+      {/* Page Header */}
       <header className="bg-red-700 text-white shadow-md">
         <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
           <h1 className="text-2xl font-bold">Academic Portal</h1>
@@ -38,7 +53,8 @@ const LecturerDashboard = () => {
         </div>
       </header>
 
-      {/* Navigation */}
+      {/* Navigasi Utama */}
+      {/* Main Navigation */}
       <nav className="bg-white shadow-md">
         <div className="container mx-auto px-4">
           <div className="flex overflow-x-auto py-3 space-x-6">
@@ -49,12 +65,14 @@ const LecturerDashboard = () => {
         </div>
       </nav>
 
+      {/* Konten Utama */}
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-6">Advisor Dashboard</h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Teaching Schedule */}
+          {/* Card Jadwal Mengajar */}
+          {/* Teaching Schedule Card */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">Today's Classes</h3>
             <ul className="space-y-3">
@@ -75,7 +93,8 @@ const LecturerDashboard = () => {
             </ul>
           </div>
           
-          {/* Advisee Alerts */}
+          {/* Card Peringatan Mahasiswa Bimbingan */}
+          {/* Advisee Alerts Card */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">Advisee Alerts</h3>
             <div className="space-y-3">
@@ -90,7 +109,8 @@ const LecturerDashboard = () => {
             </div>
           </div>
           
-          {/* Advisor Profile */}
+          {/* Card Profil Dosen */}
+          {/* Advisor Profile Card */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">My Profile</h3>
             <div className="space-y-2">

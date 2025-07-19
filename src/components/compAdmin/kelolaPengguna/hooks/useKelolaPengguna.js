@@ -17,42 +17,56 @@ import {
     bulkCreateMahasiswa,
 } from '../../../../services/adminServices/kelolaPenggunaService';
 
+/**
+ * Custom Hook untuk mengelola state dan logika halaman Kelola Pengguna.
+ * Custom Hook to manage state and logic for the User Management page.
+ */
 export const useKelolaPengguna = () => {
-    // State untuk tab yang aktif
+    // State untuk tab yang aktif (admin, dosen, mahasiswa)
+    // State for the active tab (admin, dosen, mahasiswa)
     const [activeTab, setActiveTab] = useState('admin');
 
-    // State untuk data
+    // State untuk menyimpan data dari API
+    // State to store data from the API
     const [admins, setAdmins] = useState([]);
     const [dosens, setDosens] = useState([]);
     const [mahasiswas, setMahasiswas] = useState([]);
     const [kelasList, setKelasList] = useState([]);
 
-    // State untuk loading
+    // State untuk status loading (memuat data tabel & aksi)
+    // State for loading status (loading table data & actions)
     const [loading, setLoading] = useState(false);
     const [loadingAction, setLoadingAction] = useState(false);
 
-    // State untuk search dan pagination
+    // State untuk fungsionalitas pencarian dan paginasi
+    // State for search and pagination functionality
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    // State untuk bulk import
+    // State untuk status import data massal
+    // State for bulk import status
     const [bulkImporting, setBulkImporting] = useState(false);
 
-    // Load data saat component mount
+    // Effect untuk memuat data saat komponen pertama kali dimuat
+    // Effect to load data when the component first mounts
     useEffect(() => {
         loadData();
         loadKelasList();
     }, []);
 
-    // Load data berdasarkan tab aktif
+    // Effect untuk memuat ulang data saat tab aktif berubah
+    // Effect to reload data when the active tab changes
     useEffect(() => {
         loadData();
-        setCurrentPage(1);
-        setSearchTerm('');
+        setCurrentPage(1); // Reset ke halaman pertama
+        setSearchTerm(''); // Reset pencarian
     }, [activeTab]);
 
-    // Load data dari API
+    /**
+     * Memuat data pengguna (admin/dosen/mahasiswa) berdasarkan tab aktif.
+     * Loads user data (admin/dosen/mahasiswa) based on the active tab.
+     */
     const loadData = async () => {
         setLoading(true);
         try {
@@ -60,24 +74,17 @@ export const useKelolaPengguna = () => {
             switch (activeTab) {
                 case 'admin':
                     response = await getAllAdmins();
-                    if (response.success) {
-                        setAdmins(response.data);
-                    }
+                    if (response.success) setAdmins(response.data);
                     break;
                 case 'dosen':
                     response = await getAllDosen();
-                    if (response.success) {
-                        setDosens(response.data);
-                    }
+                    if (response.success) setDosens(response.data);
                     break;
                 case 'mahasiswa':
                     response = await getAllMahasiswa();
-                    if (response.success) {
-                        setMahasiswas(response.data);
-                    }
+                    if (response.success) setMahasiswas(response.data);
                     break;
             }
-
             if (!response.success) {
                 toast.error(response.message || 'Gagal memuat data');
             }
@@ -88,7 +95,10 @@ export const useKelolaPengguna = () => {
         }
     };
 
-    // Load daftar kelas
+    /**
+     * Memuat daftar kelas untuk dropdown pada form mahasiswa.
+     * Loads the list of classes for the dropdown in the student form.
+     */
     const loadKelasList = async () => {
         try {
             const response = await getAllKelas();
@@ -100,17 +110,25 @@ export const useKelolaPengguna = () => {
         }
     };
 
-    // Handle tab change
+    /**
+     * Menangani perubahan tab aktif.
+     * Handles changing the active tab.
+     * @param {string} tab - Kunci tab yang dipilih ('admin', 'dosen', 'mahasiswa').
+     */
     const handleTabChange = (tab) => {
         setActiveTab(tab);
     };
 
-    // Create data
+    /**
+     * Menangani pembuatan data pengguna baru.
+     * Handles the creation of new user data.
+     * @param {object} formData - Data dari form.
+     * @returns {boolean} - True jika berhasil, false jika gagal.
+     */
     const handleCreate = async (formData) => {
         setLoadingAction(true);
         try {
             let response;
-
             if (activeTab === 'admin') {
                 if (!formData.password) {
                     toast.error('Password wajib diisi untuk admin baru');
@@ -139,12 +157,17 @@ export const useKelolaPengguna = () => {
         }
     };
 
-    // Update data
+    /**
+     * Menangani pembaruan data pengguna yang ada.
+     * Handles updating existing user data.
+     * @param {string|number} id - ID pengguna yang akan diupdate.
+     * @param {object} formData - Data baru dari form.
+     * @returns {boolean} - True jika berhasil, false jika gagal.
+     */
     const handleUpdate = async (id, formData) => {
         setLoadingAction(true);
         try {
             let response;
-
             if (activeTab === 'admin') {
                 response = await updateAdmin(id, formData);
             } else if (activeTab === 'dosen') {
@@ -169,12 +192,16 @@ export const useKelolaPengguna = () => {
         }
     };
 
-    // Delete data
+    /**
+     * Menangani penghapusan data pengguna.
+     * Handles deleting user data.
+     * @param {string|number} id - ID pengguna yang akan dihapus.
+     * @returns {boolean} - True jika berhasil, false jika gagal.
+     */
     const handleDelete = async (id) => {
         setLoadingAction(true);
         try {
             let response;
-
             if (activeTab === 'admin') {
                 response = await deleteAdmin(id);
             } else if (activeTab === 'dosen') {
@@ -199,16 +226,20 @@ export const useKelolaPengguna = () => {
         }
     };
 
-    // Bulk import mahasiswa
+    /**
+     * Menangani import data mahasiswa secara massal dari file CSV.
+     * Handles bulk import of student data from a CSV file.
+     * @param {File} file - File CSV yang akan diimport.
+     * @returns {object|null} - Objek hasil import atau null jika gagal.
+     */
     const handleBulkImport = async (file) => {
         setBulkImporting(true);
         try {
             const response = await bulkCreateMahasiswa(file);
-
             if (response.success) {
                 toast.success(response.message);
-                loadData(); // Refresh data after bulk import
-                return response.data; // Return results for popup display
+                loadData();
+                return response.data;
             } else {
                 toast.error(response.message || 'Gagal import data');
                 return null;
@@ -221,10 +252,13 @@ export const useKelolaPengguna = () => {
         }
     };
 
-    // Filter data berdasarkan search
+    /**
+     * Menyaring data berdasarkan searchTerm.
+     * Filters data based on the searchTerm.
+     * @returns {Array} - Data yang sudah difilter.
+     */
     const getFilteredData = () => {
         let data = [];
-
         switch (activeTab) {
             case 'admin':
                 data = admins;
@@ -239,34 +273,24 @@ export const useKelolaPengguna = () => {
 
         if (!searchTerm) return data;
 
+        // Logika filter untuk setiap tab
+        // Filter logic for each tab
         return data.filter((item) => {
             if (activeTab === 'admin') {
                 return (
-                    item.name
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    item.username
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.username?.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             } else if (activeTab === 'dosen') {
                 return (
-                    item.nama
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    item.nip
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
+                    item.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.nip?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     item.kode?.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             } else if (activeTab === 'mahasiswa') {
                 return (
-                    item.nama
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    item.nim
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
+                    item.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.nim?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     item.kelas?.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             }
@@ -274,13 +298,16 @@ export const useKelolaPengguna = () => {
         });
     };
 
-    // Pagination
+    // Logika untuk paginasi data yang sudah difilter
+    // Logic for paginating the filtered data
     const filteredData = getFilteredData();
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentData = filteredData.slice(startIndex, endIndex);
 
+    // Mengembalikan semua state dan fungsi handler untuk digunakan di komponen
+    // Returns all state and handler functions for use in the component
     return {
         // State
         activeTab,

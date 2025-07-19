@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../services/authService';
-//Import gambar:
 import logoMitigasi from '/src/assets/images/FIX_LOGO.png';
 
+/**
+ * Komponen untuk halaman login multi-peran (Mahasiswa, Dosen Wali, Admin).
+ * Component for the multi-role login page (Student, Course Advisor, Admin).
+ */
 const Login = () => {
+    // State untuk peran yang dipilih, ID, password, status loading, dan pesan error
+    // State for the selected role, ID, password, loading status, and error message
     const [selectedRole, setSelectedRole] = useState('mahasiswa'); // Changed from isStudentLogin
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
@@ -13,17 +18,24 @@ const Login = () => {
 
     const navigate = useNavigate();
 
+    /**
+     * Menangani proses submit form login.
+     * Handles the login form submission process.
+     * @param {React.FormEvent} e - Event form.
+     */
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         try {
-            // Call the API login endpoint
+            // Memanggil layanan API untuk login
+            // Calling the API service for login
             const response = await loginUser(id, password, selectedRole);
 
             if (response.success) {
-                // Determine user type for frontend routing
+                // Menentukan tipe pengguna untuk routing di frontend
+                // Determining the user type for frontend routing
                 let userType;
                 if (selectedRole === 'mahasiswa') {
                     userType = 'students';
@@ -33,7 +45,8 @@ const Login = () => {
                     userType = 'admin';
                 }
 
-                // Store user info and token in localStorage
+                // Menyimpan informasi pengguna dan token di localStorage
+                // Storing user info and token in localStorage
                 localStorage.setItem(
                     'user',
                     JSON.stringify({
@@ -45,7 +58,8 @@ const Login = () => {
                     })
                 );
 
-                // Navigate to appropriate dashboard
+                // Navigasi ke dashboard yang sesuai
+                // Navigate to the appropriate dashboard
                 if (selectedRole === 'mahasiswa') {
                     navigate('/student');
                 } else if (selectedRole === 'dosen_wali') {
@@ -64,6 +78,11 @@ const Login = () => {
         }
     };
 
+    /**
+     * Menangani perpindahan antar peran (role).
+     * Handles switching between roles.
+     * @param {string} role - Peran yang dipilih ('mahasiswa', 'dosen_wali', 'admin').
+     */
     const handleRoleSwitch = (role) => {
         setSelectedRole(role);
         setId(''); // Clear form when switching
@@ -71,7 +90,11 @@ const Login = () => {
         setError('');
     };
 
-    // Get role configuration
+    /**
+     * Mendapatkan konfigurasi UI (judul, warna, placeholder) berdasarkan peran yang dipilih.
+     * Gets UI configuration (title, color, placeholder) based on the selected role.
+     * @returns {object} - Objek konfigurasi.
+     */
     const getRoleConfig = () => {
         switch (selectedRole) {
             case 'mahasiswa':
@@ -117,6 +140,7 @@ const Login = () => {
     return (
         <div className="min-h-screen bg-[#FAF0E6] flex items-center justify-center px-4">
             <div className="bg-white shadow-2xl rounded-3xl overflow-hidden w-full max-w-5xl">
+                {/* Header dengan Logo dan Judul */}
                 {/* Header with Logo and Title */}
                 <div className="bg-gradient-to-r from-red-800 to-red-600 text-white py-4 px-5 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -139,6 +163,7 @@ const Login = () => {
                 </div>
 
                 <div className="p-8">
+                    {/* Tab Pemilihan Peran */}
                     {/* Role Selection Tabs */}
                     <div className="mb-8">
                         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
@@ -222,6 +247,7 @@ const Login = () => {
                         </div>
                     </div>
 
+                    {/* Form Login */}
                     {/* Login Form */}
                     <div className="max-w-md mx-auto">
                         <div
@@ -320,7 +346,9 @@ const Login = () => {
                                         required
                                     />
                                 </div>
-
+                                
+                                {/* Tombol Login dengan status loading */}
+                                {/* Login Button with loading state */}
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -366,6 +394,7 @@ const Login = () => {
                             </form>
                         </div>
 
+                        {/* Teks Bantuan */}
                         {/* Help Text */}
                         <div className="mt-6 text-center">
                             <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">

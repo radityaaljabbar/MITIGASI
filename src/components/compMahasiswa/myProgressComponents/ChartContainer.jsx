@@ -1,22 +1,37 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 
+/**
+ * Komponen kontainer yang dapat digunakan kembali untuk merender grafik menggunakan Chart.js.
+ * A reusable container component for rendering charts using Chart.js.
+ * @param {object} props - Props komponen.
+ * @param {string} props.id - ID unik untuk elemen canvas.
+ * @param {Array} props.data - Data yang akan divisualisasikan.
+ * @param {string} props.type - Jenis grafik ('semester' atau 'attendance').
+ */
 const ChartContainer = ({ id, data, type }) => {
+    // Ref untuk elemen canvas dan instance chart
+    // Refs for the canvas element and the chart instance
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
+    // Effect untuk membuat, memperbarui, dan menghapus chart
+    // Effect to create, update, and destroy the chart
     useEffect(() => {
-        // Hapus chart yang sudah ada sebelumnya jka sudah pernah dibuat.
+        // Hapus chart yang sudah ada sebelumnya untuk mencegah memory leak
+        // Destroy the previous chart instance to prevent memory leaks
         if (chartInstance.current) {
             chartInstance.current.destroy();
         }
 
-        // Buat chart baru berdasarkan jenis data:
+        // Buat chart baru berdasarkan jenis data yang diberikan
+        // Create a new chart based on the provided data type
         if (chartRef.current) {
             const ctx = chartRef.current.getContext('2d');
 
             if (type === 'semester') {
-                // Mixed Chart - Bar + Line untuk trend
+                // Grafik campuran: Bar untuk IP Semester dan Line untuk tren
+                // Mixed Chart: Bar for Semester GPA and Line for the trend
                 chartInstance.current = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -136,7 +151,8 @@ const ChartContainer = ({ id, data, type }) => {
                     },
                 });
             } else if (type === 'attendance') {
-                // Untuk chart kehadiran - Modern styling
+                // Grafik Bar sederhana untuk kehadiran
+                // Simple Bar chart for attendance
                 chartInstance.current = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -220,20 +236,24 @@ const ChartContainer = ({ id, data, type }) => {
                 });
             }
         }
-        // Cleanup Function:
+        // Fungsi cleanup: Dijalankan saat komponen unmount atau data berubah
+        // Cleanup Function: Runs when the component unmounts or data changes
         return () => {
             if (chartInstance.current) {
                 chartInstance.current.destroy();
             }
         };
-    }, [data, type]);
+    }, [data, type]); // Dependensi: chart akan dibuat ulang jika data atau tipe berubah
 
+    // Menentukan judul chart secara dinamis
+    // Dynamically determining the chart title
     const chartTitle =
         type === 'semester' ? 'Perkembangan IP Semester' : 'Tingkat Kehadiran';
 
     return (
         <div className="bg-white border border-gray-100 shadow-lg rounded-2xl p-6 w-full max-w-[600px] h-fit">
             {/* Header dengan judul dan indikator */}
+            {/* Header with title and indicator */}
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -253,7 +273,8 @@ const ChartContainer = ({ id, data, type }) => {
                 </div>
             </div>
 
-            {/* Chart Container */}
+            {/* Kontainer untuk elemen canvas chart */}
+            {/* Container for the chart canvas element */}
             <div className="relative h-[280px] w-full">
                 <canvas
                     ref={chartRef}

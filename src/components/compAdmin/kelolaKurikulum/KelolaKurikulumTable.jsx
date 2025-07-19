@@ -1,12 +1,25 @@
 import React from 'react';
 
+/**
+ * Komponen KelolaKurikulumTable
+ * @desc
+ *   Komponen presentasional untuk menampilkan data mata kuliah dalam sebuah tabel.
+ *   A presentational component to display course data in a table.
+ * @props
+ *   Props yang diperlukan untuk menampilkan data dan menangani aksi.
+ *   Props needed to display data and handle actions.
+ */
 const KelolaKurikulumTable = ({
     mataKuliahList,
     loading,
     onEdit,
     onDelete,
 }) => {
-    // Helper function untuk mendapatkan badge berdasarkan jenis mata kuliah
+    /**
+     * @desc
+     *   Fungsi helper untuk mendapatkan kelas CSS badge berdasarkan jenis mata kuliah.
+     *   Helper function to get a badge CSS class based on the course type.
+     */
     const getJenisBadge = (jenisMk) => {
         const badges = {
             'WAJIB PRODI': 'bg-blue-100 text-blue-800',
@@ -16,6 +29,8 @@ const KelolaKurikulumTable = ({
         return badges[jenisMk] || 'bg-gray-100 text-gray-800';
     };
 
+    // Tampilkan indikator loading jika data sedang diambil.
+    // Display a loading indicator if data is being fetched.
     if (loading) {
         return (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -59,6 +74,8 @@ const KelolaKurikulumTable = ({
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
+                        {/* Tampilkan pesan jika tidak ada data, atau render baris tabel. */}
+                        {/* Show a message if there is no data, or render table rows. */}
                         {mataKuliahList.length === 0 ? (
                             <tr>
                                 <td
@@ -146,6 +163,8 @@ const KelolaKurikulumTable = ({
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        {/* Tombol aksi untuk setiap baris. */}
+                                        {/* Action buttons for each row. */}
                                         <button
                                             onClick={() => onEdit(mk)}
                                             className="text-[#16a085] hover:text-[#16a085]/80 mr-3 transition-colors">

@@ -1,21 +1,33 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// Import file service fitur MyCourse
+// Mengimpor service untuk mengambil data riwayat mata kuliah
+// Importing the service to fetch course history data
 import { getCourseHistory } from '../../../services/mahasiswaServices/myCourseService';
 
+/**
+ * Komponen untuk menampilkan riwayat mata kuliah yang telah diambil oleh mahasiswa.
+ * Component to display the history of courses taken by the student.
+ */
 const RiwayatMataKuliah = () => {
+    // State untuk data mentah, status loading, error, dan filter
+    // State for raw data, loading status, errors, and filters
     const [courseHistory, setCourseHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedTahunAjaranFilter, setSelectedTahunAjaranFilter] =
         useState('');
+    // State untuk mode tampilan (tabel atau Card)
+    // State for view mode (table or card)
     const [viewMode, setViewMode] = useState('table');
 
-    // DITAMBAHKAN: State untuk konfigurasi sorting
+    // State untuk konfigurasi sorting tabel
+    // State for table sorting configuration
     const [sortConfig, setSortConfig] = useState({
         key: 'semester',
         direction: 'ascending',
     });
 
+    // Effect untuk mengambil data saat komponen pertama kali dimuat
+    // Effect to fetch data when the component first mounts
     useEffect(() => {
         const fetchCourseHistory = async () => {
             try {
@@ -42,26 +54,32 @@ const RiwayatMataKuliah = () => {
         };
 
         fetchCourseHistory();
-    }, []);
+    }, []); // Dependensi kosong, hanya berjalan sekali
 
+    // Menerapkan filter tahun ajaran pada data
+    // Applying the academic year filter to the data
     const filteredCourses = selectedTahunAjaranFilter
         ? courseHistory.filter(
               (course) => course.tahun_ajaran === selectedTahunAjaranFilter
           )
         : courseHistory;
 
-    // DITAMBAHKAN: Logika sorting dengan useMemo untuk optimasi
+    // Logika sorting dengan useMemo untuk optimasi, hanya berjalan jika filter atau config berubah
+    // Sorting logic with useMemo for optimization, only runs if filters or config change
     const sortedCourses = useMemo(() => {
         let sortableItems = [...filteredCourses];
         if (sortConfig.key !== null) {
             sortableItems.sort((a, b) => {
                 // Helper untuk menangani nilai null atau undefined
+                // Helper to handle null or undefined values
                 const valA = a[sortConfig.key] || '';
                 const valB = b[sortConfig.key] || '';
 
                 // Logika sorting berdasarkan tipe data
+                // Sorting logic based on data type
                 if (sortConfig.key === 'sks' || sortConfig.key === 'semester') {
-                    // Sort numerik untuk SKS dan Semester
+                    // Sorting numerik untuk SKS dan Semester
+                    // Numeric sorting for SKS and Semester
                     if (parseInt(valA) < parseInt(valB)) {
                         return sortConfig.direction === 'ascending' ? -1 : 1;
                     }
@@ -69,7 +87,8 @@ const RiwayatMataKuliah = () => {
                         return sortConfig.direction === 'ascending' ? 1 : -1;
                     }
                 } else if (sortConfig.key === 'nilai') {
-                    // Sort kustom untuk Nilai (A > B > C > D > E)
+                    // Sorting kustom untuk Nilai (A > B > C > D > E)
+                    // Custom sorting for Grades (A > B > C > D > E)
                     const gradeOrder = {
                         A: 5,
                         'A-': 4.7,
@@ -93,7 +112,8 @@ const RiwayatMataKuliah = () => {
                         return sortConfig.direction === 'ascending' ? -1 : 1;
                     }
                 } else {
-                    // Sort string (default)
+                    // Sorting string (default)
+                    // String sorting (default)
                     if (
                         valA.toString().toLowerCase() <
                         valB.toString().toLowerCase()
@@ -113,7 +133,11 @@ const RiwayatMataKuliah = () => {
         return sortableItems;
     }, [filteredCourses, sortConfig]);
 
-    // DITAMBAHKAN: Fungsi untuk menangani klik pada header tabel
+    /**
+     * Menangani permintaan sorting saat header tabel diklik.
+     * Handles sorting requests when a table header is clicked.
+     * @param {string} key - Kunci kolom yang akan di-sort.
+     */
     const requestSort = (key) => {
         let direction = 'ascending';
         if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -122,7 +146,12 @@ const RiwayatMataKuliah = () => {
         setSortConfig({ key, direction });
     };
 
-    // DITAMBAHKAN: Fungsi untuk menampilkan ikon sorting
+    /**
+     * Menampilkan ikon sorting yang sesuai pada header tabel.
+     * Displays the appropriate sorting icon in the table header.
+     * @param {string} columnKey - Kunci kolom.
+     * @returns {JSX.Element} - Ikon sorting.
+     */
     const getSortIcon = (columnKey) => {
         if (sortConfig.key !== columnKey) {
             return <i className="fas fa-sort text-slate-400 ml-2"></i>;
@@ -133,24 +162,27 @@ const RiwayatMataKuliah = () => {
         return <i className="fas fa-sort-down text-white ml-2"></i>;
     };
 
+    // Mendapatkan daftar unik tahun ajaran untuk filter dropdown
+    // Getting a unique list of academic years for the filter dropdown
     const availableTahunAjaran = [
         ...new Set(courseHistory.map((course) => course.tahun_ajaran)),
     ]
         .filter(Boolean)
-        .sort((a, b) => b.localeCompare(a));
+        .sort((a, b) => b.localeCompare(a)); // Urutkan dari terbaru
     const totalCourses = filteredCourses.length;
 
-    // ... sisa fungsi (getRowStyle, getGradeBadgeStyle, dll tidak berubah)
+    // Fungsi-fungsi helper untuk styling berdasarkan nilai
+    // Helper functions for styling based on grades
     const getRowStyle = (nilai) => {
         const grade = nilai ? nilai.trim() : '';
 
         if (grade === 'A' || grade === 'A-' || grade === 'AB') {
             return 'bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-400 text-gray-800 shadow-sm';
-        } else if (grade === 'B' || grade === 'B+' || grade === 'BC') {
+        } else if (grade === 'B' || grade === 'B+' || grade === 'BC' || grade === 'B-') {
             return 'bg-gradient-to-r from-blue-50 to-blue-50 border-l-4 border-blue-400 text-gray-800 shadow-sm';
-        } else if (grade === 'C' || grade === 'C+' || grade === 'CD') {
+        } else if (grade === 'C' || grade === 'C+' || grade === 'C-') {
             return 'bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-400 text-gray-800 shadow-sm';
-        } else if (grade === 'D' || grade === 'D+') {
+        } else if (grade === 'D') {
             return 'bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-400 text-gray-800 shadow-sm';
         } else if (grade === 'E') {
             return 'bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-400 text-gray-800 shadow-sm';
@@ -164,29 +196,21 @@ const RiwayatMataKuliah = () => {
             return 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-sm font-semibold shadow-sm';
         } else if (grade === 'E') {
             return 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200 px-3 py-1 rounded-full text-sm font-semibold shadow-sm';
-        } else if (grade === 'B' || grade === 'B+' || grade === 'BC') {
+        } else if (grade === 'B' || grade === 'B+' || grade === 'BC' || grade === 'B-') {
             return 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-full text-sm font-semibold shadow-sm';
-        } else if (grade === 'C' || grade === 'C+' || grade === 'CD') {
+        } else if (grade === 'C' || grade === 'C+' || grade === 'C-') {
             return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200 px-3 py-1 rounded-full text-sm font-semibold shadow-sm';
-        } else if (grade === 'D' || grade === 'D+') {
+        } else if (grade === 'D') {
             return 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border border-orange-200 px-3 py-1 rounded-full text-sm font-semibold shadow-sm';
         }
         return 'bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-sm font-medium shadow-sm';
     };
 
-    if (loading) {
-        return <div>...</div>;
-    }
-    if (error) {
-        return <div>...</div>;
-    }
-    if (courseHistory.length === 0) {
-        return <div>...</div>;
-    }
 
     return (
         <div className="bg-white w-full max-w-[1200px] min-h-[500px] p-4 md:p-6 rounded-2xl shadow-xl border border-gray-200 flex flex-col space-y-5">
-            {/* ... Header dan Filter Section tidak berubah ... */}
+            {/* Bagian Header dan Filter */}
+            {/* Header and Filter Section */}
             <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
                 <div className="flex-1">
                     <div className="flex items-center mb-2">
@@ -233,7 +257,8 @@ const RiwayatMataKuliah = () => {
                             </select>
                         </div>
 
-                        {/* View Mode Toggle */}
+                        {/* Tombol Ganti Mode Tampilan */}
+                        {/* View Mode Toggle Button */}
                         <div className="flex items-center">
                             <label className="mr-2 text-sm font-semibold text-gray-700">
                                 View:
@@ -267,6 +292,8 @@ const RiwayatMataKuliah = () => {
                         </div>
                     </div>
 
+                    {/* Tombol Reset Filter */}
+                    {/* Reset Filter Button */}
                     {selectedTahunAjaranFilter && (
                         <button
                             onClick={() => setSelectedTahunAjaranFilter('')}
@@ -278,14 +305,18 @@ const RiwayatMataKuliah = () => {
                 </div>
             </div>
 
-            {/* Content */}
+            {/* Konten Utama (Tabel atau Card) */}
+            {/* Main Content (Table or Cards) */}
             <div className="flex-1 overflow-x-hidden">
                 {viewMode === 'table' ? (
+                    // Tampilan Tabel
+                    // Table View
                     <div className="w-full h-full overflow-x rounded-xl border border-slate-200 shadow-sm">
                         <table className="w-full border-separate border-spacing-0 text-sm">
                             <thead className="sticky top-0 z-10">
                                 <tr className="bg-gradient-to-r from-[#951a22] to-[#7a1419] text-white">
-                                    {/* DIUBAH: Tambahkan onClick dan styling pada setiap header */}
+                                    {/* Header Tabel dengan fungsi sorting */}
+                                    {/* Table Headers with sorting functionality */}
                                     <th
                                         className="p-3 text-center font-bold uppercase hidden md:table-cell cursor-pointer hover:bg-white/10 transition-colors"
                                         onClick={() =>
@@ -332,7 +363,8 @@ const RiwayatMataKuliah = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* DIUBAH: Gunakan `sortedCourses` untuk me-render data */}
+                                {/* Render baris data menggunakan data yang sudah di-sort */}
+                                {/* Render data rows using the sorted data */}
                                 {sortedCourses.length > 0 ? (
                                     sortedCourses.map((course, index) => (
                                         <tr
@@ -386,7 +418,8 @@ const RiwayatMataKuliah = () => {
                                         <td
                                             colSpan="7"
                                             className="p-8 text-center text-gray-500">
-                                            {/* ... Pesan 'tidak ada hasil' tidak berubah ... */}
+                                            {/* Pesan "tidak ada hasil" jika filter tidak menemukan data */}
+                                            {/* "No results" message if the filter finds no data */}
                                         </td>
                                     </tr>
                                 )}
@@ -394,13 +427,17 @@ const RiwayatMataKuliah = () => {
                         </table>
                     </div>
                 ) : (
-                    /* Card View juga menggunakan sortedCourses untuk konsistensi */
+                    // Tampilan Card
+                    // Card View
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 h-full overflow-x pr-2">
+                        {/* Render Card data menggunakan data yang sudah di-sort */}
+                        {/* Render data cards using the sorted data */}
                         {sortedCourses.map((course, index) => (
                             <div
                                 key={index}
                                 className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                                {/* ... Card View JSX tidak berubah ... */}
+                                {/* Konten Card */}
+                                {/* Card Content */}
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-gray-900 text-sm leading-tight mb-1">
