@@ -4,24 +4,6 @@
         └── App.jsx
         └── 📁assets
             └── 📁data
-                └── feedback.json
-                └── 📁mockupjsonDosenWali
-                    └── dataDosen.json
-                    └── dataLecturer.json
-                    └── 📁myCourseAdvisor
-                        └── availableCourses.json
-                    └── 📁MyStudent
-                        └── 📁AnalisisFinansial
-                            └── mockupFinansialMahasiswa.json
-                └── 📁mockupjsonMahasiswa
-                    └── dataStudent.json
-                    └── 📁mockupjsonMyCourse
-                        └── matakuliah.json
-                        └── rekomendasimk.json
-                        └── riwayatmk.json
-                    └── 📁mockupjsonMyProgress
-                        └── mockupDataKehadiran.json
-                        └── mockupDataSemester.json
                 └── 📁UsedData
                     └── DASS12Questionnaire_questions.json
                     └── scoreCategories.json
