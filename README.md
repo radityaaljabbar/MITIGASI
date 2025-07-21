@@ -2,7 +2,7 @@
 
 Frontend project for **MITIGASI (Integrated Academic Mitigation)** system.
 
-## 🚀 Tech Stack
+## Tech Stack
 - **Framework**: React 19
 - **Build Tool**: Vite 6.2.0
 - **Styling**: Tailwind CSS 3.4.17
